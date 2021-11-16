@@ -252,6 +252,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
       'data-test-subj': `syntheticsSourceTab__inline`,
       content: (
         <EuiFormRow
+          fullWidth={true}
           isInvalid={!config.inlineScript}
           error={
             <FormattedMessage

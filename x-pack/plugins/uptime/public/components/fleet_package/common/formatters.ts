@@ -15,9 +15,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKeys.NAME]: null,
   [ConfigKeys.MONITOR_TYPE]: null,
   [ConfigKeys.SCHEDULE]: (fields) =>
-    JSON.stringify(
-      `@every ${fields[ConfigKeys.SCHEDULE]?.number}${fields[ConfigKeys.SCHEDULE]?.unit}`
-    ),
+    `@every ${fields[ConfigKeys.SCHEDULE]?.number}${fields[ConfigKeys.SCHEDULE]?.unit}`,
   [ConfigKeys.APM_SERVICE_NAME]: null,
   [ConfigKeys.TAGS]: (fields) => arrayToJsonFormatter(fields[ConfigKeys.TAGS]),
   [ConfigKeys.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKeys.TIMEOUT]),

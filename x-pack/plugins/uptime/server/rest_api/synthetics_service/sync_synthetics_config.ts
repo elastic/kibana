@@ -16,25 +16,32 @@ export const createSyncSyntheticsConfig: UMRestApiRouteFactory = () => ({
   path: API_URLS.SYNC_CONFIG,
   validate: {},
   handler: async ({ savedObjectsClient, server, request, context }): Promise<any> => {
-    let apiKey: SyntheticsServiceApiKey;
-    try {
-      const hiddenSavedObjectClient = context.core.savedObjects.getClient({
-        includedHiddenTypes: [syntheticsServiceApiKey.name],
-      });
-      // get api key
-      apiKey = await savedObjectsAdapter.getSyntheticsServiceApiKey(hiddenSavedObjectClient!);
-      // if no api key, set api key
-      if (!apiKey) {
-        apiKey = await generateAPIKey({
-          savedObjectsClient: hiddenSavedObjectClient,
-          request,
-          security: server.security,
-        });
-      }
-    } catch (e) {
-      throw e;
-    }
+    const apiKey = await fetchAPIKey({
+      savedObjects: context.core.savedObjects,
+      security: server.security,
+    });
 
     await pushConfigs({ savedObjectsClient, config: server.config, cloud: server.cloud, apiKey });
   },
 });
+export const fetchAPIKey = async ({ savedObjects, server, request }: any) => {
+  let apiKey: SyntheticsServiceApiKey;
+  try {
+    const hiddenSavedObjectClient = savedObjects.getClient({
+      includedHiddenTypes: [syntheticsServiceApiKey.name],
+    });
+    // get api key
+    apiKey = await savedObjectsAdapter.getSyntheticsServiceApiKey(hiddenSavedObjectClient!);
+    // if no api key, set api key
+    if (!apiKey) {
+      apiKey = await generateAPIKey({
+        savedObjectsClient: hiddenSavedObjectClient,
+        request,
+        security: server.security,
+      });
+    }
+  } catch (e) {
+    throw e;
+  }
+  return apiKey;
+};

@@ -41,6 +41,7 @@ export const getMonitors = async ({
       } else {
         await core!.savedObjects.createInternalRepository().delete(uptimeMonitorType, monitor.id);
       }
+      delete monitor.runOnce;
     }
   }
 

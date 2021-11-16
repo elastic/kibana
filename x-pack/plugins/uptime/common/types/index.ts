@@ -35,7 +35,7 @@ export type MonitorSavedObject = SimpleSavedObject<{
   name: string;
   runOnce: boolean;
   urls?: string[];
-  tags: string[];
+  tags?: string[];
   schedule: string;
   type: 'http' | 'tcp' | 'icmp' | 'browser';
   source?: {

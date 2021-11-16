@@ -86,6 +86,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
         />
       </EuiFormRow>
       <EuiFormRow
+        fullWidth={true}
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.sourceType.label"

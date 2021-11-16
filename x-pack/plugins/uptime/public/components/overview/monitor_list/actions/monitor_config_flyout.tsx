@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   EuiButton,
@@ -16,11 +16,11 @@ import {
   EuiFlyoutHeader,
   EuiModalHeaderTitle,
   EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { apiService } from '../../../../state/api/utils';
 import { API_URLS } from '../../../../../common/constants';
-import { UptimeRefreshContext } from '../../../../contexts';
 import { MonitorSavedObject } from '../../../../../common/types';
 import { TestRunResult } from './TestRunResult';
 import { MonitorConfigFlyoutBody } from './monitor_config_flyout_body';
@@ -31,6 +31,7 @@ import { usePolicyConfigContext, defaultConfig } from '../../../fleet_package/co
 import { usePolicy } from '../../../fleet_package/hooks/use_policy';
 import { validate } from '../../../fleet_package/validation';
 import { useUpdateMonitor } from './use_update_monitor';
+import { useSaveMonitor } from './use_save_monitor';
 
 export const uptimeMonitorType = 'uptime-monitor';
 
@@ -55,7 +56,7 @@ export const MonitorConfigFlyout = ({ setIsFlyoutVisible, isEditFlow = false }: 
     defaultConfig: defaultConfig[monitorType],
   });
 
-  const { refreshApp } = useContext(UptimeRefreshContext);
+  const { onSave } = useSaveMonitor({ isEditFlow, setTestMonitor });
 
   /* install index templates, this will need to be moved to it's own component and happen
    * on explicit user input to enable the synthetics service */
@@ -70,45 +71,10 @@ export const MonitorConfigFlyout = ({ setIsFlyoutVisible, isEditFlow = false }: 
     installIndexTemplates();
   }, []);
 
-  const {
-    services: { savedObjects },
-  } = useKibana();
-
-  const onSave = async (testRun?: boolean) => {
-    const monitorData = {
-      ...updatedMonitor,
-      name,
-    };
-    if (isEditFlow) {
-      await savedObjects?.client.update(
-        uptimeMonitorType,
-        'test-existing-monitor-to-be-edited-id',
-        monitorData
-      );
-    } else {
-      if (testRun) {
-        const testMonitorT = await savedObjects?.client.create<MonitorSavedObject['attributes']>(
-          uptimeMonitorType,
-          {
-            ...monitorData,
-            runOnce: true,
-            schedule: `@every 60m`,
-            name: `Test run of (${name})`,
-          }
-        );
-        setTestMonitor(testMonitorT);
-      } else {
-        await savedObjects?.client.create(uptimeMonitorType, monitorData);
-      }
-    }
-    await apiService.get(API_URLS.SYNC_CONFIG);
-    refreshApp();
-  };
-
   const saveMonitor = async () => {
     if (isValid) {
       setIsSaving(true);
-      await onSave();
+      await onSave({ updatedMonitor, name });
       setIsFlyoutVisible(false);
     } else {
       // error state
@@ -122,7 +88,7 @@ export const MonitorConfigFlyout = ({ setIsFlyoutVisible, isEditFlow = false }: 
   const onTestRun = () => {
     if (isValid) {
       setTestRunning(true);
-      onSave(true);
+      onSave({ updatedMonitor, name, testRun: true });
     } else {
       // error state
     }
@@ -143,23 +109,31 @@ export const MonitorConfigFlyout = ({ setIsFlyoutVisible, isEditFlow = false }: 
           setName={setName}
           name={name}
         />
+        <EuiHorizontalRule margin="xs" style={{ height: 2 }} />
+        {testMonitor && (
+          <TestRunResult monitorId={testMonitor?.id + '-inline'} monitor={testMonitor} />
+        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
-
-        <EuiButton onClick={onTestRun} isLoading={isTestRunning}>
-          Test run
-        </EuiButton>
-
-        <EuiButton onClick={saveMonitor} fill isLoading={isSaving}>
-          Save
-        </EuiButton>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={true}>
+            <EuiButtonEmpty onClick={closeModal} style={{ width: 100 }}>
+              Cancel
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={onTestRun} isLoading={isTestRunning}>
+              Test run
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={saveMonitor} fill isLoading={isSaving}>
+              Save
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
-      <EuiHorizontalRule margin="xs" style={{ height: 2 }} />
-      {testMonitor && (
-        <TestRunResult monitorId={testMonitor?.id + '-inline'} monitor={testMonitor} />
-      )}
     </EuiFlyout>
   );
 };

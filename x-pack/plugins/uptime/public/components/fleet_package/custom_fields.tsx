@@ -19,6 +19,7 @@ import {
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
 import { ConfigKeys, DataStream, Validation } from './types';
 import { usePolicyConfigContext } from './contexts';
 import { TLSFields } from './tls_fields';
@@ -78,9 +79,13 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
     }
   };
 
+  const isWithInUptime = window.location.pathname.includes('/app/uptime');
+
   return (
     <EuiForm component="form">
       <EuiDescribedFormGroup
+        descriptionFlexItemProps={{ grow: 1 }}
+        fieldFlexItemProps={{ grow: 2 }}
         title={
           <h4>
             <FormattedMessage
@@ -129,7 +134,7 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
               </EuiFormRow>
             )}
             <EuiSpacer size="s" />
-            {isBrowser && (
+            {isBrowser && !isWithInUptime && (
               <EuiCallOut
                 title={
                   <FormattedMessage
@@ -162,6 +167,8 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
       </EuiDescribedFormGroup>
       {(isHTTP || isTCP) && (
         <EuiDescribedFormGroup
+          descriptionFlexItemProps={{ grow: 1 }}
+          fieldFlexItemProps={{ grow: 2 }}
           title={
             <h4>
               <FormattedMessage

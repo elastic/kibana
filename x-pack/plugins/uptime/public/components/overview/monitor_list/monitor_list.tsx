@@ -46,7 +46,7 @@ interface Props extends MonitorListProps {
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
   monitorListObjects: object[];
-  allMonListObjs: object[];
+  allMonListObjs: MonitorSavedObject[];
 }
 
 export const noItemsMessage = (loading: boolean, filters?: string) => {
@@ -170,8 +170,13 @@ export const MonitorListComponent: ({
         field: 'state.monitor.name',
         name: TAGS_LABEL,
         width: '12%',
-        render: (_name: string, summary: MonitorSummary) =>
-          summary.state ? <MonitorTags summary={summary} /> : null,
+        render: (_name: string, summary: MonitorSummary) => (
+          <MonitorTags
+            summary={summary}
+            monitorListObjects={allMonListObjs}
+            monitorId={summary.monitor_id || summary.id}
+          />
+        ),
       },
       {
         align: 'left' as const,

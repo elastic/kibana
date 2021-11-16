@@ -57,13 +57,13 @@ export const TestRunResult = ({ monitorId, monitor }: Props) => {
     };
   }, [summaryDoc]);
 
-  useFetcher(() => {
-    if (monitor?.id) {
-      return apiService.post(API_URLS.GET_IN_PROGRESS_JOBS, {
-        monitor: { ...monitor.attributes, id: monitor.id },
-      });
-    }
-  }, [monitor, refresh]);
+  // useFetcher(() => {
+  //   if (monitor?.id) {
+  //     return apiService.post(API_URLS.GET_IN_PROGRESS_JOBS, {
+  //       monitor: { ...monitor.attributes, id: monitor.id },
+  //     });
+  //   }
+  // }, [monitor, refresh]);
 
   const { data } = useEsSearch(
     createEsParams({
