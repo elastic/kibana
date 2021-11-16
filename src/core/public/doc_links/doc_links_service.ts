@@ -22,6 +22,7 @@ export class DocLinksService {
     // Documentation for `main` branches is still published at a `master` URL.
     const DOC_LINK_VERSION = kibanaBranch === 'main' ? 'master' : kibanaBranch;
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
+    const STACK_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/${DOC_LINK_VERSION}/`;
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
     const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
     const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
@@ -36,6 +37,9 @@ export class DocLinksService {
       links: {
         settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
         elasticStackGetStarted: `${STACK_GETTING_STARTED}get-started-elastic-stack.html`,
+        upgrade: {
+          upgradingElasticStack: `${STACK_DOCS}upgrading-elastic-stack.html`,
+        },
         apm: {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
@@ -114,6 +118,7 @@ export class DocLinksService {
           range: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-range-aggregation.html`,
           significant_terms: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-significantterms-aggregation.html`,
           terms: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-terms-aggregation.html`,
+          terms_doc_count_error: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-terms-aggregation.html#_per_bucket_document_count_error`,
           avg: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-avg-aggregation.html`,
           avg_bucket: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-avg-bucket-aggregation.html`,
           max_bucket: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-max-bucket-aggregation.html`,
@@ -154,11 +159,15 @@ export class DocLinksService {
           introduction: `${KIBANA_DOCS}index-patterns.html`,
           fieldFormattersNumber: `${KIBANA_DOCS}numeral.html`,
           fieldFormattersString: `${KIBANA_DOCS}field-formatters-string.html`,
-          runtimeFields: `${KIBANA_DOCS}managing-index-patterns.html#runtime-fields`,
+          runtimeFields: `${KIBANA_DOCS}managing-data-views.html#runtime-fields`,
         },
         addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
         kibana: `${KIBANA_DOCS}index.html`,
-        upgradeAssistant: `${KIBANA_DOCS}upgrade-assistant.html`,
+        upgradeAssistant: {
+          overview: `${KIBANA_DOCS}upgrade-assistant.html`,
+          batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
+          remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
+        },
         rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
         elasticsearch: {
           docsBase: `${ELASTICSEARCH_DOCS}`,
@@ -222,10 +231,11 @@ export class DocLinksService {
           remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
           remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
           scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
-          setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
           shardAllocationSettings: `${ELASTICSEARCH_DOCS}modules-cluster.html#cluster-shard-allocation-settings`,
           transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
+          setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
+          apiCompatibilityHeader: `${ELASTICSEARCH_DOCS}api-conventions.html#api-compatibility`,
         },
         siem: {
           guide: `${SECURITY_SOLUTION_DOCS}index.html`,
@@ -246,7 +256,6 @@ export class DocLinksService {
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
-          autocompleteChanges: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
         },
         search: {
           sessions: `${KIBANA_DOCS}search-sessions.html`,
@@ -289,6 +298,7 @@ export class DocLinksService {
           outlierDetectionRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-finding-outliers.html#ml-dfanalytics-roc`,
           regressionEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-regression.html#ml-dfanalytics-regression-evaluation`,
           classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-classification.html#ml-dfanalytics-class-aucroc`,
+          setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
         },
         transforms: {
           guide: `${ELASTICSEARCH_DOCS}transforms.html`,
@@ -479,6 +489,7 @@ export class DocLinksService {
           fleetServerAddFleetServer: `${FLEET_DOCS}fleet-server.html#add-fleet-server`,
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
+          settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
           elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
           beatsAgentComparison: `${FLEET_DOCS}beats-agent-comparison.html`,
@@ -490,6 +501,7 @@ export class DocLinksService {
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
           apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
+          onPremRegistry: `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/${DOC_LINK_VERSION}/air-gapped.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -522,6 +534,9 @@ export interface DocLinksStart {
   readonly links: {
     readonly settings: string;
     readonly elasticStackGetStarted: string;
+    readonly upgrade: {
+      readonly upgradingElasticStack: string;
+    };
     readonly apm: {
       readonly kibanaSettings: string;
       readonly supportedServiceMaps: string;
@@ -598,6 +613,7 @@ export interface DocLinksStart {
       readonly range: string;
       readonly significant_terms: string;
       readonly terms: string;
+      readonly terms_doc_count_error: string;
       readonly avg: string;
       readonly avg_bucket: string;
       readonly max_bucket: string;
@@ -645,7 +661,11 @@ export interface DocLinksStart {
     };
     readonly addData: string;
     readonly kibana: string;
-    readonly upgradeAssistant: string;
+    readonly upgradeAssistant: {
+      readonly overview: string;
+      readonly batchReindex: string;
+      readonly remoteReindex: string;
+    };
     readonly rollupJobs: string;
     readonly elasticsearch: Record<string, string>;
     readonly siem: {
@@ -667,7 +687,6 @@ export interface DocLinksStart {
       readonly luceneQuerySyntax: string;
       readonly percolate: string;
       readonly queryDsl: string;
-      readonly autocompleteChanges: string;
     };
     readonly date: {
       readonly dateMath: string;
@@ -748,6 +767,7 @@ export interface DocLinksStart {
       fleetServerAddFleetServer: string;
       settings: string;
       settingsFleetServerHostSettings: string;
+      settingsFleetServerProxySettings: string;
       troubleshooting: string;
       elasticAgent: string;
       datastreams: string;
@@ -757,6 +777,7 @@ export interface DocLinksStart {
       upgradeElasticAgent712lower: string;
       learnMoreBlog: string;
       apiKeysLearnMore: string;
+      onPremRegistry: string;
     }>;
     readonly ecs: {
       readonly guide: string;

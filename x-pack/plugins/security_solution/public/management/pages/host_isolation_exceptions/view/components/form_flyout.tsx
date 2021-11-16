@@ -26,6 +26,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Dispatch } from 'redux';
+import { useQueryClient } from 'react-query';
 import { Loader } from '../../../../../common/components/loader';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
@@ -62,6 +63,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const creationFailure = useHostIsolationExceptionsSelector(getFormStatusFailure);
   const exceptionToEdit = useHostIsolationExceptionsSelector(getExceptionToEdit);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
+  const queryClient = useQueryClient();
   const history = useHistory();
 
   const [formHasError, setFormHasError] = useState(true);
@@ -115,8 +117,17 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
       } else {
         toasts.addSuccess(getCreationSuccessMessage(exception.name));
       }
+      queryClient.invalidateQueries('hostIsolationExceptions');
     }
-  }, [creationSuccessful, dispatch, exception?.item_id, exception?.name, onCancel, toasts]);
+  }, [
+    creationSuccessful,
+    dispatch,
+    exception?.item_id,
+    exception?.name,
+    onCancel,
+    queryClient,
+    toasts,
+  ]);
 
   // handle load item to edit error
   useEffect(() => {
@@ -181,12 +192,12 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
         {exception?.item_id ? (
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.flyout.editButton"
-            defaultMessage="Edit Host isolation exception"
+            defaultMessage="Edit host isolation exception"
           />
         ) : (
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.flyout.createButton"
-            defaultMessage="Add Host isolation exception"
+            defaultMessage="Add host isolation exception"
           />
         )}
       </EuiButton>
@@ -206,14 +217,14 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
             <h2>
               <FormattedMessage
                 id="xpack.securitySolution.hostIsolationExceptions.flyout.editTitle"
-                defaultMessage="Edit Host isolation exception"
+                defaultMessage="Edit host isolation exception"
               />
             </h2>
           ) : (
             <h2>
               <FormattedMessage
                 id="xpack.securitySolution.hostIsolationExceptions.flyout.title"
-                defaultMessage="Add Host isolation exception"
+                defaultMessage="Add host isolation exception"
               />
             </h2>
           )}
