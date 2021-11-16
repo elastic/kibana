@@ -152,3 +152,55 @@ export const EXCEPTION_LIST_SEARCH_PLACEHOLDER = i18n.translate(
     defaultMessage: 'e.g. Example List Name',
   }
 );
+
+export const IMPORT_EXCEPTIONS = i18n.translate('xpack.securitySolution.exceptions.import', {
+  defaultMessage: 'Import exceptions',
+});
+
+export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
+  'xpack.securitySolution.exceptions.import.overwriteDescription',
+  {
+    defaultMessage: 'Overwrite existing exception lists with conflicting "list_id"',
+  }
+);
+
+export const SUCCESSFULLY_IMPORTED_EXCEPTIONS = (totalExceptions: number) =>
+  i18n.translate('xpack.securitySolution.exceptions.import.successfullyImportedRulesTitle', {
+    values: { totalExceptions },
+    defaultMessage:
+      'Successfully imported {totalExceptions} {totalExceptions, plural, =1 {exception} other {exceptions}}.',
+  });
+
+export const IMPORT_EXCEPTIONS_BTN_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.import.importExceptionTitle',
+  {
+    defaultMessage: 'Import exceptions',
+  }
+);
+
+export const INITIAL_PROMPT_TEXT = i18n.translate(
+  'xpack.securitySolution.exceptions.import.initialPromptTextDescription',
+  {
+    defaultMessage: 'Select or drag and drop a valid exceptions ndjson file',
+  }
+);
+
+export const IMPORT_FAILED = (totalExceptions: number) =>
+  i18n.translate('xpack.securitySolution.exceptions.import.importFailedTitle', {
+    values: { totalExceptions },
+    defaultMessage:
+      'Failed to import {totalExceptions} {totalExceptions, plural, =1 {exception} other {exceptions}}',
+  });
+
+export const IMPORT_FAILED_DETAILED = (message: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.import.importFailedDetailedTitle', {
+    values: { message },
+    defaultMessage: '{message}',
+  });
+
+export const SELECT_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.exceptions.import.selectRuleDescription',
+  {
+    defaultMessage: 'Select exceptions (as exported from the Exceptions page) to import',
+  }
+);

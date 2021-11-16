@@ -6,6 +6,7 @@
  */
 
 import { TypeOf, schema } from '@kbn/config-schema';
+import { MAX_IMPORT_SIZE } from '../common/constants.mock';
 
 export const ConfigSchema = schema.object({
   importBufferSize: schema.number({ defaultValue: 1000, min: 1 }),
@@ -21,6 +22,7 @@ export const ConfigSchema = schema.object({
   }),
   listIndex: schema.string({ defaultValue: '.lists' }),
   listItemIndex: schema.string({ defaultValue: '.items' }),
+  maxExceptionsImportSize: schema.number({ defaultValue: MAX_IMPORT_SIZE, min: 1 }),
   maxImportPayloadBytes: schema.number({ defaultValue: 9000000, min: 1 }),
 });
 

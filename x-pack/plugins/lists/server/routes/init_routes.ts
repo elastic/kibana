@@ -29,6 +29,7 @@ import {
   findExceptionListRoute,
   findListItemRoute,
   findListRoute,
+  importExceptionListRoute,
   importListItemRoute,
   patchListItemRoute,
   patchListRoute,
@@ -79,6 +80,7 @@ export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void 
   deleteExceptionListRoute(router);
   findExceptionListRoute(router);
   exportExceptionListRoute(router);
+  importExceptionListRoute(router, config);
 
   // exception list items
   createExceptionListItemRoute(router);

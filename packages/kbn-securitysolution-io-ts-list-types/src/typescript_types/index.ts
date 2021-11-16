@@ -117,6 +117,13 @@ export interface ExportExceptionListProps {
   signal: AbortSignal;
 }
 
+export interface ImportExceptionsProps {
+  http: HttpStart;
+  fileToImport: File;
+  overwrite?: boolean;
+  signal: AbortSignal;
+}
+
 export interface AddEndpointExceptionListProps {
   http: HttpStart;
   signal: AbortSignal;

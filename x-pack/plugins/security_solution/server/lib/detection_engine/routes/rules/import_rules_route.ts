@@ -12,11 +12,9 @@ import { createPromiseFromStreams } from '@kbn/utils';
 
 import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import {
-  importRulesQuerySchema,
-  ImportRulesQuerySchemaDecoded,
-  ImportRulesSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysolution-io-ts-types';
+
+import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
   ImportRulesSchema as ImportRulesResponseSchema,
   importRulesSchema as importRulesResponseSchema,
@@ -61,8 +59,8 @@ export const importRulesRoute = (
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,
       validate: {
-        query: buildRouteValidation<typeof importRulesQuerySchema, ImportRulesQuerySchemaDecoded>(
-          importRulesQuerySchema
+        query: buildRouteValidation<typeof importQuerySchema, ImportQuerySchemaDecoded>(
+          importQuerySchema
         ),
         body: schema.any(), // validation on file object is accomplished later in the handler.
       },

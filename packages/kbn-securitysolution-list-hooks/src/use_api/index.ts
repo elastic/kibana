@@ -15,6 +15,7 @@ import type {
   ApiCallFindListsItemsMemoProps,
   ApiCallMemoProps,
   ApiListExportProps,
+  ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import * as Api from '@kbn/securitysolution-list-api';
 
@@ -45,6 +46,11 @@ export interface ExceptionsApi {
   ) => Promise<void>;
   getExceptionListsItems: (arg: ApiCallFindListsItemsMemoProps) => Promise<void>;
   exportExceptionList: (arg: ApiListExportProps) => Promise<void>;
+  importExceptions: (arg: {
+    fileToImport: File;
+    overwrite: boolean;
+    signal: AbortSignal;
+  }) => Promise<ImportExceptionsResponseSchema>;
 }
 
 export const useApi = (http: HttpStart): ExceptionsApi => {
@@ -223,6 +229,22 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         } catch (error) {
           onError(error);
         }
+      },
+      async importExceptions({
+        fileToImport,
+        overwrite,
+        signal,
+      }: {
+        fileToImport: File;
+        overwrite: boolean;
+        signal: AbortSignal;
+      }): Promise<ImportExceptionsResponseSchema> {
+        return Api.importExceptions({
+          http,
+          fileToImport,
+          overwrite,
+          signal,
+        });
       },
       async updateExceptionListItem({
         listItem,

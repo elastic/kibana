@@ -27,8 +27,10 @@ import {
   ApiCallByListIdProps,
   ApiCallFetchExceptionListsProps,
   ExportExceptionListProps,
+  ImportExceptionsProps,
   UpdateExceptionListItemProps,
   UpdateExceptionListProps,
+  ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
@@ -562,3 +564,31 @@ export const exportExceptionList = async ({
     query: { id, list_id: listId, namespace_type: namespaceType },
     signal,
   });
+
+/**
+ * Import exceptions by providing ndjson file
+ *
+ * @param http Kibana http service
+ * @param fileToImport File to upload containing exceptions to import
+ * @param overwrite whether or not to overwrite exceptions with the same list_id
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const importExceptions = async ({
+  http,
+  fileToImport,
+  overwrite = false,
+  signal,
+}: ImportExceptionsProps): Promise<ImportExceptionsResponseSchema> => {
+  const formData = new FormData();
+  formData.append('file', fileToImport);
+
+  return http.fetch<ImportExceptionsResponseSchema>(`${EXCEPTION_LIST_URL}/_import`, {
+    method: 'POST',
+    headers: { 'Content-Type': undefined },
+    query: { overwrite },
+    body: formData,
+    signal,
+  });
+};
