@@ -11,9 +11,7 @@ export const EXPAND_NOTES_BTN = '[data-test-subj="expand-notes"]';
 
 export const EXPORT_TIMELINE_ACTION = '[data-test-subj="export-timeline-action"]';
 
-export const IMPORT_BTN = '.euiButton__text';
-
-export const IMPORT_BTN_POSITION = 8;
+export const IMPORT_BTN = '.euiButton.euiButton--primary.euiButton--fill';
 
 export const IMPORT_TIMELINE_BTN = '[data-test-subj="open-import-data-modal-btn"]';
 

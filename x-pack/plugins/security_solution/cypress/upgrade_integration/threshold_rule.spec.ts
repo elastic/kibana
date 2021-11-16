@@ -4,17 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  DESTINATION_IP,
-  HOST_NAME,
-  PROCESS_NAME,
-  REASON,
-  RISK_SCORE,
-  RULE_NAME,
-  SEVERITY,
-  SOURCE_IP,
-  USER_NAME,
-} from '../screens/alerts';
+
+import { HOST_NAME, REASON, RISK_SCORE, RULE_NAME, SEVERITY } from '../screens/alerts';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/alerts_detection_rules';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
@@ -30,49 +21,58 @@ import {
   RUNS_EVERY_DETAILS,
   SCHEDULE_DETAILS,
   SEVERITY_DETAILS,
+  THRESHOLD_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
 } from '../screens/rule_details';
 
+import { expandFirstAlert } from '../tasks/alerts';
 import { waitForPageToBeLoaded } from '../tasks/common';
-import { waitForRulesTableToBeLoaded, goToTheRuleDetailsOf } from '../tasks/alerts_detection_rules';
+import { waitForRulesTableToBeLoaded, goToRuleDetails } from '../tasks/alerts_detection_rules';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../urls/navigation';
+import {
+  OVERVIEW_HOST_NAME,
+  OVERVIEW_RISK_SCORE,
+  OVERVIEW_RULE,
+  OVERVIEW_SEVERITY,
+  OVERVIEW_STATUS,
+  OVERVIEW_THRESHOLD_COUNT,
+  OVERVIEW_THRESHOLD_VALUE,
+  SUMMARY_VIEW,
+} from '../screens/alerts_details';
 
 const EXPECTED_NUMBER_OF_ALERTS = '1';
 
 const alert = {
-  rule: 'Custom query rule for upgrade',
-  severity: 'low',
-  riskScore: '7',
-  reason:
-    'file event with process test, file The file to test, by Security Solution on security-solution.local created low alert Custom query rule for upgrade.',
+  rule: 'Threshold rule',
+  severity: 'medium',
+  riskScore: '17',
+  reason: 'event created medium alert Threshold rule.',
   hostName: 'security-solution.local',
-  username: 'Security Solution',
-  processName: 'test',
-  fileName: 'The file to test',
-  sourceIp: '127.0.0.1',
-  destinationIp: '127.0.0.2',
+  thresholdCount: '2',
 };
 
 const rule = {
   customQuery: '*:*',
-  name: 'Custom query rule for upgrade',
-  description: 'My description',
-  index: ['auditbeat-custom*'],
-  severity: 'Low',
-  riskScore: '7',
+  name: 'Threshold rule',
+  description: 'Threshold rule for testing upgrade',
+  index: ['auditbeat-threshold*'],
+  severity: 'Medium',
+  riskScore: '17',
   timelineTemplate: 'none',
-  runsEvery: '10s',
-  lookBack: '179999990s',
+  runsEvery: '60s',
+  lookBack: '2999999m',
   timeline: 'None',
+  thresholdField: 'host.name',
+  threholdValue: '1',
 };
 
-describe('After an upgrade, the custom query rule', () => {
+describe('After an upgrade, the threshold rule', () => {
   before(() => {
     loginAndWaitForPage(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    goToTheRuleDetailsOf(rule.name);
+    goToRuleDetails();
     waitForPageToBeLoaded();
   });
 
@@ -81,7 +81,7 @@ describe('After an upgrade, the custom query rule', () => {
   });
 
   it('Displays the rule details', () => {
-    cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+    cy.get(RULE_NAME_HEADER).should('contain', rule.name);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', rule.severity);
@@ -90,8 +90,12 @@ describe('After an upgrade, the custom query rule', () => {
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', rule.index.join(''));
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.customQuery);
-      getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
+      getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', rule.timeline);
+      getDetails(THRESHOLD_DETAILS).should(
+        'have.text',
+        `Results aggregated by ${rule.thresholdField} >= ${rule.threholdValue}`
+      );
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
       getDetails(RUNS_EVERY_DETAILS).should('have.text', rule.runsEvery);
@@ -99,15 +103,24 @@ describe('After an upgrade, the custom query rule', () => {
     });
   });
 
-  it('Displays the alert details at the tgrid', () => {
+  it('Displays the alert details in the TGrid', () => {
     cy.get(RULE_NAME).should('have.text', alert.rule);
     cy.get(SEVERITY).should('have.text', alert.severity);
     cy.get(RISK_SCORE).should('have.text', alert.riskScore);
-    cy.get(REASON).should('have.text', alert.reason).type('{rightarrow}');
+    cy.get(REASON).should('have.text', alert.reason);
     cy.get(HOST_NAME).should('have.text', alert.hostName);
-    cy.get(USER_NAME).should('have.text', alert.username);
-    cy.get(PROCESS_NAME).should('have.text', alert.processName);
-    cy.get(SOURCE_IP).should('have.text', alert.sourceIp);
-    cy.get(DESTINATION_IP).should('have.text', alert.destinationIp);
+  });
+
+  it('Displays the Overview alert details in the alert flyout', () => {
+    expandFirstAlert();
+
+    cy.get(OVERVIEW_STATUS).should('have.text', 'open');
+    cy.get(OVERVIEW_RULE).should('have.text', alert.rule);
+    cy.get(OVERVIEW_SEVERITY).should('have.text', alert.severity);
+    cy.get(OVERVIEW_RISK_SCORE).should('have.text', alert.riskScore);
+    cy.get(OVERVIEW_HOST_NAME).should('have.text', alert.hostName);
+    cy.get(OVERVIEW_THRESHOLD_COUNT).should('have.text', alert.thresholdCount);
+    cy.get(OVERVIEW_THRESHOLD_VALUE).should('have.text', alert.hostName);
+    cy.get(SUMMARY_VIEW).should('contain', `${rule.thresholdField} [threshold]`);
   });
 });

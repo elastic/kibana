@@ -54,7 +54,7 @@ const username = 'elastic';
 const timelineDetails = {
   dateStart: 'Oct 11, 2020 @ 00:00:00.000',
   dateEnd: 'Oct 11, 2030 @ 17:13:15.851',
-  queryTab: 'Query2',
+  queryTab: 'Query4',
   correlationTab: 'Correlation',
   analyzerTab: 'Analyzer',
   notesTab: 'Notes2',
