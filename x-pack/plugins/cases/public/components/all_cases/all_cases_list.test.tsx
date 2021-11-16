@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import '../../common/mock/match_media';
@@ -761,6 +761,22 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="status-badge-in-progress"]`).exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="status-badge-in-progress"]').exists()).toBeTruthy();
+  });
+
+  it('should call doRefresh if provided', async () => {
+    const doRefresh = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} doRefresh={doRefresh} />
+      </TestProviders>
+    );
+
+    await act(async () => {
+      wrapper.find('[data-test-subj="all-cases-refresh"] button').first().simulate('click');
+    });
+
+    expect(doRefresh).toHaveBeenCalled();
   });
 });

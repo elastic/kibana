@@ -335,6 +335,28 @@ describe('CaseView ', () => {
     });
   });
 
+  it('should update title', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseProps} />
+      </TestProviders>
+    );
+    const newTitle = 'The new title';
+    wrapper.find(`[data-test-subj="editable-title-edit-icon"]`).first().simulate('click');
+    wrapper
+      .find(`[data-test-subj="editable-title-input-field"]`)
+      .last()
+      .simulate('change', { target: { value: newTitle } });
+
+    wrapper.find(`[data-test-subj="editable-title-submit-btn"]`).first().simulate('click');
+
+    const updateObject = updateCaseProperty.mock.calls[0][0];
+    await waitFor(() => {
+      expect(updateObject.updateKey).toEqual('title');
+      expect(updateObject.updateValue).toEqual(newTitle);
+    });
+  });
+
   it('should push updates on button click', async () => {
     useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
@@ -709,24 +731,8 @@ describe('CaseView ', () => {
             <CaseView
               {...{
                 refreshRef,
-                allCasesNavigation: {
-                  href: 'all-cases-href',
-                  onClick: jest.fn(),
-                },
-                caseDetailsNavigation: {
-                  href: 'case-details-href',
-                  onClick: jest.fn(),
-                },
                 caseId: '1234',
-                configureCasesNavigation: {
-                  href: 'configure-cases-href',
-                  onClick: jest.fn(),
-                },
                 onComponentInitialized: jest.fn(),
-                ruleDetailsNavigation: {
-                  href: jest.fn(),
-                  onClick: jest.fn(),
-                },
                 showAlertDetails: jest.fn(),
                 useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
                 userCanCrud: true,

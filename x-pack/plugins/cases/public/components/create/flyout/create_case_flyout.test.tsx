@@ -37,7 +37,7 @@ describe('CreateCaseFlyout', () => {
     });
   });
 
-  it('Closing modal calls onCloseCaseModal', async () => {
+  it('Closing flyout calls onCloseCaseModal', async () => {
     await act(async () => {
       const wrapper = mount(
         <TestProviders>
