@@ -98,6 +98,14 @@ export const TestRunResult = ({ monitorId, monitor }: Props) => {
   );
 
   useEffect(() => {
+    if (monitorId) {
+      setJourneyStarted(false);
+      setSummaryDoc(null);
+      setStepEnds([]);
+    }
+  }, [monitorId]);
+
+  useEffect(() => {
     const hits = data?.hits.hits;
 
     const stepEndsT = [];
@@ -161,8 +169,8 @@ export const TestRunResult = ({ monitorId, monitor }: Props) => {
     <EuiPanel>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h3>Test Run</h3>
+          <EuiTitle size="s">
+            <h3>Test run</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
@@ -179,8 +187,8 @@ export const TestRunResult = ({ monitorId, monitor }: Props) => {
             </EuiFlexGroup>
           ) : (
             <EuiFlexGroup alignItems="center">
-              <EuiFlexItem style={{ width: 100 }}>
-                <EuiBadge color={journeyStarted ? 'primary' : 'warning'}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge style={{ width: 100 }} color={journeyStarted ? 'primary' : 'warning'}>
                   {journeyStarted ? 'IN PROGRESS' : 'PENDING'}
                 </EuiBadge>
               </EuiFlexItem>
@@ -201,7 +209,12 @@ export const TestRunResult = ({ monitorId, monitor }: Props) => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-
+      {summaryDoc && stepEnds.length === 0 && (
+        <EuiText color="danger">Failed to run steps.</EuiText>
+      )}
+      {!summaryDoc && journeyStarted && stepEnds.length === 0 && (
+        <EuiText>Loading steps...</EuiText>
+      )}
       <EuiListGroup listItems={myContent} maxWidth={false} />
       <EuiHorizontalRule margin="xs" />
     </EuiPanel>

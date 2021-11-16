@@ -110,11 +110,10 @@ export const MonitorConfigFlyout = ({ setIsFlyoutVisible, isEditFlow = false }: 
           name={name}
         />
         <EuiHorizontalRule margin="xs" style={{ height: 2 }} />
-        {testMonitor && (
-          <TestRunResult monitorId={testMonitor?.id + '-inline'} monitor={testMonitor} />
-        )}
       </EuiFlyoutBody>
-
+      {testMonitor && (
+        <TestRunResult monitorId={testMonitor?.id + '-inline'} monitor={testMonitor} />
+      )}
       <EuiFlyoutFooter>
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
@@ -123,8 +122,8 @@ export const MonitorConfigFlyout = ({ setIsFlyoutVisible, isEditFlow = false }: 
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onTestRun} isLoading={isTestRunning}>
-              Test run
+            <EuiButton onClick={onTestRun}>
+              {testMonitor ? 'Update test run' : 'Test run'}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

@@ -17,6 +17,7 @@ import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTextArea,
 } from '@elastic/eui';
 import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
@@ -279,6 +280,16 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
             onChange={(code) => setConfig((prevConfig) => ({ ...prevConfig, inlineScript: code }))}
             value={config.inlineScript}
           />
+          {/* <EuiTextArea*/}
+          {/*  fullWidth={true}*/}
+          {/*  value={*/}
+          {/*    config.inlineScript ||*/}
+          {/*    "step(\"load homepage\", async () => { await page.goto('https://www.elastic.co', { waitUntil: 'networkidle', timeout: 120000 }); });"*/}
+          {/*  }*/}
+          {/*  onChange={(evt) =>*/}
+          {/*    setConfig((prevConfig) => ({ ...prevConfig, inlineScript: evt.target.value }))*/}
+          {/*  }*/}
+          {/* />*/}
         </EuiFormRow>
       ),
     },
