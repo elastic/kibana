@@ -396,7 +396,7 @@
 # Security Solution sub teams
 /x-pack/plugins/cases @elastic/security-threat-hunting
 /x-pack/plugins/timelines @elastic/security-threat-hunting
-/x-pack/test/case_api_integration @elastic/security-threat-hunting
+/x-pack/test/cases_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
 
 ## Security Solution sub teams - security-onboarding-and-lifecycle-mgt
@@ -414,11 +414,15 @@
 /x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
 
+## Security Solution sub teams - security-telemetry (Data Engineering)
+x-pack/plugins/security_solution/server/usage/ @elastic/security-telemetry
+x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-telemetry
+
 ## Security Solution sub teams - security-engineering-productivity
-x-pack/plugins/security_solution/cypress/ccs_integration
-x-pack/plugins/security_solution/cypress/upgrade_integration
-x-pack/plugins/security_solution/cypress/README.md
-x-pack/test/security_solution_cypress
+x-pack/plugins/security_solution/cypress/ccs_integration @elastic/security-engineering-productivity
+x-pack/plugins/security_solution/cypress/upgrade_integration @elastic/security-engineering-productivity
+x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering-productivity
+x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics

@@ -64,30 +64,6 @@ export function onPremInstructions({
           iconType: 'alert',
         },
         instructionVariants: [
-          // hides fleet section when plugin is disabled
-          ...(isFleetPluginEnabled
-            ? [
-                {
-                  id: INSTRUCTION_VARIANT.FLEET,
-                  instructions: [
-                    {
-                      title: i18n.translate('xpack.apm.tutorial.fleet.title', {
-                        defaultMessage: 'Fleet',
-                      }),
-                      customComponentName: 'TutorialFleetInstructions',
-                    },
-                  ],
-                },
-              ]
-            : []),
-          {
-            id: INSTRUCTION_VARIANT.OSX,
-            instructions: [
-              createDownloadServerOsx(),
-              EDIT_CONFIG,
-              START_SERVER_UNIX,
-            ],
-          },
           {
             id: INSTRUCTION_VARIANT.DEB,
             instructions: [
@@ -105,9 +81,33 @@ export function onPremInstructions({
             ],
           },
           {
+            id: INSTRUCTION_VARIANT.OSX,
+            instructions: [
+              createDownloadServerOsx(),
+              EDIT_CONFIG,
+              START_SERVER_UNIX,
+            ],
+          },
+          {
             id: INSTRUCTION_VARIANT.WINDOWS,
             instructions: createWindowsServerInstructions(),
           },
+          // hides fleet section when plugin is disabled
+          ...(isFleetPluginEnabled
+            ? [
+                {
+                  id: INSTRUCTION_VARIANT.FLEET,
+                  instructions: [
+                    {
+                      title: i18n.translate('xpack.apm.tutorial.fleet.title', {
+                        defaultMessage: 'Fleet',
+                      }),
+                      customComponentName: 'TutorialFleetInstructions',
+                    },
+                  ],
+                },
+              ]
+            : []),
         ],
         statusCheck: {
           title: i18n.translate(
