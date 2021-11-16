@@ -386,8 +386,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep);
     } catch (e) {
       notifications.toasts.addDanger({
-        title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
-          defaultMessage: 'Unable to generate export',
+        title: i18n.translate('savedObjectsManagement.objectsTable.export.toastErrorMessage', {
+          defaultMessage: 'Unable to generate export: {error}',
+          values: {
+            error: e.body?.message ?? e,
+          },
         }),
       });
       throw e;
@@ -423,8 +426,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       });
     } catch (e) {
       notifications.toasts.addDanger({
-        title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
-          defaultMessage: 'Unable to generate export',
+        title: i18n.translate('savedObjectsManagement.objectsTable.export.toastErrorMessage', {
+          defaultMessage: 'Unable to generate export: {error}',
+          values: {
+            error: e.body?.message ?? e,
+          },
         }),
       });
       throw e;
