@@ -142,7 +142,7 @@ Object {
           },
           Object {
             "exists": Object {
-              "field": "transaction.breakdown.count",
+              "field": "span.self_time.sum.us",
             },
           },
         ],
@@ -265,20 +265,8 @@ Object {
             },
           },
           Object {
-            "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
-                Object {
-                  "exists": Object {
-                    "field": "span.self_time.sum.us",
-                  },
-                },
-                Object {
-                  "exists": Object {
-                    "field": "transaction.breakdown.count",
-                  },
-                },
-              ],
+            "exists": Object {
+              "field": "span.self_time.sum.us",
             },
           },
           Object {
