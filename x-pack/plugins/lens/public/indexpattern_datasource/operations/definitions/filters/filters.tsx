@@ -6,7 +6,7 @@
  */
 
 import './filters.scss';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
