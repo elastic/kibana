@@ -377,7 +377,7 @@ View the data in visualizations and the requests that collect the data.
 
 * *Unformatted* &mdash; Best used for computer use.
 +
-When you download visualization panels with multiple layers, each layer produces a CSV file, and the file names contain the visualization and layer index names.
+When you download visualization panels with multiple layers, each layer produces a CSV file, and the file names contain the visualization and layer {data-source} names.
 
 . View the requests that collect the data.
 

@@ -94,7 +94,7 @@ To save the panel to the dashboard:
 [[explore-the-underlying-documents]]
 === Open panel data in Discover
 
-You can add interactions to panels that allow you to open and explore the data in *Discover*. To use the interactions, the panel must use only one index pattern. 
+You can add interactions to panels that allow you to open and explore the data in *Discover*. To use the interactions, the panel must use only one {data-view}. 
 
 There are three types of *Discover* interactions you can add to dashboards:
 
