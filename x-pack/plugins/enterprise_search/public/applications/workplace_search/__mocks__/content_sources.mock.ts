@@ -376,7 +376,7 @@ export const exampleResult = {
       source: 'custom',
     },
   ],
-  schemaFields: { cats: 'text', dogs: 'text' },
+  schemaFields: {},
 };
 
 export const mostRecentIndexJob = {
