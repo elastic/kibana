@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 
 import { EMPTY } from 'rxjs';
 import type { StoryContext } from '@storybook/react';
@@ -46,40 +46,46 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
   const browserHistory = createBrowserHistory();
   const history = new ScopedHistory(browserHistory, basepath);
 
-  const startServices: FleetStartServices = {
-    ...stubbedStartServices,
-    application: getApplication(),
-    chrome: getChrome(),
-    cloud: getCloud({ isCloudEnabled: storyContext?.args.isCloudEnabled }),
-    customIntegrations: {
-      ContextProvider: getStorybookContextProvider(),
-    },
-    docLinks: getDocLinks(),
-    http: getHttp(),
-    i18n: {
-      Context: function I18nContext({ children }) {
-        return <I18nProvider>{children}</I18nProvider>;
-      },
-    },
-    injectedMetadata: {
-      getInjectedVar: () => null,
-    },
-    notifications: getNotifications(),
-    share: getShare(),
-    uiSettings: getUiSettings(),
-    theme: {
-      theme$: EMPTY,
-    },
-  };
+  const isCloudEnabled = storyContext?.args.isCloudEnabled;
 
-  setHttpClient(startServices.http);
-  setCustomIntegrations({
-    getAppendCustomIntegrations: async () => [],
-    getReplacementCustomIntegrations: async () => {
-      const { integrations } = await import('./fixtures/replacement_integrations');
-      return integrations;
-    },
-  });
+  const startServices: FleetStartServices = useMemo(
+    () => ({
+      ...stubbedStartServices,
+      application: getApplication(),
+      chrome: getChrome(),
+      cloud: getCloud({ isCloudEnabled }),
+      customIntegrations: {
+        ContextProvider: getStorybookContextProvider(),
+      },
+      docLinks: getDocLinks(),
+      http: getHttp(),
+      i18n: {
+        Context: function I18nContext({ children }) {
+          return <I18nProvider>{children}</I18nProvider>;
+        },
+      },
+      injectedMetadata: {
+        getInjectedVar: () => null,
+      },
+      notifications: getNotifications(),
+      share: getShare(),
+      uiSettings: getUiSettings(),
+      theme: {
+        theme$: EMPTY,
+      },
+    }),
+    [isCloudEnabled]
+  );
+  useEffect(() => {
+    setHttpClient(startServices.http);
+    setCustomIntegrations({
+      getAppendCustomIntegrations: async () => [],
+      getReplacementCustomIntegrations: async () => {
+        const { integrations } = await import('./fixtures/replacement_integrations');
+        return integrations;
+      },
+    });
+  }, [startServices]);
 
   const config = {
     enabled: true,
@@ -91,7 +97,7 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
 
   const extensions = {};
   const kibanaVersion = '1.2.3';
-  const setHeaderActionMenu = () => {};
+  const setHeaderActionMenu = useCallback(() => {}, []);
 
   return (
     <IntegrationsAppContext

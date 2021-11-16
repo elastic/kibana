@@ -48,7 +48,7 @@ import {
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
-import { CustomIconAndTooltipContent, ILayer } from '../layer';
+import { LayerIcon, ILayer } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
@@ -270,8 +270,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return true;
   }
 
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
-    throw new Error('Should implement AbstractVectorLayer#getCustomIconAndTooltipContent');
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
+    throw new Error('Should implement AbstractVectorLayer#getLayerIcon');
   }
 
   getLayerTypeIconName() {
