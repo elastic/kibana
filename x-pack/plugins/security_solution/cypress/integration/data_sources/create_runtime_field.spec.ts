@@ -20,6 +20,7 @@ import { getNewRule } from '../../objects/rule';
 import { refreshPage } from '../../tasks/security_header';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { openEventsViewerFieldsBrowser } from '../../tasks/hosts/events';
+import { assertFieldDisplayed, createField } from '../../tasks/create_runtime_field';
 
 describe('Create DataView runtime field', () => {
   before(() => {
@@ -36,13 +37,8 @@ describe('Create DataView runtime field', () => {
     waitForAlertsToPopulate(500);
     openEventsViewerFieldsBrowser();
 
-    cy.get('[data-test-subj="create-field"]').click();
-    cy.get('.indexPatternFieldEditorMaskOverlay').find('[data-test-subj="input"]').type(fieldName);
-    cy.get('[data-test-subj="fieldSaveButton"]').click();
-
-    cy.get(
-      `[data-test-subj="events-viewer-panel"] [data-test-subj="dataGridHeaderCell-${fieldName}"]`
-    ).should('exist');
+    createField(fieldName);
+    assertFieldDisplayed(fieldName, 'alerts');
   });
 
   it('adds field to timeline', () => {
@@ -53,12 +49,7 @@ describe('Create DataView runtime field', () => {
     populateTimeline();
     openTimelineFieldsBrowser();
 
-    cy.get('[data-test-subj="create-field"]').click();
-    cy.get('.indexPatternFieldEditorMaskOverlay').find('[data-test-subj="input"]').type(fieldName);
-    cy.get('[data-test-subj="fieldSaveButton"]').click();
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`).should(
-      'exist'
-    );
+    createField(fieldName);
+    assertFieldDisplayed(fieldName);
   });
 });
