@@ -37,7 +37,7 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
    actionTypeId: .servicenow-sir
    config:
      apiUrl: https://example.service-now.com/
-     isLegacy: false
+     usesTableApi: false
    secrets:
      username: testuser
      password: passwordkeystorevalue
@@ -46,9 +46,9 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 Config defines information for the connector type.
 
 `apiUrl`:: An address that corresponds to *URL*.
-`isLegacy`:: A boolean that indicates if the connector should use the Table API (legacy) or the Import Set API.
+`usesTableApi`:: A boolean that indicates if the connector uses the Table API or the Import Set API.
 
-Note: If `isLegacy` is set to false the Elastic application should be installed in ServiceNow.
+Note: If `usesTableApi` is set to false the Elastic application should be installed in ServiceNow.
 
 Secrets defines sensitive information for the connector type.
 

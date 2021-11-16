@@ -376,5 +376,50 @@ describe('PieVisualization component', () => {
       expect(component.find(VisualizationContainer)).toHaveLength(1);
       expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDonut);
     });
+
+    test('it should dynamically shrink the chart area to when some small slices are detected', () => {
+      const defaultData = getDefaultArgs().data;
+      const emptyData: LensMultiTable = {
+        ...defaultData,
+        tables: {
+          first: {
+            ...defaultData.tables.first,
+            rows: [
+              { a: 60, b: 'I', c: 200, d: 'Row 1' },
+              { a: 1, b: 'J', c: 0.1, d: 'Row 2' },
+            ],
+          },
+        },
+      };
+
+      const component = shallow(
+        <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
+      );
+      expect(component.find(Partition).prop('config')?.outerSizeRatio).toBeCloseTo(1 / 1.05);
+    });
+
+    test('it should bound the shrink the chart area to ~20% when some small slices are detected', () => {
+      const defaultData = getDefaultArgs().data;
+      const emptyData: LensMultiTable = {
+        ...defaultData,
+        tables: {
+          first: {
+            ...defaultData.tables.first,
+            rows: [
+              { a: 60, b: 'I', c: 200, d: 'Row 1' },
+              { a: 1, b: 'J', c: 0.1, d: 'Row 2' },
+              { a: 1, b: 'K', c: 0.1, d: 'Row 3' },
+              { a: 1, b: 'G', c: 0.1, d: 'Row 4' },
+              { a: 1, b: 'H', c: 0.1, d: 'Row 5' },
+            ],
+          },
+        },
+      };
+
+      const component = shallow(
+        <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
+      );
+      expect(component.find(Partition).prop('config')?.outerSizeRatio).toBeCloseTo(1 / 1.2);
+    });
   });
 });

@@ -29,7 +29,12 @@ import { getAxis } from './get_axis';
 import { getAspects } from './get_aspects';
 import { ChartType } from '../index';
 
-export function getConfig(table: Datatable, params: VisParams): VisConfig {
+export function getConfig(
+  table: Datatable,
+  params: VisParams,
+  useLegacyTimeAxis = false,
+  darkMode = false
+): VisConfig {
   const {
     thresholdLine,
     orderBucketsBySum,
@@ -42,13 +47,6 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     fillOpacity,
   } = params;
   const aspects = getAspects(table.columns, params.dimensions);
-  const xAxis = getAxis<XScaleType>(
-    params.categoryAxes[0],
-    params.grid,
-    aspects.x,
-    params.seriesParams,
-    params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM
-  );
   const tooltip = getTooltip(aspects, params);
   const yAxes = params.valueAxes.map((a) => {
     // find the correct aspect for each value axis
@@ -60,10 +58,28 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
       params.seriesParams
     );
   });
+
+  const rotation = getRotation(params.categoryAxes[0]);
+
+  const isDateHistogram = params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM;
+  const isHistogram = params.dimensions.x?.aggType === BUCKET_TYPES.HISTOGRAM;
   const enableHistogramMode =
-    (params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM ||
-      params.dimensions.x?.aggType === BUCKET_TYPES.HISTOGRAM) &&
+    (isDateHistogram || isHistogram) &&
     shouldEnableHistogramMode(params.seriesParams, aspects.y, yAxes);
+
+  const useMultiLayerTimeAxis =
+    enableHistogramMode && isDateHistogram && !useLegacyTimeAxis && rotation === 0;
+
+  const xAxis = getAxis<XScaleType>(
+    params.categoryAxes[0],
+    params.grid,
+    aspects.x,
+    params.seriesParams,
+    isDateHistogram,
+    useMultiLayerTimeAxis,
+    darkMode
+  );
+
   const isTimeChart = (aspects.x.params as DateHistogramParams).date ?? false;
 
   return {
@@ -83,7 +99,7 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     xAxis,
     yAxes,
     legend: getLegend(params),
-    rotation: getRotation(params.categoryAxes[0]),
+    rotation,
     thresholdLine: getThresholdLine(thresholdLine, yAxes, params.seriesParams),
   };
 }

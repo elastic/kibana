@@ -52,5 +52,5 @@ export const wrapHitsFactory =
       };
     });
 
-    return filterDuplicateSignals(completeRule.alertId, wrappedDocs, false);
+    return filterDuplicateSignals(completeRule.alertId, wrappedDocs, true);
   };

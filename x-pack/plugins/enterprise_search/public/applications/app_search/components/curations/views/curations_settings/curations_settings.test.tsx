@@ -17,6 +17,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButtonEmpty, EuiCallOut, EuiSwitch } from '@elastic/eui';
 
+import { mountWithIntl } from '@kbn/test/jest';
+
 import { Loading } from '../../../../../shared/loading';
 import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { DataPanel } from '../../../data_panel';
@@ -44,6 +46,8 @@ const MOCK_VALUES = {
 
 const MOCK_ACTIONS = {
   // CurationsSettingsLogic
+  loadCurationsSettings: jest.fn(),
+  onSkipLoadingCurationsSettings: jest.fn(),
   toggleCurationsEnabled: jest.fn(),
   toggleCurationsMode: jest.fn(),
   // LogRetentionLogic
@@ -54,6 +58,14 @@ describe('CurationsSettings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockActions(MOCK_ACTIONS);
+  });
+
+  it('loads curations and log retention settings on load', () => {
+    setMockValues(MOCK_VALUES);
+    mountWithIntl(<CurationsSettings />);
+
+    expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalled();
+    expect(MOCK_ACTIONS.fetchLogRetention).toHaveBeenCalled();
   });
 
   it('contains a switch to toggle curations settings', () => {
@@ -154,12 +166,61 @@ describe('CurationsSettings', () => {
     expect(wrapper.is(Loading)).toBe(true);
   });
 
+  describe('loading curation settings based on log retention', () => {
+    it('loads curation settings when log retention is enabled', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        logRetention: {
+          [LogRetentionOptions.Analytics]: {
+            enabled: true,
+          },
+        },
+      });
+
+      shallow(<CurationsSettings />);
+
+      expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips loading curation settings when log retention is enabled', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        logRetention: {
+          [LogRetentionOptions.Analytics]: {
+            enabled: false,
+          },
+        },
+      });
+
+      shallow(<CurationsSettings />);
+
+      expect(MOCK_ACTIONS.onSkipLoadingCurationsSettings).toHaveBeenCalledTimes(1);
+    });
+
+    it('takes no action if log retention has not yet been loaded', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        logRetention: null,
+      });
+
+      shallow(<CurationsSettings />);
+
+      expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalledTimes(0);
+      expect(MOCK_ACTIONS.onSkipLoadingCurationsSettings).toHaveBeenCalledTimes(0);
+    });
+  });
+
   describe('when the user has no platinum license', () => {
     beforeEach(() => {
       setMockValues({
         ...MOCK_VALUES,
         hasPlatinumLicense: false,
       });
+    });
+
+    it('it does not fetch log retention', () => {
+      shallow(<CurationsSettings />);
+      expect(MOCK_ACTIONS.fetchLogRetention).toHaveBeenCalledTimes(0);
     });
 
     it('shows a CTA to upgrade your license when the user when the user', () => {

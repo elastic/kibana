@@ -32,6 +32,13 @@ export type TileMetaFeature = Feature & {
   properties: {
     'hits.total.relation': string;
     'hits.total.value': number;
+
+    // For _mvt requests with "aggs" property in request: aggregation statistics returned in the pattern outined below
+    // aggregations._count.min
+    // aggregations._count.max
+    // aggregations.<agg_name>.min
+    // aggregations.<agg_name>.max
+    [key: string]: number | string;
   };
 };
 

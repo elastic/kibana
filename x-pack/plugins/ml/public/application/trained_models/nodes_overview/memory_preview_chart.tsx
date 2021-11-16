@@ -8,25 +8,26 @@
 import { i18n } from '@kbn/i18n';
 import React, { FC, useMemo } from 'react';
 import {
-  Chart,
-  Settings,
-  BarSeries,
-  ScaleType,
   Axis,
+  BarSeries,
+  Chart,
   Position,
+  ScaleType,
   SeriesColorAccessor,
+  Settings,
 } from '@elastic/charts';
 import { euiPaletteGray } from '@elastic/eui';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useCurrentEuiTheme } from '../../components/color_range_legend';
+import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 interface MemoryPreviewChartProps {
   memoryOverview: NodeDeploymentStatsResponse['memory_overview'];
 }
 
 export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview }) => {
-  const bytesFormatter = useFieldFormatter('bytes');
+  const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
 
   const { euiTheme } = useCurrentEuiTheme();
 
@@ -112,7 +113,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         tooltip={{
           headerFormatter: ({ value }) =>
             i18n.translate('xpack.ml.trainedModels.nodesList.memoryBreakdown', {
-              defaultMessage: 'Approximate memory breakdown based on the node info',
+              defaultMessage: 'Approximate memory breakdown',
             }),
         }}
       />

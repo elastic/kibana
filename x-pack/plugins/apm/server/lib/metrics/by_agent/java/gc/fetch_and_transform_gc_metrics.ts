@@ -6,22 +6,31 @@
  */
 
 import { sum, round } from 'lodash';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
 import { Setup } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
-import { getMetricsProjection } from '../../../../../projections/metrics';
-import { mergeProjection } from '../../../../../projections/util/merge_projection';
+
 import {
   AGENT_NAME,
   LABEL_NAME,
   METRIC_JAVA_GC_COUNT,
   METRIC_JAVA_GC_TIME,
+  SERVICE_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../../helpers/get_bucket_size';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
+import {
+  environmentQuery,
+  serviceNodeNameQuery,
+} from '../../../../../../common/utils/environment_query';
+import {
+  kqlQuery,
+  rangeQuery,
+} from '../../../../../../../observability/server';
+import { ProcessorEvent } from '../../../../../../common/processor_event';
 
 export async function fetchAndTransformGcMetrics({
   environment,
@@ -50,26 +59,24 @@ export async function fetchAndTransformGcMetrics({
 
   const { bucketSize } = getBucketSize({ start, end });
 
-  const projection = getMetricsProjection({
-    environment,
-    kuery,
-    serviceName,
-    serviceNodeName,
-    start,
-    end,
-  });
-
   // GC rate and time are reported by the agents as monotonically
   // increasing counters, which means that we have to calculate
   // the delta in an es query. In the future agent might start
   // reporting deltas.
-  const params = mergeProjection(projection, {
+  const params = {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            ...projection.body.query.bool.filter,
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...serviceNodeNameQuery(serviceNodeName),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
             { exists: { field: fieldName } },
             { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
           ],
@@ -114,7 +121,7 @@ export async function fetchAndTransformGcMetrics({
         },
       },
     },
-  });
+  };
 
   const response = await apmEventClient.search(operationName, params);
 
@@ -123,7 +130,6 @@ export async function fetchAndTransformGcMetrics({
   if (!aggregations) {
     return {
       ...chartBase,
-      noHits: true,
       series: [],
     };
   }
@@ -170,7 +176,6 @@ export async function fetchAndTransformGcMetrics({
 
   return {
     ...chartBase,
-    noHits: response.hits.total.value === 0,
     series,
   };
 }

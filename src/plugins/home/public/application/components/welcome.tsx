@@ -76,7 +76,11 @@ export class Welcome extends React.Component<Props> {
 
   private renderTelemetryEnabledOrDisabledText = () => {
     const { telemetry } = this.props;
-    if (!telemetry || !telemetry.telemetryService.userCanChangeSettings) {
+    if (
+      !telemetry ||
+      !telemetry.telemetryService.userCanChangeSettings ||
+      !telemetry.telemetryService.getCanChangeOptInStatus()
+    ) {
       return null;
     }
 

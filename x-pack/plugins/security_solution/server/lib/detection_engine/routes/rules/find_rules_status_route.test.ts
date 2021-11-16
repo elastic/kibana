@@ -27,7 +27,9 @@ describe.each([
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus()); // successful status search
+    clients.ruleExecutionLogClient.getCurrentStatusBulk.mockResolvedValue(
+      getFindBulkResultStatus()
+    ); // successful status search
     clients.rulesClient.get.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
@@ -48,7 +50,7 @@ describe.each([
     });
 
     test('catch error when status search throws error', async () => {
-      clients.ruleExecutionLogClient.findBulk.mockImplementation(async () => {
+      clients.ruleExecutionLogClient.getCurrentStatusBulk.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(ruleStatusRequest(), context);

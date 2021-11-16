@@ -13,7 +13,6 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../helpers/setup_request';
-import { getProcessorEventForTransactions } from '../helpers/transactions';
 
 interface ServiceAgent {
   agent?: {
@@ -29,13 +28,11 @@ interface ServiceAgent {
 export async function getServiceAgent({
   serviceName,
   setup,
-  searchAggregatedTransactions,
   start,
   end,
 }: {
   serviceName: string;
   setup: Setup;
-  searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }) {
@@ -46,7 +43,7 @@ export async function getServiceAgent({
     apm: {
       events: [
         ProcessorEvent.error,
-        getProcessorEventForTransactions(searchAggregatedTransactions),
+        ProcessorEvent.transaction,
         ProcessorEvent.metric,
       ],
     },
@@ -70,6 +67,9 @@ export async function getServiceAgent({
             },
           },
         },
+      },
+      sort: {
+        _score: 'desc' as const,
       },
     },
   };

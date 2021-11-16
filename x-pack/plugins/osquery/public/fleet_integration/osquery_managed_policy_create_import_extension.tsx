@@ -165,16 +165,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     defaultValue: {
       config: JSON.stringify(get(newPolicy, 'inputs[0].config.osquery.value', {}), null, 2),
     },
-    serializer: (formData) => {
-      let config;
-      try {
-        // @ts-expect-error update types
-        config = JSON.parse(formData.config);
-      } catch (e) {
-        config = {};
-      }
-      return { config };
-    },
     schema: {
       config: {
         label: i18n.translate('xpack.osquery.fleetIntegration.osqueryConfig.configFieldLabel', {
@@ -243,10 +233,16 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       if (isValid === undefined) return;
 
       const updatedPolicy = produce(newPolicy, (draft) => {
-        if (isEmpty(config)) {
+        let parsedConfig;
+        try {
+          parsedConfig = JSON.parse(config);
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+
+        if (isEmpty(parsedConfig)) {
           unset(draft, 'inputs[0].config');
         } else {
-          set(draft, 'inputs[0].config.osquery.value', config);
+          set(draft, 'inputs[0].config.osquery.value', parsedConfig);
         }
         return draft;
       });
@@ -261,11 +257,14 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     if (editMode && policyAgentsCount === null) {
       const fetchAgentsCount = async () => {
         try {
-          const response = await http.fetch(agentRouteService.getStatusPath(), {
-            query: {
-              policyId: policy?.policy_id,
-            },
-          });
+          const response = await http.fetch<{ results: { total: number } }>(
+            agentRouteService.getStatusPath(),
+            {
+              query: {
+                policyId: policy?.policy_id,
+              },
+            }
+          );
           if (response.results) {
             setPolicyAgentsCount(response.results.total);
           }
@@ -276,7 +275,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       const fetchAgentPolicyDetails = async () => {
         if (policy?.policy_id) {
           try {
-            const response = await http.fetch(
+            const response = await http.fetch<{ item: AgentPolicy }>(
               agentPolicyRouteService.getInfoPath(policy?.policy_id)
             );
             if (response.item) {
@@ -319,6 +318,16 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
               streams: [],
               policy_template: 'osquery_manager',
             });
+          } else {
+            if (!draft.inputs[0].type) {
+              set(draft, 'inputs[0].type', 'osquery');
+            }
+            if (!draft.inputs[0].policy_template) {
+              set(draft, 'inputs[0].policy_template', 'osquery_manager');
+            }
+            if (!draft.inputs[0].enabled) {
+              set(draft, 'inputs[0].enabled', true);
+            }
           }
         });
         onChange({

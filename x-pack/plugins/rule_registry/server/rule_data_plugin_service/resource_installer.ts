@@ -309,12 +309,14 @@ export class ResourceInstaller {
 
         template: {
           settings: {
+            hidden: true,
             'index.lifecycle': {
               name: ilmPolicyName,
               // TODO: fix the types in the ES package, they don't include rollover_alias???
               // @ts-expect-error
               rollover_alias: primaryNamespacedAlias,
             },
+            'index.mapping.total_fields.limit': 1100,
           },
           mappings: {
             dynamic: false,

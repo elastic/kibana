@@ -64,6 +64,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'visualization:useLegacyTimeAxis': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'visualization:regionmap:showWarnings': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -414,6 +418,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:maxSuggestions': {
     type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableComparisonByDefault': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'banners:placement': {

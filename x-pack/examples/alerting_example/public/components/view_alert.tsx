@@ -38,10 +38,12 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
 
   useEffect(() => {
     if (!alert) {
-      http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`).then(setAlert);
+      http.get<Alert | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`).then(setAlert);
     }
     if (!alertState) {
-      http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`).then(setAlertState);
+      http
+        .get<AlertTaskState | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`)
+        .then(setAlertState);
     }
   }, [alert, alertState, http, id]);
 
