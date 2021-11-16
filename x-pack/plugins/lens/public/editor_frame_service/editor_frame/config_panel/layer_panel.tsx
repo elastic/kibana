@@ -125,11 +125,7 @@ export function LayerPanel(
     dateRange,
   };
 
-  const {
-    groups,
-    supportStaticValue,
-    supportFieldFormat = true,
-  } = useMemo(
+  const { groups } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -518,7 +514,7 @@ export function LayerPanel(
                         setActiveDimension({
                           activeGroup: group,
                           activeId: id,
-                          isNew: !supportStaticValue,
+                          isNew: !group.supportStaticValue,
                         });
                       }}
                       onDrop={onDrop}
@@ -575,8 +571,9 @@ export function LayerPanel(
                   toggleFullscreen,
                   isFullscreen,
                   setState: updateDataLayerState,
-                  supportStaticValue: Boolean(supportStaticValue),
-                  supportFieldFormat: Boolean(supportFieldFormat),
+                  supportStaticValue: Boolean(activeGroup.supportStaticValue),
+                  paramEditorCustomProps: activeGroup.paramEditorCustomProps,
+                  supportFieldFormat: activeGroup.supportFieldFormat !== false,
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 }}
               />
