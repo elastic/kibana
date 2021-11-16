@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import { AlertStatus } from '../../../common/typings';
@@ -50,6 +50,10 @@ function AlertsPage() {
   const timefilterService = useTimefilterService();
   const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, workflowStatus } =
     useAlertsPageStateContainer();
+
+  useEffect(() => {
+    syncAlertStatusFilterStatus(kuery as string);
+  }, [kuery]);
 
   useBreadcrumbs([
     {
@@ -112,15 +116,30 @@ function AlertsPage() {
       if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
         return refetch.current && refetch.current();
       }
-
       timefilterService.setTime(dateRange);
       setRangeFrom(dateRange.from);
       setRangeTo(dateRange.to);
       setKuery(query);
+      syncAlertStatusFilterStatus(query as string);
     },
     [rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, timefilterService]
   );
 
+  const syncAlertStatusFilterStatus = (query: string) => {
+    const [, alertStatus] = /\s*kibana\.alert\.status\s*:\s*"(.*?)"/.exec(query) || [];
+    if (!alertStatus) return;
+    switch (alertStatus.toLowerCase()) {
+      case 'active':
+        setAlertFilterStatus(AlertStatus.Active);
+        break;
+      case 'recovered':
+        setAlertFilterStatus(AlertStatus.Recovered);
+        break;
+      default:
+        setAlertFilterStatus(AlertStatus.All);
+        break;
+    }
+  };
   const setAlertStatusFilter = useCallback(
     (id: string, query: string) => {
       setAlertFilterStatus(id as AlertStatus);
