@@ -27,10 +27,6 @@ import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { getMetrics } from './metrics';
 
-interface HeadlessChromiumDriverFactoryOptions extends ConfigType {
-  binaryPath: string;
-}
-
 interface CreatePageOptions {
   browserTimezone?: string;
   openUrlTimeout: number;
@@ -74,26 +70,25 @@ const DEFAULT_ARGS = [
 const DIAGNOSTIC_TIME = 5 * 1000;
 
 export class HeadlessChromiumDriverFactory {
-  private userDataDir: string;
+  private userDataDir = fs.mkdtempSync(path.join(getDataPath(), 'chromium-'));
   type = 'chromium';
 
   constructor(
     private screenshotMode: ScreenshotModePluginSetup,
+    private config: ConfigType,
     private logger: Logger,
-    private options: HeadlessChromiumDriverFactoryOptions
+    private binaryPath: string
   ) {
-    if (this.options.browser.chromium.disableSandbox) {
+    if (this.config.browser.chromium.disableSandbox) {
       logger.warn(`Enabling the Chromium sandbox provides an additional layer of protection.`);
     }
-
-    this.userDataDir = fs.mkdtempSync(path.join(getDataPath(), 'chromium-'));
   }
 
   private getChromiumArgs() {
     return args({
       userDataDir: this.userDataDir,
-      disableSandbox: this.options.browser.chromium.disableSandbox,
-      proxy: this.options.browser.chromium.proxy,
+      disableSandbox: this.config.browser.chromium.disableSandbox,
+      proxy: this.config.browser.chromium.proxy,
       viewport: DEFAULT_VIEWPORT,
     });
   }
@@ -117,9 +112,9 @@ export class HeadlessChromiumDriverFactory {
 
       try {
         browser = await puppeteer.launch({
-          pipe: !this.options.browser.chromium.inspect,
+          pipe: !this.config.browser.chromium.inspect,
           userDataDir: this.userDataDir,
-          executablePath: this.options.binaryPath,
+          executablePath: this.binaryPath,
           ignoreHTTPSErrors: true,
           handleSIGHUP: false,
           args: chromiumArgs,
@@ -204,10 +199,7 @@ export class HeadlessChromiumDriverFactory {
       this.getProcessLogger(browser, logger).subscribe();
 
       // HeadlessChromiumDriver: object to "drive" a browser page
-      const driver = new HeadlessChromiumDriver(this.screenshotMode, page, {
-        inspect: !!this.options.browser.chromium.inspect,
-        networkPolicy: this.options.networkPolicy,
-      });
+      const driver = new HeadlessChromiumDriver(this.screenshotMode, this.config, page);
 
       // Rx.Observable<never>: stream to interrupt page capture
       const exit$ = this.getPageExit(browser, page);
@@ -315,7 +307,7 @@ export class HeadlessChromiumDriverFactory {
     // leader of a new process group, making it possible to kill child
     // process tree with `.kill(-pid)` command. @see
     // https://nodejs.org/api/child_process.html#child_process_options_detached
-    const browserProcess = spawn(this.options.binaryPath, finalArgs, {
+    const browserProcess = spawn(this.binaryPath, finalArgs, {
       detached: process.platform !== 'win32',
     });
 
