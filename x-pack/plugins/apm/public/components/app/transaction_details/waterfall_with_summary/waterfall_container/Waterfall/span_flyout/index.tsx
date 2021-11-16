@@ -101,11 +101,11 @@ export function SpanFlyout({
   const stackframes = span.span.stacktrace;
   const codeLanguage = parentTransaction?.service.language?.name;
   const spanDb = span.span.db;
-  const httpContext = span.span.http;
   const spanTypes = getSpanTypes(span);
-  const spanHttpStatusCode = httpContext?.response?.status_code;
-  const spanHttpUrl = httpContext?.url?.original;
-  const spanHttpMethod = httpContext?.method;
+  const spanHttpStatusCode =
+    span.http?.response?.status_code || span.span?.http?.response?.status_code;
+  const spanHttpUrl = span.url?.original || span.span?.http?.url?.original;
+  const spanHttpMethod = span.http?.request?.method || span.span?.http?.method;
 
   return (
     <EuiPortal>

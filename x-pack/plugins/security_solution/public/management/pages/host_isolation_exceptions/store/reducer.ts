@@ -65,31 +65,8 @@ export const hostIsolationExceptionsPageReducer: StateReducer = (
         },
       };
     }
-    case 'hostIsolationExceptionsPageDataChanged': {
-      return {
-        ...state,
-        entries: action.payload,
-      };
-    }
     case 'userChangedUrl':
       return userChangedUrl(state, action);
-    case 'hostIsolationExceptionsMarkToDelete': {
-      return {
-        ...state,
-        deletion: {
-          item: action.payload,
-          status: createUninitialisedResourceState(),
-        },
-      };
-    }
-    case 'hostIsolationExceptionsDeleteStatusChanged':
-      return {
-        ...state,
-        deletion: {
-          ...state.deletion,
-          status: action.payload,
-        },
-      };
   }
   return state;
 };
