@@ -7,7 +7,7 @@
 
 import './filter_popover.scss';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import { FilterValue, defaultLabel, isQueryValid } from '.';
 import { IndexPattern } from '../../../types';
