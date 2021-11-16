@@ -13,29 +13,41 @@ content, and more from your apps, endpoints, infrastructure, cloud, network,
 workplace tools, and other common sources in your ecosystem. All
 integrations are available in a single view, and
 {kib} guides you there from the Welcome screen and home page. Start
-with one of our promoted integrations, or browse or search for a specific integration.
+with one of the three promoted integrations, browse the categories, or search for a specific integration.
 
 [role="screenshot"]
 image::images/add-integration.png[Integrations page from which you can choose integrations to start collecting and analyzing data]
 
-The *Integrations* view shows Elastic Agent integrations when the integration is generally available (GA).
-If it is not GA,
-the view defaults to Beats integrations. To use a specific
-Beats integration, use the control on the bottom left to filter for it.
+If an integration is available for both
+https://www.elastic.co/guide/en/fleet/master/beats-agent-comparison.html[Elastic Agent and Beats], the *Integrations* view defaults to the
+Elastic Agent integration, if it is generally available (GA).
+To switch to a
+Beats integration, use the filter on the left.
 
-Some common integrations follow:
+[role="screenshot"]
+image::images/integration-filter.png[Filter for determining whether to show Elasic Agent or Beats integrations in the Integrations view, width=50%]
 
-* *Enterprise Search integrations.*. Integrations for App Search enable you to search your application with APIs, search your JSON data,
-and add search to your website.
-For Workplace Search, you can search your files and folders, email, project workflow, organizational content,
-and more.
-For a custom search, click *View deployment details* and fill in the required information.
 
-* *Observability integrations.* Integrations are available for popular services and platforms, like Nginx, AWS, and MongoDB,
-as well as many generic input types like log files.
+[float]
+==== Enterprise Search
+Discover, extract, and index your web content into App Search engines using the
+{app-search-ref}/web-crawler.html[Enterprise Search web crawler].
+Search across Google Drive, GitHub, Salesforce, and many other web services using
+{workplace-search-ref}/workplace-search-content-sources.html[Workplace Search content sources].
 
-* *Security integrations.*  Integrations help you protect agains security threats.  For example, the osquery host management integration enables you to use osquery results
-to address cyber threats without the complexity or cost of a separate management layer.
+[float]
+==== Observability
+
+Get logs, metrics, and uptime data into the Elastic Stack.
+Integrations are available for popular services and platforms,
+such as Nginx, AWS, and MongoDB,
+and generic input types like log files.  For more information,
+refer to .....
+
+[float]
+==== Security
+
+Collect threat intelligence from a variety of sources.
 
 
 [float]
@@ -86,7 +98,7 @@ data, refer to <<import-geospatial-data,Import geospatial data>>.
 [discrete]
 === What's next?
 
-Now that data is streaming into the Elastic Stack, take your investigation
+Now that you added data to the Elastic Stack, take your investigation
 to a deeper level. Use <<discover, **Discover**>> to quickly gain insight to your data:
 search and filter your data, get information about the structure of the fields,
 and present your findings in a visualization.
