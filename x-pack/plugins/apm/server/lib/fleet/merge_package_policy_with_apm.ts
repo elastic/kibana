@@ -7,7 +7,7 @@
 
 import { Setup } from '../helpers/setup_request';
 import { APMPluginStartDependencies } from '../../types';
-import { listConfigurations } from '../settings/agent_configuration/list_configurations';
+import { listConfigurations } from '../../routes/settings/agent_configuration/list_configurations';
 import {
   getPackagePolicyWithAgentConfigurations,
   PackagePolicy,

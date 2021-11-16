@@ -12,9 +12,9 @@ import { getTopTransactionGroupList } from '../lib/transaction_groups';
 import { createApmServerRoute } from './apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
-import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
+import { getRootTransactionByTraceId } from './transactions/get_transaction_by_trace';
 import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
-import { getTransaction } from '../lib/transactions/get_transaction';
+import { getTransaction } from './transactions/get_transaction';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',

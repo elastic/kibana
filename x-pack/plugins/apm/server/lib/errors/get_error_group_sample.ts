@@ -15,7 +15,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup } from '../helpers/setup_request';
-import { getTransaction } from '../transactions/get_transaction';
+import { getTransaction } from '../../routes/transactions/get_transaction';
 
 export async function getErrorGroupSample({
   environment,

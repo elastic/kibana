@@ -20,14 +20,14 @@ import { Dataset } from '../../rule_registry/server';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
-import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
+import { registerApmAlerts } from './routes/alerts/register_apm_alerts';
 import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
-import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
-import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
-import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
+import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
+import { getApmIndices } from './routes/settings/apm_indices/get_apm_indices';
+import { createApmCustomLinkIndex } from './routes/settings/custom_link/create_custom_link_index';
 import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
 import type {
   ApmPluginRequestHandlerContext,
