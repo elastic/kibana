@@ -85,7 +85,7 @@ function NewsItem({ item }: { item: INewsItem }) {
           {item.image_url?.en && (
             <EuiFlexItem grow={false}>
               <img
-                data-test-subj="news_image"
+                data-test-subj="newsImage"
                 style={{ border: theme.eui.euiBorderThin }}
                 width={48}
                 height={48}
