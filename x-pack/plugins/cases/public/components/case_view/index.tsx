@@ -508,7 +508,7 @@ export const CaseView = React.memo(
     refreshRef,
     hideSyncAlerts,
   }: CaseViewProps) => {
-    const { spaces: spacesApi, http } = useKibana().services;
+    const { spaces: spacesApi } = useKibana().services;
     const { detailName: caseId, subCaseId } = useCaseViewParams();
     const { basePath } = useCasesContext();
     const { data, resolveOutcome, resolveAliasId, isLoading, isError, fetchCase, updateCase } =
@@ -516,25 +516,22 @@ export const CaseView = React.memo(
 
     useEffect(() => {
       if (spacesApi && resolveOutcome === 'aliasMatch' && resolveAliasId != null) {
-        const newPath = http.basePath.prepend(
-          `${basePath}${generateCaseViewPath({ detailName: resolveAliasId })}${
-            window.location.search
-          }${window.location.hash}`
-        );
+        const newPath = `${basePath}${generateCaseViewPath({ detailName: resolveAliasId })}${
+          window.location.search
+        }${window.location.hash}`;
         spacesApi.ui.redirectLegacyUrl(newPath, i18n.CASE);
       }
-    }, [resolveOutcome, resolveAliasId, basePath, spacesApi, http]);
+    }, [resolveOutcome, resolveAliasId, basePath, spacesApi]);
 
     const getLegacyUrlConflictCallout = useCallback(() => {
       // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
       if (data && spacesApi && resolveOutcome === 'conflict' && resolveAliasId != null) {
         // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
         // callout with a warning for the user, and provide a way for them to navigate to the other object.
-        const otherObjectPath = http.basePath.prepend(
-          `${basePath}${generateCaseViewPath({ detailName: resolveAliasId })}${
-            window.location.search
-          }${window.location.hash}`
-        );
+        const otherObjectPath = `${basePath}${generateCaseViewPath({
+          detailName: resolveAliasId,
+        })}${window.location.search}${window.location.hash}`;
+
         return spacesApi.ui.components.getLegacyUrlConflict({
           objectNoun: i18n.CASE,
           currentObjectId: data.id,
@@ -543,7 +540,7 @@ export const CaseView = React.memo(
         });
       }
       return null;
-    }, [data, resolveAliasId, resolveOutcome, basePath, spacesApi, http]);
+    }, [data, resolveAliasId, resolveOutcome, basePath, spacesApi]);
 
     return isError ? (
       <DoesNotExist caseId={caseId} />
