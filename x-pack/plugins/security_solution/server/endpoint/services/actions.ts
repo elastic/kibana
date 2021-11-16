@@ -294,6 +294,7 @@ const hasEndpointResponseDoc = async ({
     .search<LogsEndpointActionResponse>(
       {
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        size: 10000,
         body: {
           query: {
             bool: {
