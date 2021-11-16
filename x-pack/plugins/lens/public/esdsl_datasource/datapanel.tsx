@@ -32,14 +32,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { EuiFieldText, EuiSelect } from '@elastic/eui';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { IndexPattern, EsDSLPrivateState, IndexPatternField, IndexPatternRef } from './types';
 import { esRawResponse } from '../../../../../src/plugins/data/common';
+import { ChangeIndexPattern } from './change_indexpattern';
 
 export type Props = DatasourceDataPanelProps<EsDSLPrivateState> & {
   data: DataPublicPluginStart;
 };
-import { EuiFieldText, EuiSelect } from '@elastic/eui';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { flatten } from './flatten';
 
@@ -211,46 +212,57 @@ export function EsDSLHorizontalDataPanel({
     >
       <EuiSpacer size="xxl" />
       <EuiFlexGroup direction="column">
-        {Object.entries(layers).map(([id, layer]) => (
-          <EuiFlexItem key={id}>
-            <EuiPanel>
-              <EuiFieldText
-                value={layer.index}
-                onChange={(e) => {
-                  setLocalState({
-                    ...state,
-                    layers: {
-                      ...state.layers,
-                      [id]: {
-                        ...layer,
-                        index: e.target.value,
+        {Object.entries(layers).map(([id, layer]) => {
+          const ref = state.indexPatternRefs.find((r) => r.id === layer.index);
+          return (
+            <EuiFlexItem key={id}>
+              <EuiPanel>
+                <ChangeIndexPattern
+                  data-test-subj="indexPattern-switcher"
+                  trigger={{
+                    label: ref?.title,
+                    title: ref?.title,
+                    'data-test-subj': 'indexPattern-switch-link',
+                    fontWeight: 'bold',
+                  }}
+                  indexPatternId={layer.index}
+                  indexPatternRefs={state.indexPatternRefs}
+                  onChangeIndexPattern={(newId: string) => {
+                    setState({
+                      ...state,
+                      layers: {
+                        ...state.layers,
+                        [id]: {
+                          ...layer,
+                          index: newId,
+                        },
                       },
-                    },
-                  });
-                }}
-              />
-              <EuiCodeEditor
-                mode="json"
-                theme="github"
-                value={layer.query}
-                width="100%"
-                height="250px"
-                onChange={(val) => {
-                  setLocalState({
-                    ...state,
-                    layers: {
-                      ...state.layers,
-                      [id]: {
-                        ...layer,
-                        query: val,
+                    });
+                  }}
+                />
+                <EuiCodeEditor
+                  mode="json"
+                  theme="github"
+                  value={layer.query}
+                  width="100%"
+                  height="250px"
+                  onChange={(val) => {
+                    setLocalState({
+                      ...state,
+                      layers: {
+                        ...state.layers,
+                        [id]: {
+                          ...layer,
+                          query: val,
+                        },
                       },
-                    },
-                  });
-                }}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        ))}
+                    });
+                  }}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          );
+        })}
         {Object.entries(removedLayers).map(([id, { layer }]) => (
           <EuiFlexItem key={id}>
             <EuiPanel>
@@ -278,7 +290,9 @@ export function EsDSLHorizontalDataPanel({
                         .search({
                           params: {
                             size: 0,
-                            index: layer.index,
+                            index: [
+                              state.indexPatternRefs.find((r) => r.id === layer.index)!.title,
+                            ],
                             body: JSON.parse(layer.query),
                           },
                         })
@@ -294,6 +308,17 @@ export function EsDSLHorizontalDataPanel({
                     // @ts-expect-error this is hacky, should probably run expression instead
                     const { rows, columns } = esRawResponse.to!.datatable({
                       body: response.rawResponse,
+                    });
+                    columns.forEach((col) => {
+                      const testVal = rows[0][col.id];
+                      if (typeof testVal === 'number' && Math.log10(testVal) > 11) {
+                        // col.meta.type = 'date';
+                        // col.meta.params = { id: 'date' };
+                        localState.layers[layerId].overwrittenFieldTypes = {
+                          ...(localState.layers[layerId].overwrittenFieldTypes || {}),
+                          [col.id]: 'date',
+                        };
+                      }
                     });
                     // todo hack some logic in for dates
                     cachedFieldList[layerId] = { fields: columns, singleRow: rows.length === 1 };

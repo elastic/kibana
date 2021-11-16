@@ -25,10 +25,27 @@ import {
 import { toExpression } from './to_expression';
 import { EsDSLDataPanel, EsDSLHorizontalDataPanel } from './datapanel';
 
+import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
 import { EsDSLLayer, EsDSLPrivateState, EsDSLPersistedState } from './types';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { Datasource } from '../types';
 import { esRawResponse } from '../../../../../src/plugins/data/common';
+
+async function loadIndexPatternRefs(
+  indexPatternsService: DataViewsService
+): Promise<IndexPatternRef[]> {
+  const indexPatterns = await indexPatternsService.getIdsWithTitle();
+
+  const timefields = await Promise.all(
+    indexPatterns.map((p) => indexPatternsService.get(p.id).then((pat) => pat.timeFieldName))
+  );
+
+  return indexPatterns
+    .map((p, i) => ({ ...p, timeField: timefields[i] }))
+    .sort((a, b) => {
+      return a.title.localeCompare(b.title);
+    });
+}
 
 export function getEsDSLDatasource({
   core,
@@ -51,6 +68,7 @@ export function getEsDSLDatasource({
     },
     async initialize(state?: EsDSLPersistedState) {
       const initState = state || { layers: {} };
+      const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(data.dataViews);
       const responses = await Promise.all(
         Object.entries(initState.layers).map(([id, layer]) => {
           return data.search
@@ -79,6 +97,7 @@ export function getEsDSLDatasource({
         ...initState,
         cachedFieldList,
         removedLayers: [],
+        indexPatternRefs,
       };
     },
 
@@ -104,7 +123,9 @@ export function getEsDSLDatasource({
         },
         layers: {
           ...state.layers,
-          [newLayerId]: removedLayer ? removedLayer.layer : blankLayer(),
+          [newLayerId]: removedLayer
+            ? removedLayer.layer
+            : blankLayer(state.indexPatternRefs[0].id),
         },
         removedLayers: newRemovedList,
       };
@@ -254,7 +275,16 @@ export function getEsDSLDatasource({
       domElement: Element,
       props: DatasourceLayerPanelProps<EsDSLPrivateState>
     ) => {
-      render(<span>{props.state.layers[props.layerId].index}</span>, domElement);
+      render(
+        <span>
+          {
+            props.state.indexPatternRefs.find(
+              (r) => r.id === props.state.layers[props.layerId].index
+            )!.title
+          }
+        </span>,
+        domElement
+      );
     },
 
     canHandleDrop: () => false,
@@ -349,9 +379,9 @@ export function getEsDSLDatasource({
   return esdslDatasource;
 }
 
-function blankLayer() {
+function blankLayer(index: string) {
   return {
-    index: '*',
+    index,
     query: '',
     columns: [],
   };

@@ -57,9 +57,11 @@ export const renameColumnFn: RenameColumnsExpressionFunction['fn'] = (
         ...column,
         id: mappedItem.id,
         name: getColumnName(mappedItem, column),
-        type: overwrittenFieldTypes[column.id] || column.type,
-        serializedParams:
-          overwrittenFieldTypes[column.id] === 'date' ? { id: 'date' } : column.serializedParams,
+        meta: {
+          ...column.meta,
+          type: overwrittenFieldTypes[column.id] || column.meta.type,
+          params: overwrittenFieldTypes[column.id] === 'date' ? { id: 'date' } : column.meta.params,
+        },
       };
     }),
   };

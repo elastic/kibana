@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/es-query';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { get } from 'lodash';
 
 import { EsRawResponse } from './es_raw_response';
 import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
@@ -25,6 +26,7 @@ interface Arguments {
   dsl: string;
   index: string;
   size: number;
+  timeField?: string;
 }
 
 export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -68,6 +70,10 @@ export const getEsdslFn = ({
         }),
         required: true,
       },
+      timeField: {
+        types: ['string'],
+        help: '',
+      },
       size: {
         types: ['number'],
         help: i18n.translate('data.search.esdsl.size.help', {
@@ -77,11 +83,29 @@ export const getEsdslFn = ({
       },
     },
     async fn(input, args, { inspectorAdapters, abortSignal, getKibanaRequest }) {
-      const { search, uiSettingsClient } = await getStartDependencies(getKibanaRequest);
+      const {
+        search,
+        uiSettingsClient,
+        query: queryS,
+      } = await getStartDependencies(getKibanaRequest);
 
       const dsl = JSON.parse(args.dsl);
 
       if (input) {
+        const timeRange: any = get(input, 'timeRange', undefined);
+        const timeField = get(args, 'timeField', undefined);
+        const timeBounds =
+          timeRange && timeField && queryS.timefilter.timefilter.calculateBounds(timeRange);
+        const timeFilter = timeBounds && {
+          range: {
+            [timeField]: {
+              format: 'strict_date_optional_time',
+              gte: timeBounds.min!.toISOString(),
+              lte: timeBounds.max!.toISOString(),
+            },
+          },
+        };
+
         const esQueryConfigs = getEsQueryConfig(uiSettingsClient as any);
         const query = buildEsQuery(
           undefined, //        args.index,
@@ -92,6 +116,10 @@ export const getEsdslFn = ({
 
         if (dsl.query) {
           query.bool.must.push(dsl.query);
+        }
+
+        if (timeFilter) {
+          query.bool.must.push(timeFilter);
         }
 
         dsl.query = query;

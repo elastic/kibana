@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -12,7 +13,7 @@ import { IndexPattern, EsDSLPrivateState, EsDSLLayer } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
 
-function getExpressionForLayer(layer: EsDSLLayer): Ast | null {
+function getExpressionForLayer(layer: EsDSLLayer, refs: any): Ast | null {
   if (layer.columns.length === 0) {
     return null;
   }
@@ -33,8 +34,9 @@ function getExpressionForLayer(layer: EsDSLLayer): Ast | null {
         type: 'function',
         function: 'esdsl',
         arguments: {
-          index: [layer.index],
+          index: [refs.find((r) => r.id === layer.index)!.title],
           dsl: [layer.query],
+          timeField: [refs.find((r) => r.id === layer.index)!.timeField],
         },
       },
       {
@@ -42,7 +44,7 @@ function getExpressionForLayer(layer: EsDSLLayer): Ast | null {
         function: 'lens_rename_columns',
         arguments: {
           idMap: [JSON.stringify(idMap)],
-          overwrittenFieldTypes: layer.overwrittenFieldTypes
+          overwriteTypes: layer.overwrittenFieldTypes
             ? [JSON.stringify(layer.overwrittenFieldTypes)]
             : [],
         },
@@ -53,7 +55,7 @@ function getExpressionForLayer(layer: EsDSLLayer): Ast | null {
 
 export function toExpression(state: EsDSLPrivateState, layerId: string) {
   if (state.layers[layerId]) {
-    return getExpressionForLayer(state.layers[layerId]);
+    return getExpressionForLayer(state.layers[layerId], state.indexPatternRefs);
   }
 
   return null;
