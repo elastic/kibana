@@ -16,7 +16,7 @@ import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_SEVERITY,
   ALERT_RULE_RISK_SCORE,
-} from '@kbn/rule-data-utils';
+} from '@kbn/rule-data-utils/technical_field_names';
 
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';

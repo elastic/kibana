@@ -18,11 +18,7 @@ import {
   StyledContent,
 } from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
 
-const FIELDS_WITHOUT_CELL_ACTIONS = [
-  '@timestamp',
-  'kibana.alert.rule.risk_score',
-  'kibana.alert.reason',
-];
+const FIELDS_WITHOUT_CELL_ACTIONS = ['kibana.alert.rule.risk_score', 'kibana.alert.reason'];
 const hasCellActions = (columnId?: string) => {
   return columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
 };

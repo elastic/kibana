@@ -52,7 +52,7 @@ export function useInput(defaultValue = '', validate?: (value: string) => string
 
 export function useComboInput(
   id: string,
-  defaultValue = [],
+  defaultValue: string[] = [],
   validate?: (value: string[]) => Array<{ message: string; index?: number }> | undefined
 ) {
   const [value, setValue] = useState<string[]>(defaultValue);
