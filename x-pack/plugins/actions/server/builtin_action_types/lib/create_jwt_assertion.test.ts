@@ -34,14 +34,13 @@ describe('createJWTAssertion', () => {
     jwtSign.mockImplementationOnce(() => {
       throw new Error('{"message": "jwt wrong header", "name": "JsonWebTokenError"}');
     });
-    const fn = () => createJWTAssertion(mockLogger, 'test', '123456', {
-      audience: '1',
-      issuer: 'someappid',
-      subject: 'test@gmail.com',
-    })
-    expect(
-      fn
-    ).toThrowError();
+    const fn = () =>
+      createJWTAssertion(mockLogger, 'test', '123456', {
+        audience: '1',
+        issuer: 'someappid',
+        subject: 'test@gmail.com',
+      });
+    expect(fn).toThrowError();
 
     expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
