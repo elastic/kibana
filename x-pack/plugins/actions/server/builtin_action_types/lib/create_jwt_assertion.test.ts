@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-jest.mock('jwt', () => ({
-  sign: jest.fn(),
+jest.mock('jsonwebtoken', () => ({
+  jwt: {
+    sign: jest.fn(),
+  },
 }));
 // eslint-disable-next-line import/no-extraneous-dependencies
 import jwt from 'jsonwebtoken';
