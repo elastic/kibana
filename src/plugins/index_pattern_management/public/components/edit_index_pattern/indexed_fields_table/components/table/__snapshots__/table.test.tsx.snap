@@ -26,17 +26,41 @@ exports[`Table render conflict summary modal  1`] = `
           values={Object {}}
         />
       </p>
-      <TypeSummary
-        conflictDescriptions={
-          Object {
-            "keyword": Array [
-              "index_a",
-            ],
-            "long": Array [
-              "index_b",
-            ],
-          }
+      <EuiBasicTable
+        columns={
+          Array [
+            Object {
+              "field": "type",
+              "name": "Type",
+            },
+            Object {
+              "field": "indices",
+              "name": "Indices",
+            },
+          ]
         }
+        items={
+          Array [
+            Object {
+              "indices": "index_a",
+              "type": "keyword",
+            },
+            Object {
+              "indices": "index_b",
+              "type": "long",
+            },
+          ]
+        }
+        noItemsMessage={
+          <EuiI18n
+            default="No items found"
+            token="euiBasicTable.noItemsMessage"
+          />
+        }
+        responsive={true}
+        rowHeader="firstName"
+        tableCaption="Demo of EuiBasicTable"
+        tableLayout="auto"
       />
     </EuiText>
   </EuiModalBody>
@@ -81,15 +105,17 @@ exports[`Table render name 2`] = `
 
 exports[`Table should render conflicting type 1`] = `
 <span>
-  conflict
   <span>
-     
-    <EuiButtonIcon
-      aria-label="Multiple type field"
+    <EuiBadge
       color="warning"
+      iconOnClick={[Function]}
+      iconOnClickAriaLabel="Conflict Detail"
       iconType="alert"
       onClick={[Function]}
-    />
+      onClickAriaLabel="Conflict Detail"
+    >
+      Conflict
+    </EuiBadge>
   </span>
 </span>
 `;

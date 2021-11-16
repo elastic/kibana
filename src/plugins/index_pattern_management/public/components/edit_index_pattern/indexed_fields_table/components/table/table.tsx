@@ -331,7 +331,6 @@ const getConflictBtn = (
       <EuiBadge
         color="warning"
         iconType="alert"
-        iconSide="right"
         onClick={onClick}
         iconOnClick={onClick}
         iconOnClickAriaLabel={conflictDetailIconAria}
