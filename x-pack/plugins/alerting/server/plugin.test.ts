@@ -39,6 +39,7 @@ describe('Alerting Plugin', () => {
         },
         maxEphemeralActionsPerAlert: 10,
         defaultRuleTaskTimeout: '5m',
+        cancelAlertsOnRuleTimeout: true,
       });
       plugin = new AlertingPlugin(context);
 
@@ -73,6 +74,7 @@ describe('Alerting Plugin', () => {
         },
         maxEphemeralActionsPerAlert: 10,
         defaultRuleTaskTimeout: '5m',
+        cancelAlertsOnRuleTimeout: true,
       });
       plugin = new AlertingPlugin(context);
 
@@ -145,13 +147,42 @@ describe('Alerting Plugin', () => {
         });
       });
 
-      it('should apply default config value for ruleTaskTimeout', async () => {
+      it('should apply default config value for ruleTaskTimeout if no value is specified', async () => {
         const ruleType = {
           ...sampleAlertType,
           minimumLicenseRequired: 'basic',
         } as AlertType<never, never, never, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('5m');
+      });
+
+      it('should apply value for ruleTaskTimeout if specified', async () => {
+        const ruleType = {
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+          ruleTaskTimeout: '20h',
+        } as AlertType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.ruleTaskTimeout).toBe('20h');
+      });
+
+      it('should apply default config value for cancelAlertsOnRuleTimeout if no value is specified', async () => {
+        const ruleType = {
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+        } as AlertType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
+      });
+
+      it('should apply value for cancelAlertsOnRuleTimeout if specified', async () => {
+        const ruleType = {
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+          cancelAlertsOnRuleTimeout: false,
+        } as AlertType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
       });
     });
   });
@@ -169,6 +200,7 @@ describe('Alerting Plugin', () => {
           },
           maxEphemeralActionsPerAlert: 10,
           defaultRuleTaskTimeout: '5m',
+          cancelAlertsOnRuleTimeout: true,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -210,6 +242,7 @@ describe('Alerting Plugin', () => {
           },
           maxEphemeralActionsPerAlert: 10,
           defaultRuleTaskTimeout: '5m',
+          cancelAlertsOnRuleTimeout: true,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -265,6 +298,7 @@ describe('Alerting Plugin', () => {
         },
         maxEphemeralActionsPerAlert: 100,
         defaultRuleTaskTimeout: '5m',
+        cancelAlertsOnRuleTimeout: true,
       });
       const plugin = new AlertingPlugin(context);
 

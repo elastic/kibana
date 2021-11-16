@@ -44,7 +44,8 @@ export interface TaskRunnerContext {
   ruleTypeRegistry: RuleTypeRegistry;
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
-  maxEphemeralActionsPerAlert: Promise<number>;
+  maxEphemeralActionsPerAlert: number;
+  cancelAlertsOnRuleTimeout: boolean;
 }
 
 export class TaskRunnerFactory {

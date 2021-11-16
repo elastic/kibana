@@ -160,6 +160,7 @@ export interface AlertType<
   defaultScheduleInterval?: string;
   minimumScheduleInterval?: string;
   ruleTaskTimeout?: string;
+  cancelAlertsOnRuleTimeout?: boolean;
 }
 export type UntypedAlertType = AlertType<
   AlertTypeParams,

@@ -465,6 +465,56 @@ function getPatternFiringAlertType() {
   return result;
 }
 
+function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true) {
+  const paramsSchema = schema.object({
+    pattern: schema.arrayOf(schema.boolean()),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State extends AlertTypeState {
+    patternIndex?: number;
+  }
+  const result: AlertType<ParamsType, never, State, {}, {}, 'default'> = {
+    id: `test.patternLongRunning${
+      cancelAlertsOnRuleTimeout === true ? '.cancelAlertsOnRuleTimeout' : ''
+    }`,
+    name: 'Test: Run Long on a Pattern',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    ruleTaskTimeout: '3s',
+    cancelAlertsOnRuleTimeout,
+    async executor(ruleExecutorOptions) {
+      const { services, state, params } = ruleExecutorOptions;
+      const pattern = params.pattern;
+      if (!Array.isArray(pattern)) {
+        throw new Error(`pattern is not an array`);
+      }
+
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      // get the pattern index, return if past it
+      const patternIndex = state.patternIndex ?? 0;
+      if (patternIndex >= pattern.length) {
+        return { patternIndex };
+      }
+
+      // run long if pattern says to
+      if (pattern[patternIndex] === true) {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+      }
+
+      services.alertInstanceFactory('alert').scheduleActions('default', {});
+
+      return {
+        patternIndex: patternIndex + 1,
+      };
+    },
+  };
+  return result;
+}
+
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
   { alerting }: Pick<FixtureSetupDeps, 'alerting'>
@@ -579,4 +629,6 @@ export function defineAlertTypes(
   alerting.registerType(longRunningAlertType);
   alerting.registerType(goldNoopAlertType);
   alerting.registerType(exampleAlwaysFiringAlertType);
+  alerting.registerType(getLongRunningPatternRuleType());
+  alerting.registerType(getLongRunningPatternRuleType(false));
 }

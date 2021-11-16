@@ -92,10 +92,18 @@ export const ALERT_ERROR_LICENSE_REASON = i18n.translate(
   }
 );
 
+export const ALERT_ERROR_TIMEOUT_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsList.alertErrorReasonTimeout',
+  {
+    defaultMessage: 'Rule execution cancelled due to timeout.',
+  }
+);
+
 export const alertsErrorReasonTranslationsMapping = {
   read: ALERT_ERROR_READING_REASON,
   decrypt: ALERT_ERROR_DECRYPTING_REASON,
   execute: ALERT_ERROR_EXECUTION_REASON,
   unknown: ALERT_ERROR_UNKNOWN_REASON,
   license: ALERT_ERROR_LICENSE_REASON,
+  timeout: ALERT_ERROR_TIMEOUT_REASON,
 };
