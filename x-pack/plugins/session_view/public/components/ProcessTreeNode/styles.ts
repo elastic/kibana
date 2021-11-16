@@ -13,13 +13,20 @@ const TREE_INDENT = 32;
 
 interface StylesDeps {
   depth: number;
+  hasAlerts: boolean;
 }
 
-export const useStyles = ({ depth }: StylesDeps) => {
+export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { colors, border, font, size } = euiTheme;
+
+    enum ButtonType {
+      children = 'children',
+      alerts = 'alerts',
+      output = 'output',
+    }
 
     const darkText: CSSObject = {
       color: colors.text,
@@ -56,8 +63,6 @@ export const useStyles = ({ depth }: StylesDeps) => {
       fontSize: '11px',
       fontFamily: font.familyCode,
       borderRadius: border.radius.medium,
-      background: 'rgba(0, 119, 204, 0.1)',
-      border: '1px solid rgba(96, 146, 192, 0.3)',
       color: colors.text,
       marginLeft: size.s,
     };
@@ -66,15 +71,41 @@ export const useStyles = ({ depth }: StylesDeps) => {
       marginLeft: size.s,
     };
 
+    const getButtonStyle = (type: string) => {
+      let background = 'rgba(170, 101, 86, 0.04)';
+      let borderStyle = '1px solid rgba(170, 101, 86, 0.48)';
+
+      switch (type) {
+        case ButtonType.alerts:
+          background = 'rgba(189, 39, 30, 0.04)';
+          borderStyle = '1px solid rgba(189, 39, 30, 0.48)';
+          break;
+        case ButtonType.output:
+          background = 'rgba(0, 119, 204, 0.04)';
+          borderStyle = '1px solid rgba(0, 119, 204, 0.48)';
+          break;
+      }
+
+      return {
+        ...button,
+        background,
+        border: borderStyle,
+      };
+    };
+
     /**
      * gets border, bg and hover colors for a process
      */
     const getHighlightColors = () => {
-      const bgColor = 'none';
-      const hoverColor = '#6B5FC6';
-      const borderColor = 'transparent';
+      let bgColor = 'none';
+      let hoverColor = '#6B5FC6';
+      let borderColor = 'transparent';
 
       // TODO: alerts highlight colors
+      if (hasAlerts) {
+        bgColor = 'rgba(189, 39, 30, 0.04)';
+        borderColor = 'rgba(189, 39, 30, 0.48)';
+      }
 
       return { bgColor, borderColor, hoverColor };
     };
@@ -126,16 +157,24 @@ export const useStyles = ({ depth }: StylesDeps) => {
       marginTop: '8px',
     };
 
+    const alertDetails: CSSObject = {
+      padding: size.s,
+      border: `3px dotted ${colors.lightShade}`,
+      borderRadius: border.radius.medium,
+    };
+
     return {
       darkText,
       searchHighlight,
       children,
-      button,
-      buttonArrow,
       processNode,
       wrapper,
       workingDir,
       userEnteredIcon,
+      buttonArrow,
+      ButtonType,
+      getButtonStyle,
+      alertDetails,
     };
   }, [depth, euiTheme]);
 

@@ -21,8 +21,14 @@ interface SessionViewDeps {
 }
 
 interface ProcessEventResults {
-  hits: any[];
-  length: number;
+  events: {
+    hits: any[];
+    total: number;
+  };
+  alerts: {
+    hits: any[];
+    total: number;
+  };
 }
 
 /**
@@ -61,23 +67,34 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     () =>
       http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
         query: {
-          indexes: ['cmd*', '.siem-signals-*'],
-          sessionEntityId
+          sessionEntityId,
         },
       })
   );
+
+  const sortEvents = (a: ProcessEvent, b: ProcessEvent) => {
+    if (a['@timestamp'].valueOf() < b['@timestamp'].valueOf()) {
+      return -1;
+    } else if (a['@timestamp'].valueOf() > b['@timestamp'].valueOf()) {
+      return 1;
+    }
+
+    return 0;
+  };
 
   useEffect(() => {
     if (!getData) {
       return;
     }
 
-    if (getData.length <= data.length) {
-      return;
-    }
-
-    setData(getData.hits.map((event: any) => event._source as ProcessEvent));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const events: ProcessEvent[] = getData.events.hits.map(
+      (event: any) => event._source as ProcessEvent
+    );
+    const alerts: ProcessEvent[] = getData.alerts.hits.map((event: any) => {
+      return event._source as ProcessEvent;
+    });
+    const all: ProcessEvent[] = events.concat(alerts).sort(sortEvents);
+    setData(all);
   }, [getData]);
 
   const renderNoData = () => {
@@ -96,15 +113,17 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
   return (
     <>
       <EuiSearchBar query={searchQuery} onChange={onSearch} />
-      <div css={styles.processTree}>
-        <ProcessTree
-          sessionEntityId={sessionEntityId}
-          forward={data}
-          searchQuery={searchQuery}
-          selectedProcess={selectedProcess}
-          onProcessSelected={onProcessSelected}
-        />
-      </div>
+      {data && (
+        <div css={styles.processTree}>
+          <ProcessTree
+            sessionEntityId={sessionEntityId}
+            forward={data}
+            searchQuery={searchQuery}
+            selectedProcess={selectedProcess}
+            onProcessSelected={onProcessSelected}
+          />
+        </div>
+      )}
     </>
   );
 };

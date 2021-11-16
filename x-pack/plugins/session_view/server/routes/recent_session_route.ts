@@ -30,7 +30,7 @@ export const registerRecentSessionRoute = (router: IRouter) => {
             'process.entry.interactive': true,
           },
         },
-        size: 1
+        size: 1,
       });
 
       return response.ok({ body: search.body.hits });

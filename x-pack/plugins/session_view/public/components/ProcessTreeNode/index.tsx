@@ -16,6 +16,7 @@ import { EuiButton, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Process } from '../../hooks/use_process_tree';
 import { useStyles } from './styles';
+import { ProcessTreeAlerts } from '../ProcessTreeAlerts';
 
 interface ProcessDeps {
   process: Process;
@@ -36,16 +37,35 @@ export function ProcessTreeNode({
   depth = 0,
   onProcessSelected,
 }: ProcessDeps) {
-  const styles = useStyles({ depth });
   const textRef = useRef<HTMLSpanElement>(null);
 
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
+  const [alertsExpanded, setAlertsExpanded] = useState(false);
   const { searchMatched } = process;
 
   useEffect(() => {
     setChildrenExpanded(isSessionLeader || process.autoExpand);
   }, [isSessionLeader, process.autoExpand]);
 
+
+  const processDetails = useMemo(() => {
+    return process.getDetails();
+  }, [process.events.length]);
+
+  const hasExec = useMemo(() => {
+    return process.hasExec();
+  }, [process.events.length]);
+  
+  const alerts = useMemo(() => {
+    return process.getAlerts();
+  }, [process.events.length]);
+  
+  if (!processDetails) {
+    return null;
+  }
+  
+  const styles = useStyles({ depth, hasAlerts: !!alerts.length });
+  
   useLayoutEffect(() => {
     if (searchMatched !== null && textRef.current) {
       const regex = new RegExp(searchMatched);
@@ -58,18 +78,6 @@ export function ProcessTreeNode({
       textRef.current.innerHTML = html;
     }
   }, [searchMatched]);
-
-  const processDetails = useMemo(() => {
-    return process.getDetails();
-  }, [process.events.length]);
-
-  const hasExec = useMemo(() => {
-    return process.hasExec();
-  }, [process.events.length]);
-
-  if (!processDetails) {
-    return null;
-  }
 
   const { interactive } = processDetails.process;
 
@@ -98,16 +106,27 @@ export function ProcessTreeNode({
     );
   };
 
+  const getExpandedIcon = (expanded: boolean) => {
+    return expanded ? 'arrowUp' : 'arrowDown';
+  }
+
   const renderButtons = () => {
     const buttons = [];
 
     if (!isSessionLeader && process.children.length > 0) {
-      const childrenExpandedIcon = childrenExpanded ? 'arrowUp' : 'arrowDown';
-
       buttons.push(
-        <EuiButton css={styles.button} onClick={() => setChildrenExpanded(!childrenExpanded)}>
+        <EuiButton css={styles.getButtonStyle(styles.ButtonType.children)} onClick={() => setChildrenExpanded(!childrenExpanded)}>
           <FormattedMessage id="kbn.sessionView.childProcesses" defaultMessage="Child processes" />
-          <EuiIcon css={styles.buttonArrow} size="s" type={childrenExpandedIcon} />
+          <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(childrenExpanded)} />
+        </EuiButton>
+      );
+    }
+
+    if (alerts.length) {
+      buttons.push(
+        <EuiButton css={styles.getButtonStyle(styles.ButtonType.alerts)} onClick={() => setAlertsExpanded(!alertsExpanded)}>
+          <FormattedMessage id="kbn.sessionView.alerts" defaultMessage="Alerts" />
+          <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(alertsExpanded)} />
         </EuiButton>
       );
     }
@@ -190,6 +209,7 @@ export function ProcessTreeNode({
           {renderButtons()}
         </div>
       </div>
+      {alertsExpanded && <ProcessTreeAlerts alerts={alerts} />}
       {renderChildren()}
     </>
   );

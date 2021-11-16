@@ -52,15 +52,14 @@ export const SessionViewPage = (props: RouteComponentProps) => {
     }
   }, [data]);
 
+
   return (
     <EuiPage>
       <EuiPageContent>
         <EuiPageHeader
           pageTitle="Process Tree"
           iconType="logoKibana"
-          description={`Below is an example of the process tree, demonstrating data fetching patterns and data rendering.
-            Please start by adding some mock data
-            `}
+          description="Session view showing the most recent interactive session."
         />
         <EuiSpacer />
         {sessionEntityId && <SessionView sessionEntityId={sessionEntityId} />}

@@ -22,6 +22,7 @@ export const useStyles = () => {
       background-color: ${euiTheme.colors.lightestShade};
       padding-top: ${padding};
       padding-left: ${padding};
+      padding-bottom: ${padding};
       display: flex;
       flex-direction: column;
     `;
