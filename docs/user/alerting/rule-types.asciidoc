@@ -2,7 +2,7 @@
 [[rule-types]]
 == Rule types
 
-A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides two types of rules:  rules specific to the Elastic Stack and rules specific to a domain.
+A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the Elastic Stack and rules registered by one of the {kib} apps.
 
 [NOTE]
 ==============================================
