@@ -20,7 +20,7 @@ if [[ "${GITHUB_PR_LABELS:-}" == *"ci:deploy-cloud"* ]]; then
     --skip-archives \
     --docker-images \
     --skip-docker-ubi \
-    --skip-docker-centos \
+    --skip-docker-ubuntu \
     --skip-docker-contexts
 fi
 
