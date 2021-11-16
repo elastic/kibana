@@ -17,7 +17,7 @@ export function registerIntegrations(
   customIntegrations.registerCustomIntegration({
     id: 'ingest_with_gdal',
     title: i18n.translate('xpack.maps.registerIntegrations.gdal.integrationTitle', {
-      defaultMessage: 'Upload geo data with GDAL',
+      defaultMessage: 'GDAL',
     }),
     description: i18n.translate('xpack.maps.registerIntegrations.gdal.integrationDescription', {
       defaultMessage:
