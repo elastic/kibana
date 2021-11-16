@@ -464,7 +464,7 @@ export class CoreSystem {
 
 // @public
 export interface CoreTheme {
-    darkMode: boolean;
+    readonly darkMode: boolean;
 }
 
 // @internal (undocumented)

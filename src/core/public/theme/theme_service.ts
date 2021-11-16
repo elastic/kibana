@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject, Observable, of } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from './types';
@@ -16,12 +16,12 @@ interface SetupDeps {
 }
 
 export class ThemeService {
-  private theme$?: BehaviorSubject<CoreTheme>;
+  private theme$?: Observable<CoreTheme>;
   private stop$ = new Subject();
 
   public setup({ injectedMetadata }: SetupDeps): ThemeServiceSetup {
     const theme = injectedMetadata.getTheme();
-    this.theme$ = new BehaviorSubject<CoreTheme>({ darkMode: theme.darkMode });
+    this.theme$ = of({ darkMode: theme.darkMode });
 
     return {
       theme$: this.theme$.pipe(takeUntil(this.stop$), shareReplay(1)),

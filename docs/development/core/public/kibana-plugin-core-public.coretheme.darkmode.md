@@ -9,5 +9,5 @@ is dark mode enabled or not
 <b>Signature:</b>
 
 ```typescript
-darkMode: boolean;
+readonly darkMode: boolean;
 ```
