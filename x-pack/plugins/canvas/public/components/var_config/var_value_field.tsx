@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 import { EuiFieldText, EuiFieldNumber, EuiButtonGroup } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,9 +31,10 @@ interface Props {
   type: CanvasVariable['type'];
   value: CanvasVariable['value'];
   onChange: (v: CanvasVariable['value']) => void;
+  isInvalid?: boolean;
 }
 
-export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
+export const VarValueField: FC<Props> = ({ type, value, onChange, isInvalid }) => {
   const idPrefix = htmlIdGenerator()();
 
   const options = [
@@ -47,13 +48,23 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
     },
   ];
 
+  const onNumberChange = useCallback(
+    (e) => {
+      const floatVal = parseFloat(e.target.value);
+      const varValue = isNaN(floatVal) ? '' : floatVal;
+      onChange(varValue);
+    },
+    [onChange]
+  );
+
   if (type === 'number') {
     return (
       <EuiFieldNumber
         compressed
         name="value"
         value={value as number}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
+        isInvalid={isInvalid}
+        onChange={onNumberChange}
       />
     );
   }
@@ -80,6 +91,7 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
       compressed
       name="value"
       value={String(value)}
+      isInvalid={isInvalid}
       onChange={(e) => onChange(e.target.value)}
     />
   );
