@@ -156,7 +156,6 @@ async function getServicesData(options: IEnvOptions) {
 
 export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;
 export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
-export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export function getServiceMap(options: IEnvOptions) {
   return withApmSpan('get_service_map', async () => {

@@ -9,7 +9,7 @@ import { Setup } from '../../helpers/setup_request';
 import { getCPUChartData } from './shared/cpu';
 import { getMemoryChartData } from './shared/memory';
 
-export async function getDefaultMetricsCharts({
+export function getDefaultMetricsCharts({
   environment,
   kuery,
   serviceName,
@@ -24,10 +24,8 @@ export async function getDefaultMetricsCharts({
   start: number;
   end: number;
 }) {
-  const charts = await Promise.all([
+  return Promise.all([
     getCPUChartData({ environment, kuery, setup, serviceName, start, end }),
     getMemoryChartData({ environment, kuery, setup, serviceName, start, end }),
   ]);
-
-  return { charts };
 }

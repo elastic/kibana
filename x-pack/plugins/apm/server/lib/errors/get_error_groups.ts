@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { AggregationsTermsAggregationOrder } from '@elastic/elasticsearch/lib/api/types';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -12,9 +16,8 @@ import {
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE,
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { getErrorGroupsProjection } from '../../projections/errors';
-import { mergeProjection } from '../../projections/util/merge_projection';
 import { getErrorName } from '../helpers/get_error_name';
 import { Setup } from '../helpers/setup_request';
 
@@ -42,27 +45,31 @@ export async function getErrorGroups({
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'latestOccurrenceAt';
 
-  const projection = getErrorGroupsProjection({
-    environment,
-    kuery,
-    serviceName,
-    start,
-    end,
-  });
-
-  const order = sortByLatestOccurrence
-    ? {
-        max_timestamp: sortDirection,
-      }
+  const maxTimestampAggKey = 'max_timestamp';
+  const order: AggregationsTermsAggregationOrder = sortByLatestOccurrence
+    ? { [maxTimestampAggKey]: sortDirection }
     : { _count: sortDirection };
 
-  const params = mergeProjection(projection, {
+  const params = {
+    apm: {
+      events: [ProcessorEvent.error as const],
+    },
     body: {
       size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
+        },
+      },
       aggs: {
         error_groups: {
           terms: {
-            ...projection.body.aggs.error_groups.terms,
+            field: ERROR_GROUP_ID,
             size: 500,
             order,
           },
@@ -83,19 +90,13 @@ export async function getErrorGroups({
               },
             },
             ...(sortByLatestOccurrence
-              ? {
-                  max_timestamp: {
-                    max: {
-                      field: '@timestamp',
-                    },
-                  },
-                }
+              ? { [maxTimestampAggKey]: { max: { field: '@timestamp' } } }
               : {}),
           },
         },
       },
     },
-  });
+  };
 
   const resp = await apmEventClient.search('get_error_groups', params);
 

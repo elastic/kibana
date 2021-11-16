@@ -37,7 +37,8 @@ const metricsChartsRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { agentName, environment, kuery, serviceNodeName, start, end } =
       params.query;
-    return await getMetricsChartDataByAgent({
+
+    const charts = await getMetricsChartDataByAgent({
       environment,
       kuery,
       setup,
@@ -47,6 +48,8 @@ const metricsChartsRoute = createApmServerRoute({
       start,
       end,
     });
+
+    return { charts };
   },
 });
 

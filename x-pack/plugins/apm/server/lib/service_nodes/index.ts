@@ -14,8 +14,13 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { getServiceNodesProjection } from '../../projections/service_nodes';
-import { mergeProjection } from '../../projections/util/merge_projection';
+import {
+  SERVICE_NAME,
+  SERVICE_NODE_NAME,
+} from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup } from '../helpers/setup_request';
 
 const getServiceNodes = async ({
@@ -35,20 +40,26 @@ const getServiceNodes = async ({
 }) => {
   const { apmEventClient } = setup;
 
-  const projection = getServiceNodesProjection({
-    kuery,
-    serviceName,
-    environment,
-    start,
-    end,
-  });
-
-  const params = mergeProjection(projection, {
+  const params = {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
+        },
+      },
       aggs: {
         nodes: {
           terms: {
-            ...projection.body.aggs.nodes.terms,
+            field: SERVICE_NODE_NAME,
             size: 10000,
             missing: SERVICE_NODE_NAME_MISSING,
           },
@@ -57,7 +68,7 @@ const getServiceNodes = async ({
               top_metrics: {
                 metrics: asMutableArray([{ field: HOST_NAME }] as const),
                 sort: {
-                  '@timestamp': 'desc',
+                  '@timestamp': 'desc' as const,
                 },
               },
             },
@@ -85,7 +96,7 @@ const getServiceNodes = async ({
         },
       },
     },
-  });
+  };
 
   const response = await apmEventClient.search('get_service_nodes', params);
 
