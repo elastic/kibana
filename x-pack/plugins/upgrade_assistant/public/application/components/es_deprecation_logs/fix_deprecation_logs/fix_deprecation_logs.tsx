@@ -92,7 +92,7 @@ interface Props {
   privilegesMissing: MissingPrivileges;
 }
 
-const FixLogsStep: FunctionComponent<Props> = ({ hasPrivileges, privilegesMissing }) => {
+const FixDeprecationLogsUI: FunctionComponent<Props> = ({ hasPrivileges, privilegesMissing }) => {
   const {
     services: {
       core: { docLinks },
@@ -190,11 +190,11 @@ const FixLogsStep: FunctionComponent<Props> = ({ hasPrivileges, privilegesMissin
   );
 };
 
-export const getFixLogsStep = () => {
+export const FixDeprecationLogs = () => {
   return (
     <WithPrivileges privileges={`index.${DEPRECATION_LOGS_INDEX}`}>
       {({ hasPrivileges, privilegesMissing, isLoading }) => (
-        <FixLogsStep
+        <FixDeprecationLogsUI
           hasPrivileges={!isLoading && hasPrivileges}
           privilegesMissing={privilegesMissing}
         />

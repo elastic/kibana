@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiSteps,
@@ -15,11 +15,12 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
@@ -30,7 +31,7 @@ import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 
 type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues';
 
-export const Overview: FunctionComponent = () => {
+export const Overview = withRouter(({ history }: RouteComponentProps) => {
   const {
     services: {
       breadcrumbs,
@@ -63,7 +64,7 @@ export const Overview: FunctionComponent = () => {
 
   return (
     <EuiPageBody restrictWidth={true} data-test-subj="overview">
-      <EuiPageContent horizontalPosition="center" color="transparent" paddingSize="none">
+      <EuiPageContentBody color="transparent" paddingSize="none">
         <EuiPageHeader
           bottomBorder
           pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
@@ -112,11 +113,12 @@ export const Overview: FunctionComponent = () => {
             getFixIssuesStep({
               isComplete: isStepComplete('fix_issues'),
               setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
+              navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
             }),
             getUpgradeStep(),
           ]}
         />
-      </EuiPageContent>
+      </EuiPageContentBody>
     </EuiPageBody>
   );
-};
+});
