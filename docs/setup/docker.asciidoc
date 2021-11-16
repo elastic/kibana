@@ -55,9 +55,9 @@ You'll use these to enroll {kib} with your {es} cluster and log in.
 [NOTE]
 ====
 If you need to reset the password for the `elastic` user or other
-built-in users, run the <<reset-password,`elasticsearch-reset-password`>> tool.
-To generate new enrollment tokens for {kib} or {es} nodes, run the
-<<create-enrollment-token,`elasticsearch-create-enrollment-token`>> tool.
+built-in users, run the {ref}/reset-password.html[`elasticsearch-reset-password`]
+tool. To generate new enrollment tokens for {kib} or {es} nodes, run the
+{ref}/create-enrollment-token.html[`elasticsearch-create-enrollment-token`] tool.
 These tools are available in the {es} `bin` directory.
 ====
 
