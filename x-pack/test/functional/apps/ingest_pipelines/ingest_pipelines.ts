@@ -25,7 +25,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const security = getService('security');
 
-  describe('Ingest Pipelines', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/118593
+  describe.skip('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
       await security.testUser.setRoles(['ingest_pipelines_user']);
