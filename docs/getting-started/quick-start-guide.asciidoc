@@ -11,7 +11,7 @@ When you've finished, you'll know how to:
 
 [float]
 === Required privileges
-When security is enabled, you must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices. 
+You must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices. 
 Learn how to <<tutorial-secure-access-to-kibana, secure access to {kib}>>, or refer to {ref}/security-privileges.html[Security privileges] for more information.
 
 [float]
