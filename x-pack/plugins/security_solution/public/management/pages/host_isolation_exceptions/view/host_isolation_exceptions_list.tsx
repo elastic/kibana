@@ -133,6 +133,15 @@ export const HostIsolationExceptionsList = () => {
     setItemToDelete(null);
   };
 
+  const handleCloseFlyout = useCallback(
+    () =>
+      navigateCallback({
+        show: undefined,
+        id: undefined,
+      }),
+    [navigateCallback]
+  );
+
   return (
     <AdministrationListPage
       title={
@@ -167,7 +176,9 @@ export const HostIsolationExceptionsList = () => {
       }
       hideHeader={!hasDataToShow}
     >
-      {showFlyout && <HostIsolationExceptionsFormFlyout />}
+      {showFlyout && (
+        <HostIsolationExceptionsFormFlyout onCancel={handleCloseFlyout} id={location.id} />
+      )}
 
       {itemToDelete ? (
         <HostIsolationExceptionDeleteModal item={itemToDelete} onCancel={handleCloseDeleteDialog} />
