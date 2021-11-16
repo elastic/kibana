@@ -15,5 +15,5 @@ export interface ThemeServiceSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [theme$](./kibana-plugin-core-public.themeservicesetup.theme_.md) | <code>Observable&lt;CoreTheme&gt;</code> |  |
+|  [theme$](./kibana-plugin-core-public.themeservicesetup.theme_.md) | Observable&lt;CoreTheme&gt; |  |
 

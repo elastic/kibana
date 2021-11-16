@@ -29,6 +29,5 @@ export renderApp = ({ element, theme$ }: AppMountParameters) => {
    ReactDOM.render(wrapWithTheme(<MyApp/>, theme$), element);
    return () => ReactDOM.unmountComponentAtNode(element);
 }
-
 ```
 

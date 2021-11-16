@@ -16,5 +16,5 @@ export interface CoreTheme
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [darkMode](./kibana-plugin-core-public.coretheme.darkmode.md) | <code>boolean</code> | is dark mode enabled or not |
+|  [darkMode](./kibana-plugin-core-public.coretheme.darkmode.md) | boolean | is dark mode enabled or not |
 

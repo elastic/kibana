@@ -15,5 +15,5 @@ export interface ThemeServiceStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [theme$](./kibana-plugin-core-public.themeservicestart.theme_.md) | <code>Observable&lt;CoreTheme&gt;</code> |  |
+|  [theme$](./kibana-plugin-core-public.themeservicestart.theme_.md) | Observable&lt;CoreTheme&gt; |  |
 
