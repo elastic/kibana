@@ -15,12 +15,22 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { FormattedStatus, getLevelSortValue } from '../lib';
 import { StatusExpandedRow } from './status_expanded_row';
 
 interface StatusTableProps {
   statuses?: FormattedStatus[];
 }
+
+const expandLabel = i18n.translate('core.statusPage.statusTable.columns.expandRow.expandLabel', {
+  defaultMessage: 'Expand',
+});
+
+const collapseLabel = i18n.translate(
+  'core.statusPage.statusTable.columns.expandRow.collapseLabel',
+  { defaultMessage: 'Collapse' }
+);
 
 export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
@@ -70,7 +80,10 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
     {
       name: (
         <EuiScreenReaderOnly>
-          <span>Expand row</span>
+          <FormattedMessage
+            id="core.statusPage.statusTable.columns.expandRowHeader"
+            defaultMessage="Expand row"
+          />
         </EuiScreenReaderOnly>
       ),
       align: 'right',
@@ -79,7 +92,7 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
       render: (item: FormattedStatus) => (
         <EuiButtonIcon
           onClick={() => toggleDetails(item)}
-          aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+          aria-label={itemIdToExpandedRowMap[item.id] ? collapseLabel : expandLabel}
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
