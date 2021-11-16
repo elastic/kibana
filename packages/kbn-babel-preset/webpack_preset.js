@@ -19,6 +19,7 @@ module.exports = () => {
           // Please read the explanation for this
           // in node_preset.js
           corejs: '3.2.1',
+          bugfixes: true,
         },
       ],
       require('./common_preset'),
