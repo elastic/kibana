@@ -67,7 +67,7 @@ const AccessDeprecationLogsMessage = ({ navigateToEsDeprecationLogs }: CustomPro
 
         return (
           <FormattedMessage
-            id="xpack.upgradeAssistant.overview.fixIssuesStepDescription"
+            id="xpack.upgradeAssistant.overview.accessEsDeprecationLogsLabel"
             defaultMessage="Optionally you can consult the {esDeprecationLogsLink} to make sure your application is not using any deprecated APIs."
             values={{
               esDeprecationLogsLink: (
