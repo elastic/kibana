@@ -76,8 +76,24 @@ export class QueryBarService extends FtrService {
     expect((await queryLanguageButton.getVisibleText()).toLowerCase()).to.eql(lang);
   }
 
-  public async getSuggestions() {
+  /**
+   * Returns the currently shown suggestions texts of the query bar. Since there is no loading
+   * indicator to wait for to validate if suggestion loading is done, this method is private
+   * and should not be used in tests. Instead {@link #expectSuggestions} should be used, which
+   * properly waits for the expected suggestions.
+   */
+  private async getSuggestions() {
     const suggestions = await this.testSubjects.findAll('autoCompleteSuggestionText');
     return Promise.all(suggestions.map((suggestion) => suggestion.getVisibleText()));
+  }
+
+  public async expectSuggestions({ count, contains }: { count: number; contains?: string }) {
+    await this.retry.try(async () => {
+      const suggestions = await this.getSuggestions();
+      expect(suggestions.length).to.be(count);
+      if (contains) {
+        expect(suggestions).to.contain(contains);
+      }
+    });
   }
 }
