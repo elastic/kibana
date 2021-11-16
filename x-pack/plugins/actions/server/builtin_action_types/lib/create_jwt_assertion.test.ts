@@ -6,9 +6,7 @@
  */
 
 jest.mock('jsonwebtoken', () => ({
-  jwt: {
-    sign: jest.fn(),
-  },
+  sign: jest.fn(),
 }));
 // eslint-disable-next-line import/no-extraneous-dependencies
 import jwt from 'jsonwebtoken';
@@ -29,28 +27,25 @@ describe('createJWTAssertion', () => {
       subject: 'test@gmail.com',
     });
 
-    expect(assertion).toMatchInlineSnapshot('');
+    expect(assertion).toMatchInlineSnapshot('"123456qwertyjwttoken"');
   });
 
-  test('throw the exception and log the proper error if token was not get successfuly', async () => {
-    jwtSign.mockReturnValueOnce({
-      name: 'JsonWebTokenError',
-      message: 'jwt wrong header',
+  test('throw the exception and log the proper error if token was not get successfuly', () => {
+    jwtSign.mockImplementationOnce(() => {
+      throw new Error('{"message": "jwt wrong header", "name": "JsonWebTokenError"}');
     });
-
-    await expect(
-      createJWTAssertion(mockLogger, 'test', '123456', {
-        audience: '1',
-        issuer: 'someappid',
-        subject: 'test@gmail.com',
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"{\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter \'scope\' is not valid.\\"}"'
-    );
+    const fn = () => createJWTAssertion(mockLogger, 'test', '123456', {
+      audience: '1',
+      issuer: 'someappid',
+      subject: 'test@gmail.com',
+    })
+    expect(
+      fn
+    ).toThrowError();
 
     expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "error thrown getting the access token from https://test for clientID: 123456: {\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter \'scope\' is not valid.\\"}",
+        "Unable to generate JWT token. Error: Error: {\\"message\\": \\"jwt wrong header\\", \\"name\\": \\"JsonWebTokenError\\"}",
       ]
     `);
   });

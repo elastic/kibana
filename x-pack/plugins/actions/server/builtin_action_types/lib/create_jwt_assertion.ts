@@ -22,7 +22,7 @@ export function createJWTAssertion(
   privateKeyPassword: string,
   reservedClaims: JWTClaims,
   customClaims?: Record<string, string>
-): Promise<string> {
+): string {
   const { subject, audience, issuer, expireInMilisecons, keyId } = reservedClaims;
   const iat = Math.floor(Date.now() / 1000);
 
