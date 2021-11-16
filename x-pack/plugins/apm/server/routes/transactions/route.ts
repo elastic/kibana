@@ -14,8 +14,8 @@ import {
 } from '../../../common/latency_aggregation_types';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { getServiceTransactionGroups } from '../../lib/services/get_service_transaction_groups';
-import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../../lib/services/get_service_transaction_group_detailed_statistics';
+import { getServiceTransactionGroups } from '../services/get_service_transaction_groups';
+import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../services/get_service_transaction_group_detailed_statistics';
 import { getTransactionBreakdown } from './breakdown';
 import { getTransactionTraceSamples } from './trace_samples';
 import { getAnomalySeries } from './get_anomaly_data';

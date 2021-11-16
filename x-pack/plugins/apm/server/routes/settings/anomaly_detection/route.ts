@@ -14,7 +14,7 @@ import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getAnomalyDetectionJobs } from '../../../lib/anomaly_detection/get_anomaly_detection_jobs';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { setupRequest } from '../../../lib/helpers/setup_request';
-import { getAllEnvironments } from '../../../lib/environments/get_all_environments';
+import { getAllEnvironments } from '../../environments/get_all_environments';
 import { hasLegacyJobs } from '../../../lib/anomaly_detection/has_legacy_jobs';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { notifyFeatureUsage } from '../../../feature';

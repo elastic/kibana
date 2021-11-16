@@ -31,7 +31,7 @@ import { Setup } from '../../lib/helpers/setup_request';
 import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
-} from '../../lib/metrics/by_agent/shared/memory';
+} from '../metrics/by_agent/shared/memory';
 import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
 
 interface Options {

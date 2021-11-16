@@ -14,7 +14,7 @@ import {
   inspectSearchParams,
 } from '../../../utils/test_helpers';
 import { findExactConfiguration } from './find_exact_configuration';
-import { getAllEnvironments } from '../../../lib/environments/get_all_environments';
+import { getAllEnvironments } from '../../environments/get_all_environments';
 
 describe('agent configuration queries', () => {
   let mock: SearchParamsMock;

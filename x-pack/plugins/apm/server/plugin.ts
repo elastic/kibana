@@ -21,7 +21,7 @@ import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './routes/alerts/register_apm_alerts';
-import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_callbacks';
+import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';

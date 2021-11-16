@@ -26,7 +26,7 @@ import {
 } from '../../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { createApmServerRouteRepository } from '../../apm_routes/create_apm_server_route_repository';
-import { syncAgentConfigsToApmPackagePolicies } from '../../../lib/fleet/sync_agent_configs_to_apm_package_policies';
+import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
