@@ -413,7 +413,7 @@ export function LayerPanel(
                 }
                 labelAppend={
                   isOptional ? (
-                    <EuiText color="subdued" size="xs">
+                    <EuiText color="subdued" size="xs" data-test-subj="lnsGroup_optional">
                       {i18n.translate('xpack.lens.editorFrame.optionalDimensionLabel', {
                         defaultMessage: 'Optional',
                       })}

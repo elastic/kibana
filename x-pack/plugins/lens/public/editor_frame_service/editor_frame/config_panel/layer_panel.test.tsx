@@ -175,7 +175,7 @@ describe('LayerPanel', () => {
 
       const group = instance.find('.lnsLayerPanel__dimensionContainer[data-test-subj="lnsGroup"]');
       expect(group).toHaveLength(1);
-      const optionalLabel = instance.find('.lnsLayerPanel__rowOptional');
+      const optionalLabel = instance.find('.[data-test-subj="lnsGroup_optional"]');
       expect(optionalLabel).toHaveLength(1);
     });
 
