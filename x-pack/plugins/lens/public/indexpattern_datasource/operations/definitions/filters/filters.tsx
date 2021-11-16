@@ -172,18 +172,10 @@ export const FilterList = ({
   indexPattern: IndexPattern;
   defaultQuery: Filter;
 }) => {
-  const [isOpenByCreation, setIsOpenByCreation] = useState(false);
   const [activeFilterId, setActiveFilterId] = useState('');
   const [localFilters, setLocalFilters] = useState(() =>
     filters.map((filter) => ({ ...filter, id: generateId() }))
   );
-
-  useEffect(() => {
-    if (isOpenByCreation) {
-      setActiveFilterId(localFilters[localFilters.length - 1].id);
-    }
-    setIsOpenByCreation(false);
-  }, [isOpenByCreation, localFilters]);
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
     // do not set internal id parameter into saved object
@@ -191,14 +183,19 @@ export const FilterList = ({
     setLocalFilters(updatedFilters);
   };
 
-  const onAddFilter = () =>
+  const onAddFilter = () => {
+    const newFilterId = generateId();
+
     updateFilters([
       ...localFilters,
       {
         ...defaultQuery,
-        id: generateId(),
+        id: newFilterId,
       },
     ]);
+
+    setActiveFilterId(newFilterId);
+  };
   const onRemoveFilter = (id: string) =>
     updateFilters(localFilters.filter((filter) => filter.id !== id));
 
@@ -279,7 +276,6 @@ export const FilterList = ({
       <NewBucketButton
         onClick={() => {
           onAddFilter();
-          setIsOpenByCreation(true);
         }}
         label={i18n.translate('xpack.lens.indexPattern.filters.addaFilter', {
           defaultMessage: 'Add a filter',
