@@ -7,8 +7,24 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { formatESMsg } from './format_es_msg';
 const has = _.has;
+
+const getRootCause = (err: Record<string, any> | string) => _.get(err, 'resp.error.root_cause');
+
+/**
+ * Utilize the extended error information returned from elasticsearch
+ * @param  {Error|String} err
+ * @returns {string}
+ */
+export const formatESMsg = (err: Record<string, any> | string) => {
+  const rootCause = getRootCause(err);
+
+  if (!Array.isArray(rootCause)) {
+    return;
+  }
+
+  return rootCause.map((cause: Record<string, any>) => cause.reason).join('\n');
+};
 
 /**
  * Formats the error message from an error object, extended elasticsearch
@@ -35,14 +51,17 @@ export function formatMsg(err: Record<string, any> | string, source: string = ''
     // is an Angular $http "error object"
     if (err.status === -1) {
       // status = -1 indicates that the request was failed to reach the server
-      message += i18n.translate('xpack.canvas.notify.toaster.unavailableServerErrorMessage', {
-        defaultMessage:
-          'An HTTP request has failed to connect. ' +
-          'Please check if the Kibana server is running and that your browser has a working connection, ' +
-          'or contact your system administrator.',
-      });
+      message += i18n.translate(
+        'xpack.monitoring.formatMsg.toaster.unavailableServerErrorMessage',
+        {
+          defaultMessage:
+            'An HTTP request has failed to connect. ' +
+            'Please check if the Kibana server is running and that your browser has a working connection, ' +
+            'or contact your system administrator.',
+        }
+      );
     } else {
-      message += i18n.translate('xpack.canvas.notify.toaster.errorStatusMessage', {
+      message += i18n.translate('xpack.monitoring.formatMsg.toaster.errorStatusMessage', {
         defaultMessage: 'Error {errStatus} {errStatusText}: {errMessage}',
         values: {
           errStatus: err.status,
