@@ -634,9 +634,9 @@ export class TaskRunner<
     }
 
     if (apm.currentTransaction) {
-      if (executionStatus.status === 'ok') {
+      if (executionStatus.status === 'ok' || executionStatus.status === 'active') {
         apm.currentTransaction.setOutcome('success');
-      } else if (executionStatus.status === 'error') {
+      } else if (executionStatus.status === 'error' || executionStatus.status === 'unknown') {
         apm.currentTransaction.setOutcome('failure');
       }
     }
