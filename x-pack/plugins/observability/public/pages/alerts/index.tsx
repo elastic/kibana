@@ -9,10 +9,10 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
-import type { AlertWorkflowStatus } from '../../../common/typings';
+import { AlertStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
@@ -26,7 +26,7 @@ import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { Provider, alertsPageStateContainer, useAlertsPageStateContainer } from './state_container';
 import './styles.scss';
-import { WorkflowStatusFilter } from './workflow_status_filter';
+import { AlertsStatusFilter } from './alerts_status_filter';
 import { AlertsDisclaimer } from './alerts_disclaimer';
 
 export interface TopAlert {
@@ -39,22 +39,17 @@ export interface TopAlert {
 
 const NO_INDEX_NAMES: string[] = [];
 const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
+const ALERT_STATUS_REGEX =
+  /\s*and\s*kibana\.alert\.status\s*:\s*".+?"|kibana\.alert\.status\s*:\s*".+?"/gm;
 
 function AlertsPage() {
   const { core, plugins, ObservabilityPageTemplate } = usePluginContext();
+  const [alertFilterStatus, setAlertFilterStatus] = useState(AlertStatus.All);
   const { prepend } = core.http.basePath;
   const refetch = useRef<() => void>();
   const timefilterService = useTimefilterService();
-  const {
-    rangeFrom,
-    setRangeFrom,
-    rangeTo,
-    setRangeTo,
-    kuery,
-    setKuery,
-    workflowStatus,
-    setWorkflowStatus,
-  } = useAlertsPageStateContainer();
+  const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, workflowStatus } =
+    useAlertsPageStateContainer();
 
   useBreadcrumbs([
     {
@@ -103,12 +98,14 @@ function AlertsPage() {
     ];
   }, [indexNames]);
 
-  const setWorkflowStatusFilter = useCallback(
-    (value: AlertWorkflowStatus) => {
-      setWorkflowStatus(value);
-    },
-    [setWorkflowStatus]
-  );
+  // Keep the Workflow status code commented (no delete) as requested: https://github.com/elastic/kibana/issues/117686
+
+  // const setWorkflowStatusFilter = useCallback(
+  //   (value: AlertWorkflowStatus) => {
+  //     setWorkflowStatus(value);
+  //   },
+  //   [setWorkflowStatus]
+  // );
 
   const onQueryChange = useCallback(
     ({ dateRange, query }) => {
@@ -124,15 +121,24 @@ function AlertsPage() {
     [rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, timefilterService]
   );
 
-  const addToQuery = useCallback(
-    (value: string) => {
-      let output = value;
-      if (kuery !== '') {
-        output = `${kuery} and ${value}`;
+  const setAlertStatusFilter = useCallback(
+    (id: string, query: string) => {
+      setAlertFilterStatus(id as AlertStatus);
+      // Updating the KQL query bar alongside with user inputs is tricky.
+      // To avoid issue, this function always remove the AlertFilter and add it
+      // at the end of the query, each time the filter is added/updated/removed (Show All)
+      // NOTE: This (query appending) will be changed entirely: https://github.com/elastic/kibana/issues/116135
+      let output = kuery;
+      if (kuery === '') {
+        output = query;
+      } else {
+        const queryWithoutAlertFilter = kuery.replace(ALERT_STATUS_REGEX, '');
+        output = `${queryWithoutAlertFilter} and ${query}`;
       }
       onQueryChange({
         dateRange: { from: rangeFrom, to: rangeTo },
-        query: output,
+        // Clean up the kuery from unwanted trailing/ahead ANDs after appending and removing filters.
+        query: output.replace(/^\s*and\s*|\s*and\s*$/gm, ''),
       });
     },
     [kuery, onQueryChange, rangeFrom, rangeTo]
@@ -194,7 +200,9 @@ function AlertsPage() {
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <WorkflowStatusFilter status={workflowStatus} onChange={setWorkflowStatusFilter} />
+              {/* Keep the Workflow status code commented (no delete) as requested: https://github.com/elastic/kibana/issues/117686*/}
+              {/* <WorkflowStatusFilter status={workflowStatus} onChange={setWorkflowStatusFilter} /> */}
+              <AlertsStatusFilter status={alertFilterStatus} onChange={setAlertStatusFilter} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -207,7 +215,6 @@ function AlertsPage() {
             kuery={kuery}
             workflowStatus={workflowStatus}
             setRefetch={setRefetch}
-            addToQuery={addToQuery}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
