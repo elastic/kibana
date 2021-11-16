@@ -11,10 +11,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['common', 'settings', 'context']);
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'settings', 'context', 'header']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/114745
-  describe.skip('value suggestions non time based', function describeIndexTests() {
+  describe('value suggestions non time based', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
@@ -29,11 +29,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows all autosuggest options for a filter in discover context app', async () => {
       await PageObjects.common.navigateToApp('discover');
-
       await queryBar.setQuery('type.keyword : ');
-      const suggestions = await queryBar.getSuggestions();
-      expect(suggestions.length).to.be(1);
-      expect(suggestions).to.contain('"apache"');
+
+      await retry.try(async () => {
+        const suggestions = await queryBar.getSuggestions();
+        expect(suggestions.length).to.be(1);
+        expect(suggestions).to.contain('"apache"');
+      });
     });
   });
 }

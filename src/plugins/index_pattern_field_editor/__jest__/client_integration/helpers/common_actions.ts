@@ -8,6 +8,36 @@
 import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test/jest';
 
+/**
+ * We often need to wait for both the documents & the preview to be fetched.
+ * We can't increase the `jest.advanceTimersByTime()` time
+ * as those are 2 different operations that occur in sequence.
+ */
+export const waitForDocumentsAndPreviewUpdate = async (testBed?: TestBed) => {
+  // Wait for documents to be fetched
+  await act(async () => {
+    jest.advanceTimersByTime(5000);
+  });
+
+  // Wait for the syntax validation debounced
+  await act(async () => {
+    jest.advanceTimersByTime(1000);
+  });
+
+  testBed?.component.update();
+};
+
+/**
+ * Handler to bypass the debounce time in our tests
+ */
+export const waitForUpdates = async (testBed?: TestBed) => {
+  await act(async () => {
+    jest.advanceTimersByTime(5000);
+  });
+
+  testBed?.component.update();
+};
+
 export const getCommonActions = (testBed: TestBed) => {
   const toggleFormRow = async (
     row: 'customLabel' | 'value' | 'format',
@@ -66,46 +96,28 @@ export const getCommonActions = (testBed: TestBed) => {
     testBed.component.update();
   };
 
-  /**
-   * Allows us to bypass the debounce time of 500ms before updating the preview. We also simulate
-   * a 2000ms latency when searching ES documents (see setup_environment.tsx).
-   */
-  const waitForUpdates = async () => {
-    await act(async () => {
-      jest.runAllTimers();
-    });
+  const getScriptError = () => {
+    const scriptError = testBed.component.find('#runtimeFieldScript-error-0');
 
-    testBed.component.update();
-  };
+    if (scriptError.length === 0) {
+      return null;
+    } else if (scriptError.length > 1) {
+      return scriptError.at(0).text();
+    }
 
-  /**
-   * When often need to both wait for the documents to be fetched and
-   * the preview to be fetched. We can't increase the `jest.advanceTimersByTime` time
-   * as those are 2 different operations that occur in sequence.
-   */
-  const waitForDocumentsAndPreviewUpdate = async () => {
-    // Wait for documents to be fetched
-    await act(async () => {
-      jest.runAllTimers();
-    });
-
-    // Wait for preview to update
-    await act(async () => {
-      jest.runAllTimers();
-    });
-
-    testBed.component.update();
+    return scriptError.text();
   };
 
   return {
     toggleFormRow,
-    waitForUpdates,
-    waitForDocumentsAndPreviewUpdate,
+    waitForUpdates: waitForUpdates.bind(null, testBed),
+    waitForDocumentsAndPreviewUpdate: waitForDocumentsAndPreviewUpdate.bind(null, testBed),
     fields: {
       updateName,
       updateType,
       updateScript,
       updateFormat,
+      getScriptError,
     },
   };
 };

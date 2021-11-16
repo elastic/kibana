@@ -66,6 +66,7 @@ const AppRoot = React.memo(
                 timelinesPluginSetup.getTGrid &&
                 timelinesPluginSetup.getTGrid<'standalone'>({
                   appId: 'securitySolution',
+                  casesOwner: 'securitySolutionUI',
                   type: 'standalone',
                   casePermissions: {
                     read: true,

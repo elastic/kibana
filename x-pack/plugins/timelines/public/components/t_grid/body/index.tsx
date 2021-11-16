@@ -32,7 +32,10 @@ import React, {
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
-import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
+} from '@kbn/rule-data-utils/technical_field_names';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -46,11 +49,12 @@ import {
   TimelineTabs,
   SetEventsLoading,
   SetEventsDeleted,
+  CreateFieldComponentType,
 } from '../../../../common/types/timeline';
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 
-import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
+import { getColumnHeaders } from './column_headers/helpers';
 import {
   addBuildingBlockStyle,
   getEventIdToDataMapping,
@@ -58,7 +62,6 @@ import {
   mapSortingColumns,
 } from './helpers';
 
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
@@ -86,10 +89,11 @@ interface OwnProps {
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
+  createFieldComponent?: CreateFieldComponentType;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
   filters?: Filter[];
-  filterQuery: string;
+  filterQuery?: string;
   filterStatus?: AlertStatus;
   id: string;
   indexNames: string[];
@@ -119,18 +123,13 @@ interface OwnProps {
 }
 
 const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
-const NUM_OF_ICON_IN_TIMELINE_ROW = 2;
 
 export const hasAdditionalActions = (id: TimelineId): boolean =>
   [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
     id
   );
 
-const EXTRA_WIDTH = 4; // px
-
 const ES_LIMIT_COUNT = 9999;
-
-const MIN_ACTION_COLUMN_WIDTH = 96; // px
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -157,9 +156,9 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
 const hasCellActions = (columnId?: string) =>
   columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
 const transformControlColumns = ({
-  actionColumnsWidth,
   columnHeaders,
   controlColumns,
+  createFieldComponent,
   data,
   isEventViewer = false,
   loadingEventIds,
@@ -179,9 +178,9 @@ const transformControlColumns = ({
   setEventsDeleted,
   hasAlertsCrudPermissions,
 }: {
-  actionColumnsWidth: number;
   columnHeaders: ColumnHeaderOptions[];
   controlColumns: ControlColumnProps[];
+  createFieldComponent?: CreateFieldComponentType;
   data: TimelineItem[];
   isEventViewer?: boolean;
   loadingEventIds: string[];
@@ -216,7 +215,7 @@ const transformControlColumns = ({
           <>
             {HeaderActions && (
               <HeaderActions
-                width={width ?? MIN_ACTION_COLUMN_WIDTH}
+                width={width}
                 browserFields={browserFields}
                 columnHeaders={columnHeaders}
                 isEventViewer={isEventViewer}
@@ -227,6 +226,7 @@ const transformControlColumns = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
+                createFieldComponent={createFieldComponent}
               />
             )}
           </>
@@ -283,13 +283,13 @@ const transformControlColumns = ({
             showCheckboxes={showCheckboxes}
             tabType={tabType}
             timelineId={timelineId}
-            width={width ?? MIN_ACTION_COLUMN_WIDTH}
+            width={width}
             setEventsLoading={setEventsLoading}
             setEventsDeleted={setEventsDeleted}
           />
         );
       },
-      width: width ?? actionColumnsWidth,
+      width,
     })
   );
 
@@ -308,6 +308,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     bulkActions = true,
     clearSelected,
     columnHeaders,
+    createFieldComponent,
     data,
     defaultCellActions,
     filterQuery,
@@ -491,6 +492,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 <StatefulFieldsBrowser
                   data-test-subj="field-browser"
                   browserFields={browserFields}
+                  createFieldComponent={createFieldComponent}
                   timelineId={id}
                   columnHeaders={columnHeaders}
                 />
@@ -527,6 +529,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         additionalControls,
         browserFields,
         columnHeaders,
+        createFieldComponent,
       ]
     );
 
@@ -616,15 +619,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         transformControlColumns({
           columnHeaders,
           controlColumns,
+          createFieldComponent,
           data,
           isEventViewer,
-          actionColumnsWidth: hasAdditionalActions(id as TimelineId)
-            ? getActionsColumnWidth(
-                isEventViewer,
-                showCheckboxes,
-                DEFAULT_ICON_BUTTON_WIDTH * NUM_OF_ICON_IN_TIMELINE_ROW + EXTRA_WIDTH
-              )
-            : controlColumns.reduce((acc, c) => acc + (c.width ?? MIN_ACTION_COLUMN_WIDTH), 0),
           loadingEventIds,
           onRowSelected,
           onRuleChange,
@@ -648,6 +645,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       leadingControlColumns,
       trailingControlColumns,
       columnHeaders,
+      createFieldComponent,
       data,
       isEventViewer,
       id,

@@ -55,6 +55,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
 ): boolean {
   return (
     existingOutput.is_default !== preconfiguredOutput.is_default ||
+    existingOutput.is_default_monitoring !== preconfiguredOutput.is_default_monitoring ||
     existingOutput.name !== preconfiguredOutput.name ||
     existingOutput.type !== preconfiguredOutput.type ||
     (preconfiguredOutput.hosts &&
@@ -72,6 +73,8 @@ export async function ensurePreconfiguredOutputs(
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
+  const logger = appContextService.getLogger();
+
   if (outputs.length === 0) {
     return;
   }
@@ -103,21 +106,15 @@ export async function ensurePreconfiguredOutputs(
       const isCreate = !existingOutput;
       const isUpdateWithNewData =
         existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
-      // If a default output already exists, delete it in favor of the preconfigured one
-      if (isCreate || isUpdateWithNewData) {
-        const defaultOutputId = await outputService.getDefaultOutputId(soClient);
-
-        if (defaultOutputId && defaultOutputId !== output.id) {
-          await outputService.delete(soClient, defaultOutputId);
-        }
-      }
 
       if (isCreate) {
-        await outputService.create(soClient, data, { id, overwrite: true });
+        logger.debug(`Creating output ${output.id}`);
+        await outputService.create(soClient, data, { id, fromPreconfiguration: true });
       } else if (isUpdateWithNewData) {
-        await outputService.update(soClient, id, data);
+        logger.debug(`Updating output ${output.id}`);
+        await outputService.update(soClient, id, data, { fromPreconfiguration: true });
         // Bump revision of all policies using that output
-        if (outputData.is_default) {
+        if (outputData.is_default || outputData.is_default_monitoring) {
           await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
         } else {
           await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
@@ -139,7 +136,7 @@ export async function cleanPreconfiguredOutputs(
   for (const output of existingPreconfiguredOutput) {
     if (!outputs.find(({ id }) => output.id === id)) {
       logger.info(`Deleting preconfigured output ${output.id}`);
-      await outputService.delete(soClient, output.id);
+      await outputService.delete(soClient, output.id, { fromPreconfiguration: true });
     }
   }
 }
@@ -342,7 +339,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         await soClient
           .delete(AGENT_POLICY_SAVED_OBJECT_TYPE, policy!.id)
           // swallow error
-          .catch((deleteErr) => appContextService.getLogger().error(deleteErr));
+          .catch((deleteErr) => logger.error(deleteErr));
 
         throw err;
       }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeQuery } from '../../../../../observability/server';
+import { rangeQuery, termQuery } from '../../../../../observability/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -52,10 +52,8 @@ export async function getTransactionErrorRateChartPreview({
       query: {
         bool: {
           filter: [
-            ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-            ...(transactionType
-              ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-              : []),
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...getDocumentTypeFilterForTransactions(
