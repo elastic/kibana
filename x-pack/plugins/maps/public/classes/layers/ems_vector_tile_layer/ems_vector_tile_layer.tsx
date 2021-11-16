@@ -124,7 +124,7 @@ export class EmsVectorTileLayer extends RasterTileLayer {
     return `${this.getId()}${DELIMITTER}${this.getSource().getTileLayerId()}${DELIMITTER}`;
   }
 
-  _generateMbSourceId(name: string) {
+  _generateMbSourceId(name: string | undefined) {
     return `${this._generateMbSourceIdPrefix()}${name}`;
   }
 
@@ -250,8 +250,9 @@ export class EmsVectorTileLayer extends RasterTileLayer {
         const newLayerObject = {
           ...layer,
           source:
-            typeof (layer as MbLayer).source === 'string'
-              ? this._generateMbSourceId((layer as MbLayer).source as string)
+            typeof (layer as MbLayer).source === 'string' ||
+            typeof (layer as MbLayer).source === 'undefined'
+              ? this._generateMbSourceId((layer as MbLayer).source as string | undefined)
               : undefined,
           id: mbLayerId,
         };
