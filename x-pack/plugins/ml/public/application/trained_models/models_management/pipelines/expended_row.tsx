@@ -6,7 +6,16 @@
  */
 
 import React, { FC } from 'react';
-import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiInMemoryTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiIcon,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { useFieldFormatter } from '../../../contexts/kibana/use_field_formatter';
@@ -49,11 +58,28 @@ export const ProcessorsStats: FC<ProcessorsStatsProps> = ({ stats }) => {
     },
     {
       field: 'stats.count',
-      name: i18n.translate(
-        'xpack.ml.trainedModels.modelsList.pipelines.processorStats.countHeader',
-        {
-          defaultMessage: 'Count',
-        }
+      name: (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.countHeader"
+              defaultMessage="Count"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.countDescription"
+                  defaultMessage="Total number of documents ingested during the lifetime of this node"
+                />
+              }
+            >
+              <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
       width: '100px',
       truncateText: true,
@@ -61,11 +87,28 @@ export const ProcessorsStats: FC<ProcessorsStatsProps> = ({ stats }) => {
     },
     {
       field: 'stats.time_in_millis',
-      name: i18n.translate(
-        'xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocHeader',
-        {
-          defaultMessage: 'Time per doc',
-        }
+      name: (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocHeader"
+              defaultMessage="Time per doc"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocDescription"
+                  defaultMessage="Total time spent preprocessing ingest documents during the lifetime of this node"
+                />
+              }
+            >
+              <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
       width: '100px',
       truncateText: false,
@@ -76,11 +119,28 @@ export const ProcessorsStats: FC<ProcessorsStatsProps> = ({ stats }) => {
     },
     {
       field: 'stats.current',
-      name: i18n.translate(
-        'xpack.ml.trainedModels.modelsList.pipelines.processorStats.currentHeader',
-        {
-          defaultMessage: 'Current',
-        }
+      name: (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.currentHeader"
+              defaultMessage="Current"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.currentDescription"
+                  defaultMessage="Total number of documents currently being ingested"
+                />
+              }
+            >
+              <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
       width: '100px',
       truncateText: false,
@@ -88,11 +148,28 @@ export const ProcessorsStats: FC<ProcessorsStatsProps> = ({ stats }) => {
     },
     {
       field: 'stats.failed',
-      name: i18n.translate(
-        'xpack.ml.trainedModels.modelsList.pipelines.processorStats.failedHeader',
-        {
-          defaultMessage: 'Failed',
-        }
+      name: (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.failedHeader"
+              defaultMessage="Failed"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.failedDescription"
+                  defaultMessage="Total number of failed ingest operations during the lifetime of this node"
+                />
+              }
+            >
+              <EuiIcon tabIndex={0} type="iInCircle" color={'subdued'} />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
       width: '100px',
       'data-test-subj': 'mlProcessorStatsFailed',
