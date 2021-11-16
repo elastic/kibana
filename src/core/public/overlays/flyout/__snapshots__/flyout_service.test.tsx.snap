@@ -11,25 +11,30 @@ Array [
 exports[`FlyoutService openFlyout() renders a flyout to the DOM 1`] = `
 Array [
   Array [
-    <mockConstructor>
-      <CoreThemeProvider
-        theme$={
-          Observable {
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction],
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
             "_isScalar": false,
             "_subscribe": [Function],
-          }
+          },
         }
+      }
+    >
+      <EuiFlyout
+        onClose={[Function]}
       >
-        <EuiFlyout
-          onClose={[Function]}
-        >
-          <MountWrapper
-            className="kbnOverlayMountWrapper"
-            mount={[Function]}
-          />
-        </EuiFlyout>
-      </CoreThemeProvider>
-    </mockConstructor>,
+        <MountWrapper
+          className="kbnOverlayMountWrapper"
+          mount={[Function]}
+        />
+      </EuiFlyout>
+    </CoreContextProvider>,
     <div />,
   ],
 ]
@@ -40,47 +45,151 @@ exports[`FlyoutService openFlyout() renders a flyout to the DOM 2`] = `"<div dat
 exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 1`] = `
 Array [
   Array [
-    <mockConstructor>
-      <CoreThemeProvider
-        theme$={
-          Observable {
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiFlyout
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiFlyout>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiFlyout
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiFlyout>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
             "_isScalar": false,
             "_subscribe": [Function],
-          }
+          },
         }
+      }
+    >
+      <EuiFlyout
+        onClose={[Function]}
       >
-        <EuiFlyout
-          onClose={[Function]}
-        >
-          <MountWrapper
-            className="kbnOverlayMountWrapper"
-            mount={[Function]}
-          />
-        </EuiFlyout>
-      </CoreThemeProvider>
-    </mockConstructor>,
+        <MountWrapper
+          className="kbnOverlayMountWrapper"
+          mount={[Function]}
+        />
+      </EuiFlyout>
+    </CoreContextProvider>,
     <div />,
   ],
   Array [
-    <mockConstructor>
-      <CoreThemeProvider
-        theme$={
-          Observable {
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    theme$={
+                      Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiFlyout
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiFlyout>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  theme$={
+                    Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiFlyout
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiFlyout>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
             "_isScalar": false,
             "_subscribe": [Function],
-          }
+          },
         }
+      }
+    >
+      <EuiFlyout
+        onClose={[Function]}
       >
-        <EuiFlyout
-          onClose={[Function]}
-        >
-          <MountWrapper
-            className="kbnOverlayMountWrapper"
-            mount={[Function]}
-          />
-        </EuiFlyout>
-      </CoreThemeProvider>
-    </mockConstructor>,
+        <MountWrapper
+          className="kbnOverlayMountWrapper"
+          mount={[Function]}
+        />
+      </EuiFlyout>
+    </CoreContextProvider>,
     <div />,
   ],
 ]

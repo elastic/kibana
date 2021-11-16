@@ -8,13 +8,14 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import { pairwise, startWith } from 'rxjs/operators';
 
-import { InternalChromeStart } from '../chrome';
-import { InternalApplicationStart } from '../application';
-import { OverlayStart } from '../overlays';
-import { ThemeServiceStart, CoreThemeProvider } from '../theme';
+import type { InternalChromeStart } from '../chrome';
+import type { InternalApplicationStart } from '../application';
+import type { OverlayStart } from '../overlays';
+import type { ThemeServiceStart } from '../theme';
+import type { I18nStart } from '../i18n';
+import { CoreContextProvider } from '../utils';
 import { AppWrapper } from './app_containers';
 
 interface StartDeps {
@@ -23,6 +24,7 @@ interface StartDeps {
   overlays: OverlayStart;
   targetDomElement: HTMLDivElement;
   theme: ThemeServiceStart;
+  i18n: I18nStart;
 }
 
 /**
@@ -34,7 +36,7 @@ interface StartDeps {
  * @internal
  */
 export class RenderingService {
-  start({ application, chrome, overlays, theme, targetDomElement }: StartDeps) {
+  start({ application, chrome, overlays, theme, i18n, targetDomElement }: StartDeps) {
     const chromeHeader = chrome.getHeaderComponent();
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
@@ -49,26 +51,24 @@ export class RenderingService {
       });
 
     ReactDOM.render(
-      <I18nProvider>
-        <CoreThemeProvider theme$={theme.theme$}>
-          <>
-            {/* Fixed headers */}
-            {chromeHeader}
+      <CoreContextProvider i18n={i18n} theme={theme}>
+        <>
+          {/* Fixed headers */}
+          {chromeHeader}
 
-            {/* banners$.subscribe() for things like the No data banner */}
-            <div id="globalBannerList">{bannerComponent}</div>
+          {/* banners$.subscribe() for things like the No data banner */}
+          <div id="globalBannerList">{bannerComponent}</div>
 
-            {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
-            <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
-              {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-              <div id="app-fixed-viewport" />
+          {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
+          <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
+            {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
+            <div id="app-fixed-viewport" />
 
-              {/* The actual plugin/app */}
-              {appComponent}
-            </AppWrapper>
-          </>
-        </CoreThemeProvider>
-      </I18nProvider>,
+            {/* The actual plugin/app */}
+            {appComponent}
+          </AppWrapper>
+        </>
+      </CoreContextProvider>,
       targetDomElement
     );
   }

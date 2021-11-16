@@ -265,6 +265,7 @@ describe('#start()', () => {
       application: expect.any(Object),
       chrome: expect.any(Object),
       overlays: expect.any(Object),
+      i18n: expect.any(Object),
       theme: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });

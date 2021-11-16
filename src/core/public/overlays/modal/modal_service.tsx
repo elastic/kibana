@@ -14,10 +14,10 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
-import { ThemeServiceStart, CoreThemeProvider } from '../../theme';
+import { ThemeServiceStart } from '../../theme';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
-import { MountWrapper } from '../../utils';
+import { MountWrapper, CoreContextProvider } from '../../utils';
 
 /**
  * A ModalRef is a reference to an opened modal. It offers methods to
@@ -140,13 +140,11 @@ export class ModalService {
         this.activeModal = modal;
 
         render(
-          <i18n.Context>
-            <CoreThemeProvider theme$={theme.theme$}>
-              <EuiModal {...options} onClose={() => modal.close()}>
-                <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
-              </EuiModal>
-            </CoreThemeProvider>
-          </i18n.Context>,
+          <CoreContextProvider i18n={i18n} theme={theme}>
+            <EuiModal {...options} onClose={() => modal.close()}>
+              <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
+            </EuiModal>
+          </CoreContextProvider>,
           targetDomElement
         );
 
@@ -202,11 +200,9 @@ export class ModalService {
           };
 
           render(
-            <i18n.Context>
-              <CoreThemeProvider theme$={theme.theme$}>
-                <EuiConfirmModal {...props} />
-              </CoreThemeProvider>
-            </i18n.Context>,
+            <CoreContextProvider i18n={i18n} theme={theme}>
+              <EuiConfirmModal {...props} />
+            </CoreContextProvider>,
             targetDomElement
           );
         });

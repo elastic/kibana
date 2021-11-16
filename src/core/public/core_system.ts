@@ -240,6 +240,7 @@ export class CoreSystem {
       this.rendering.start({
         application,
         chrome,
+        i18n,
         overlays,
         theme,
         targetDomElement: coreUiTargetDomElement,

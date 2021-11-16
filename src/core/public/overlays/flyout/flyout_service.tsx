@@ -13,10 +13,10 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
-import { ThemeServiceStart, CoreThemeProvider } from '../../theme';
+import { ThemeServiceStart } from '../../theme';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
-import { MountWrapper } from '../../utils';
+import { MountWrapper, CoreContextProvider } from '../../utils';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
@@ -137,13 +137,11 @@ export class FlyoutService {
         };
 
         render(
-          <i18n.Context>
-            <CoreThemeProvider theme$={theme.theme$}>
-              <EuiFlyout {...options} onClose={onCloseFlyout}>
-                <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
-              </EuiFlyout>
-            </CoreThemeProvider>
-          </i18n.Context>,
+          <CoreContextProvider i18n={i18n} theme={theme}>
+            <EuiFlyout {...options} onClose={onCloseFlyout}>
+              <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
+            </EuiFlyout>
+          </CoreContextProvider>,
           this.targetDomElement
         );
 
