@@ -18,14 +18,14 @@ import {
   EuiComboBoxProps,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { OperationType } from '../indexpattern';
 import { LensFieldIcon } from '../lens_field_icon';
-import { DataType } from '../../types';
-import { OperationSupportMatrix } from './operation_support';
-import { IndexPattern, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
 import { TruncatedLabel } from './truncated_label';
+import type { OperationType } from '../indexpattern';
+import type { DataType } from '../../types';
+import type { OperationSupportMatrix } from './operation_support';
+import type { IndexPattern, IndexPatternPrivateState } from '../types';
 export interface FieldChoice {
   type: 'field';
   field: string;

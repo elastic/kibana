@@ -31,11 +31,11 @@ import {
   RequiredReference,
 } from '../operations';
 import { FieldSelect } from './field_select';
-import { hasField } from '../utils';
+import { hasField } from '../pure_utils';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { ParamEditorCustomProps, VisualizationDimensionGroupConfig } from '../../types';
-import { IndexPatternDimensionEditorProps } from './dimension_panel';
+import type { ParamEditorCustomProps, VisualizationDimensionGroupConfig } from '../../types';
+import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 
 const operationPanels = getOperationDisplay();
 

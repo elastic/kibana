@@ -16,9 +16,9 @@ import {
   EuiToolTip,
   EuiText,
 } from '@elastic/eui';
-import { IndexPatternDimensionEditorProps } from './dimension_panel';
-import { OperationSupportMatrix } from './operation_support';
-import { IndexPatternColumn } from '../indexpattern';
+import type { IndexPatternDimensionEditorProps } from './dimension_panel';
+import type { OperationSupportMatrix } from './operation_support';
+import type { IndexPatternColumn } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -32,9 +32,10 @@ import {
   DEFAULT_TIME_SCALE,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
-import { hasField, fieldIsInvalid } from '../utils';
+import { hasField } from '../pure_utils';
+import { fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import { IndexPattern, IndexPatternLayer } from '../types';
+import type { IndexPattern, IndexPatternLayer } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
@@ -42,7 +43,7 @@ import { setTimeScaling, TimeScaling } from './time_scaling';
 import { defaultFilter, Filtering, setFilter } from './filtering';
 import { AdvancedOptions } from './advanced_options';
 import { setTimeShift, TimeShift } from './time_shift';
-import { LayerType } from '../../../common';
+import type { LayerType } from '../../../common';
 import {
   quickFunctionsName,
   staticValueOperationName,
@@ -400,18 +401,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     }
   );
 
-  // Need to workout early on the error to decide whether to show this or an help text
-  // const fieldErrorMessage =
-  //   ((selectedOperationDefinition?.input !== 'fullReference' &&
-  //     selectedOperationDefinition?.input !== 'managedReference') ||
-  //     (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
-  //   getErrorMessage(
-  //     selectedColumn,
-  //     Boolean(incompleteOperation),
-  //     selectedOperationDefinition?.input,
-  //     currentFieldIsInvalid
-  //   );
-
   const shouldDisplayExtraOptions =
     !currentFieldIsInvalid &&
     !incompleteInfo &&
@@ -504,7 +493,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               if (temporaryQuickFunction) {
                 setTemporaryState('none');
               }
-              setStateWrapper(newLayer);
+              setStateWrapper(newLayer, { forceRender: temporaryQuickFunction });
             }}
             incompleteField={incompleteField}
             incompleteOperation={incompleteOperation}
@@ -517,62 +506,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
             })}
             dimensionGroups={dimensionGroups}
             groupId={props.groupId}
+            operationDefinitionMap={operationDefinitionMap}
           />
-        ) : //  (
-        //   <EuiFormRow
-        //     data-test-subj="indexPattern-field-selection-row"
-        //     label={i18n.translate('xpack.lens.indexPattern.chooseField', {
-        //       defaultMessage: 'Field',
-        //     })}
-        //     fullWidth
-        //     isInvalid={Boolean(incompleteOperation || currentFieldIsInvalid)}
-        //     error={fieldErrorMessage}
-        //     labelAppend={
-        //       !fieldErrorMessage &&
-        //       selectedOperationDefinition?.getHelpMessage?.({
-        //         data: props.data,
-        //         uiSettings: props.uiSettings,
-        //         currentColumn: state.layers[layerId].columns[columnId],
-        //       })
-        //     }
-        //   >
-        //     <FieldSelect
-        //       fieldIsInvalid={currentFieldIsInvalid}
-        //       currentIndexPattern={currentIndexPattern}
-        //       existingFields={state.existingFields}
-        //       operationByField={operationByField}
-        //       selectedOperationType={
-        //         // Allows operation to be selected before creating a valid column
-        //         selectedColumn ? selectedColumn.operationType : incompleteOperation
-        //       }
-        //       selectedField={
-        //         // Allows field to be selected
-        //         incompleteField
-        //           ? incompleteField
-        //           : (selectedColumn as FieldBasedIndexPatternColumn)?.sourceField
-        //       }
-        //       incompleteOperation={incompleteOperation}
-        //       onChoose={(choice) => {
-        //         if (temporaryQuickFunction) {
-        //           setTemporaryState('none');
-        //         }
-        //         setStateWrapper(
-        //           insertOrReplaceColumn({
-        //             layer: state.layers[layerId],
-        //             columnId,
-        //             indexPattern: currentIndexPattern,
-        //             op: choice.operationType,
-        //             field: currentIndexPattern.getFieldByName(choice.field),
-        //             visualizationGroups: dimensionGroups,
-        //             targetGroup: props.groupId,
-        //             incompleteParams,
-        //           }),
-        //           { forceRender: temporaryQuickFunction }
-        //         );
-        //       }}
-        //     />
-        //   </EuiFormRow>
-        null}
+        ) : null}
 
         {shouldDisplayExtraOptions && ParamEditor && (
           <ParamEditor

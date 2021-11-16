@@ -212,6 +212,7 @@ export interface FieldInputProps<C> {
   updateLayer: (
     setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
   ) => void;
+  onDeleteColumn?: () => void;
   currentFieldIsInvalid: boolean;
   incompleteField: IncompleteColumn['sourceField'] | null;
   incompleteOperation: IncompleteColumn['operationType'];
@@ -224,6 +225,7 @@ export interface FieldInputProps<C> {
   existingFields: Record<string, Record<string, boolean>>;
   operationSupportMatrix: OperationSupportMatrix;
   helpMessage?: React.ReactNode;
+  operationDefinitionMap: Record<string, GenericOperationDefinition>;
 }
 
 export interface HelpProps<C> {

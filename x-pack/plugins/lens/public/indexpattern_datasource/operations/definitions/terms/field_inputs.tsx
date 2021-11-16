@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { DragDropBuckets, NewBucketButton } from '../shared_components/buckets';
 import { TooltipWrapper, useDebouncedValue } from '../../../../shared_components';
 import { FieldSelect } from '../../../dimension_panel/field_select';
-import type { TermsIndexPatternColumn } from './index';
+import type { TermsIndexPatternColumn } from './types';
 import type { IndexPattern, IndexPatternPrivateState } from '../../../types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
 

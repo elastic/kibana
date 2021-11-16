@@ -42,7 +42,8 @@ import {
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
-import { isColumnInvalid, isDraggedField, normalizeOperationDataType } from './utils';
+import { isColumnInvalid } from './utils';
+import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';

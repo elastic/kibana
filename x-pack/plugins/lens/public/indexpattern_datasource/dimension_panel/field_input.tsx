@@ -8,10 +8,10 @@
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { operationDefinitionMap, insertOrReplaceColumn } from '../operations';
-import { FieldInputProps, IndexPatternColumn, OperationType } from '../operations/definitions';
-import { FieldBasedIndexPatternColumn } from '../operations/definitions/column_types';
+import { insertOrReplaceColumn } from '../operations/layer_helpers';
 import { FieldSelect } from './field_select';
+import type { FieldInputProps, IndexPatternColumn, OperationType } from '../operations/definitions';
+import type { FieldBasedIndexPatternColumn } from '../operations/definitions/column_types';
 
 export function FieldInput({
   layer,
@@ -21,6 +21,7 @@ export function FieldInput({
   existingFields,
   operationSupportMatrix,
   updateLayer,
+  onDeleteColumn,
   incompleteField,
   incompleteOperation,
   incompleteParams,
@@ -28,6 +29,7 @@ export function FieldInput({
   helpMessage,
   groupId,
   dimensionGroups,
+  operationDefinitionMap,
 }: FieldInputProps<FieldBasedIndexPatternColumn>) {
   const selectedOperationDefinition =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType];
@@ -64,6 +66,7 @@ export function FieldInput({
         }
         selectedField={incompleteField ?? selectedColumn?.sourceField}
         incompleteOperation={incompleteOperation}
+        onDeleteColumn={onDeleteColumn}
         onChoose={(choice) => {
           return updateLayer(
             insertOrReplaceColumn({
