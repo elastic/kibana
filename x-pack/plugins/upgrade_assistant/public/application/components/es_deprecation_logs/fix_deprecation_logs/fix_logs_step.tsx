@@ -9,7 +9,6 @@ import React, { FunctionComponent, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiSpacer, EuiLink, EuiCallOut, EuiCode } from '@elastic/eui';
-import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { useAppContext } from '../../../app_context';
 import { ExternalLinks } from './external_links';
@@ -17,14 +16,10 @@ import { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
 import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
-import type { OverviewStepProps } from '../../types';
 import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
 import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
 
 const i18nTexts = {
-  identifyStepTitle: i18n.translate('xpack.upgradeAssistant.overview.identifyStepTitle', {
-    defaultMessage: 'Identify deprecated API use and update your applications',
-  }),
   analyzeTitle: i18n.translate('xpack.upgradeAssistant.overview.analyzeTitle', {
     defaultMessage: 'Analyze deprecation logs',
   }),
@@ -93,16 +88,11 @@ const i18nTexts = {
 };
 
 interface Props {
-  setIsComplete: OverviewStepProps['setIsComplete'];
   hasPrivileges: boolean;
   privilegesMissing: MissingPrivileges;
 }
 
-const FixLogsStep: FunctionComponent<Props> = ({
-  setIsComplete,
-  hasPrivileges,
-  privilegesMissing,
-}) => {
+const FixLogsStep: FunctionComponent<Props> = ({ hasPrivileges, privilegesMissing }) => {
   const {
     services: {
       core: { docLinks },
@@ -125,15 +115,6 @@ const FixLogsStep: FunctionComponent<Props> = ({
   useEffect(() => {
     saveLogsCheckpoint(checkpoint);
   }, [checkpoint]);
-
-  useEffect(() => {
-    if (!isDeprecationLogIndexingEnabled) {
-      setIsComplete(false);
-    }
-
-    // Depending upon setIsComplete would create an infinite loop.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDeprecationLogIndexingEnabled]);
 
   return (
     <>
@@ -189,11 +170,7 @@ const FixLogsStep: FunctionComponent<Props> = ({
             <h4>{i18nTexts.deprecationsCountCheckpointTitle}</h4>
           </EuiText>
           <EuiSpacer size="m" />
-          <DeprecationsCountCheckpoint
-            checkpoint={checkpoint}
-            setCheckpoint={setCheckpoint}
-            setHasNoDeprecationLogs={setIsComplete}
-          />
+          <DeprecationsCountCheckpoint checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
 
           <EuiSpacer size="xl" />
           <EuiText data-test-subj="apiCompatibilityNoteTitle">
@@ -213,23 +190,15 @@ const FixLogsStep: FunctionComponent<Props> = ({
   );
 };
 
-export const getFixLogsStep = ({ isComplete, setIsComplete }: OverviewStepProps): EuiStepProps => {
-  const status = isComplete ? 'complete' : 'incomplete';
-
-  return {
-    status,
-    title: i18nTexts.identifyStepTitle,
-    'data-test-subj': `fixLogsStep-${status}`,
-    children: (
-      <WithPrivileges privileges={`index.${DEPRECATION_LOGS_INDEX}`}>
-        {({ hasPrivileges, privilegesMissing, isLoading }) => (
-          <FixLogsStep
-            setIsComplete={setIsComplete}
-            hasPrivileges={!isLoading && hasPrivileges}
-            privilegesMissing={privilegesMissing}
-          />
-        )}
-      </WithPrivileges>
-    ),
-  };
+export const getFixLogsStep = () => {
+  return (
+    <WithPrivileges privileges={`index.${DEPRECATION_LOGS_INDEX}`}>
+      {({ hasPrivileges, privilegesMissing, isLoading }) => (
+        <FixLogsStep
+          hasPrivileges={!isLoading && hasPrivileges}
+          privilegesMissing={privilegesMissing}
+        />
+      )}
+    </WithPrivileges>
+  );
 };

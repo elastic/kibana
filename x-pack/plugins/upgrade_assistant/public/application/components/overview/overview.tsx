@@ -25,11 +25,10 @@ import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
 import { getBackupStep } from './backup_step';
 import { getFixIssuesStep } from './fix_issues_step';
-import { getFixLogsStep } from './fix_logs_step';
 import { getUpgradeStep } from './upgrade_step';
 import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 
-type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'fix_logs';
+type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues';
 
 export const Overview: FunctionComponent = () => {
   const {
@@ -52,7 +51,6 @@ export const Overview: FunctionComponent = () => {
     backup: false,
     migrate_system_indices: false,
     fix_issues: false,
-    fix_logs: false,
   });
 
   const isStepComplete = (step: OverviewStep) => completedStepsMap[step];
@@ -114,10 +112,6 @@ export const Overview: FunctionComponent = () => {
             getFixIssuesStep({
               isComplete: isStepComplete('fix_issues'),
               setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
-            }),
-            getFixLogsStep({
-              isComplete: isStepComplete('fix_logs'),
-              setIsComplete: setCompletedStep.bind(null, 'fix_logs'),
             }),
             getUpgradeStep(),
           ]}
