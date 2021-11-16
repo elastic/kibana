@@ -48,11 +48,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
 
-  const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(false);
-
-  const isOnlyDetectionAlerts: boolean =
-    isDetectionsSourcerer || (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
-
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
     defaultDataView,
@@ -60,6 +55,13 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     signalIndexName,
     sourcererScope: { selectedDataViewId, selectedPatterns, loading },
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+
+  const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(
+    isTimelineSourcerer && selectedPatterns.join() === signalIndexName
+  );
+
+  const isOnlyDetectionAlerts: boolean =
+    isDetectionsSourcerer || (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewId, setDataViewId] = useState<string>(selectedDataViewId ?? defaultDataView.id);
@@ -244,7 +246,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
               fullWidth
               onChange={onChangeSuper}
               options={dataViewSelectOptions}
-              placeholder={i18n.PICK_INDEX_PATTERNS}
+              placeholder={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}
               valueOfSelected={dataViewId}
             />
           </StyledFormRow>
