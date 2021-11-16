@@ -31,6 +31,7 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams> {
 - Timestamp: \\{\\{context.date\\}\\}`,
       }
     ),
+    // if true users can only created in the application context not in alerting UI
     requiresAppContext: false,
   };
 }

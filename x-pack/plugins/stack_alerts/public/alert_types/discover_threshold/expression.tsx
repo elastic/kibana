@@ -8,7 +8,7 @@
 import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiCallOut, EuiTitle, EuiExpression } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiTitle, EuiExpression, EuiPopover } from '@elastic/eui';
 import {
   COMPARATORS,
   ThresholdExpression,
@@ -22,7 +22,11 @@ import {
   ISearchSource,
   parseSearchSourceJSON,
 } from '../../../../../../src/plugins/data/common';
-import { injectSearchSourceReferences } from '../../../../../../src/plugins/data/public';
+import {
+  injectSearchSourceReferences,
+  QueryStringInput,
+} from '../../../../../../src/plugins/data/public';
+import { FilterBar } from '../../../../../../src/plugins/data/public';
 
 export const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
@@ -48,6 +52,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     searchSourceReferencesJSON,
   } = alertParams;
   const [usedSearchSource, setUsedSearchSource] = useState<ISearchSource | undefined>();
+  const [showQueryBar, setShowQueryBar] = useState<boolean>(false);
+  const [showFilter, setShowFilter] = useState<boolean>(false);
 
   useEffect(() => {
     async function getSearchSource() {
@@ -102,8 +108,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     return null;
   }
   const filterArr = usedSearchSource!.getField('filter') as Filter[];
+  // @ts-ignore
   return (
-    <Fragment>
+    <>
       {hasExpressionErrors ? (
         <Fragment>
           <EuiSpacer />
@@ -126,28 +133,64 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         isActive={true}
         display="columns"
       />
-      <EuiSpacer size="s" />
-      <EuiExpression
-        description={'Query'}
-        value={usedSearchSource!.getField('query')!.query}
-        isActive={true}
-        display="columns"
-      />
-      {filterArr && (
-        <>
-          <EuiSpacer size="s" />
+      <EuiPopover
+        button={
           <EuiExpression
-            description={'Filter'}
-            value={filterArr
-              .map((filter: Filter) => {
-                return filter.meta.key;
-              })
-              .join(', ')}
+            description={'Query'}
+            value={usedSearchSource!.getField('query')!.query}
             isActive={true}
             display="columns"
+            onClick={() => setShowQueryBar(!showQueryBar)}
           />
-        </>
-      )}
+        }
+        display="block"
+        isOpen={showQueryBar}
+      >
+        <QueryStringInput
+          indexPatterns={[usedSearchSource!.getField('index')!]}
+          query={usedSearchSource!.getField('query')!}
+          onChange={(query) => {
+            // eslint-disable-next-line no-console
+            console.log(query);
+          }}
+        />
+      </EuiPopover>
+      <EuiSpacer size="s" />
+
+      <EuiPopover
+        button={
+          <EuiExpression
+            description={'Filter'}
+            value={
+              filterArr
+                ? filterArr
+                    .map((filter: Filter) => {
+                      return filter.meta.key;
+                    })
+                    .join(', ')
+                : ''
+            }
+            isActive={true}
+            display="columns"
+            onClick={() => setShowFilter(!showFilter)}
+          />
+        }
+        display="block"
+        isOpen={showFilter}
+      >
+        <FilterBar
+          filters={filterArr}
+          appName="discover"
+          className={''}
+          intl={{} as never}
+          indexPatterns={[usedSearchSource!.getField('index')!]}
+          onFiltersUpdated={(filters) => {
+            // eslint-disable-next-line no-console
+            console.log(filters);
+          }}
+        />
+      </EuiPopover>
+
       <EuiSpacer size="s" />
 
       <EuiTitle size="xs">
@@ -189,7 +232,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         }
       />
       <EuiSpacer />
-    </Fragment>
+    </>
   );
 };
 

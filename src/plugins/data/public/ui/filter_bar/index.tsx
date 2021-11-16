@@ -26,3 +26,12 @@ export const FilterItem = (props: FilterItemProps) => (
     <LazyFilterItem {...props} />
   </React.Suspense>
 );
+
+import type { FilterBarProps } from './filter_bar';
+
+const LazyFilterBar = React.lazy(() => import('./filter_bar'));
+export const FilterBar = (props: FilterBarProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyFilterBar {...props} />
+  </React.Suspense>
+);
