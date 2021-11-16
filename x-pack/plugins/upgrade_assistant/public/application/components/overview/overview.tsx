@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -64,7 +64,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
 
   return (
     <EuiPageBody restrictWidth={true} data-test-subj="overview">
-      <EuiPageContent horizontalPosition="center" color="transparent" paddingSize="none">
+      <EuiPageContentBody color="transparent" paddingSize="none">
         <EuiPageHeader
           bottomBorder
           pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
@@ -118,7 +118,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             getUpgradeStep(),
           ]}
         />
-      </EuiPageContent>
+      </EuiPageContentBody>
     </EuiPageBody>
   );
 });

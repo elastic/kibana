@@ -12,7 +12,7 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -40,7 +40,7 @@ export const EsDeprecationLogs: FunctionComponent = () => {
 
   return (
     <EuiPageBody restrictWidth={true} data-test-subj="esDeprecationLogs">
-      <EuiPageContent horizontalPosition="center" color="transparent" paddingSize="none">
+      <EuiPageContentBody color="transparent" paddingSize="none">
         <EuiPageHeader
           bottomBorder
           pageTitle={i18n.translate('xpack.upgradeAssistant.esDeprecationLogs.pageTitle', {
@@ -68,7 +68,7 @@ export const EsDeprecationLogs: FunctionComponent = () => {
         <EuiSpacer size="l" />
 
         <FixDeprecationLogs />
-      </EuiPageContent>
+      </EuiPageContentBody>
     </EuiPageBody>
   );
 };
