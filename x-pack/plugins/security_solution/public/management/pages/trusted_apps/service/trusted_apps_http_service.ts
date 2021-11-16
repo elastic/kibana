@@ -7,8 +7,14 @@
 
 import pMap from 'p-map';
 import { HttpStart } from 'kibana/public';
-import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  EXCEPTION_LIST_ITEM_URL,
+} from '@kbn/securitysolution-list-constants';
+import {
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   DeleteTrustedAppsRequestParams,
   GetOneTrustedAppRequestParams,
@@ -27,9 +33,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import {
-  TRUSTED_APPS_DELETE_API,
   TRUSTED_APPS_GET_API,
-  TRUSTED_APPS_LIST_API,
   TRUSTED_APPS_SUMMARY_API,
 } from '../../../../../common/endpoint/constants';
 import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/services/ingest';
@@ -99,10 +103,30 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     );
   }
 
-  async getTrustedAppsList(request: GetTrustedAppsListRequest) {
-    return this.http.get<GetTrustedAppsListResponse>(TRUSTED_APPS_LIST_API, {
-      query: request,
-    });
+  async getTrustedAppsList({
+    page = 1,
+    per_page: perPage = 10,
+    kuery,
+  }: GetTrustedAppsListRequest): Promise<GetTrustedAppsListResponse> {
+    const itemListResults = await this.http.get<FoundExceptionListItemSchema>(
+      `${EXCEPTION_LIST_ITEM_URL}/_find`,
+      {
+        query: {
+          page,
+          per_page: perPage,
+          filter: kuery,
+          sort_field: 'name',
+          sort_order: 'asc',
+          list_id: [ENDPOINT_TRUSTED_APPS_LIST_ID],
+          namespace_type: ['agnostic'],
+        },
+      }
+    );
+
+    return {
+      ...itemListResults,
+      data: itemListResults.data.map(exceptionListItemToTrustedApp),
+    };
   }
 
   async deleteTrustedApp(request: DeleteTrustedAppsRequestParams): Promise<void> {
