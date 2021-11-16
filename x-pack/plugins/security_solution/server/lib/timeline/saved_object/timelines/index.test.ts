@@ -26,6 +26,8 @@ import {
   mockResolvedTimeline,
   mockResolveTimelineResponse,
 } from '../../__mocks__/resolve_timeline';
+import { DATA_VIEW_ID_REF_NAME, SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../../../../../src/plugins/data_views/common';
 
 jest.mock('./convert_saved_object_to_savedtimeline', () => ({
   convertSavedObjectToSavedTimeline: jest.fn(),
@@ -307,6 +309,56 @@ describe('saved_object', () => {
 
     test('should return the timeline with resolve attributes', async () => {
       expect(result).toEqual(mockResolveTimelineResponse);
+    });
+  });
+  describe('field migrator', () => {
+    let mockResolveSavedObject: jest.Mock;
+    const convertSavedObjectToSavedTimelineMock: jest.Mock =
+      convertSavedObjectToSavedTimeline as jest.Mock;
+    let mockRequest: FrameworkRequest;
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      convertSavedObjectToSavedTimelineMock.mockReturnValue(mockResolvedTimeline);
+      mockResolveSavedObject = jest.fn().mockReturnValue({
+        ...mockResolvedSavedObject,
+        saved_object: {
+          ...mockResolvedSavedObject.saved_object,
+          references: [
+            {
+              id: 'boo',
+              name: SAVED_QUERY_ID_REF_NAME,
+              type: SAVED_QUERY_TYPE,
+            },
+            {
+              id: 'also-boo',
+              name: DATA_VIEW_ID_REF_NAME,
+              type: DATA_VIEW_SAVED_OBJECT_TYPE,
+            },
+          ],
+        },
+      });
+      mockRequest = {
+        user: {
+          username: 'username',
+        },
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                resolve: mockResolveSavedObject,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+
+      await resolveTimelineOrNull(mockRequest, '760d3d20-2142-11ec-a46f-051cb8e3154c');
+    });
+
+    test('the fields we track in references are converted to attributes when SO is requested', () => {
+      const { attributes } = convertSavedObjectToSavedTimelineMock.mock.calls[0][0];
+      expect(attributes.dataViewId).toEqual('also-boo');
+      expect(attributes.savedQueryId).toEqual('boo');
     });
   });
 });

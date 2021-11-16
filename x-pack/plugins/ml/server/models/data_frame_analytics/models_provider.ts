@@ -49,26 +49,31 @@ export function modelsProvider(
         modelIds.map((id: string) => [id, null])
       );
 
-      const { body, statusCode } = await client.asCurrentUser.ingest.getPipeline();
+      try {
+        const { body } = await client.asCurrentUser.ingest.getPipeline();
 
-      if (statusCode !== 200) {
-        return modelIdsMap;
-      }
+        for (const [pipelineName, pipelineDefinition] of Object.entries(body)) {
+          const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
 
-      for (const [pipelineName, pipelineDefinition] of Object.entries(body)) {
-        const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
-
-        for (const processor of processors) {
-          const id = processor.inference?.model_id;
-          if (modelIdsMap.has(id)) {
-            const obj = modelIdsMap.get(id);
-            if (obj === null) {
-              modelIdsMap.set(id, { [pipelineName]: pipelineDefinition });
-            } else {
-              obj![pipelineName] = pipelineDefinition;
+          for (const processor of processors) {
+            const id = processor.inference?.model_id;
+            if (modelIdsMap.has(id)) {
+              const obj = modelIdsMap.get(id);
+              if (obj === null) {
+                modelIdsMap.set(id, { [pipelineName]: pipelineDefinition });
+              } else {
+                obj![pipelineName] = pipelineDefinition;
+              }
             }
           }
         }
+      } catch (error) {
+        if (error.statusCode === 404) {
+          // ES returns 404 when there are no pipelines
+          // Instead, we should return the modelIdsMap and a 200
+          return modelIdsMap;
+        }
+        throw error;
       }
 
       return modelIdsMap;

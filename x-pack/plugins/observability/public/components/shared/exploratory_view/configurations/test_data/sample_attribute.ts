@@ -181,6 +181,7 @@ export const sampleAttribute = {
             {
               color: 'green',
               forAccessor: 'y-axis-column-layer0',
+              axisMode: 'left',
             },
           ],
         },

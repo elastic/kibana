@@ -43,10 +43,10 @@ describe('Reporting server createConfig$', () => {
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
 
     expect(result.encryptionKey).toMatch(/\S{32,}/); // random 32 characters
-    expect(mockLogger.warn.mock.calls.length).toBe(1);
-    expect(mockLogger.warn.mock.calls[0]).toMatchObject([
-      'Generating a random key for xpack.reporting.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.reporting.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.',
-    ]);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Generating a random key for xpack.reporting.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.reporting.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+    );
   });
 
   it('uses the user-provided encryption key', async () => {
@@ -58,7 +58,7 @@ describe('Reporting server createConfig$', () => {
     const mockConfig$ = createMockConfig(mockInitContext);
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
     expect(result.encryptionKey).toMatch('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
-    expect(mockLogger.warn.mock.calls.length).toBe(0);
+    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
   it('uses the user-provided encryption key, reporting kibanaServer settings to override server info', async () => {
@@ -103,7 +103,7 @@ describe('Reporting server createConfig$', () => {
         },
       }
     `);
-    expect(mockLogger.warn.mock.calls.length).toBe(0);
+    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
   it('uses user-provided disableSandbox: false', async () => {
@@ -117,7 +117,7 @@ describe('Reporting server createConfig$', () => {
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
 
     expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: false });
-    expect(mockLogger.warn.mock.calls.length).toBe(0);
+    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
   it('uses user-provided disableSandbox: true', async () => {
@@ -131,7 +131,7 @@ describe('Reporting server createConfig$', () => {
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
 
     expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: true });
-    expect(mockLogger.warn.mock.calls.length).toBe(0);
+    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
   it('provides a default for disableSandbox', async () => {
@@ -144,18 +144,12 @@ describe('Reporting server createConfig$', () => {
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
 
     expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: expect.any(Boolean) });
-    expect(mockLogger.warn.mock.calls.length).toBe(0);
+    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
-  for (const hostname of [
-    '0',
-    '0.0',
-    '0.0.0',
-    '0.0.0.0',
-    '0000:0000:0000:0000:0000:0000:0000:0000',
-    '::',
-  ]) {
-    it(`apply failover logic when hostname is given as ${hostname}`, async () => {
+  it.each(['0', '0.0', '0.0.0', '0.0.0.0', '0000:0000:0000:0000:0000:0000:0000:0000', '::'])(
+    `apply failover logic when hostname is given as "%s"`,
+    async (hostname) => {
       mockInitContext = coreMock.createPluginInitializerContext(
         createMockConfigSchema({
           encryptionKey: 'aaaaaaaaaaaaabbbbbbbbbbbbaaaaaaaaa',
@@ -167,7 +161,7 @@ describe('Reporting server createConfig$', () => {
           },
         })
       );
-      mockCoreSetup.http.getServerInfo = jest.fn().mockImplementation(
+      mockCoreSetup.http.getServerInfo = jest.fn(
         (): HttpServerInfo => ({
           name: 'cool server',
           hostname,
@@ -177,12 +171,16 @@ describe('Reporting server createConfig$', () => {
       );
 
       const mockConfig$ = createMockConfig(mockInitContext);
-      const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
-      expect(result.kibanaServer).toMatchObject({
-        hostname: 'localhost',
-        port: 5601,
-        protocol: 'http',
-      });
-    });
-  }
+      await expect(
+        createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise()
+      ).resolves.toHaveProperty(
+        'kibanaServer',
+        expect.objectContaining({
+          hostname: 'localhost',
+          port: 5601,
+          protocol: 'http',
+        })
+      );
+    }
+  );
 });

@@ -546,8 +546,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
           navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
         }
       } catch (e) {
-        flashAPIErrors(e);
         navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
+        flashAPIErrors(e);
       }
     },
     createContentSource: async ({ serviceType, successCallback, errorCallback }) => {

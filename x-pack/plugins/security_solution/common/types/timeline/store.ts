@@ -38,19 +38,20 @@ export interface SortColumnTimeline {
 }
 
 export interface TimelinePersistInput {
-  id: string;
+  columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
+  dataViewId: string;
   dateRange?: {
     start: string;
     end: string;
   };
+  defaultColumns?: ColumnHeaderOptions[];
   excludedRowRendererIds?: RowRendererId[];
   expandedDetail?: TimelineExpandedDetail;
   filters?: Filter[];
-  columns: ColumnHeaderOptions[];
-  defaultColumns?: ColumnHeaderOptions[];
-  itemsPerPage?: number;
+  id: string;
   indexNames: string[];
+  itemsPerPage?: number;
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
   };

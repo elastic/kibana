@@ -19,10 +19,10 @@ import { CurationsLogic } from '../curations_logic';
 export const CurationsOverview: React.FC = () => {
   const { curations } = useValues(CurationsLogic);
   const {
-    engine: { search_relevance_suggestions_active: searchRelevanceSuggestionsActive },
+    engine: { adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive },
   } = useValues(EngineLogic);
 
-  const shouldShowSuggestions = searchRelevanceSuggestionsActive;
+  const shouldShowSuggestions = adaptiveRelevanceSuggestionsActive;
 
   return (
     <>

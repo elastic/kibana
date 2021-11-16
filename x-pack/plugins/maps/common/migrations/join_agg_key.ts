@@ -62,7 +62,13 @@ export function migrateJoinAggKey({
     return attributes;
   }
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layerDescriptor: LayerDescriptor) => {
     if (
       layerDescriptor.type === LAYER_TYPE.VECTOR ||

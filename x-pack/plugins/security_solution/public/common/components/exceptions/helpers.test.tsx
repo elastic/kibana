@@ -42,13 +42,13 @@ import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/
 import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
 import { CodeSignature } from '../../../../common/ecs/file';
-import { IndexPatternBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
 
-const getMockIndexPattern = (): IndexPatternBase => ({
+const getMockIndexPattern = (): DataViewBase => ({
   fields,
   id: '1234',
   title: 'logstash-*',
@@ -364,7 +364,7 @@ describe('Exception helpers', () => {
           name: 'nested.field',
         },
       ],
-    } as IndexPatternBase;
+    } as DataViewBase;
 
     test('it should return false with an empty array', () => {
       const payload: ExceptionListItemSchema[] = [];
