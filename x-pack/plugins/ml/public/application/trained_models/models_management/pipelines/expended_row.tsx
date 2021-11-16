@@ -69,7 +69,7 @@ export const ProcessorsStats: FC<ProcessorsStatsProps> = ({ stats }) => {
       ),
       width: '100px',
       truncateText: false,
-      'data-test-subj': 'mlProcessorStatsTypePerDoc',
+      'data-test-subj': 'mlProcessorStatsTimePerDoc',
       render: (v: number) => {
         return durationFormatter(v);
       },
