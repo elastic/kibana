@@ -264,11 +264,11 @@ export class EmsVectorTileLayer extends AbstractLayer {
         }
         const newLayerObject = {
           ...layer,
-          source:
-            typeof (layer as MbLayer).source === 'string' ||
-            typeof (layer as MbLayer).source === 'undefined'
-              ? this._generateMbSourceId((layer as MbLayer).source as string | undefined)
-              : undefined,
+          source: this._generateMbSourceId(
+            typeof (layer as MbLayer).source === 'string'
+              ? ((layer as MbLayer).source as string)
+              : undefined
+          ),
           id: mbLayerId,
         };
 
