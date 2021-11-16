@@ -227,7 +227,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepRetention.docsButtonLabel"
-              defaultMessage="Snapshot retention docs"
+              defaultMessage="Snapshot docs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
