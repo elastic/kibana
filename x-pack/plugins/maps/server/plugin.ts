@@ -39,6 +39,8 @@ import { EMSSettings } from '../common/ems_settings';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { embeddableMigrations } from './embeddable_migrations';
+import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
+import { registerIntegrations } from './register_integrations';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -47,6 +49,7 @@ interface SetupDeps {
   licensing: LicensingPluginSetup;
   mapsEms: MapsEmsPluginSetup;
   embeddable: EmbeddableSetup;
+  customIntegrations?: CustomIntegrationsPluginSetup;
 }
 
 export interface StartDeps {
@@ -159,7 +162,7 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features, mapsEms } = plugins;
+    const { usageCollection, home, licensing, features, mapsEms, customIntegrations } = plugins;
     const mapsEmsConfig = mapsEms.config;
     const config$ = this._initializerContext.config.create();
 
@@ -176,6 +179,10 @@ export class MapsPlugin implements Plugin {
 
     if (home) {
       this._initHomeData(home, core.http.basePath.prepend, emsSettings);
+    }
+
+    if (customIntegrations) {
+      registerIntegrations(core, customIntegrations);
     }
 
     features.registerKibanaFeature({

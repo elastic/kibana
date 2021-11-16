@@ -45,6 +45,7 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   language_client: 'Language client',
   upload_file: 'Upload a file',
   website_search: 'Website search',
+  geo: 'Geo',
 };
 
 /**
