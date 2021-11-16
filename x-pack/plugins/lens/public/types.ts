@@ -198,6 +198,10 @@ export interface Datasource<T = unknown, P = unknown> {
     domElement: Element,
     props: DatasourceDataPanelProps<T>
   ) => ((cleanupElement: Element) => void) | void;
+  renderHorizontalDataPanel?: (
+    domElement: Element,
+    props: DatasourceDataPanelProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
   renderDimensionTrigger: (
     domElement: Element,
     props: DatasourceDimensionTriggerProps<T>

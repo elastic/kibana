@@ -22,6 +22,10 @@ export const renameColumns: RenameColumnsExpressionFunction = {
           'A JSON encoded object in which keys are the old column ids and values are the corresponding new ones. All other columns ids are kept.',
       }),
     },
+    overwriteTypes: {
+      types: ['string'],
+      help: '',
+    },
   },
   inputTypes: ['datatable'],
   async fn(...args) {

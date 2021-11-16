@@ -125,15 +125,6 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
 
     trackUiEvent(`chart_switch`);
 
-    switchToSuggestion(
-      dispatchLens,
-      {
-        ...selection,
-        visualizationState: selection.getVisualizationState(),
-      },
-      true
-    );
-
     if (
       (!selection.datasourceId && !selection.sameDatasources) ||
       selection.dataLoss === 'everything'
@@ -145,6 +136,15 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         })
       );
     }
+
+    switchToSuggestion(
+      dispatchLens,
+      {
+        ...selection,
+        visualizationState: selection.getVisualizationState(),
+      },
+      true
+    );
   };
 
   function getSelection(

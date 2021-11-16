@@ -23,9 +23,10 @@ function getColumnName(originalColumn: OriginalColumn, newColumn: DatatableColum
 
 export const renameColumnFn: RenameColumnsExpressionFunction['fn'] = (
   data,
-  { idMap: encodedIdMap }
+  { idMap: encodedIdMap, overwriteTypes: encodedOverwriteTypes }
 ) => {
   const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn>;
+  const overwrittenFieldTypes = encodedOverwriteTypes ? JSON.parse(encodedOverwriteTypes) : {};
 
   return {
     type: 'datatable',
@@ -56,6 +57,9 @@ export const renameColumnFn: RenameColumnsExpressionFunction['fn'] = (
         ...column,
         id: mappedItem.id,
         name: getColumnName(mappedItem, column),
+        type: overwrittenFieldTypes[column.id] || column.type,
+        serializedParams:
+          overwrittenFieldTypes[column.id] === 'date' ? { id: 'date' } : column.serializedParams,
       };
     }),
   };

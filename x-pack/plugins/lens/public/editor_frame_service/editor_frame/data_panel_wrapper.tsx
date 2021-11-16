@@ -33,6 +33,7 @@ interface DataPanelWrapperProps {
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
   plugins: { uiActions: UiActionsStart };
+  horizontal: boolean;
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
@@ -93,7 +94,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
 
   return (
     <>
-      {Object.keys(props.datasourceMap).length > 1 && (
+      {!props.horizontal && Object.keys(props.datasourceMap).length > 1 && (
         <EuiPopover
           id="datasource-switch"
           className="lnsDataPanelWrapper__switchSource"
@@ -138,7 +139,11 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       {activeDatasourceId && !datasourceIsLoading && (
         <NativeRenderer
           className="lnsDataPanelWrapper"
-          render={props.datasourceMap[activeDatasourceId].renderDataPanel}
+          render={
+            props.horizontal
+              ? props.datasourceMap[activeDatasourceId].renderHorizontalDataPanel!
+              : props.datasourceMap[activeDatasourceId].renderDataPanel
+          }
           nativeProps={datasourceProps}
         />
       )}

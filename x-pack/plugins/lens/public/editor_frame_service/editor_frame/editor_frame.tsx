@@ -93,7 +93,22 @@ export function EditorFrame(props: EditorFrameProps) {
             showNoDataPopover={props.showNoDataPopover}
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}
+            horizontal={false}
           />
+        }
+        horizontalDataPanel={
+          activeDatasourceId &&
+          datasourceMap[activeDatasourceId].renderHorizontalDataPanel && (
+            <DataPanelWrapper
+              core={props.core}
+              plugins={props.plugins}
+              datasourceMap={datasourceMap}
+              showNoDataPopover={props.showNoDataPopover}
+              dropOntoWorkspace={dropOntoWorkspace}
+              hasSuggestionForField={hasSuggestionForField}
+              horizontal
+            />
+          )
         }
         configPanel={
           areDatasourcesLoaded && (

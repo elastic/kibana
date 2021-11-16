@@ -52,10 +52,12 @@ export const getPreloadedState = ({
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
   if (initialDatasourceId) {
-    datasourceStates[initialDatasourceId] = {
-      state: null,
-      isLoading: true,
-    };
+    Object.keys(datasourceMap).forEach((datasourceId) => {
+      datasourceStates[datasourceId] = {
+        state: null,
+        isLoading: true,
+      };
+    });
   }
 
   const state = {
@@ -383,13 +385,18 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         };
       }
     ) => {
+      const activeDatasourceId = state.activeDatasourceId!;
+      const activeDatasource = datasourceMap[activeDatasourceId];
       return {
         ...state,
         datasourceStates: {
           ...state.datasourceStates,
-          [payload.newDatasourceId]: state.datasourceStates[payload.newDatasourceId] || {
-            state: null,
-            isLoading: true,
+          [payload.newDatasourceId]: {
+            isLoading: false,
+            state: datasourceMap[payload.newDatasourceId].insertLayer(
+              state.datasourceStates[payload.newDatasourceId].state,
+              activeDatasource.getLayers(state.datasourceStates[activeDatasourceId].state)[0]
+            ),
           },
         },
         activeDatasourceId: payload.newDatasourceId,

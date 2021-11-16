@@ -84,6 +84,7 @@ import type { SaveModalContainerProps } from './app_plugin/save_modal_container'
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
+import { EsDSLDatasource } from './esdsl_datasource';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -165,6 +166,7 @@ export class LensPlugin {
   private datatableVisualization: DatatableVisualizationType | undefined;
   private editorFrameService: EditorFrameServiceType | undefined;
   private indexpatternDatasource: IndexPatternDatasourceType | undefined;
+  private esdslDatasource: IndexPatternDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
   private pieVisualization: PieVisualizationType | undefined;
@@ -311,6 +313,7 @@ export class LensPlugin {
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
     this.indexpatternDatasource = new IndexPatternDatasource();
+    this.esdslDatasource = new EsDSLDatasource();
     this.xyVisualization = new XyVisualization();
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
@@ -331,6 +334,7 @@ export class LensPlugin {
       formatFactory,
     };
     this.indexpatternDatasource.setup(core, dependencies);
+    this.esdslDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
