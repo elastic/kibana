@@ -446,7 +446,6 @@ Object {
           "type": "search",
         },
       ],
-      "internal": false,
       "keep_policies_up_to_date": false,
       "name": "apache",
       "package_assets": Array [
