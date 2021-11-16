@@ -14,20 +14,20 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
   VECTOR_STYLES,
-} from '../../../../common/constants';
-import { getJoinAggKey } from '../../../../common/get_agg_key';
+} from '../../../../../common/constants';
+import { getJoinAggKey } from '../../../../../common/get_agg_key';
 import {
   ColorDynamicOptions,
   CountAggDescriptor,
   EMSFileSourceDescriptor,
   ESSearchSourceDescriptor,
-} from '../../../../common/descriptor_types';
-import { VectorStyle } from '../../styles/vector/vector_style';
-import { GeoJsonVectorLayer } from '../vector_layer';
-import { EMSFileSource } from '../../sources/ems_file_source';
+} from '../../../../../common/descriptor_types';
+import { VectorStyle } from '../../../styles/vector/vector_style';
+import { GeoJsonVectorLayer } from '../../vector_layer';
+import { EMSFileSource } from '../../../sources/ems_file_source';
 // @ts-ignore
-import { ESSearchSource } from '../../sources/es_search_source';
-import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
+import { ESSearchSource } from '../../../sources/es_search_source';
+import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 

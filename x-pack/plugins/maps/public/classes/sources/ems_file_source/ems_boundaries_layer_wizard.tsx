@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonVectorLayer } from '../../layers/vector_layer';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { EMSFileSource, getSourceTitle } from './ems_file_source';
 
@@ -16,7 +16,7 @@ import { EMSFileSource, getSourceTitle } from './ems_file_source';
 import { getEMSSettings } from '../../../kibana_services';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { EMSBoundariesLayerIcon } from '../../layers/icons/ems_boundaries_layer_icon';
+import { EMSBoundariesLayerIcon } from '../../layers/wizards/icons/ems_boundaries_layer_icon';
 
 function getDescription() {
   const emsSettings = getEMSSettings();

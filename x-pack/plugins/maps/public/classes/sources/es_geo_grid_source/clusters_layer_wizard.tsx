@@ -10,7 +10,7 @@ import React from 'react';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import {
   ESGeoGridSourceDescriptor,
@@ -29,7 +29,7 @@ import {
   STYLE_TYPE,
 } from '../../../../common/constants';
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
-import { ClustersLayerIcon } from '../../layers/icons/clusters_layer_icon';
+import { ClustersLayerIcon } from '../../layers/wizards/icons/clusters_layer_icon';
 
 export const clustersLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],

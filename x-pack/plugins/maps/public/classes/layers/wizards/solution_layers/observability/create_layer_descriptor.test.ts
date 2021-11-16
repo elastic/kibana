@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { emsWorldLayerId } from '../../../../../common/constants';
+import { emsWorldLayerId } from '../../../../../../common/constants';
 
-jest.mock('../../../../kibana_services', () => {
+jest.mock('../../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
       return false;
