@@ -51,6 +51,12 @@ export type {
   IndexPatternLoadStartDependencies,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../data_views/common';
+export type {
+  IndexPatternsContract,
+  DataViewsContract,
+  IndexPatternListItem,
+  DataViewListItem,
+} from '../../data_views/common';
 export {
   RUNTIME_FIELD_TYPES,
   FLEET_ASSETS_TO_IGNORE,
@@ -58,21 +64,20 @@ export {
   DATA_VIEW_SAVED_OBJECT_TYPE,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
   isFilterable,
-  isNestedField,
   fieldList,
   DataViewField,
   IndexPatternField,
   DataViewType,
   IndexPatternType,
   IndexPatternsService,
-  IndexPatternsContract,
   DataViewsService,
-  DataViewsContract,
   IndexPattern,
-  IndexPatternListItem,
   DataView,
-  DataViewListItem,
   DuplicateDataViewError,
   DataViewSavedObjectConflictError,
   getIndexPatternLoadMeta,
+  isNestedField,
+  isMultiField,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
 } from '../../data_views/common';

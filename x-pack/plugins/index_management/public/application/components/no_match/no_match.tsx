@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const NoMatch = () => (
-  <div>
+  <div data-test-subj="noIndicesMessage">
     <FormattedMessage
       id="xpack.idxMgmt.noMatch.noIndicesDescription"
       defaultMessage="No indices to show"

@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /** @internal **/
 export interface ScriptedFieldItem {
   name: string;
   lang: estypes.ScriptLanguage;
   script: string;
+  isUserEditable?: boolean;
 }

@@ -57,6 +57,11 @@ export interface CreateRulesProps {
   signal: AbortSignal;
 }
 
+export interface PreviewRulesProps {
+  rule: CreateRulesSchema & { invocationCount: number };
+  signal: AbortSignal;
+}
+
 export interface UpdateRulesProps {
   rule: UpdateRulesSchema;
   signal: AbortSignal;
@@ -108,6 +113,8 @@ export const RuleSchema = t.intersection([
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
+    outcome: t.union([t.literal('exactMatch'), t.literal('aliasMatch'), t.literal('conflict')]),
+    alias_target_id: t.string,
     building_block_type,
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),
@@ -138,6 +145,7 @@ export const RuleSchema = t.intersection([
     timestamp_override,
     note: t.string,
     exceptions_list: listArray,
+    uuid: t.string,
     version: t.number,
   }),
 ]);

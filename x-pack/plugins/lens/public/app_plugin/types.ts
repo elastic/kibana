@@ -21,7 +21,6 @@ import type {
 import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import type { UsageCollectionStart } from '../../../../../src/plugins/usage_collection/public';
 import type { DashboardStart } from '../../../../../src/plugins/dashboard/public';
-import type { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import type { LensAttributeService } from '../lens_attribute_service';
@@ -105,7 +104,7 @@ export interface LensAppServices {
   dashboard: DashboardStart;
   fieldFormats: FieldFormatsStart;
   data: DataPublicPluginStart;
-  inspector: InspectorStart;
+  inspector: LensInspector;
   uiSettings: IUiSettingsClient;
   application: ApplicationStart;
   notifications: NotificationsStart;

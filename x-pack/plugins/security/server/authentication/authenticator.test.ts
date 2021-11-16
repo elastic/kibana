@@ -27,7 +27,7 @@ import {
 import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
+import { auditServiceMock } from '../audit/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import type { SessionValue } from '../session_management';
@@ -48,7 +48,6 @@ function getMockOptions({
   selector?: AuthenticatorOptions['config']['authc']['selector'];
 } = {}) {
   return {
-    legacyAuditLogger: securityAuditLoggerMock.create(),
     audit: auditServiceMock.create(),
     getCurrentUser: jest.fn(),
     clusterClient: elasticsearchServiceMock.createClusterClient(),
@@ -210,7 +209,7 @@ describe('Authenticator', () => {
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
         ).toHaveBeenCalledWith(expect.anything(), {
-          supportedSchemes: new Set(['apikey', 'basic']),
+          supportedSchemes: new Set(['apikey', 'bearer', 'basic']),
         });
       });
 
@@ -238,7 +237,9 @@ describe('Authenticator', () => {
 
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
-        ).toHaveBeenCalledWith(expect.anything(), { supportedSchemes: new Set(['apikey']) });
+        ).toHaveBeenCalledWith(expect.anything(), {
+          supportedSchemes: new Set(['apikey', 'bearer']),
+        });
       });
 
       it('disabled if explicitly disabled', () => {
@@ -1888,10 +1889,15 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessionValue: SessionValue;
+    const auditLogger = {
+      log: jest.fn(),
+    };
+
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
       mockSessionValue = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
       mockOptions.session.get.mockResolvedValue(mockSessionValue);
+      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
       mockOptions.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
       mockOptions.license.getFeatures.mockReturnValue({
         allowAccessAgreement: true,
@@ -1951,13 +1957,11 @@ describe('Authenticator', () => {
         accessAgreementAcknowledged: true,
       });
 
-      expect(mockOptions.legacyAuditLogger.accessAgreementAcknowledged).toHaveBeenCalledTimes(1);
-      expect(mockOptions.legacyAuditLogger.accessAgreementAcknowledged).toHaveBeenCalledWith(
-        'user',
-        {
-          type: 'basic',
-          name: 'basic1',
-        }
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'access_agreement_acknowledged', category: ['authentication'] },
+        })
       );
 
       expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).toHaveBeenCalledTimes(

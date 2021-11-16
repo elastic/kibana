@@ -48,15 +48,11 @@ export function MetricChart({
   args,
   formatFactory,
 }: MetricChartProps & { formatFactory: FormatFactory }) {
-  const { metricTitle, title, description, accessor, mode } = args;
+  const { metricTitle, accessor, mode } = args;
   const firstTable = Object.values(data.tables)[0];
 
   const getEmptyState = () => (
-    <VisualizationContainer
-      reportTitle={title}
-      reportDescription={description}
-      className="lnsMetricExpression__container"
-    >
+    <VisualizationContainer className="lnsMetricExpression__container">
       <EmptyPlaceholder icon={LensIconChartMetric} />
     </VisualizationContainer>
   );
@@ -84,12 +80,8 @@ export function MetricChart({
       : Number(Number(row[accessor]).toFixed(3)).toString();
 
   return (
-    <VisualizationContainer
-      reportTitle={title}
-      reportDescription={description}
-      className="lnsMetricExpression__container"
-    >
-      <AutoScale>
+    <VisualizationContainer className="lnsMetricExpression__container">
+      <AutoScale key={value}>
         <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
           {value}
         </div>

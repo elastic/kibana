@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +18,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { EngineLogic } from '../../../engine';
 
 import { Result } from '../../../result';
 import { Result as ResultType } from '../../../result/types';
@@ -27,14 +31,14 @@ interface Props {
 }
 
 export const CurationResultPanel: React.FC<Props> = ({ variant, results }) => {
-  // TODO wire up
-  const count = 3;
+  const { isMetaEngine, engine } = useValues(EngineLogic);
+  const count = results.length;
 
   return (
     <>
       <EuiFlexGroup className="curationResultPanel__header" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiNotificationBadge>{count}</EuiNotificationBadge>
+          <EuiNotificationBadge data-test-subj="curationCount">{count}</EuiNotificationBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
@@ -68,9 +72,14 @@ export const CurationResultPanel: React.FC<Props> = ({ variant, results }) => {
         className={`curationResultPanel curationResultPanel--${variant}`}
       >
         {results.length > 0 ? (
-          results.map((result) => (
-            <EuiFlexItem grow={false} key={result.id.raw}>
-              <Result result={result} isMetaEngine={false} />
+          results.map((result, index) => (
+            <EuiFlexItem key={result.id.raw} style={{ width: '100%' }} grow={false}>
+              <Result
+                result={result}
+                isMetaEngine={isMetaEngine}
+                schemaForTypeHighlights={engine.schema}
+                resultPosition={index + 1}
+              />
             </EuiFlexItem>
           ))
         ) : (

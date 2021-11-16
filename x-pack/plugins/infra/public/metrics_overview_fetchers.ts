@@ -27,7 +27,7 @@ export const createMetricsHasData =
 
 export const createMetricsFetchData =
   (getStartServices: InfraClientCoreSetup['getStartServices']) =>
-  async ({ absoluteTime, bucketSize }: FetchDataParams): Promise<MetricsFetchDataResponse> => {
+  async ({ absoluteTime, intervalString }: FetchDataParams): Promise<MetricsFetchDataResponse> => {
     const [coreServices] = await getStartServices();
     const { http } = coreServices;
 
@@ -36,7 +36,7 @@ export const createMetricsFetchData =
 
       const overviewRequest: TopNodesRequest = {
         sourceId: 'default',
-        bucketSize,
+        bucketSize: intervalString,
         size: 5,
         timerange: {
           from: start,

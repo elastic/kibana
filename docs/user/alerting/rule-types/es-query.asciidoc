@@ -17,9 +17,9 @@ Define properties to detect the condition.
 [role="screenshot"]
 image::user/alerting/images/rule-types-es-query-conditions.png[Five clauses define the condition to detect]
 
-Index:: This clause requires an *index or index pattern* and a *time field* that will be used for the *time window*.
+Index:: This clause requires an *index or data view* and a *time field* that will be used for the *time window*.
 Size:: This clause specifies the number of documents to pass to the configured actions when the the threshold condition is met.
-{es} query:: This clause specifies the ES DSL query to execute. The number of documents that match this query will be evaulated against the threshold
+{es} query:: This clause specifies the ES DSL query to execute. The number of documents that match this query will be evaluated against the threshold
 condition. Aggregations are not supported at this time. 
 Threshold:: This clause defines a threshold value and a comparison operator  (`is above`, `is above or equals`, `is below`, `is below or equals`, or `is between`). The number of documents that match the specified query is compared to this threshold.
 Time window:: This clause determines how far back to search for documents, using the *time field* set in the *index* clause. Generally this value should be set to a value higher than the *check every* value in the <<defining-rules-general-details, general rule details>>, to avoid gaps in detection. 

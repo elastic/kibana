@@ -29,13 +29,6 @@ const Container = euiStyled.div`
   overflow: hidden;
 `;
 
-const TIMELINE_MARGINS = {
-  top: 40,
-  left: 100,
-  right: 50,
-  bottom: 0,
-};
-
 const toggleFlyout = ({
   history,
   item,
@@ -72,6 +65,16 @@ export function Waterfall({ waterfall, waterfallItemId }: Props) {
   const agentMarks = getAgentMarks(waterfall.entryWaterfallTransaction?.doc);
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
+  // Calculate the left margin relative to the deepest level, or 100px, whichever
+  // is more.
+  const [maxLevel, setMaxLevel] = useState(0);
+  const timelineMargins = {
+    top: 40,
+    left: Math.max(100, maxLevel * 10),
+    right: 50,
+    bottom: 0,
+  };
+
   return (
     <HeightRetainer>
       <Container>
@@ -99,7 +102,7 @@ export function Waterfall({ waterfall, waterfallItemId }: Props) {
               marks={[...agentMarks, ...errorMarks]}
               xMax={duration}
               height={waterfallHeight}
-              margins={TIMELINE_MARGINS}
+              margins={timelineMargins}
             />
           </div>
           <WaterfallItemsContainer>
@@ -110,15 +113,13 @@ export function Waterfall({ waterfall, waterfallItemId }: Props) {
                 isOpen={isAccordionOpen}
                 item={waterfall.entryWaterfallTransaction}
                 level={0}
+                setMaxLevel={setMaxLevel}
                 waterfallItemId={waterfallItemId}
                 duration={duration}
                 waterfall={waterfall}
-                timelineMargins={TIMELINE_MARGINS}
+                timelineMargins={timelineMargins}
                 onClickWaterfallItem={(item: IWaterfallItem) =>
                   toggleFlyout({ history, item })
-                }
-                onToggleEntryTransaction={() =>
-                  setIsAccordionOpen((isOpen) => !isOpen)
                 }
               />
             )}

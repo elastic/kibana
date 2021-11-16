@@ -15,15 +15,10 @@ import './journeys';
 
 export function playwrightRunTests() {
   return async ({ getService }: any) => {
-    try {
-      const result = await playwrightStart(getService);
+    const result = await playwrightStart(getService);
 
-      if (result && result.uptime.status !== 'succeeded') {
-        process.exit(1);
-      }
-    } catch (error) {
-      console.error('errors: ', error);
-      process.exit(1);
+    if (result && result.uptime.status !== 'succeeded') {
+      throw new Error('Tests failed');
     }
   };
 }
@@ -42,7 +37,7 @@ async function playwrightStart(getService: any) {
 
   const res = await playwrightRun({
     params: { kibanaUrl },
-    playwrightOptions: { chromiumSandbox: false },
+    playwrightOptions: { headless: true, chromiumSandbox: false, timeout: 60 * 1000 },
   });
 
   console.log('Removing esArchiver...');

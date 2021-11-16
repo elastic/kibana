@@ -5,12 +5,37 @@
  * 2.0.
  */
 
+import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Action } from 'redux';
 import { HostIsolationExceptionsPageState } from '../types';
 
-export type HostIsolationExceptionsPageDataChanged =
-  Action<'hostIsolationExceptionsPageDataChanged'> & {
-    payload: HostIsolationExceptionsPageState['entries'];
+export type HostIsolationExceptionsFormStateChanged =
+  Action<'hostIsolationExceptionsFormStateChanged'> & {
+    payload: HostIsolationExceptionsPageState['form']['status'];
   };
 
-export type HostIsolationExceptionsPageAction = HostIsolationExceptionsPageDataChanged;
+export type HostIsolationExceptionsFormEntryChanged =
+  Action<'hostIsolationExceptionsFormEntryChanged'> & {
+    payload: HostIsolationExceptionsPageState['form']['entry'];
+  };
+
+export type HostIsolationExceptionsCreateEntry = Action<'hostIsolationExceptionsCreateEntry'> & {
+  payload: HostIsolationExceptionsPageState['form']['entry'];
+};
+
+export type HostIsolationExceptionsMarkToEdit = Action<'hostIsolationExceptionsMarkToEdit'> & {
+  payload: {
+    id: string;
+  };
+};
+
+export type HostIsolationExceptionsSubmitEdit = Action<'hostIsolationExceptionsSubmitEdit'> & {
+  payload: UpdateExceptionListItemSchema;
+};
+
+export type HostIsolationExceptionsPageAction =
+  | HostIsolationExceptionsCreateEntry
+  | HostIsolationExceptionsFormStateChanged
+  | HostIsolationExceptionsFormEntryChanged
+  | HostIsolationExceptionsMarkToEdit
+  | HostIsolationExceptionsSubmitEdit;

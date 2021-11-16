@@ -65,6 +65,9 @@ import { RulesClient } from '../../../../../alerting/server';
 import { LegacyRuleActions } from '../rule_actions/legacy_types';
 import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRuleActionsSavedObjectType } from '../rule_actions/legacy_saved_object_mappings';
+import { LegacyMigrateParams } from './types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -295,4 +298,69 @@ export const maybeMute = async ({
   } else {
     // Do nothing, no-operation
   }
+};
+
+/**
+ * Determines if rule needs to be migrated from legacy actions
+ * and returns necessary pieces for the updated rule
+ */
+export const legacyMigrate = async ({
+  rulesClient,
+  savedObjectsClient,
+  rule,
+}: LegacyMigrateParams): Promise<SanitizedAlert<RuleParams> | null | undefined> => {
+  if (rule == null || rule.id == null) {
+    return rule;
+  }
+  /**
+   * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
+   * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actualy value (1hr etc..)
+   * Then use the rules client to delete the siem.notification
+   * Then with the legacy Rule Actions saved object type, just delete it.
+   */
+
+  // find it using the references array, not params.ruleAlertId
+  const [siemNotification, legacyRuleActionsSO] = await Promise.all([
+    rulesClient.find({
+      options: {
+        hasReference: {
+          type: 'alert',
+          id: rule.id,
+        },
+      },
+    }),
+    savedObjectsClient.find({
+      type: legacyRuleActionsSavedObjectType,
+      hasReference: {
+        type: 'alert',
+        id: rule.id,
+      },
+    }),
+  ]);
+
+  if (siemNotification != null && siemNotification.data.length > 0) {
+    await Promise.all([
+      rulesClient.delete({ id: siemNotification.data[0].id }),
+      legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0
+        ? savedObjectsClient.delete(
+            legacyRuleActionsSavedObjectType,
+            legacyRuleActionsSO.saved_objects[0].id
+          )
+        : null,
+    ]);
+
+    const { id, ...restOfRule } = rule;
+    const migratedRule = {
+      ...restOfRule,
+      actions: siemNotification.data[0].actions,
+      throttle: siemNotification.data[0].schedule.interval,
+      notifyWhen: transformToNotifyWhen(siemNotification.data[0].throttle),
+    };
+    await rulesClient.update({
+      id: rule.id,
+      data: migratedRule,
+    });
+    return { id: rule.id, ...migratedRule };
+  }
+  return rule;
 };

@@ -22,16 +22,12 @@ import {
 
 import styled from 'styled-components';
 
-import type {
-  AgentPolicy,
-  PackageInfo,
-  PackagePolicy,
-  NewPackagePolicy,
-  RegistryVarsEntry,
-} from '../../../types';
+import type { AgentPolicy, PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../types';
 import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../services';
 import { Loading } from '../../../components';
-import { useStartServices } from '../../../hooks';
+import { useStartServices, useGetPackagePolicies } from '../../../hooks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+import { SO_SEARCH_LIMIT } from '../../../../../../common';
 
 import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';
@@ -47,7 +43,7 @@ const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
 `;
 
 export const StepDefinePackagePolicy: React.FunctionComponent<{
-  agentPolicy: AgentPolicy;
+  agentPolicy?: AgentPolicy;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
   integrationToEnable?: string;
@@ -65,6 +61,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     submitAttempted,
   }) => {
     const { docLinks } = useStartServices();
+
+    // Fetch all packagePolicies having the package name
+    const { data: packagePolicyData, isLoading: isLoadingPackagePolicies } = useGetPackagePolicies({
+      perPage: SO_SEARCH_LIMIT,
+      page: 1,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
+    });
+
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
@@ -84,30 +88,37 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     // Update package policy's package and agent policy info
     useEffect(() => {
+      if (isLoadingPackagePolicies) {
+        return;
+      }
       const pkg = packagePolicy.package;
       const currentPkgKey = pkg ? pkgKeyFromPackageInfo(pkg) : '';
       const pkgKey = pkgKeyFromPackageInfo(packageInfo);
 
       // If package has changed, create shell package policy with input&stream values based on package info
       if (currentPkgKey !== pkgKey) {
-        // Existing package policies on the agent policy using the package name, retrieve highest number appended to package policy name
+        // Retrieve highest number appended to package policy name and increment it by one
         const pkgPoliciesNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
-        const pkgPoliciesWithMatchingNames = (agentPolicy.package_policies as PackagePolicy[])
-          .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-          .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-          .sort((a, b) => a - b);
+        const pkgPoliciesWithMatchingNames = packagePolicyData?.items
+          ? packagePolicyData.items
+              .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+              .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
+              .sort((a, b) => a - b)
+          : [];
+
+        const incrementedName = `${packageInfo.name}-${
+          pkgPoliciesWithMatchingNames.length
+            ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
+            : 1
+        }`;
 
         updatePackagePolicy(
           packageToPackagePolicy(
             packageInfo,
-            agentPolicy.id,
+            agentPolicy?.id || '',
             packagePolicy.output_id,
             packagePolicy.namespace,
-            `${packageInfo.name}-${
-              pkgPoliciesWithMatchingNames.length
-                ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-                : 1
-            }`,
+            packagePolicy.name || incrementedName,
             packagePolicy.description,
             integrationToEnable
           )
@@ -115,13 +126,21 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       }
 
       // If agent policy has changed, update package policy's agent policy ID and namespace
-      if (packagePolicy.policy_id !== agentPolicy.id) {
+      if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
         updatePackagePolicy({
           policy_id: agentPolicy.id,
           namespace: agentPolicy.namespace,
         });
       }
-    }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy, integrationToEnable]);
+    }, [
+      packagePolicy,
+      agentPolicy,
+      packageInfo,
+      updatePackagePolicy,
+      integrationToEnable,
+      packagePolicyData,
+      isLoadingPackagePolicies,
+    ]);
 
     return validationResults ? (
       <FormGroupResponsiveFields
@@ -307,6 +326,34 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         });
                       }}
                     />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLabel"
+                        defaultMessage="Data retention settings"
+                      />
+                    }
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText"
+                        defaultMessage="By default all logs and metrics data are stored on the hot tier. {learnMore} about changing the data retention policy for this integration."
+                        values={{
+                          learnMore: (
+                            <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
+                              {i18n.translate(
+                                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
+                                { defaultMessage: 'Learn more' }
+                              )}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    }
+                  >
+                    <div />
                   </EuiFormRow>
                 </EuiFlexItem>
                 {/* Advanced vars */}

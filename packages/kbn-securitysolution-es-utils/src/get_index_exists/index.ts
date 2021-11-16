@@ -6,21 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../elasticsearch_client';
+import type { ElasticsearchClient } from '../elasticsearch_client';
 
 export const getIndexExists = async (
   esClient: ElasticsearchClient,
   index: string
 ): Promise<boolean> => {
   try {
-    const { body: response } = await esClient.search({
-      index,
-      size: 0,
-      allow_no_indices: true,
-      body: {
-        terminate_after: 1,
+    const { body: response } = await esClient.search(
+      {
+        index,
+        size: 0,
+        allow_no_indices: true,
+        body: {
+          terminate_after: 1,
+        },
       },
-    });
+      { meta: true }
+    );
     return response._shards.total > 0;
   } catch (err) {
     if (err.body != null && err.body.status === 404) {

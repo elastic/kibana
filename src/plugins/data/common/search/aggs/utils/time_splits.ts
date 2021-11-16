@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import _, { isArray } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RangeFilter } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
@@ -430,8 +430,8 @@ export function insertTimeShiftSplit(
       filters[key] = {
         range: {
           [timeField]: {
-            gte: moment(timeFilter.range[timeField].gte).subtract(shift).toISOString(),
-            lte: moment(timeFilter.range[timeField].lte).subtract(shift).toISOString(),
+            gte: moment(timeFilter.query.range[timeField].gte).subtract(shift).toISOString(),
+            lte: moment(timeFilter.query.range[timeField].lte).subtract(shift).toISOString(),
           },
         },
       };

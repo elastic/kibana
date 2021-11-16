@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
@@ -14,13 +13,17 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../../../lib/helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../../../lib/helpers/transactions';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
@@ -61,40 +64,31 @@ function searchLatency({
     searchAggregatedTransactions,
   });
 
-  const filter: ESFilter[] = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
-    ...rangeQuery(start, end),
-    ...environmentQuery(environment),
-    ...kqlQuery(kuery),
-  ];
-
-  if (transactionName) {
-    filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
-  }
-
-  if (transactionType) {
-    filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-  }
-
-  const transactionDurationField =
-    getTransactionDurationFieldForAggregatedTransactions(
-      searchAggregatedTransactions
-    );
+  const transactionDurationField = getTransactionDurationFieldForTransactions(
+    searchAggregatedTransactions
+  );
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
-      query: { bool: { filter } },
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...getDocumentTypeFilterForTransactions(
+              searchAggregatedTransactions
+            ),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+          ],
+        },
+      },
       aggs: {
         latencyTimeseries: {
           date_histogram: {

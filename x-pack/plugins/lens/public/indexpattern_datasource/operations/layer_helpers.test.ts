@@ -15,6 +15,7 @@ import {
   deleteColumn,
   updateLayerIndexPattern,
   getErrorMessages,
+  hasTermsWithManyBuckets,
 } from './layer_helpers';
 import { operationDefinitionMap, OperationType } from '../operations';
 import { TermsIndexPatternColumn } from './definitions/terms';
@@ -1136,6 +1137,122 @@ describe('state_helpers', () => {
             field: indexPattern.fields[2], // bytes field
             visualizationGroups: [],
             shouldResetLabel: true,
+          }).columns.col1
+        ).toEqual(expect.objectContaining({ label: 'Average of bytes' }));
+      });
+
+      it('should carry over a custom label when transitioning to a managed reference', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'MY CUSTOM LABEL',
+                  customLabel: true,
+                  dataType: 'string',
+                  isBucketed: true,
+                  operationType: 'terms',
+                  sourceField: 'source',
+                  params: {
+                    orderBy: { type: 'alphabetical' },
+                    orderDirection: 'asc',
+                    size: 5,
+                  },
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'formula',
+            field: indexPattern.fields[2], // bytes field
+            visualizationGroups: [],
+            shouldResetLabel: undefined,
+          }).columns.col1
+        ).toEqual(expect.objectContaining({ label: 'MY CUSTOM LABEL' }));
+      });
+
+      it('should overwrite the current label when transitioning to a managed reference operation when not custom', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'Average of bytes',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'average',
+                  sourceField: 'bytes',
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'formula',
+            field: indexPattern.fields[2], // bytes field
+            visualizationGroups: [],
+            shouldResetLabel: undefined,
+          }).columns.col1
+        ).toEqual(expect.objectContaining({ label: 'average(bytes)' }));
+      });
+
+      it('should carry over a custom label when transitioning from a managed reference', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'MY CUSTOM LABEL',
+                  customLabel: true,
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { isFormulaBroken: false, formula: 'average(bytes)' },
+                  references: [],
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'average',
+            field: indexPattern.fields[2], // bytes field
+            visualizationGroups: [],
+            shouldResetLabel: undefined,
+          }).columns.col1
+        ).toEqual(expect.objectContaining({ label: 'MY CUSTOM LABEL' }));
+      });
+
+      it('should not carry over the managed reference default label to the new operation', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'average(bytes)',
+                  customLabel: true,
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { isFormulaBroken: false, formula: 'average(bytes)' },
+                  references: [],
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'average',
+            field: indexPattern.fields[2], // bytes field
+            visualizationGroups: [],
+            shouldResetLabel: undefined,
           }).columns.col1
         ).toEqual(expect.objectContaining({ label: 'Average of bytes' }));
       });
@@ -2887,6 +3004,81 @@ describe('state_helpers', () => {
         indexPattern,
         operationDefinitionMap
       );
+    });
+  });
+
+  describe('hasTermsWithManyBuckets', () => {
+    it('should return false for a bucketed non terms operation', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '',
+            operationType: 'date_histogram',
+            sourceField: 'fieldD',
+            params: {
+              interval: 'd',
+            },
+          },
+        },
+        indexPatternId: 'original',
+      };
+
+      expect(hasTermsWithManyBuckets(layer)).toBeFalsy();
+    });
+
+    it('should return false if all terms operation have a lower size', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'My Op',
+            customLabel: true,
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            sourceField: 'dest',
+            params: {
+              size: 5,
+              orderBy: { type: 'alphabetical' },
+              orderDirection: 'asc',
+            },
+          },
+        },
+        indexPatternId: 'original',
+      };
+
+      expect(hasTermsWithManyBuckets(layer)).toBeFalsy();
+    });
+
+    it('should return true if the size is high', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'My Op',
+            customLabel: true,
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            sourceField: 'dest',
+            params: {
+              size: 15,
+              orderBy: { type: 'alphabetical' },
+              orderDirection: 'asc',
+            },
+          },
+        },
+        indexPatternId: 'original',
+      };
+
+      expect(hasTermsWithManyBuckets(layer)).toBeTruthy();
     });
   });
 });

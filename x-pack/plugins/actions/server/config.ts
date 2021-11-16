@@ -57,7 +57,6 @@ const customHostSettingsSchema = schema.object({
 export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   allowedHosts: schema.arrayOf(
     schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
     {

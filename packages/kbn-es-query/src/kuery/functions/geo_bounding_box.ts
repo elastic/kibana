@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { IndexPatternBase, KueryNode, KueryQueryOptions, LatLon } from '../..';
@@ -53,7 +53,6 @@ export function toElasticsearchQuery(
   }
 
   return {
-    // @ts-expect-error @elastic/elasticsearch doesn't support ignore_unmapped in QueryDslGeoBoundingBoxQuery
     geo_bounding_box: {
       [fieldName]: queryParams,
       ignore_unmapped: true,

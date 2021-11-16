@@ -12,7 +12,7 @@ import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_erro
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 
-type TraceAPIResponse = APIReturnType<'GET /api/apm/traces/{traceId}'>;
+type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 
 interface IWaterfallGroup {
   [key: string]: IWaterfallSpanOrTransaction[];

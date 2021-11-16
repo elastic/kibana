@@ -16,7 +16,7 @@ import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
@@ -30,9 +30,9 @@ interface Props {
   serviceName: string;
 }
 type ErrorGroupMainStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
 type ErrorGroupDetailedStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
 type SortField = 'name' | 'lastSeen' | 'occurrences';
@@ -61,7 +61,7 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
     urlParams: { comparisonType, comparisonEnabled },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
   const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
@@ -97,7 +97,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/error_groups/main_statistics',
+          'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -150,7 +150,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       if (requestId && items.length && start && end && transactionType) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics',
+            'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {

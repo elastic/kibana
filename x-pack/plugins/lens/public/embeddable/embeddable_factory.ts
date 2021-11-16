@@ -24,6 +24,8 @@ import { LensAttributeService } from '../lens_attribute_service';
 import { DOC_TYPE } from '../../common/constants';
 import { ErrorMessage } from '../editor_frame_service/types';
 import { extract, inject } from '../../common/embeddable_factory';
+import type { SpacesPluginStart } from '../../../spaces/public';
+import { VisualizationMap } from '../types';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
@@ -38,6 +40,8 @@ export interface LensEmbeddableStartServices {
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  visualizationMap: VisualizationMap;
+  spaces?: SpacesPluginStart;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -83,6 +87,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       timefilter,
       expressionRenderer,
       documentToExpression,
+      visualizationMap,
       uiActions,
       coreHttp,
       attributeService,
@@ -90,6 +95,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       capabilities,
       usageCollection,
       inspector,
+      spaces,
     } = await this.getStartServices();
 
     const { Embeddable } = await import('../async_services');
@@ -105,11 +111,13 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         getTrigger: uiActions?.getTrigger,
         getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
         documentToExpression,
+        visualizationMap,
         capabilities: {
           canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
           canSaveVisualizations: Boolean(capabilities.visualize.save),
         },
         usageCollection,
+        spaces,
       },
       input,
       parent

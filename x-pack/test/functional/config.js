@@ -56,7 +56,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/transform'),
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
-      resolve(__dirname, './apps/reporting'),
       resolve(__dirname, './apps/lens'), // smokescreen tests cause flakiness in other tests
 
       // This license_management file must be last because it is destructive.

@@ -54,8 +54,8 @@ export const loadingSaga = ({
     const migrationStatus = migrateLegacyIndexPatternRef(savedWorkspace, indexPatterns);
     if (!migrationStatus.success) {
       notifications.toasts.addDanger(
-        i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Index pattern "{name}" not found',
+        i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
+          defaultMessage: 'Data view "{name}" not found',
           values: {
             name: migrationStatus.missingIndexPattern,
           },

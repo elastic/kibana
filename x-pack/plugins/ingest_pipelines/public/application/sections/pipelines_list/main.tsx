@@ -153,14 +153,14 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           <span data-test-subj="appTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.list.listTitle"
-              defaultMessage="Ingest Node Pipelines"
+              defaultMessage="Ingest Pipelines"
             />
           </span>
         }
         description={
           <FormattedMessage
             id="xpack.ingestPipelines.list.pipelinesDescription"
-            defaultMessage="Define a pipeline for preprocessing documents before indexing."
+            defaultMessage="Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing."
           />
         }
         rightSideItems={[
@@ -172,7 +172,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           >
             <FormattedMessage
               id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
-              defaultMessage="Ingest Node Pipelines docs"
+              defaultMessage="Ingest Pipelines docs"
             />
           </EuiButtonEmpty>,
         ]}

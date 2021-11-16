@@ -14,7 +14,9 @@ export type StaticPage =
   | 'policies'
   | 'policies_list'
   | 'enrollment_tokens'
-  | 'data_streams';
+  | 'data_streams'
+  | 'settings'
+  | 'settings_edit_fleet_server_hosts';
 
 export type DynamicPage =
   | 'integrations_all'
@@ -26,7 +28,6 @@ export type DynamicPage =
   | 'integration_details_custom'
   | 'integration_policy_edit'
   | 'policy_details'
-  | 'add_integration_from_policy'
   | 'add_integration_to_policy'
   | 'edit_integration'
   | 'upgrade_package_policy'
@@ -56,10 +57,10 @@ export const FLEET_ROUTING_PATHS = {
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
-  // TODO: Review uses and remove if it is no longer used or linked to in any UX flows
-  add_integration_from_policy: '/policies/:policyId/add-integration',
   enrollment_tokens: '/enrollment-tokens',
   data_streams: '/data-streams',
+  settings: '/settings',
+  settings_edit_fleet_server_hosts: '/settings/edit-fleet-server-hosts',
 
   // TODO: Move this to the integrations app
   add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
@@ -127,11 +128,6 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  // TODO: This might need to be removed because we do not have a way to pick an integration in line anymore
-  add_integration_from_policy: ({ policyId }) => [
-    FLEET_BASE_PATH,
-    `/policies/${policyId}/add-integration`,
-  ],
   add_integration_to_policy: ({ pkgkey, integration, agentPolicyId }) => [
     FLEET_BASE_PATH,
     // prettier-ignore
@@ -153,4 +149,9 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
+  settings: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings],
+  settings_edit_fleet_server_hosts: () => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts,
+  ],
 };

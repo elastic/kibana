@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render the "Ingest" section with ingest pipelines', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        // We gave the ingest node pipelines user access to advanced settings to allow them to use ingest node pipelines.
+        // We gave the ingest pipelines user access to advanced settings to allow them to use ingest pipelines.
         // See https://github.com/elastic/kibana/pull/102409/
         expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({

@@ -57,7 +57,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
     allowStringIndicesLabel = (
       <FormattedMessage
         id="visTypeTimeseries.indexPatternSelect.switchModePopover.enableAllowStringIndices"
-        defaultMessage="To search by Elasticsearch indices enable {allowStringIndices} setting."
+        defaultMessage="To query Elasticsearch indices, you must enable the {allowStringIndices} setting."
         values={{
           allowStringIndices: canEditAdvancedSettings ? (
             <EuiLink color="accent" onClick={handleAllowStringIndicesLinkClick}>

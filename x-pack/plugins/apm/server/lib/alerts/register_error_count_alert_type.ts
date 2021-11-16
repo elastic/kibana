@@ -7,17 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
-import type {
-  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
-  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
-  ALERT_REASON as ALERT_REASON_TYPED,
-} from '@kbn/rule-data-utils';
 import {
-  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
-  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
-  ALERT_REASON as ALERT_REASON_NON_TYPED,
-  // @ts-expect-error
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils/technical_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   ENVIRONMENT_NOT_DEFINED,
@@ -41,12 +35,7 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
-
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
-  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
-  ALERT_EVALUATION_VALUE_NON_TYPED;
-const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
+import { termQuery } from '../../../../observability/server';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -99,7 +88,7 @@ export function registerErrorCountAlertType({
         });
 
         const searchParams = {
-          index: indices['apm_oss.errorIndices'],
+          index: indices.error,
           size: 0,
           body: {
             query: {
@@ -113,9 +102,7 @@ export function registerErrorCountAlertType({
                     },
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                  ...(alertParams.serviceName
-                    ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
-                    : []),
+                  ...termQuery(SERVICE_NAME, alertParams.serviceName),
                   ...environmentQuery(alertParams.environment),
                 ],
               },

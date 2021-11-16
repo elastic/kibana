@@ -10,6 +10,7 @@ import {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
 } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { useUiTracker } from '../../../../hooks/use_track_metric';
 import type {
   AppDataType,
   ReportViewType,
@@ -20,17 +21,18 @@ import type {
 import { convertToShortUrl } from '../configurations/utils';
 import { OperationType, SeriesType } from '../../../../../../lens/public';
 import { URL_KEYS } from '../configurations/constants/url_constants';
+import { trackTelemetryOnApply } from '../utils/telemetry';
 
 export interface SeriesContextValue {
   firstSeries?: SeriesUrl;
   lastRefresh: number;
   setLastRefresh: (val: number) => void;
-  applyChanges: () => void;
+  applyChanges: (onApply?: () => void) => void;
   allSeries: AllSeries;
   setSeries: (seriesIndex: number, newValue: SeriesUrl) => void;
   getSeries: (seriesIndex: number) => SeriesUrl | undefined;
   removeSeries: (seriesIndex: number) => void;
-  setReportType: (reportType: string) => void;
+  setReportType: (reportType: ReportViewType) => void;
   storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
   reportType: ReportViewType;
 }
@@ -45,7 +47,7 @@ export function convertAllShortSeries(allShortSeries: AllShortSeries) {
 }
 
 export const allSeriesKey = 'sr';
-const reportTypeKey = 'reportType';
+export const reportTypeKey = 'reportType';
 
 export function UrlStorageContextProvider({
   children,
@@ -57,11 +59,13 @@ export function UrlStorageContextProvider({
 
   const [lastRefresh, setLastRefresh] = useState<number>(() => Date.now());
 
-  const [reportType, setReportType] = useState<string>(
-    () => (storage as IKbnUrlStateStorage).get(reportTypeKey) ?? ''
+  const [reportType, setReportType] = useState<ReportViewType>(
+    () => ((storage as IKbnUrlStateStorage).get(reportTypeKey) ?? '') as ReportViewType
   );
 
   const [firstSeries, setFirstSeries] = useState<SeriesUrl>();
+
+  const trackEvent = useUiTracker();
 
   useEffect(() => {
     const firstSeriesT = allSeries?.[0];
@@ -71,9 +75,16 @@ export function UrlStorageContextProvider({
 
   const setSeries = useCallback((seriesIndex: number, newValue: SeriesUrl) => {
     setAllSeries((prevAllSeries) => {
+      const seriesWithCurrentBreakdown = prevAllSeries.findIndex((series) => series.breakdown);
       const newStateRest = prevAllSeries.map((series, index) => {
         if (index === seriesIndex) {
-          return newValue;
+          return {
+            ...newValue,
+            breakdown:
+              seriesWithCurrentBreakdown === seriesIndex || seriesWithCurrentBreakdown === -1
+                ? newValue.breakdown
+                : undefined,
+          };
         }
         return series;
       });
@@ -85,10 +96,6 @@ export function UrlStorageContextProvider({
       return [...newStateRest];
     });
   }, []);
-
-  useEffect(() => {
-    (storage as IKbnUrlStateStorage).set(reportTypeKey, reportType);
-  }, [reportType, storage]);
 
   const removeSeries = useCallback((seriesIndex: number) => {
     setAllSeries((prevAllSeries) =>
@@ -103,12 +110,22 @@ export function UrlStorageContextProvider({
     [allSeries]
   );
 
-  const applyChanges = useCallback(() => {
-    const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
+  const applyChanges = useCallback(
+    (onApply?: () => void) => {
+      const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
+      (storage as IKbnUrlStateStorage).set(reportTypeKey, reportType);
 
-    (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
-    setLastRefresh(Date.now());
-  }, [allSeries, storage]);
+      (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
+      setLastRefresh(Date.now());
+
+      trackTelemetryOnApply(trackEvent, allSeries, reportType);
+
+      if (onApply) {
+        onApply();
+      }
+    },
+    [allSeries, storage, trackEvent, reportType]
+  );
 
   const value = {
     applyChanges,
@@ -120,7 +137,7 @@ export function UrlStorageContextProvider({
     lastRefresh,
     setLastRefresh,
     setReportType,
-    reportType: storage.get(reportTypeKey) as ReportViewType,
+    reportType,
     firstSeries: firstSeries!,
   };
   return <UrlStorageContext.Provider value={value}>{children}</UrlStorageContext.Provider>;

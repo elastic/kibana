@@ -52,7 +52,7 @@ import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expre
 import {
   onActiveDataChange,
   useLensDispatch,
-  updateVisualizationState,
+  editVisualizationAction,
   updateDatasourceState,
   setSaveable,
   useLensSelector,
@@ -224,14 +224,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   ]);
 
   const expressionExists = Boolean(expression);
-  const hasLoaded = Boolean(
-    activeVisualization && visualization.state && datasourceMap && datasourceStates
-  );
   useEffect(() => {
-    if (hasLoaded) {
-      dispatchLens(setSaveable(expressionExists));
-    }
-  }, [hasLoaded, expressionExists, dispatchLens]);
+    dispatchLens(setSaveable(expressionExists));
+  }, [expressionExists, dispatchLens]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
@@ -251,9 +246,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
         dispatchLens(
-          updateVisualizationState({
+          editVisualizationAction({
             visualizationId: activeVisualization.id,
-            updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
+            event,
           })
         );
       }

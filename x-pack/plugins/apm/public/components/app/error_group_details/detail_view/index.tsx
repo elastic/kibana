@@ -54,7 +54,7 @@ const TransactionLinkName = euiStyled.div`
 `;
 
 interface Props {
-  errorGroup: APIReturnType<'GET /api/apm/services/{serviceName}/errors/{groupId}'>;
+  errorGroup: APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}'>;
   urlParams: ApmUrlParams;
   kuery: string;
 }
@@ -72,12 +72,14 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
   const history = useHistory();
   const { transaction, error, occurrencesCount } = errorGroup;
 
+  const { detailTab, comparisonType, comparisonEnabled } = urlParams;
+
   if (!error) {
     return null;
   }
 
   const tabs = getTabs(error);
-  const currentTab = getCurrentTab(tabs, urlParams.detailTab) as ErrorTab;
+  const currentTab = getCurrentTab(tabs, detailTab) as ErrorTab;
 
   const errorUrl = error.error.page?.url || error.url?.full;
 
@@ -139,6 +141,8 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
                 transactionName={transaction.transaction.name}
                 transactionType={transaction.transaction.type}
                 serviceName={transaction.service.name}
+                comparisonType={comparisonType}
+                comparisonEnabled={comparisonEnabled}
               >
                 <EuiIcon type="merge" />
                 <TransactionLinkName>

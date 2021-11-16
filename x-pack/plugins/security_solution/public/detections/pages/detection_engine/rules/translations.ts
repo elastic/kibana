@@ -13,6 +13,11 @@ export const BACK_TO_DETECTIONS = i18n.translate(
     defaultMessage: 'Back to detections',
   }
 );
+export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
+    defaultMessage: 'Tooltip for column: {columnName}',
+    values: { columnName },
+  });
 
 export const IMPORT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.importRuleTitle',
@@ -364,10 +369,24 @@ export const COLUMN_INDEXING_TIMES = i18n.translate(
   }
 );
 
+export const COLUMN_INDEXING_TIMES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.indexingTimesTooltip',
+  {
+    defaultMessage: 'Total time spent indexing alerts during last Rule execution',
+  }
+);
+
 export const COLUMN_QUERY_TIMES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimes',
   {
     defaultMessage: 'Query Time (ms)',
+  }
+);
+
+export const COLUMN_QUERY_TIMES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimesTooltip',
+  {
+    defaultMessage: 'Total time spent querying source indices during last Rule execution',
   }
 );
 
@@ -532,7 +551,8 @@ export const IMPORT_RULE_BTN_TITLE = i18n.translate(
 export const SELECT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription',
   {
-    defaultMessage: 'Select Security rules (as exported from the Detection Rules page) to import',
+    defaultMessage:
+      'Select rules and actions (as exported from the Security > Rules page) to import',
   }
 );
 
@@ -560,19 +580,21 @@ export const SUCCESSFULLY_IMPORTED_RULES = (totalRules: number) =>
     }
   );
 
-export const IMPORT_FAILED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedTitle',
-  {
-    defaultMessage: 'Failed to import rules',
-  }
-);
+export const IMPORT_FAILED = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedTitle',
+    {
+      values: { totalRules },
+      defaultMessage: 'Failed to import {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    }
+  );
 
-export const IMPORT_FAILED_DETAILED = (ruleId: string, statusCode: number, message: string) =>
+export const IMPORT_FAILED_DETAILED = (message: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedDetailedTitle',
     {
-      values: { ruleId, statusCode, message },
-      defaultMessage: 'Rule ID: {ruleId}\n Status Code: {statusCode}\n Message: {message}',
+      values: { message },
+      defaultMessage: '{message}',
     }
   );
 

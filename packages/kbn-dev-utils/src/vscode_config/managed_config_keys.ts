@@ -8,7 +8,7 @@
 
 export interface ManagedConfigKey {
   key: string;
-  value: string | Record<string, any> | boolean;
+  value: string | Record<string, any> | boolean | number;
 }
 
 /**
@@ -20,21 +20,25 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
   {
     key: 'files.watcherExclude',
     value: {
-      ['**/.eslintcache']: true,
-      ['**/.es']: true,
-      ['**/.yarn-local-mirror']: true,
       ['**/.chromium']: true,
-      ['**/packages/kbn-pm/dist/index.js']: true,
+      ['**/.es']: true,
+      ['**/.eslintcache']: true,
+      ['**/.yarn-local-mirror']: true,
+      ['**/*.log']: true,
+      ['**/api_docs']: true,
       ['**/bazel-*']: true,
       ['**/node_modules']: true,
+      ['**/packages/kbn-pm/dist/index.js']: true,
       ['**/target']: true,
-      ['**/*.log']: true,
     },
   },
   {
     key: 'search.exclude',
     value: {
       ['**/packages/kbn-pm/dist/index.js']: true,
+      ['**/api_docs']: true,
+      ['**/tsconfig.tsbuildinfo']: true,
+      ['**/*.map']: true,
     },
   },
   {
@@ -45,5 +49,9 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
   {
     key: 'typescript.enablePromptUseWorkspaceTsdk',
     value: true,
+  },
+  {
+    key: 'typescript.tsserver.maxTsServerMemory',
+    value: 4096,
   },
 ];

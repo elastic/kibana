@@ -43,7 +43,7 @@ To create workpads, you must meet the minimum requirements.
 
 * If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
-* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and a <<data-views, data view>>.
 
 * Have an understanding of {ref}/documents-indices.html[{es} documents and indices].
 

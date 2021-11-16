@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import {
-  ADD_POLICY_BTN,
-  CREATE_PACKAGE_POLICY_SAVE_BTN,
-  INTEGRATIONS_CARD,
-} from '../screens/integrations';
+import { CREATE_PACKAGE_POLICY_SAVE_BTN, SAVE_PACKAGE_CONFIRM } from '../screens/integrations';
 
-export const addIntegration = (integration: string) => {
-  cy.get(INTEGRATIONS_CARD).contains(integration).click();
-  cy.get(ADD_POLICY_BTN).click();
+import { navigateTo, OSQUERY_INTEGRATION_PAGE } from './navigation';
+
+// TODO: allow adding integration version strings to this
+export const addIntegration = (policyId: string) => {
+  navigateTo(OSQUERY_INTEGRATION_PAGE, { qs: { policyId } });
   cy.get(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
-  cy.get(CREATE_PACKAGE_POLICY_SAVE_BTN).should('not.exist');
-  cy.reload();
+  cy.get(SAVE_PACKAGE_CONFIRM).click();
+  // XXX: there is a race condition between the test going to the ui powered by the agent, and the agent having the integration ready to go
+  // so we wait.
+  // TODO: actually make this wait til the agent has been updated with the proper integration
+  cy.wait(5000);
+  return cy.reload();
 };

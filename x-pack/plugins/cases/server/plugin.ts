@@ -15,7 +15,6 @@ import {
 } from '../../actions/server';
 import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common';
 
-import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
 import {
   createCaseCommentSavedObjectType,
@@ -33,10 +32,6 @@ import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { LensServerPluginSetup } from '../../lens/server';
-
-function createConfig(context: PluginInitializerContext) {
-  return context.config.get<ConfigType>();
-}
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -76,12 +71,6 @@ export class CasePlugin {
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const config = createConfig(this.initializerContext);
-
-    if (!config.enabled) {
-      return;
-    }
-
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
@@ -137,6 +126,11 @@ export class CasePlugin {
       },
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
+      /**
+       * Lens will be always defined as
+       * it is declared as required plugin in kibana.json
+       */
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
     });
 

@@ -27,7 +27,9 @@ describe.each([
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus()); // successful status search
+    clients.ruleExecutionLogClient.getCurrentStatusBulk.mockResolvedValue(
+      getFindBulkResultStatus()
+    ); // successful status search
     clients.rulesClient.get.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
@@ -41,14 +43,14 @@ describe.each([
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(ruleStatusRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catch error when status search throws error', async () => {
-      clients.ruleExecutionLogClient.findBulk.mockImplementation(async () => {
+      clients.ruleExecutionLogClient.getCurrentStatusBulk.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(ruleStatusRequest(), context);

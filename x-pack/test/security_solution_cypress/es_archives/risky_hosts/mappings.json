@@ -1,7 +1,7 @@
 {
   "type": "index",
   "value": {
-    "index": "ml_host_risk_score_latest",
+    "index": "ml_host_risk_score_latest_default",
     "mappings": {
       "properties": {
         "@timestamp": {
@@ -40,8 +40,8 @@
     "settings": {
       "index": {
         "lifecycle": {
-          "name": "ml_host_risk_score_latest",
-          "rollover_alias": "ml_host_risk_score_latest"
+          "name": "ml_host_risk_score_latest_default",
+          "rollover_alias": "ml_host_risk_score_latest_default"
         },
         "mapping": {
           "total_fields": {

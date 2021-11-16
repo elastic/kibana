@@ -37,13 +37,7 @@ export function onPremInstructions({
   apmConfig,
   isFleetPluginEnabled,
 }: {
-  apmConfig: Pick<
-    APMConfig,
-    | 'apm_oss.errorIndices'
-    | 'apm_oss.transactionIndices'
-    | 'apm_oss.metricsIndices'
-    | 'apm_oss.onboardingIndices'
-  >;
+  apmConfig: APMConfig;
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema {
   const EDIT_CONFIG = createEditConfig();
@@ -70,25 +64,6 @@ export function onPremInstructions({
           iconType: 'alert',
         },
         instructionVariants: [
-          // hides fleet section when plugin is disabled
-          ...(isFleetPluginEnabled
-            ? [
-                {
-                  id: INSTRUCTION_VARIANT.FLEET,
-                  instructions: [
-                    { customComponentName: 'TutorialFleetInstructions' },
-                  ],
-                },
-              ]
-            : []),
-          {
-            id: INSTRUCTION_VARIANT.OSX,
-            instructions: [
-              createDownloadServerOsx(),
-              EDIT_CONFIG,
-              START_SERVER_UNIX,
-            ],
-          },
           {
             id: INSTRUCTION_VARIANT.DEB,
             instructions: [
@@ -106,9 +81,33 @@ export function onPremInstructions({
             ],
           },
           {
+            id: INSTRUCTION_VARIANT.OSX,
+            instructions: [
+              createDownloadServerOsx(),
+              EDIT_CONFIG,
+              START_SERVER_UNIX,
+            ],
+          },
+          {
             id: INSTRUCTION_VARIANT.WINDOWS,
             instructions: createWindowsServerInstructions(),
           },
+          // hides fleet section when plugin is disabled
+          ...(isFleetPluginEnabled
+            ? [
+                {
+                  id: INSTRUCTION_VARIANT.FLEET,
+                  instructions: [
+                    {
+                      title: i18n.translate('xpack.apm.tutorial.fleet.title', {
+                        defaultMessage: 'Fleet',
+                      }),
+                      customComponentName: 'TutorialFleetInstructions',
+                    },
+                  ],
+                },
+              ]
+            : []),
         ],
         statusCheck: {
           title: i18n.translate(
@@ -144,7 +143,7 @@ export function onPremInstructions({
             }
           ),
           esHitsCheck: {
-            index: apmConfig['apm_oss.onboardingIndices'],
+            index: apmConfig.indices.onboarding,
             query: {
               bool: {
                 filter: [
@@ -237,9 +236,9 @@ export function onPremInstructions({
           ),
           esHitsCheck: {
             index: [
-              apmConfig['apm_oss.errorIndices'],
-              apmConfig['apm_oss.transactionIndices'],
-              apmConfig['apm_oss.metricsIndices'],
+              apmConfig.indices.error,
+              apmConfig.indices.transaction,
+              apmConfig.indices.metric,
             ],
             query: {
               bool: {

@@ -32,6 +32,17 @@ export const applyDeltaToColumnWidth = actionCreator<{
   delta: number;
 }>('APPLY_DELTA_TO_COLUMN_WIDTH');
 
+export const updateColumnOrder = actionCreator<{
+  columnIds: string[];
+  id: string;
+}>('UPDATE_COLUMN_ORDER');
+
+export const updateColumnWidth = actionCreator<{
+  columnId: string;
+  id: string;
+  width: number;
+}>('UPDATE_COLUMN_WIDTH');
+
 export type ToggleDetailPanel = TimelineExpandedDetailType & {
   tabType?: TimelineTabs;
   timelineId: string;

@@ -20,6 +20,8 @@ export const PLUGIN = {
   },
 };
 
+export const MAJOR_VERSION = '8.0.0';
+
 export const API_BASE_PATH = '/api/snapshot_restore/';
 
 export enum REPOSITORY_TYPES {
@@ -65,9 +67,3 @@ export const TIME_UNITS: { [key: string]: 'd' | 'h' | 'm' | 's' } = {
   MINUTE: 'm',
   SECOND: 's',
 };
-
-/**
- * [Temporary workaround] In order to prevent client-side performance issues for users with a large number of snapshots,
- * we set a hard-coded limit on the number of snapshots we return from the ES snapshots API
- */
-export const SNAPSHOT_LIST_MAX_SIZE = 1000;

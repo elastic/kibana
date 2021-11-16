@@ -70,18 +70,18 @@ export function privilegesFactory(
           ];
         }
 
-        if (allowSubFeaturePrivileges && feature.subFeatures?.length > 0) {
-          for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
-            augmentWithSubFeaturePrivileges: false,
-            licenseHasAtLeast,
-          })) {
-            featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
-              actions.login,
-              actions.version,
-              ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
-            ];
-          }
+        for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: false,
+          licenseHasAtLeast,
+        })) {
+          featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
+            actions.login,
+            actions.version,
+            ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
+          ];
+        }
 
+        if (allowSubFeaturePrivileges && feature.subFeatures?.length > 0) {
           for (const subFeaturePrivilege of featuresService.subFeaturePrivilegeIterator(
             feature,
             licenseHasAtLeast

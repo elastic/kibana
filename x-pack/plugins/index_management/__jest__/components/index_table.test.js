@@ -88,7 +88,15 @@ const snapshot = (rendered) => {
   expect(rendered).toMatchSnapshot();
 };
 
-const openMenuAndClickButton = (rendered, rowIndex, buttonIndex) => {
+const names = (rendered) => {
+  return findTestSubject(rendered, 'indexTableIndexNameLink');
+};
+
+const namesText = (rendered) => {
+  return names(rendered).map((button) => button.text());
+};
+
+const openMenuAndClickButton = (rendered, rowIndex, buttonSelector) => {
   // Select a row.
   const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
   checkboxes.at(rowIndex).simulate('change', { target: { checked: true } });
@@ -100,18 +108,19 @@ const openMenuAndClickButton = (rendered, rowIndex, buttonIndex) => {
   rendered.update();
 
   // Click an action in the context menu.
-  const contextMenuButtons = findTestSubject(rendered, 'indexTableContextMenuButton');
-  contextMenuButtons.at(buttonIndex).simulate('click');
+  const contextMenuButton = findTestSubject(rendered, buttonSelector);
+  contextMenuButton.simulate('click');
   rendered.update();
 };
 
-const testEditor = (rendered, buttonIndex, rowIndex = 0) => {
-  openMenuAndClickButton(rendered, rowIndex, buttonIndex);
+const testEditor = (rendered, buttonSelector, rowIndex = 0) => {
+  openMenuAndClickButton(rendered, rowIndex, buttonSelector);
   rendered.update();
   snapshot(findTestSubject(rendered, 'detailPanelTabSelected').text());
 };
 
-const testAction = (rendered, buttonIndex, rowIndex = 0) => {
+const testAction = (rendered, buttonSelector, indexName = 'testy0') => {
+  const rowIndex = namesText(rendered).indexOf(indexName);
   // This is leaking some implementation details about how Redux works. Not sure exactly what's going on
   // but it looks like we're aware of how many Redux actions are dispatched in response to user interaction,
   // so we "time" our assertion based on how many Redux actions we observe. This is brittle because it
@@ -127,19 +136,16 @@ const testAction = (rendered, buttonIndex, rowIndex = 0) => {
     dispatchedActionsCount++;
   });
 
-  openMenuAndClickButton(rendered, rowIndex, buttonIndex);
+  openMenuAndClickButton(rendered, rowIndex, buttonSelector);
   // take snapshot of initial state.
   snapshot(status(rendered, rowIndex));
 };
 
-const names = (rendered) => {
-  return findTestSubject(rendered, 'indexTableIndexNameLink');
+const getActionMenuButtons = (rendered) => {
+  return findTestSubject(rendered, 'indexContextMenu')
+    .find('button')
+    .map((span) => span.text());
 };
-
-const namesText = (rendered) => {
-  return names(rendered).map((button) => button.text());
-};
-
 describe('index table', () => {
   beforeEach(() => {
     // Mock initialization of services
@@ -232,7 +238,7 @@ describe('index table', () => {
     await runAllPromises();
     rendered.update();
 
-    let button = findTestSubject(rendered, 'indexTableContextMenuButton');
+    let button = findTestSubject(rendered, 'indexActionsContextMenuButton');
     expect(button.length).toEqual(0);
 
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
@@ -247,7 +253,7 @@ describe('index table', () => {
     await runAllPromises();
     rendered.update();
 
-    let button = findTestSubject(rendered, 'indexTableContextMenuButton');
+    let button = findTestSubject(rendered, 'indexActionsContextMenuButton');
     expect(button.length).toEqual(0);
 
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
@@ -353,7 +359,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
+    snapshot(getActionMenuButtons(rendered));
   });
 
   test('should show the right context menu options when one index is selected and closed', async () => {
@@ -367,7 +373,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
+    snapshot(getActionMenuButtons(rendered));
   });
 
   test('should show the right context menu options when one open and one closed index is selected', async () => {
@@ -382,7 +388,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
+    snapshot(getActionMenuButtons(rendered));
   });
 
   test('should show the right context menu options when more than one open index is selected', async () => {
@@ -397,7 +403,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
+    snapshot(getActionMenuButtons(rendered));
   });
 
   test('should show the right context menu options when more than one closed index is selected', async () => {
@@ -412,28 +418,28 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
+    snapshot(getActionMenuButtons(rendered));
   });
 
   test('flush button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testAction(rendered, 8);
+    testAction(rendered, 'flushIndexMenuButton');
   });
 
   test('clear cache button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testAction(rendered, 7);
+    testAction(rendered, 'clearCacheIndexMenuButton');
   });
 
   test('refresh button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testAction(rendered, 6);
+    testAction(rendered, 'refreshIndexMenuButton');
   });
 
   test('force merge button works from context menu', async () => {
@@ -442,7 +448,7 @@ describe('index table', () => {
     rendered.update();
 
     const rowIndex = 0;
-    openMenuAndClickButton(rendered, rowIndex, 5);
+    openMenuAndClickButton(rendered, rowIndex, 'forcemergeIndexMenuButton');
     snapshot(status(rendered, rowIndex));
     expect(rendered.find('.euiModal').length).toBe(1);
 
@@ -478,55 +484,54 @@ describe('index table', () => {
       JSON.stringify(modifiedIndices),
     ]);
 
-    testAction(rendered, 4);
+    testAction(rendered, 'closeIndexMenuButton');
   });
 
   test('open index button works from context menu', async () => {
-    const rendered = mountWithIntl(component);
-    await runAllPromises();
-    rendered.update();
-
     const modifiedIndices = indices.map((index) => {
       return {
         ...index,
-        status: index.name === 'testy1' ? 'open' : index.status,
+        status: index.name === 'testy1' ? 'closed' : index.status,
       };
     });
 
-    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
+    server.respondWith(`${API_BASE_PATH}/indices`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(modifiedIndices),
     ]);
 
-    testAction(rendered, 3, 1);
+    const rendered = mountWithIntl(component);
+    await runAllPromises();
+    rendered.update();
+    testAction(rendered, 'openIndexMenuButton', 'testy1');
   });
 
   test('show settings button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testEditor(rendered, 0);
+    testEditor(rendered, 'showSettingsIndexMenuButton');
   });
 
   test('show mappings button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testEditor(rendered, 1);
+    testEditor(rendered, 'showMappingsIndexMenuButton');
   });
 
   test('show stats button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testEditor(rendered, 2);
+    testEditor(rendered, 'showStatsIndexMenuButton');
   });
 
   test('edit index button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testEditor(rendered, 3);
+    testEditor(rendered, 'editIndexMenuButton');
   });
 });

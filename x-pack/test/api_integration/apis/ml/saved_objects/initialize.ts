@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should not initialize jobs if all jobs have spaces assigned', async () => {
       const body = await runRequest(USER.ML_POWERUSER_ALL_SPACES, 200);
 
-      expect(body).to.eql({ jobs: [], success: true });
+      expect(body).to.eql({ datafeeds: [], jobs: [], success: true });
       await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', ['*']);
       await ml.api.assertJobSpaces(dfaJobId, 'data-frame-analytics', ['*']);
     });

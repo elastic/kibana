@@ -9,18 +9,30 @@ import { IESAggField } from './agg_field_types';
 import { IVectorSource } from '../../sources/vector_source';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { TOP_TERM_PERCENTAGE_SUFFIX, FIELD_ORIGIN } from '../../../../common/constants';
+import { TileMetaFeature } from '../../../../common/descriptor_types';
 
 export class TopTermPercentageField implements IESAggField {
   private readonly _topTermAggField: IESAggField;
-  private readonly _canReadFromGeoJson: boolean;
 
-  constructor(topTermAggField: IESAggField, canReadFromGeoJson: boolean = true) {
+  constructor(topTermAggField: IESAggField) {
     this._topTermAggField = topTermAggField;
-    this._canReadFromGeoJson = canReadFromGeoJson;
+  }
+
+  supportsFieldMetaFromEs(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API does not support top term metric
+    return false;
   }
 
   getSource(): IVectorSource {
     return this._topTermAggField.getSource();
+  }
+
+  getMbFieldName(): string {
+    return this.getName();
   }
 
   getOrigin(): FIELD_ORIGIN {
@@ -60,15 +72,6 @@ export class TopTermPercentageField implements IESAggField {
   getBucketCount(): number {
     return 0;
   }
-
-  supportsAutoDomain(): boolean {
-    return this._canReadFromGeoJson;
-  }
-
-  supportsFieldMeta(): boolean {
-    return false;
-  }
-
   async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
     return null;
   }
@@ -85,11 +88,11 @@ export class TopTermPercentageField implements IESAggField {
     return false;
   }
 
-  canReadFromGeoJson(): boolean {
-    return this._canReadFromGeoJson;
-  }
-
   isEqual(field: IESAggField) {
     return field.getName() === this.getName();
+  }
+
+  pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
+    return null;
   }
 }

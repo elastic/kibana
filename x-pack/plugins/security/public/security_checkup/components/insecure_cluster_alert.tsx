@@ -26,15 +26,13 @@ export const insecureClusterAlertTitle = i18n.translate(
 );
 
 export const insecureClusterAlertText = (
-  getDocLinks: () => DocLinksStart,
+  docLinks: DocLinksStart,
   onDismiss: (persist: boolean) => void
 ) =>
   ((e) => {
     const AlertText = () => {
       const [persist, setPersist] = useState(false);
-      const enableSecurityDocLink = `${
-        getDocLinks().links.security.elasticsearchEnableSecurity
-      }?blade=kibanasecuritymessage`;
+      const enableSecurityDocLink = `${docLinks.links.security.elasticsearchEnableSecurity}?blade=kibanasecuritymessage`;
 
       return (
         <I18nProvider>

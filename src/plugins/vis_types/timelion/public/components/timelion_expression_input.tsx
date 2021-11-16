@@ -25,7 +25,7 @@ interface TimelionExpressionInputProps {
 }
 
 function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputProps) {
-  const functionList = useRef([]);
+  const functionList = useRef<ITimelionFunction[]>([]);
   const kibana = useKibana();
   const argValueSuggestions = useMemo(getArgValueSuggestions, []);
 
@@ -84,7 +84,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
 
   useEffect(() => {
     if (kibana.services.http) {
-      kibana.services.http.get('../api/timelion/functions').then((data) => {
+      kibana.services.http.get<ITimelionFunction[]>('../api/timelion/functions').then((data) => {
         functionList.current = data;
       });
     }

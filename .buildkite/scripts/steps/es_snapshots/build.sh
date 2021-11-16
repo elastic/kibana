@@ -14,6 +14,10 @@ mkdir -p "$destination"
 mkdir -p elasticsearch && cd elasticsearch
 
 export ELASTICSEARCH_BRANCH="${ELASTICSEARCH_BRANCH:-$BUILDKITE_BRANCH}"
+# Until ES renames their master branch to main...
+if [[ "$ELASTICSEARCH_BRANCH" == "main" ]]; then
+  export ELASTICSEARCH_BRANCH="master"
+fi
 
 if [[ ! -d .git ]]; then
   git init
@@ -61,7 +65,14 @@ export DOCKER_TLS_CERTDIR="$CERTS_DIR"
 export DOCKER_HOST=localhost:2377
 
 echo "--- Build Elasticsearch"
-./gradlew -Dbuild.docker=true assemble --parallel
+./gradlew \
+  :distribution:archives:darwin-aarch64-tar:assemble \
+  :distribution:archives:darwin-tar:assemble \
+  :distribution:docker:docker-export:assemble \
+  :distribution:archives:linux-aarch64-tar:assemble \
+  :distribution:archives:linux-tar:assemble \
+  :distribution:archives:windows-zip:assemble \
+  --parallel
 
 echo "--- Create distribution archives"
 find distribution -type f \( -name 'elasticsearch-*-*-*-*.tar.gz' -o -name 'elasticsearch-*-*-*-*.zip' \) -not -path '*no-jdk*' -not -path '*build-context*' -exec cp {} "$destination" \;

@@ -57,6 +57,19 @@ export interface GetInfoResponse {
   response: PackageInfo;
 }
 
+export interface UpdatePackageRequest {
+  params: {
+    pkgkey: string;
+  };
+  body: {
+    keepPoliciesUpToDate?: boolean;
+  };
+}
+
+export interface UpdatePackageResponse {
+  response: PackageInfo;
+}
+
 export interface GetStatsRequest {
   params: {
     pkgname: string;

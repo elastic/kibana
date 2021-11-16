@@ -8,6 +8,7 @@ const STORYBOOKS = [
   'canvas',
   'codeeditor',
   'ci_composite',
+  'custom_integrations',
   'url_template_editor',
   'dashboard',
   'dashboard_enhanced',

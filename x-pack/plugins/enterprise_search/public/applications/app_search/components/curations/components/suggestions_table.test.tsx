@@ -11,9 +11,9 @@ import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable } from '@elastic/eui';
 
 import { SuggestionsTable } from './suggestions_table';
 
@@ -75,11 +75,21 @@ describe('SuggestionsTable', () => {
   });
 
   it('show a suggestions query with a link', () => {
-    const wrapper = renderColumn(0)('test');
+    const wrapper = renderColumn(0)('test', {});
     expect(wrapper.prop('href')).toBe(
       '/app/enterprise_search/engines/some-engine/curations/suggestions/test'
     );
     expect(wrapper.text()).toEqual('test');
+  });
+
+  it('show a badge when there are overrides', () => {
+    let wrapper: ShallowWrapper;
+
+    wrapper = renderColumn(0)('test', {});
+    expect(wrapper.find(EuiBadge)).toHaveLength(0);
+
+    wrapper = renderColumn(0)('test', { override_manual_curation: true });
+    expect(wrapper.find(EuiBadge).prop('children')).toEqual('Overrides');
   });
 
   it('contains an updated at timestamp', () => {

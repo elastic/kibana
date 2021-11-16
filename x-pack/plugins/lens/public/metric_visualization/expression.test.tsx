@@ -87,10 +87,10 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription="Fancy chart description"
-          reportTitle="My fanci metric chart"
         >
-          <AutoScale>
+          <AutoScale
+            key="3"
+          >
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -132,10 +132,10 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription="Fancy chart description"
-          reportTitle="My fanci metric chart"
         >
-          <AutoScale>
+          <AutoScale
+            key="last"
+          >
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -176,10 +176,10 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription=""
-          reportTitle=""
         >
-          <AutoScale>
+          <AutoScale
+            key="3"
+          >
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -220,10 +220,10 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription=""
-          reportTitle=""
         >
-          <AutoScale>
+          <AutoScale
+            key="3"
+          >
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -254,8 +254,6 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription=""
-          reportTitle=""
         >
           <EmptyPlaceholder
             icon={[Function]}
@@ -280,8 +278,6 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription=""
-          reportTitle=""
         >
           <EmptyPlaceholder
             icon={[Function]}
@@ -306,10 +302,10 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription=""
-          reportTitle=""
         >
-          <AutoScale>
+          <AutoScale
+            key="0"
+          >
             <div
               data-test-subj="lns_metric_value"
               style={

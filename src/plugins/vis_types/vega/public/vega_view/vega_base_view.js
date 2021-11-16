@@ -49,6 +49,31 @@ export function bypassExternalUrlCheck(url) {
   return { url, bypassToken };
 }
 
+const getExternalUrlsAreNotEnabledError = () =>
+  new Error(
+    i18n.translate('visTypeVega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
+      defaultMessage:
+        'External URLs are not enabled. Add {enableExternalUrls} to {kibanaConfigFileName}',
+      values: {
+        enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
+        kibanaConfigFileName: 'kibana.yml',
+      },
+    })
+  );
+
+const getExternalUrlServiceError = (uri) =>
+  new Error(
+    i18n.translate('visTypeVega.vegaParser.baseView.externalUrlServiceErrorMessage', {
+      defaultMessage:
+        'External URL [{uri}] was denied by ExternalUrl service. You can configure external URL policies using "{externalUrlPolicy}" setting in {kibanaConfigFileName}.',
+      values: {
+        uri,
+        externalUrlPolicy: 'externalUrl.policy',
+        kibanaConfigFileName: 'kibana.yml',
+      },
+    })
+  );
+
 export class VegaBaseView {
   constructor(opts) {
     this._$parentEl = $(opts.parentEl);
@@ -62,6 +87,7 @@ export class VegaBaseView {
     this._$messages = null;
     this._destroyHandlers = [];
     this._initialized = false;
+    this._externalUrl = opts.externalUrl;
     this._enableExternalUrls = getEnableExternalUrls();
     this._vegaStateRestorer = opts.vegaStateRestorer;
   }
@@ -165,6 +191,11 @@ export class VegaBaseView {
     return idxObj.id;
   }
 
+  handleExternalUrlError(externalUrlError) {
+    this.onError(externalUrlError);
+    throw externalUrlError;
+  }
+
   createViewConfig() {
     const config = {
       expr: expressionInterpreter,
@@ -180,16 +211,9 @@ export class VegaBaseView {
         // because user can only supply pure JSON data structure.
         uri = uri.url;
       } else if (!this._enableExternalUrls) {
-        throw new Error(
-          i18n.translate('visTypeVega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
-            defaultMessage:
-              'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
-            values: {
-              enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
-              kibanaConfigFileName: 'kibana.yml',
-            },
-          })
-        );
+        this.handleExternalUrlError(getExternalUrlsAreNotEnabledError());
+      } else if (!this._externalUrl.validateUrl(uri)) {
+        this.handleExternalUrlError(getExternalUrlServiceError(uri));
       }
       const result = await originalSanitize(uri, options);
       // This will allow Vega users to load images from any domain.
@@ -223,11 +247,16 @@ export class VegaBaseView {
     if (!this._$messages) {
       this._$messages = $(`<ul class="vgaVis__messages">`).appendTo(this._$parentEl);
     }
-    this._$messages.append(
-      $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
-        $(`<pre class="vgaVis__messageCode">`).text(text)
-      )
-    );
+    const isMessageAlreadyDisplayed = this._$messages
+      .find(`pre.vgaVis__messageCode`)
+      .filter((index, element) => element.textContent === text).length;
+    if (!isMessageAlreadyDisplayed) {
+      this._$messages.append(
+        $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
+          $(`<pre class="vgaVis__messageCode">`).text(text)
+        )
+      );
+    }
   }
 
   resize() {
@@ -358,11 +387,13 @@ export class VegaBaseView {
         timeFieldName: '*',
         filters: [
           {
-            range: {
-              '*': {
-                mode,
-                gte: from,
-                lte: to,
+            query: {
+              range: {
+                '*': {
+                  mode,
+                  gte: from,
+                  lte: to,
+                },
               },
             },
           },

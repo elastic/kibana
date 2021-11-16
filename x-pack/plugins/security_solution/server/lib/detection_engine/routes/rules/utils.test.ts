@@ -18,6 +18,7 @@ import {
   transformAlertsToRules,
   getDuplicates,
   getTupleDuplicateErrorsAndUniqueRules,
+  getInvalidConnectors,
 } from './utils';
 import { getAlertMock } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
@@ -36,9 +37,12 @@ import {
   getQueryRuleParams,
   getThreatRuleParams,
 } from '../../schemas/rule_schemas.mock';
+import { requestContextMock } from '../__mocks__';
+
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRuleAlertAction } from '../../rule_actions/legacy_types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -46,6 +50,8 @@ describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('utils - %s', (_, isRuleRegistryEnabled) => {
+  const { clients } = requestContextMock.createTools();
+
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
       const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
@@ -306,7 +312,7 @@ describe.each([
     });
 
     test('outputs 200 if the data is of type siem alert and has a legacy rule action', () => {
-      const actions: RuleAlertAction[] = [
+      const actions: LegacyRuleAlertAction[] = [
         {
           id: '456',
           params: {},
@@ -468,12 +474,12 @@ describe.each([
 
   describe('transformAlertsToRules', () => {
     test('given an empty array returns an empty array', () => {
-      expect(transformAlertsToRules([])).toEqual([]);
+      expect(transformAlertsToRules([], {})).toEqual([]);
     });
 
     test('given single alert will return the alert transformed', () => {
       const result1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
-      const transformed = transformAlertsToRules([result1]);
+      const transformed = transformAlertsToRules([result1], {});
       const expected = getOutputRuleAlertForRest();
       expect(transformed).toEqual([expected]);
     });
@@ -484,7 +490,7 @@ describe.each([
       result2.id = 'some other id';
       result2.params.ruleId = 'some other id';
 
-      const transformed = transformAlertsToRules([result1, result2]);
+      const transformed = transformAlertsToRules([result1, result2], {});
       const expected1 = getOutputRuleAlertForRest();
       const expected2 = getOutputRuleAlertForRest();
       expected2.id = 'some other id';
@@ -528,6 +534,7 @@ describe.each([
 
   describe('getTupleDuplicateErrorsAndUniqueRules', () => {
     test('returns tuple of empty duplicate errors array and rule array with instance of Syntax Error when imported rule contains parse error', async () => {
+      // This is a string because we have a double "::" below to make an error happen on purpose.
       const multipartPayload =
         '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\n';
       const ndJsonStream = new Readable({
@@ -642,6 +649,471 @@ describe.each([
 
       expect(isInstanceOfError).toEqual(true);
       expect(errors.length).toEqual(0);
+    });
+  });
+
+  describe('getInvalidConnectors', () => {
+    beforeEach(() => {
+      clients.actionsClient.getAll.mockReset();
+    });
+
+    test('returns empty errors array and rule array with instance of Syntax Error when imported rule contains parse error', async () => {
+      // This is a string because we have a double "::" below to make an error happen on purpose.
+      const multipartPayload =
+        '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\n';
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(multipartPayload);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const isInstanceOfError = output[0] instanceof Error;
+
+      expect(isInstanceOfError).toEqual(true);
+      expect(errors.length).toEqual(0);
+    });
+
+    test('creates error with a rule has an action that does not exist within the actions client', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(output.length).toEqual(0);
+      expect(errors).toEqual<BulkError[]>([
+        {
+          error: {
+            message: '1 connector is missing. Connector id missing is: 123',
+            status_code: 404,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
+    });
+
+    test('creates output with no errors if 1 rule with an action exists within the actions client', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(0);
+      expect(output.length).toEqual(1);
+      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
+    });
+
+    test('creates output with no errors if 1 rule with 2 actions exists within the actions client', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '789',
+            action_type_id: '101112',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+        {
+          id: '789',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(0);
+      expect(output.length).toEqual(1);
+      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
+    });
+
+    test('creates output with no errors if 2 rules with 1 action each exists within the actions client', async () => {
+      const rule1: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const rule2: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-2'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule1)}\n`);
+          this.push(`${JSON.stringify(rule2)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+        {
+          id: '789',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(0);
+      expect(output.length).toEqual(2);
+      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
+      expect(output[1]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule2));
+    });
+
+    test('creates output with 1 error if 2 rules with 1 action each exists within the actions client but 1 has a nonexistent action', async () => {
+      const rule1: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const rule2: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-2'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '456', // <--- Non-existent that triggers the error.
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule1)}\n`);
+          this.push(`${JSON.stringify(rule2)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+        {
+          id: '789',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(1);
+      expect(output.length).toEqual(1);
+      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
+      expect(errors).toEqual<BulkError[]>([
+        {
+          error: {
+            message: '1 connector is missing. Connector id missing is: 456',
+            status_code: 404,
+          },
+          rule_id: 'rule-2',
+        },
+      ]);
+    });
+
+    test('creates output with error if 1 rule with 2 actions but 1 action does not exist within the actions client', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '789',
+            action_type_id: '101112',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '101112', // <-- Does not exist
+            action_type_id: '101112',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+        {
+          id: '789',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(1);
+      expect(output.length).toEqual(0);
+      expect(errors).toEqual<BulkError[]>([
+        {
+          error: {
+            message: '1 connector is missing. Connector id missing is: 101112',
+            status_code: 404,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
+    });
+
+    test('creates output with 2 errors if 3 rules with actions but 1 action does not exist within the actions client', async () => {
+      const rule1: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '789',
+            action_type_id: '101112',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '101112', // <-- Does not exist
+            action_type_id: '101112',
+            params: {},
+          },
+        ],
+      };
+      const rule2: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '789',
+            action_type_id: '101112',
+            params: {},
+          },
+        ],
+      };
+      const rule3: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '789',
+            action_type_id: '101112',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '101112', // <-- Does not exist
+            action_type_id: '101112',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule1)}\n`);
+          this.push(`${JSON.stringify(rule2)}\n`);
+          this.push(`${JSON.stringify(rule3)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+        {
+          id: '789',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(2);
+      expect(output.length).toEqual(1);
+      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule2));
+      expect(errors).toEqual<BulkError[]>([
+        {
+          error: {
+            message: '1 connector is missing. Connector id missing is: 101112',
+            status_code: 404,
+          },
+          rule_id: 'rule-1',
+        },
+        {
+          error: {
+            message: '1 connector is missing. Connector id missing is: 101112',
+            status_code: 404,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
     });
   });
 });

@@ -28,7 +28,6 @@ export default function () {
       buildArgs: [],
       sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
-        '--logging.json=false',
         `--server.port=${kbnTestConfig.getPort()}`,
         '--status.allowAnonymous=true',
         // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should

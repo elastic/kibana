@@ -19,21 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const dashboardName = 'Dashboard Listing A11y';
     const clonedDashboardName = 'Dashboard Listing A11y Copy';
 
-    before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.addSampleDataSet('flights');
-    });
-
-    after(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await listingTable.searchForItemWithName(dashboardName);
-      await listingTable.checkListingSelectAllCheckbox();
-      await listingTable.clickDeleteSelected();
-      await PageObjects.common.clickConfirmOnModal();
-    });
-
     it('dashboard', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await a11y.testAppSnapshot();
@@ -60,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('add a visualization', async () => {
+      await testSubjects.setValue('savedObjectFinderSearchInput', '[Flights]');
       await testSubjects.click('savedObjectTitle[Flights]-Delay-Buckets');
       await a11y.testAppSnapshot();
     });
@@ -100,6 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Add one more saved object to cancel it', async () => {
+      await testSubjects.setValue('savedObjectFinderSearchInput', '[Flights]');
       await testSubjects.click('savedObjectTitle[Flights]-Destination-Weather');
       await a11y.testAppSnapshot();
     });

@@ -22,11 +22,11 @@ export type {
   XYLayerConfig,
   LegendConfig,
   SeriesType,
-  ValueLabelConfig,
   YAxisMode,
   XYCurveType,
   YConfig,
 } from '../common/expressions';
+export type { ValueLabelConfig } from '../common/types';
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
 export type {
   IndexPatternPersistedState,
@@ -58,6 +58,6 @@ export type {
 } from './indexpattern_datasource/types';
 export type { LensEmbeddableInput } from './embeddable';
 
-export { LensPublicStart } from './plugin';
+export type { LensPublicStart } from './plugin';
 
 export const plugin = () => new LensPlugin();

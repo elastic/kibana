@@ -67,7 +67,6 @@ describe('Security Plugin', () => {
         Object {
           "audit": Object {
             "asScoped": [Function],
-            "getLogger": [Function],
           },
           "authc": Object {
             "getCurrentUser": [Function],
@@ -122,6 +121,9 @@ describe('Security Plugin', () => {
             "hasAtLeast": [Function],
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],
+          },
+          "privilegeDeprecationsService": Object {
+            "getKibanaRolesByFeatureId": [Function],
           },
         }
       `);

@@ -36,7 +36,7 @@ const first = (stream, map) =>
 
 exports.Cluster = class Cluster {
   constructor({ log = defaultLog, ssl = false } = {}) {
-    this._log = log;
+    this._log = log.withType('@kbn/es Cluster');
     this._ssl = ssl;
     this._caCertPromise = ssl ? readFile(CA_CERT_PATH) : undefined;
   }
@@ -240,7 +240,7 @@ exports.Cluster = class Cluster {
    * @return {undefined}
    */
   _exec(installPath, opts = {}) {
-    const { skipNativeRealmSetup = false, ...options } = opts;
+    const { skipNativeRealmSetup = false, reportTime = () => {}, startTime, ...options } = opts;
 
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
@@ -257,9 +257,13 @@ exports.Cluster = class Cluster {
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
-      esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
-      esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
-      esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
+
+      // Include default keystore settings only if keystore isn't configured.
+      if (!esArgs.some((arg) => arg.startsWith('xpack.security.http.ssl.keystore'))) {
+        esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+        esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
+        esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
+      }
     }
 
     const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {
@@ -321,10 +325,17 @@ exports.Cluster = class Cluster {
       await nativeRealm.setPasswords(options);
     });
 
+    let reportSent = false;
     // parse and forward es stdout to the log
     this._process.stdout.on('data', (data) => {
       const lines = parseEsLog(data.toString());
       lines.forEach((line) => {
+        if (!reportSent && line.message.includes('publish_address')) {
+          reportSent = true;
+          reportTime(startTime, 'ready', {
+            success: true,
+          });
+        }
         this._log.info(line.formattedMessage);
       });
     });
@@ -341,7 +352,16 @@ exports.Cluster = class Cluster {
 
       // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
       if (code > 0 && !(code === 143 || code === 130)) {
+        reportTime(startTime, 'abort', {
+          success: true,
+          error: code,
+        });
         throw createCliError(`ES exited with code ${code}`);
+      } else {
+        reportTime(startTime, 'error', {
+          success: false,
+          error: `exited with ${code}`,
+        });
       }
     });
   }

@@ -26,16 +26,18 @@ import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetServerAgentPoliciesExists } from './agents';
-import { awaitIfFleetServerSetupPending } from './fleet_server';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
 import { getInstallations, installPackage } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
 import { pkgToPkgKey } from './epm/registry';
+import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 
 export interface SetupStatus {
   isInitialized: boolean;
-  nonFatalErrors: Array<PreconfigurationError | DefaultPackagesInstallationError>;
+  nonFatalErrors: Array<
+    PreconfigurationError | DefaultPackagesInstallationError | UpgradeManagedPackagePoliciesResult
+  >;
 }
 
 export async function setupFleet(
@@ -49,6 +51,9 @@ async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
+  const logger = appContextService.getLogger();
+  logger.info('Beginning fleet setup');
+
   const {
     agentPolicies: policiesOrUndefined,
     packages: packagesOrUndefined,
@@ -58,6 +63,7 @@ async function createSetupSideEffects(
   const policies = policiesOrUndefined ?? [];
   let packages = packagesOrUndefined ?? [];
 
+  logger.debug('Setting up Fleet outputs');
   await Promise.all([
     ensurePreconfiguredOutputs(soClient, esClient, outputsOrUndefined ?? []),
     settingsService.settingsSetup(soClient),
@@ -65,8 +71,8 @@ async function createSetupSideEffects(
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
 
-  await awaitIfFleetServerSetupPending();
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
+    logger.debug('Setting up Fleet Elasticsearch assets');
     await ensureFleetGlobalEsAssets(soClient, esClient);
   }
 
@@ -90,6 +96,8 @@ async function createSetupSideEffects(
     ...autoUpdateablePackages.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
+  logger.debug('Setting up initial Fleet packages');
+
   const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
     soClient,
     esClient,
@@ -98,10 +106,21 @@ async function createSetupSideEffects(
     defaultOutput
   );
 
+  logger.debug('Cleaning up Fleet outputs');
   await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
 
+  logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
+
+  logger.debug('Setting up Fleet Server agent policies');
   await ensureFleetServerAgentPoliciesExists(soClient, esClient);
+
+  if (nonFatalErrors.length > 0) {
+    logger.info('Encountered non fatal errors during Fleet setup');
+    formatNonFatalErrors(nonFatalErrors).forEach((error) => logger.info(JSON.stringify(error)));
+  }
+
+  logger.info('Fleet setup completed');
 
   return {
     isInitialized: true,
@@ -118,6 +137,7 @@ export async function ensureFleetGlobalEsAssets(
 ) {
   const logger = appContextService.getLogger();
   // Ensure Global Fleet ES assets are installed
+  logger.debug('Creating Fleet component template and ingest pipeline');
   const globalAssetsRes = await Promise.all([
     ensureDefaultComponentTemplate(esClient),
     ensureFleetFinalPipelineIsInstalled(esClient),
@@ -140,7 +160,7 @@ export async function ensureFleetGlobalEsAssets(
           savedObjectsClient: soClient,
           pkgkey: pkgToPkgKey({ name: installation.name, version: installation.version }),
           esClient,
-          // Force install the pacakge will update the index template and the datastream write indices
+          // Force install the package will update the index template and the datastream write indices
           force: true,
         }).catch((err) => {
           logger.error(
@@ -185,4 +205,28 @@ export async function ensureDefaultEnrollmentAPIKeysExists(
       });
     })
   );
+}
+
+/**
+ * Maps the `nonFatalErrors` object returned by the setup process to a more readable
+ * and predictable format suitable for logging output or UI presentation.
+ */
+export function formatNonFatalErrors(
+  nonFatalErrors: SetupStatus['nonFatalErrors']
+): Array<{ name: string; message: string }> {
+  return nonFatalErrors.flatMap((e) => {
+    if ('error' in e) {
+      return {
+        name: e.error.name,
+        message: e.error.message,
+      };
+    } else {
+      return e.errors.map((upgradePackagePolicyError: any) => {
+        return {
+          name: upgradePackagePolicyError.key,
+          message: upgradePackagePolicyError.message,
+        };
+      });
+    }
+  });
 }

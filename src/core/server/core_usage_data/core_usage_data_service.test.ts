@@ -17,7 +17,6 @@ import { mockCoreContext } from '../core_context.mock';
 import { config as RawElasticsearchConfig } from '../elasticsearch/elasticsearch_config';
 import { config as RawHttpConfig } from '../http/http_config';
 import { config as RawLoggingConfig } from '../logging/logging_config';
-import { config as RawKibanaConfig } from '../kibana_config';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { httpServiceMock } from '../http/http_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
@@ -40,8 +39,6 @@ describe('CoreUsageDataService', () => {
         return new BehaviorSubject(RawLoggingConfig.schema.validate({}));
       } else if (path === 'savedObjects') {
         return new BehaviorSubject(RawSavedObjectsConfig.schema.validate({}));
-      } else if (path === 'kibana') {
-        return new BehaviorSubject(RawKibanaConfig.schema.validate({}));
       }
       return new BehaviorSubject({});
     };

@@ -40,6 +40,7 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
         }}
         indexPatternId={layer.indexPatternId}
         indexPatternRefs={state.indexPatternRefs}
+        isMissingCurrent={!indexPattern}
         onChangeIndexPattern={onChangeIndexPattern}
       />
     </I18nProvider>

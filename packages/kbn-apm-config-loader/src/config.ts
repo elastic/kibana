@@ -16,21 +16,22 @@ import type { AgentConfigOptions } from 'elastic-apm-node';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
 const DEFAULT_CONFIG: AgentConfigOptions = {
-  active: false,
+  active: true,
+  contextPropagationOnly: true,
   environment: 'development',
   logUncaughtExceptions: true,
   globalLabels: {},
 };
 
 const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions = {
-  serverUrl: 'https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io',
+  serverUrl: 'https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io',
 
   // The secretToken below is intended to be hardcoded in this file even though
   // it makes it public. This is not a security/privacy issue. Normally we'd
   // instead disable the need for a secretToken in the APM Server config where
   // the data is transmitted to, but due to how it's being hosted, it's easier,
   // for now, to simply leave it in.
-  secretToken: 'ZQHYvrmXEx04ozge8F',
+  secretToken: '7YKhoXsO4MzjhXjx2c',
 
   centralConfig: false,
   metricsInterval: '30s',
@@ -71,6 +72,8 @@ export class ApmConfiguration {
 
   private getBaseConfig() {
     if (!this.baseConfig) {
+      const configFromSources = this.getConfigFromAllSources();
+
       this.baseConfig = merge(
         {
           serviceVersion: this.kibanaVersion,
@@ -79,9 +82,7 @@ export class ApmConfiguration {
         this.getUuidConfig(),
         this.getGitConfig(),
         this.getCiConfig(),
-        this.getConfigFromKibanaConfig(),
-        this.getDevConfig(),
-        this.getConfigFromEnv()
+        configFromSources
       );
 
       /**
@@ -112,6 +113,12 @@ export class ApmConfiguration {
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
       config.active = true;
+    }
+
+    if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'true') {
+      config.contextPropagationOnly = true;
+    } else if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'false') {
+      config.contextPropagationOnly = false;
     }
 
     if (process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV) {
@@ -248,5 +255,29 @@ export class ApmConfiguration {
     } catch {
       return {};
     }
+  }
+
+  /**
+   * Reads APM configuration from different sources and merges them together.
+   */
+  private getConfigFromAllSources(): AgentConfigOptions {
+    const config = merge(
+      {},
+      this.getConfigFromKibanaConfig(),
+      this.getDevConfig(),
+      this.getConfigFromEnv()
+    );
+
+    if (config.active === false && config.contextPropagationOnly !== false) {
+      throw new Error(
+        'APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false'
+      );
+    }
+
+    if (config.active === true) {
+      config.contextPropagationOnly = config.contextPropagationOnly ?? false;
+    }
+
+    return config;
   }
 }

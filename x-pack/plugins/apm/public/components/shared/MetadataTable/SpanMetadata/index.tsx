@@ -6,19 +6,41 @@
  */
 
 import React, { useMemo } from 'react';
-import { SPAN_METADATA_SECTIONS } from './sections';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
-import { getSectionsWithRows } from '../helper';
+import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { ProcessorEvent } from '../../../../../common/processor_event';
 
 interface Props {
   span: Span;
 }
 
 export function SpanMetadata({ span }: Props) {
-  const sectionsWithRows = useMemo(
-    () => getSectionsWithRows(SPAN_METADATA_SECTIONS, span),
-    [span]
+  const { data: spanEvent, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi({
+        endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
+        params: {
+          path: {
+            processorEvent: ProcessorEvent.span,
+            id: span.span.id,
+          },
+        },
+      });
+    },
+    [span.span.id]
   );
-  return <MetadataTable sections={sectionsWithRows} />;
+
+  const sections = useMemo(
+    () => getSectionsFromFields(spanEvent?.metadata || {}),
+    [spanEvent?.metadata]
+  );
+
+  return (
+    <MetadataTable
+      sections={sections}
+      isLoading={status === FETCH_STATUS.LOADING}
+    />
+  );
 }

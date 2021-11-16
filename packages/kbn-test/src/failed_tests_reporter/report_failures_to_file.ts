@@ -76,17 +76,27 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
       .flat()
       .join('\n');
 
+    // Buildkite steps that use `parallelism` need a numerical suffix added to identify them
+    // We should also increment the number by one, since it's 0-based
+    const jobNumberSuffix = process.env.BUILDKITE_PARALLEL_JOB
+      ? ` #${parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10) + 1}`
+      : '';
+
+    const buildUrl = process.env.BUILDKITE_BUILD_URL || '';
+    const jobUrl = process.env.BUILDKITE_JOB_ID
+      ? `${buildUrl}#${process.env.BUILDKITE_JOB_ID}`
+      : '';
+
     const failureJSON = JSON.stringify(
       {
         ...failure,
         hash,
         buildId: process.env.BUJILDKITE_BUILD_ID || '',
         jobId: process.env.BUILDKITE_JOB_ID || '',
-        url: process.env.BUILDKITE_BUILD_URL || '',
+        url: buildUrl,
+        jobUrl,
         jobName: process.env.BUILDKITE_LABEL
-          ? `${process.env.BUILDKITE_LABEL}${
-              process.env.BUILDKITE_PARALLEL_JOB ? ` #${process.env.BUILDKITE_PARALLEL_JOB}` : ''
-            }`
+          ? `${process.env.BUILDKITE_LABEL}${jobNumberSuffix}`
           : '',
       },
       null,
@@ -124,6 +134,30 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
           .join('')}
         <hr />
         <p><strong>${escape(failure.name)}</strong></p>
+        <p>
+          <small>
+            <strong>Failures in tracked branches</strong>: <span class="badge rounded-pill bg-danger">${
+              failure.failureCount || 0
+            }</span>
+            ${
+              failure.githubIssue
+                ? `<br /><a href="${escape(failure.githubIssue)}">${escape(
+                    failure.githubIssue
+                  )}</a>`
+                : ''
+            }
+          </small>
+        </p>
+        ${
+          jobUrl
+            ? `<p>
+              <small>
+                <strong>Buildkite Job</strong><br />
+                <a href="${escape(jobUrl)}">${escape(jobUrl)}</a>
+              </small>
+            </p>`
+            : ''
+        }
         <pre>${escape(failure.failure)}</pre>
         ${screenshotHtml}
         <pre>${escape(failure['system-out'] || '')}</pre>

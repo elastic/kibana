@@ -37,6 +37,7 @@ export function registerVisualizeRoute({
   router,
   license,
   lib: { handleEsError },
+  kibanaVersion,
 }: RouteDependencies) {
   router.post(
     {
@@ -48,7 +49,7 @@ export function registerVisualizeRoute({
     license.guardApiRoute(async (ctx, request, response) => {
       const watch = Watch.fromDownstreamJson(request.body.watch);
       const options = VisualizeOptions.fromDownstreamJson(request.body.options);
-      const body = watch.getVisualizeQuery(options);
+      const body = watch.getVisualizeQuery(options, kibanaVersion);
 
       try {
         const hits = await fetchVisualizeData(ctx.core.elasticsearch.client, watch.index, body);

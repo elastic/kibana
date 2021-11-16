@@ -1566,7 +1566,13 @@
                 "text": "SerializedAction"
               },
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">, triggers: string[]) => Promise<void>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1590,7 +1596,13 @@
                     "text": "SerializedAction"
                   },
                   "<",
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   ">"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1635,7 +1647,13 @@
                 "text": "SerializedAction"
               },
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">, triggers: string[]) => Promise<void>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1675,7 +1693,13 @@
                     "text": "SerializedAction"
                   },
                   "<",
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   ">"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1856,7 +1880,13 @@
                 "text": "SerializedAction"
               },
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">; }[]>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
@@ -3051,7 +3081,13 @@
                 "text": "ActionFactory"
               },
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ", object, ",
               {
                 "pluginId": "uiActionsEnhanced",
@@ -3196,7 +3232,13 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          "SerializableRecord"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -3271,7 +3313,13 @@
             "text": "SerializedAction"
           },
           "<",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">; }"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3351,7 +3399,13 @@
           "text": "UiActionsService"
         },
         ", ",
-        "MethodKeysOf",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.MethodKeysOf",
+          "text": "MethodKeysOf"
+        },
         "<",
         {
           "pluginId": "uiActions",
@@ -3362,7 +3416,7 @@
         },
         ">>,Pick<",
         "UiActionsServiceEnhancements",
-        ", \"telemetry\" | \"inject\" | \"extract\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
+        ", \"telemetry\" | \"extract\" | \"inject\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
       ],
       "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,
@@ -3765,7 +3819,13 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          "SerializableRecord"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -3826,7 +3886,13 @@
             "text": "SerializedAction"
           },
           "<",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">; }"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3940,7 +4006,13 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          "SerializableRecord"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -4001,7 +4073,13 @@
             "text": "SerializedAction"
           },
           "<",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">; }"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",

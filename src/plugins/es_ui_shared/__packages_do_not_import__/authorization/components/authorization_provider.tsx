@@ -13,7 +13,7 @@ import { useRequest } from '../../../public/request';
 
 import { Privileges, Error as CustomError } from '../types';
 
-interface Authorization {
+export interface Authorization {
   isLoading: boolean;
   apiError: CustomError | null;
   privileges: Privileges;

@@ -65,7 +65,7 @@ import {
   updateRange,
   updateSort,
   upsertColumn,
-  updateIndexNames,
+  updateDataView,
   updateTimeline,
   updateTitleAndDescription,
   updateAutoSaveMsg,
@@ -109,7 +109,7 @@ const timelineActionsType = [
   updateProviders.type,
   updateTitleAndDescription.type,
 
-  updateIndexNames.type,
+  updateDataView.type,
   removeColumn.type,
   updateColumns.type,
   updateSort.type,
@@ -235,7 +235,7 @@ export const createTimelineEpic =
               mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {
                 const error = result as TimelineErrorResponse;
                 if (error.status_code != null && error.status_code === 405) {
-                  kibana.notifications!.toasts.addDanger({
+                  kibana.notifications.toasts.addDanger({
                     title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
                     text: error.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
                   });
@@ -326,6 +326,7 @@ export const createTimelineEpic =
 const timelineInput: TimelineInput = {
   columns: null,
   dataProviders: null,
+  dataViewId: null,
   description: null,
   eqlOptions: null,
   eventType: null,
@@ -392,27 +393,28 @@ export const convertTimelineAsInput = (
                   },
                   ...(esFilters.isMatchAllFilter(basicFilter)
                     ? {
-                        match_all: convertToString((basicFilter as MatchAllFilter).match_all),
+                        query: {
+                          match_all: convertToString(
+                            (basicFilter as MatchAllFilter).query.match_all
+                          ),
+                        },
                       }
                     : { match_all: null }),
-                  ...(esFilters.isMissingFilter(basicFilter) && basicFilter.missing != null
-                    ? { missing: convertToString(basicFilter.missing) }
-                    : { missing: null }),
-                  ...(esFilters.isExistsFilter(basicFilter) && basicFilter.exists != null
-                    ? { exists: convertToString(basicFilter.exists) }
+                  ...(esFilters.isExistsFilter(basicFilter) && basicFilter.query.exists != null
+                    ? { query: { exists: convertToString(basicFilter.query.exists) } }
                     : { exists: null }),
                   ...((esFilters.isQueryStringFilter(basicFilter) ||
                     get('query', basicFilter) != null) &&
                   basicFilter.query != null
                     ? { query: convertToString(basicFilter.query) }
                     : { query: null }),
-                  ...(esFilters.isRangeFilter(basicFilter) && basicFilter.range != null
-                    ? { range: convertToString(basicFilter.range) }
+                  ...(esFilters.isRangeFilter(basicFilter) && basicFilter.query.range != null
+                    ? { query: { range: convertToString(basicFilter.query.range) } }
                     : { range: null }),
                   ...(isScriptedRangeFilter(basicFilter) &&
-                  basicFilter.script !=
+                  basicFilter.query.script !=
                     null /* TODO remove it when PR50713 is merged || esFilters.isPhraseFilter(basicFilter) */
-                    ? { script: convertToString(basicFilter.script) }
+                    ? { query: { script: convertToString(basicFilter.query.script) } }
                     : { script: null }),
                 };
               })

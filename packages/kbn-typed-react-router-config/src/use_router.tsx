@@ -16,7 +16,7 @@ export const RouterContextProvider = ({
   children,
 }: {
   router: Router<Route[]>;
-  children: React.ReactElement;
+  children: React.ReactNode;
 }) => <RouterContext.Provider value={router}>{children}</RouterContext.Provider>;
 
 export function useRouter(): Router<Route[]> {

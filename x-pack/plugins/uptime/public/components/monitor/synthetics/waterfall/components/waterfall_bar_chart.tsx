@@ -24,6 +24,7 @@ import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
 import { useWaterfallContext, WaterfallData } from '..';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
+import { WaterfallChartMarkers } from './waterfall_markers';
 
 const getChartHeight = (data: WaterfallData): number => {
   // We get the last item x(number of bars) and adds 1 to cater for 0 index
@@ -120,6 +121,7 @@ export const WaterfallBarChart = ({
           styleAccessor={barStyleAccessor}
           data={chartData}
         />
+        <WaterfallChartMarkers />
       </Chart>
     </WaterfallChartChartContainer>
   );

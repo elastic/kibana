@@ -38,14 +38,14 @@ interface TitleFieldProps {
 }
 
 const rollupIndexPatternNoMatchError = {
-  message: i18n.translate('indexPatternEditor.rollupIndexPattern.createIndex.noMatchError', {
-    defaultMessage: 'Rollup index pattern error: must match one rollup index',
+  message: i18n.translate('indexPatternEditor.rollupDataView.createIndex.noMatchError', {
+    defaultMessage: 'Rollup data view error: must match one rollup index',
   }),
 };
 
 const rollupIndexPatternTooManyMatchesError = {
-  message: i18n.translate('indexPatternEditor.rollupIndexPattern.createIndex.tooManyMatchesError', {
-    defaultMessage: 'Rollup index pattern error: can only match one rollup index',
+  message: i18n.translate('indexPatternEditor.rollupDataView.createIndex.tooManyMatchesError', {
+    defaultMessage: 'Rollup data view error: can only match one rollup index',
   }),
 };
 
@@ -61,8 +61,8 @@ const createTitlesNoDupesValidator = (
   validator: ({ value }) => {
     if (namesNotAllowed.includes(value)) {
       return {
-        message: i18n.translate('indexPatternEditor.indexPatternExists.ValidationErrorMessage', {
-          defaultMessage: 'An index pattern with this title already exists.',
+        message: i18n.translate('indexPatternEditor.dataViewExists.ValidationErrorMessage', {
+          defaultMessage: 'A data view with this title already exists.',
         }),
       };
     }
@@ -109,7 +109,7 @@ const createMatchesIndicesValidator = ({
     if (error) {
       return {
         message: i18n.translate('indexPatternEditor.rollup.uncaughtError', {
-          defaultMessage: 'Rollup index pattern error: {error}',
+          defaultMessage: 'Rollup data view error: {error}',
           values: {
             error,
           },

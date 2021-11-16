@@ -246,6 +246,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (
     state: T,
+    filterFn?: (layerId: string) => boolean,
     activeData?: Record<string, Datatable>
   ) => Array<DatasourceSuggestion<T>>;
 
@@ -280,6 +281,10 @@ export interface Datasource<T = unknown, P = unknown> {
    * Checks if the visualization created is time based, for example date histogram
    */
   isTimeBased: (state: T) => boolean;
+  /**
+   * Given the current state layer and a columnId will verify if the column configuration has errors
+   */
+  isValidColumn: (state: T, layerId: string, columnId: string) => boolean;
 }
 
 export interface DatasourceFixAction<T> {
@@ -333,7 +338,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   invalid?: boolean;
   invalidMessage?: string;
 };
-
+export type ParamEditorCustomProps = Record<string, unknown> & { label?: string };
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
@@ -351,6 +356,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   isFullscreen: boolean;
   layerType: LayerType | undefined;
   supportStaticValue: boolean;
+  paramEditorCustomProps?: ParamEditorCustomProps;
   supportFieldFormat?: boolean;
 };
 
@@ -480,6 +486,9 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   invalidMessage?: string;
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
+  supportStaticValue?: boolean;
+  paramEditorCustomProps?: ParamEditorCustomProps;
+  supportFieldFormat?: boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {
@@ -668,8 +677,6 @@ export interface Visualization<T = unknown> {
    */
   getConfiguration: (props: VisualizationConfigProps<T>) => {
     groups: VisualizationDimensionGroupConfig[];
-    supportStaticValue?: boolean;
-    supportFieldFormat?: boolean;
   };
 
   /**
@@ -771,7 +778,7 @@ export interface LensBrushEvent {
 }
 
 // Use same technique as TriggerContext
-interface LensEditContextMapping {
+export interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
   [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
   [LENS_TOGGLE_ACTION]: LensToggleActionData;
@@ -833,5 +840,5 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 export interface SharingSavedObjectProps {
   outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
   aliasTargetId?: string;
-  errorJSON?: string;
+  sourceId?: string;
 }

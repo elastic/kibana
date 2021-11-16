@@ -21,7 +21,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
 } from '@elastic/eui';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ShardFailureTable } from './shard_failure_table';
 import { ShardFailureRequest } from './shard_failure_types';
 

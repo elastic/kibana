@@ -10,6 +10,6 @@ import type { DecoratorFn } from '@storybook/react';
 
 import { StorybookContext } from './context';
 
-export const decorator: DecoratorFn = (story: Function) => {
-  return <StorybookContext>{story()}</StorybookContext>;
+export const decorator: DecoratorFn = (story, storybook) => {
+  return <StorybookContext storyContext={storybook}>{story()}</StorybookContext>;
 };

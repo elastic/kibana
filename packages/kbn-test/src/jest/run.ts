@@ -21,23 +21,45 @@ import { resolve, relative, sep as osSep } from 'path';
 import { existsSync } from 'fs';
 import { run } from 'jest';
 import { buildArgv } from 'jest-cli/build/cli';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { map } from 'lodash';
 
 // yarn test:jest src/core/server/saved_objects
 // yarn test:jest src/core/public/core_system.test.ts
 // :kibana/src/core/server/saved_objects yarn test:jest
 
+// Patch node 16 types to be compatible with jest 26
+// https://github.com/facebook/jest/issues/11640#issuecomment-893867514
+/* eslint-disable */
+declare global {
+  namespace NodeJS {
+    interface Global {}
+    interface InspectOptions {}
+
+    interface ConsoleConstructor
+      extends console.ConsoleConstructor {}
+  }
+}
+/* eslint-enable */
+
 export function runJest(configName = 'jest.config.js') {
   const argv = buildArgv(process.argv);
+  const devConfigName = 'jest.config.dev.js';
 
   const log = new ToolingLog({
     level: argv.verbose ? 'verbose' : 'info',
     writeTo: process.stdout,
   });
 
+  const runStartTime = Date.now();
+  const reportTime = getTimeReporter(log, 'scripts/jest');
+
+  let testFiles: string[];
+
+  const cwd: string = process.env.INIT_CWD || process.cwd();
+
   if (!argv.config) {
-    const cwd = process.env.INIT_CWD || process.cwd();
-    const testFiles = argv._.splice(2).map((p) => resolve(cwd, p));
+    testFiles = argv._.splice(2).map((p) => resolve(cwd, p));
     const commonTestFiles = commonBasePath(testFiles);
     const testFilesProvided = testFiles.length > 0;
 
@@ -46,16 +68,23 @@ export function runJest(configName = 'jest.config.js') {
     log.verbose('commonTestFiles:', commonTestFiles);
 
     let configPath;
+    let devConfigPath;
 
     // sets the working directory to the cwd or the common
     // base directory of the provided test files
     let wd = testFilesProvided ? commonTestFiles : cwd;
 
+    devConfigPath = resolve(wd, devConfigName);
     configPath = resolve(wd, configName);
 
-    while (!existsSync(configPath)) {
+    while (!existsSync(configPath) && !existsSync(devConfigPath)) {
       wd = resolve(wd, '..');
+      devConfigPath = resolve(wd, devConfigName);
       configPath = resolve(wd, configName);
+    }
+
+    if (existsSync(devConfigPath)) {
+      configPath = devConfigPath;
     }
 
     log.verbose(`no config provided, found ${configPath}`);
@@ -73,7 +102,14 @@ export function runJest(configName = 'jest.config.js') {
     process.env.NODE_ENV = 'test';
   }
 
-  run();
+  run().then(() => {
+    // Success means that tests finished, doesn't mean they passed.
+    reportTime(runStartTime, 'total', {
+      success: true,
+      isXpack: cwd.includes('x-pack'),
+      testFiles: map(testFiles, (testFile) => relative(cwd, testFile)),
+    });
+  });
 }
 
 /**

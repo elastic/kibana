@@ -39,7 +39,7 @@ import { deprecationsServiceMock } from './deprecations/deprecations_service.moc
 import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 import { prebootServiceMock } from './preboot/preboot_service.mock';
 
-export { configServiceMock } from './config/mocks';
+export { configServiceMock, configDeprecationsMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
@@ -65,9 +65,6 @@ type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>[
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
-    kibana: {
-      index: '.kibana-tests',
-    },
     elasticsearch: {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),

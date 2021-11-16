@@ -21,7 +21,6 @@ describe('event_log plugin', () => {
     const setup = plugin.setup(coreSetup);
     expect(typeof setup.getLogger).toBe('function');
     expect(typeof setup.getProviderActions).toBe('function');
-    expect(typeof setup.isEnabled).toBe('function');
     expect(typeof setup.isIndexingEntries).toBe('function');
     expect(typeof setup.isLoggingEntries).toBe('function');
     expect(typeof setup.isProviderActionRegistered).toBe('function');

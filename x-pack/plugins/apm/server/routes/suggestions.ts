@@ -8,10 +8,10 @@
 import * as t from 'io-ts';
 import { maxSuggestions } from '../../../observability/common';
 import { getSuggestions } from '../lib/suggestions/get_suggestions';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 
 const suggestionsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/suggestions',

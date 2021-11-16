@@ -9,7 +9,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery } from '../../../../observability/server';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../helpers/setup_request';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getProcessorEventForTransactions } from '../helpers/transactions';
 
 export async function getServiceCount({
   setup,
@@ -27,9 +27,7 @@ export async function getServiceCount({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],

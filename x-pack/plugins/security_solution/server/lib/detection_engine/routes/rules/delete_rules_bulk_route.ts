@@ -80,21 +80,19 @@ export const deleteRulesBulkRoute = (
             return getIdBulkError({ id, ruleId });
           }
 
-          const ruleStatuses = await ruleStatusClient.find({
-            logsCount: 6,
+          const ruleStatus = await ruleStatusClient.getCurrentStatus({
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
           await deleteRules({
+            ruleId: rule.id,
             rulesClient,
             ruleStatusClient,
-            ruleStatuses,
-            id: rule.id,
           });
           return transformValidateBulkError(
             idOrRuleIdOrUnknown,
             rule,
-            ruleStatuses,
+            ruleStatus,
             isRuleRegistryEnabled
           );
         } catch (err) {

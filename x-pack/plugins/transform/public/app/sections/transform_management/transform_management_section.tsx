@@ -35,6 +35,11 @@ import { useRefreshInterval } from './components/transform_list/use_refresh_inte
 import { SearchSelection } from './components/search_selection';
 import { TransformList } from './components/transform_list';
 import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
+import {
+  AlertRulesManageContext,
+  getAlertRuleManageContext,
+  TransformAlertFlyoutWrapper,
+} from '../../../alerting/transform_alerting_flyout';
 
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
@@ -149,12 +154,15 @@ export const TransformManagement: FC = () => {
               </EuiFlexGroup>
             )}
             {typeof errorMessage === 'undefined' && (
-              <TransformList
-                onCreateTransform={onOpenModal}
-                transformNodes={transformNodes}
-                transforms={transforms}
-                transformsLoading={transformsLoading}
-              />
+              <AlertRulesManageContext.Provider value={getAlertRuleManageContext()}>
+                <TransformList
+                  onCreateTransform={onOpenModal}
+                  transformNodes={transformNodes}
+                  transforms={transforms}
+                  transformsLoading={transformsLoading}
+                />
+                <TransformAlertFlyoutWrapper />
+              </AlertRulesManageContext.Provider>
             )}
           </>
         )}

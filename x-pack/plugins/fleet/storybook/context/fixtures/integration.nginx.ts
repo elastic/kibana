@@ -252,6 +252,7 @@ export const response: GetInfoResponse['response'] = {
       lens: [],
       map: [],
       security_rule: [],
+      tag: [],
     },
     elasticsearch: {
       ingest_pipeline: [
@@ -294,6 +295,7 @@ export const response: GetInfoResponse['response'] = {
       ilm_policy: [],
       index_template: [],
       transform: [],
+      ml_model: [],
     },
   },
   policy_templates: [

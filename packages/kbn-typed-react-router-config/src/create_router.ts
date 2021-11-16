@@ -15,15 +15,9 @@ import {
 } from 'react-router-config';
 import qs from 'query-string';
 import { findLastIndex, merge, compact } from 'lodash';
-import type { deepExactRt as deepExactRtTyped, mergeRt as mergeRtTyped } from '@kbn/io-ts-utils';
-// @ts-expect-error
-import { deepExactRt as deepExactRtNonTyped } from '@kbn/io-ts-utils/target_node/deep_exact_rt';
-// @ts-expect-error
-import { mergeRt as mergeRtNonTyped } from '@kbn/io-ts-utils/target_node/merge_rt';
-import { Route, Router } from './types';
-
-const deepExactRt: typeof deepExactRtTyped = deepExactRtNonTyped;
-const mergeRt: typeof mergeRtTyped = mergeRtNonTyped;
+import { mergeRt } from '@kbn/io-ts-utils/merge_rt';
+import { deepExactRt } from '@kbn/io-ts-utils/deep_exact_rt';
+import { FlattenRoutesOf, Route, Router } from './types';
 
 function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');
@@ -49,6 +43,20 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     reactRouterConfigsByRoute.set(route, reactRouterConfig);
 
     return reactRouterConfig;
+  }
+
+  function getRoutesToMatch(path: string) {
+    const matches = matchRoutesConfig(reactRouterConfigs, toReactRouterPath(path));
+
+    if (!matches.length) {
+      throw new Error(`No matching route found for ${path}`);
+    }
+
+    const matchedRoutes = matches.map((match) => {
+      return routesByReactRouterConfig.get(match.route)!;
+    });
+
+    return matchedRoutes;
   }
 
   const matchRoutes = (...args: any[]) => {
@@ -142,15 +150,7 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
       })
       .join('/');
 
-    const matches = matchRoutesConfig(reactRouterConfigs, toReactRouterPath(path));
-
-    if (!matches.length) {
-      throw new Error(`No matching route found for ${path}`);
-    }
-
-    const matchedRoutes = matches.map((match) => {
-      return routesByReactRouterConfig.get(match.route)!;
-    });
+    const matchedRoutes = getRoutesToMatch(path);
 
     const validationType = mergeRt(
       ...(compact(
@@ -199,6 +199,9 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     },
     getRoutePath: (route) => {
       return reactRouterConfigsByRoute.get(route)!.path as string;
+    },
+    getRoutesToMatch: (path: string) => {
+      return getRoutesToMatch(path) as unknown as FlattenRoutesOf<TRoutes>;
     },
   };
 }

@@ -23,7 +23,7 @@ import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { lensPluginMock } from '../../../../../lens/public/mocks';
 import * as useAppIndexPatternHook from './hooks/use_app_index_pattern';
-import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
+import { IndexPatternContext, IndexPatternContextProvider } from './hooks/use_app_index_pattern';
 import { AllSeries, SeriesContextValue, UrlStorageContext } from './hooks/use_series_storage';
 
 import * as fetcherHook from '../../../hooks/use_fetcher';
@@ -234,7 +234,7 @@ export const mockUseHasData = () => {
   return { spy, onRefreshTimeRange };
 };
 
-export const mockAppIndexPattern = () => {
+export const mockAppIndexPattern = (props?: Partial<IndexPatternContext>) => {
   const loadIndexPattern = jest.fn();
   const spy = jest.spyOn(useAppIndexPatternHook, 'useAppIndexPatternContext').mockReturnValue({
     indexPattern: mockIndexPattern,
@@ -243,6 +243,8 @@ export const mockAppIndexPattern = () => {
     hasAppData: { ux: true } as any,
     loadIndexPattern,
     indexPatterns: { ux: mockIndexPattern } as unknown as Record<AppDataType, IndexPattern>,
+    indexPatternErrors: {} as any,
+    ...(props || {}),
   });
   return { spy, loadIndexPattern };
 };
@@ -307,10 +309,14 @@ export function mockUseSeriesFilter() {
   const removeFilter = jest.fn();
   const invertFilter = jest.fn();
   const setFilter = jest.fn();
+  const replaceFilter = jest.fn();
+  const setFiltersWildcard = jest.fn();
   const spy = jest.spyOn(useSeriesFilterHook, 'useSeriesFilters').mockReturnValue({
     removeFilter,
     invertFilter,
     setFilter,
+    replaceFilter,
+    setFiltersWildcard,
   });
 
   return {
@@ -318,6 +324,8 @@ export function mockUseSeriesFilter() {
     removeFilter,
     invertFilter,
     setFilter,
+    replaceFilter,
+    setFiltersWildcard,
   };
 }
 

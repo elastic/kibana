@@ -58,6 +58,7 @@ export interface CustomRule {
   lookBack: Interval;
   timeline: CompleteTimeline;
   maxSignals: number;
+  buildingBlockType?: string;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -70,10 +71,6 @@ export interface OverrideRule extends CustomRule {
   riskOverride: string;
   nameOverride: string;
   timestampOverride: string;
-}
-
-export interface EventCorrelationRule extends CustomRule {
-  language: string;
 }
 
 export interface ThreatIndicatorRule extends CustomRule {
@@ -112,7 +109,7 @@ export const getIndexPatterns = (): string[] => [
   'winlogbeat-*',
 ];
 
-export const getThreatIndexPatterns = (): string[] => ['filebeat-*'];
+export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
 
 const getMitre1 = (): Mitre => ({
   tactic: `${getMockThreatData().tactic.name} (${getMockThreatData().tactic.id})`,
@@ -190,6 +187,25 @@ export const getNewRule = (): CustomRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+});
+
+export const getBuildingBlockRule = (): CustomRule => ({
+  customQuery: 'host.name: *',
+  index: getIndexPatterns(),
+  name: 'Building Block Rule Test',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+  buildingBlockType: 'default',
 });
 
 export const getUnmappedRule = (): CustomRule => ({
@@ -330,7 +346,7 @@ export const getEqlRule = (): CustomRule => ({
   maxSignals: 100,
 });
 
-export const getCCSEqlRule = (): EventCorrelationRule => ({
+export const getCCSEqlRule = (): CustomRule => ({
   customQuery: 'any where process.name == "run-parts"',
   name: 'New EQL Rule',
   index: [`${ccsRemoteName}:run-parts`],
@@ -346,7 +362,6 @@ export const getCCSEqlRule = (): EventCorrelationRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
-  language: 'eql',
 });
 
 export const getEqlSequenceRule = (): CustomRule => ({
@@ -385,7 +400,7 @@ export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   lookBack: getLookBack(),
   indicatorIndexPattern: ['filebeat-*'],
   indicatorMappingField: 'myhash.mysha256',
-  indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
+  indicatorIndexField: 'threat.indicator.file.hash.sha256',
   type: 'file',
   atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
   timeline: getIndicatorMatchTimelineTemplate(),
@@ -404,7 +419,63 @@ export const getEditedRule = (): CustomRule => ({
 });
 
 export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>): string => {
-  const jsonrule = ruleResponse.body;
+  const {
+    id,
+    updated_at: updatedAt,
+    updated_by: updatedBy,
+    created_at: createdAt,
+    description,
+    name,
+    risk_score: riskScore,
+    severity,
+    query,
+  } = ruleResponse.body;
+  const rule = {
+    id,
+    updated_at: updatedAt,
+    updated_by: updatedBy,
+    created_at: createdAt,
+    created_by: 'elastic',
+    name,
+    tags: [],
+    interval: '100m',
+    enabled: false,
+    description,
+    risk_score: riskScore,
+    severity,
+    output_index: '.siem-signals-default',
+    author: [],
+    false_positives: [],
+    from: 'now-50000h',
+    rule_id: 'rule_testing',
+    max_signals: 100,
+    risk_score_mapping: [],
+    severity_mapping: [],
+    threat: [],
+    to: 'now',
+    references: [],
+    version: 1,
+    exceptions_list: [],
+    immutable: false,
+    type: 'query',
+    language: 'kuery',
+    index: ['exceptions-*'],
+    query,
+    throttle: 'no_actions',
+    actions: [],
+  };
+  const details = {
+    exported_count: 1,
+    exported_rules_count: 1,
+    missing_rules: [],
+    missing_rules_count: 0,
+    exported_exception_list_count: 0,
+    exported_exception_list_item_count: 0,
+    missing_exception_list_item_count: 0,
+    missing_exception_list_items: [],
+    missing_exception_lists: [],
+    missing_exception_lists_count: 0,
+  };
 
-  return `{"id":"${jsonrule.id}","updated_at":"${jsonrule.updated_at}","updated_by":"elastic","created_at":"${jsonrule.created_at}","created_by":"elastic","name":"${jsonrule.name}","tags":[],"interval":"100m","enabled":false,"description":"${jsonrule.description}","risk_score":${jsonrule.risk_score},"severity":"${jsonrule.severity}","output_index":".siem-signals-default","author":[],"false_positives":[],"from":"now-50000h","rule_id":"rule_testing","max_signals":100,"risk_score_mapping":[],"severity_mapping":[],"threat":[],"to":"now","references":[],"version":1,"exceptions_list":[],"immutable":false,"type":"query","language":"kuery","index":["exceptions-*"],"query":"${jsonrule.query}","throttle":"no_actions","actions":[]}\n{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n`;
+  return `${JSON.stringify(rule)}\n${JSON.stringify(details)}\n`;
 };

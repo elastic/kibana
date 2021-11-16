@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { cloneDeep, get } from 'lodash';
 
 import { EuiSpacer } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 
-import { IAggConfig } from '../../../../../../../data/public';
+import { BUCKET_TYPES, IAggConfig } from '../../../../../../../data/public';
+import { getUISettings } from '../../../../services';
 
 import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
@@ -19,7 +21,6 @@ import { SeriesPanel } from './series_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
 import { ValueAxesPanel } from './value_axes_panel';
 import {
-  makeSerie,
   isAxisHorizontal,
   countNextAxisNumber,
   getUpdatedAxisName,
@@ -27,6 +28,8 @@ import {
   mapPosition,
   mapPositionOpposingOpposite,
 } from './utils';
+import { getSeriesParams } from '../../../../utils/get_series_params';
+import { LEGACY_TIME_AXIS } from '../../../../../../../charts/common';
 
 export type SetParamByIndex = <P extends keyof ValueAxis, O extends keyof SeriesParam>(
   axesName: 'valueAxes' | 'seriesParams',
@@ -273,40 +276,33 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
   );
 
   const schemaName = vis.type.schemas.metrics[0].name;
-  const metrics = useMemo(() => {
-    return aggs.bySchemaName(schemaName);
-  }, [schemaName, aggs]);
-
   const firstValueAxesId = stateParams.valueAxes[0].id;
 
   useEffect(() => {
-    const updatedSeries = metrics.map((agg) => {
-      const params = stateParams.seriesParams.find((param) => param.data.id === agg.id);
-      const label = agg.makeLabel();
+    const updatedSeries = getSeriesParams(
+      aggs,
+      stateParams.seriesParams,
+      schemaName,
+      firstValueAxesId
+    );
 
-      // update labels for existing params or create new one
-      if (params) {
-        return {
-          ...params,
-          data: {
-            ...params.data,
-            label,
-          },
-        };
-      } else {
-        const series = makeSerie(
-          agg.id,
-          label,
-          firstValueAxesId,
-          stateParams.seriesParams[stateParams.seriesParams.length - 1]
-        );
-        return series;
-      }
-    });
-
-    setValue('seriesParams', updatedSeries);
+    if (updatedSeries) setValue('seriesParams', updatedSeries);
     updateAxisTitle(updatedSeries);
-  }, [metrics, firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle]);
+  }, [firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle, aggs, schemaName]);
+
+  const isTimeViz = aggs.aggs.some(
+    (agg) =>
+      agg.schema === 'segment' && agg.enabled && agg.type?.name === BUCKET_TYPES.DATE_HISTOGRAM
+  );
+  const xAxisIsHorizontal =
+    stateParams.categoryAxes[0].position === Position.Bottom ||
+    stateParams.categoryAxes[0].position === Position.Top;
+  const useLegacyTimeAxis = getUISettings().get(LEGACY_TIME_AXIS, false);
+  const linearOrStackedBars = stateParams.seriesParams.every(
+    ({ mode, type }) => type !== 'histogram' || (type === 'histogram' && mode === 'stacked')
+  );
+  const useMultiLayerAxis =
+    xAxisIsHorizontal && isTimeViz && !useLegacyTimeAxis && linearOrStackedBars;
 
   return isTabSelected ? (
     <>
@@ -332,6 +328,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
         axis={stateParams.categoryAxes[0]}
         onPositionChanged={onCategoryAxisPositionChanged}
         setCategoryAxis={setCategoryAxis}
+        useMultiLayerAxis={useMultiLayerAxis}
       />
     </>
   ) : null;

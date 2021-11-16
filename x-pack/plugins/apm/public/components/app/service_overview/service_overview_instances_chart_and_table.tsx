@@ -10,7 +10,7 @@ import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -28,9 +28,9 @@ interface ServiceOverviewInstancesChartAndTableProps {
 }
 
 type ApiResponseMainStats =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type ApiResponseDetailedStats =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATS = {
   currentPeriodItems: [] as ApiResponseMainStats['currentPeriod'],
@@ -78,7 +78,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
   const {
     urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -100,7 +100,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics',
+          'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
         params: {
           path: {
             serviceName,
@@ -181,7 +181,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
+            'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
           params: {
             path: {
               serviceName,

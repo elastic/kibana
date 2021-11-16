@@ -67,8 +67,6 @@ export const LogsSettingsPage = () => {
     logIndicesFormElement,
     logColumnsFormElement,
     nameFormElement,
-    tiebreakerFieldFormElement,
-    timestampFieldFormElement,
   } = useLogSourceConfigurationFormState(source?.configuration);
 
   const persistUpdates = useCallback(async () => {
@@ -113,8 +111,6 @@ export const LogsSettingsPage = () => {
             isLoading={isLoading}
             isReadOnly={!isWriteable}
             indicesFormElement={logIndicesFormElement}
-            tiebreakerFieldFormElement={tiebreakerFieldFormElement}
-            timestampFieldFormElement={timestampFieldFormElement}
           />
         </EuiPanel>
         <EuiSpacer />

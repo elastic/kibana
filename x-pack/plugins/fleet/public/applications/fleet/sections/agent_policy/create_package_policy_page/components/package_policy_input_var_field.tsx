@@ -17,11 +17,16 @@ import {
   EuiFieldPassword,
   EuiCodeBlock,
 } from '@elastic/eui';
+import styled from 'styled-components';
 
 import type { RegistryVarsEntry } from '../../../../types';
 import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 import { MultiTextInput } from './multi_text_input';
+
+const FixedHeightDiv = styled.div`
+  height: 300px;
+`;
 
 export const PackagePolicyInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;
@@ -55,31 +60,34 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             <pre>{value}</pre>
           </EuiCodeBlock>
         ) : (
-          <CodeEditor
-            languageId="yaml"
-            width="100%"
-            height="300px"
-            value={value}
-            onChange={onChange}
-            options={{
-              minimap: {
-                enabled: false,
-              },
-              ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
-                defaultMessage: 'YAML Code Editor',
-              }),
-              scrollBeyondLastLine: false,
-              wordWrap: 'off',
-              wrappingIndent: 'indent',
-              tabSize: 2,
-              // To avoid left margin
-              lineNumbers: 'off',
-              lineNumbersMinChars: 0,
-              glyphMargin: false,
-              folding: false,
-              lineDecorationsWidth: 0,
-            }}
-          />
+          <FixedHeightDiv>
+            <CodeEditor
+              languageId="yaml"
+              width="100%"
+              height="300px"
+              value={value}
+              onChange={onChange}
+              options={{
+                minimap: {
+                  enabled: false,
+                },
+                ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
+                  defaultMessage: 'YAML Code Editor',
+                }),
+                scrollBeyondLastLine: false,
+                wordWrap: 'off',
+                wrappingIndent: 'indent',
+                tabSize: 2,
+                // To avoid left margin
+                lineNumbers: 'off',
+                lineNumbersMinChars: 0,
+                glyphMargin: false,
+                folding: false,
+                lineDecorationsWidth: 0,
+                overviewRulerBorder: false,
+              }}
+            />
+          </FixedHeightDiv>
         );
       case 'bool':
         return (

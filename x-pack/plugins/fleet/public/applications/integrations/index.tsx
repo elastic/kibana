@@ -15,7 +15,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { licenseService } from '../../hooks';
 import type { UIExtensionsStorage } from '../../types';
 
-import { AppRoutes, IntegrationsAppContext, WithPermissionsAndSetup } from './app';
+import { AppRoutes, IntegrationsAppContext } from './app';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -37,6 +37,7 @@ interface IntegrationsAppProps {
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 const IntegrationsApp = ({
   basepath,
@@ -45,6 +46,7 @@ const IntegrationsApp = ({
   history,
   kibanaVersion,
   extensions,
+  setHeaderActionMenu,
 }: IntegrationsAppProps) => {
   return (
     <IntegrationsAppContext
@@ -54,30 +56,33 @@ const IntegrationsApp = ({
       history={history}
       kibanaVersion={kibanaVersion}
       extensions={extensions}
+      setHeaderActionMenu={setHeaderActionMenu}
     >
-      <WithPermissionsAndSetup>
-        <AppRoutes />
-      </WithPermissionsAndSetup>
+      <AppRoutes />
     </IntegrationsAppContext>
   );
 };
 
 export function renderApp(
   startServices: FleetStartServices,
-  { element, appBasePath, history }: AppMountParameters,
+  { element, appBasePath, history, setHeaderActionMenu }: AppMountParameters,
   config: FleetConfigType,
   kibanaVersion: string,
-  extensions: UIExtensionsStorage
+  extensions: UIExtensionsStorage,
+  UsageTracker: React.FC
 ) {
   ReactDOM.render(
-    <IntegrationsApp
-      basepath={appBasePath}
-      startServices={startServices}
-      config={config}
-      history={history}
-      kibanaVersion={kibanaVersion}
-      extensions={extensions}
-    />,
+    <UsageTracker>
+      <IntegrationsApp
+        basepath={appBasePath}
+        startServices={startServices}
+        config={config}
+        history={history}
+        kibanaVersion={kibanaVersion}
+        extensions={extensions}
+        setHeaderActionMenu={setHeaderActionMenu}
+      />
+    </UsageTracker>,
     element
   );
 

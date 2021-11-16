@@ -104,7 +104,7 @@ export class MonitoringPlugin
       kibanaStats: {
         uuid: this.initializerContext.env.instanceUuid,
         name: serverInfo.name,
-        index: this.legacyConfig.kibana.index,
+        index: coreSetup.savedObjects.getKibanaIndex(),
         host: serverInfo.hostname,
         locale: i18n.getLocale(),
         port: serverInfo.port.toString(),
@@ -128,6 +128,7 @@ export class MonitoringPlugin
     for (const alert of alerts) {
       plugins.alerting?.registerType(alert.getRuleType());
     }
+
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
 
     // Register collector objects for stats to show up in the APIs
@@ -201,6 +202,7 @@ export class MonitoringPlugin
         router,
         licenseService: this.licenseService,
         encryptedSavedObjects: plugins.encryptedSavedObjects,
+        alerting: plugins.alerting,
         logger: this.log,
       });
       initInfraSource(config, plugins.infra);

@@ -13,26 +13,26 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_NAMESPACE,
-  ALERT_INSTANCE_ID,
   ALERT_UUID,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
+  ALERT_INSTANCE_ID,
 } from '@kbn/rule-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+
 import { TypeOfFieldMap } from '../../../../../../rule_registry/common/field_map';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ANCHOR_DATE } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
-import { flattenWithPrefix } from '../factories/utils/flatten_with_prefix';
-import { RulesFieldMap } from '../field_maps';
+import { RulesFieldMap } from '../../../../../common/field_maps';
 import {
   ALERT_ANCESTORS,
   ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
-} from '../field_maps/field_names';
+} from '../../../../../common/field_maps/field_names';
 import { WrappedRACAlert } from '../types';
 
 export const mockThresholdResults = {
@@ -60,19 +60,8 @@ export const mockThresholdResults = {
                   {
                     key: 'tardigrade',
                     doc_count: 3,
-                    top_threshold_hits: {
-                      hits: {
-                        total: {
-                          value: 1,
-                          relation: 'eq',
-                        },
-                        hits: [
-                          {
-                            ...sampleDocNoSortId(),
-                            'host.name': 'tardigrade',
-                          },
-                        ],
-                      },
+                    max_timestamp: {
+                      value_as_string: '2020-04-20T21:26:30.000Z',
                     },
                     cardinality_count: {
                       value: 3,
@@ -94,8 +83,8 @@ export const sampleThresholdAlert: WrappedRACAlert = {
   _source: {
     '@timestamp': '2020-04-20T21:26:30.000Z',
     [SPACE_IDS]: ['default'],
-    [ALERT_INSTANCE_ID]: 'b3ad77a4-65bd-4c4e-89cf-13c46f54bc4d',
     [ALERT_UUID]: '310158f7-994d-4a38-8cdc-152139ac4d29',
+    [ALERT_INSTANCE_ID]: '',
     [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
     [ALERT_ANCESTORS]: [
       {

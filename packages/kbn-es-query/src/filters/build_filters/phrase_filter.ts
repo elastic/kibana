@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get, has, isPlainObject } from 'lodash';
 import type { Filter, FilterMeta } from './types';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
@@ -100,7 +100,7 @@ export const buildPhraseFilter = (
   if (field.scripted) {
     return {
       meta: { index: indexPattern.id, field: field.name } as PhraseFilterMeta,
-      script: getPhraseScript(field, value),
+      query: { script: getPhraseScript(field, value) },
     };
   } else {
     return {

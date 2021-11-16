@@ -34,4 +34,6 @@ export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   getSavedObjectsClient: noop,
   getUISettings: noop,
   setFullscreen: noop,
+  redirectLegacyUrl: noop,
+  getLegacyUrlConflict: undefined,
 });

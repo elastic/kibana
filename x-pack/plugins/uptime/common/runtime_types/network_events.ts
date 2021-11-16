@@ -56,6 +56,7 @@ export const SyntheticsNetworkEventsApiResponseType = t.type({
   events: t.array(NetworkEventType),
   total: t.number,
   isWaterfallSupported: t.boolean,
+  hasNavigationRequest: t.boolean,
 });
 
 export type SyntheticsNetworkEventsApiResponse = t.TypeOf<

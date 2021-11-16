@@ -9,15 +9,15 @@ import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTraceItems } from '../lib/traces/get_trace_items';
 import { getTopTransactionGroupList } from '../lib/transaction_groups';
-import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import { getTransaction } from '../lib/transactions/get_transaction';
 
 const tracesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/traces',
+  endpoint: 'GET /internal/apm/traces',
   params: t.type({
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
@@ -41,7 +41,7 @@ const tracesRoute = createApmServerRoute({
 });
 
 const tracesByIdRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/traces/{traceId}',
+  endpoint: 'GET /internal/apm/traces/{traceId}',
   params: t.type({
     path: t.type({
       traceId: t.string,
@@ -60,7 +60,7 @@ const tracesByIdRoute = createApmServerRoute({
 });
 
 const rootTransactionByTraceIdRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/traces/{traceId}/root_transaction',
+  endpoint: 'GET /internal/apm/traces/{traceId}/root_transaction',
   params: t.type({
     path: t.type({
       traceId: t.string,
@@ -76,7 +76,7 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
 });
 
 const transactionByIdRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/transactions/{transactionId}',
+  endpoint: 'GET /internal/apm/transactions/{transactionId}',
   params: t.type({
     path: t.type({
       transactionId: t.string,
