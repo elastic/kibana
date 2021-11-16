@@ -47,7 +47,7 @@ import { ExampleResultDetailCard } from './example_result_detail_card';
 import { ResultDetail } from './result_detail';
 
 describe('ResultDetail', () => {
-  const { searchResultConfig, exampleDocuments, schemaFields } = exampleResult;
+  const { searchResultConfig, exampleDocuments } = exampleResult;
   const availableFieldOptions = [
     {
       value: 'foo',
@@ -70,7 +70,6 @@ describe('ResultDetail', () => {
       searchResultConfig,
       availableFieldOptions,
       exampleDocuments,
-      schemaFields,
     });
   });
 
@@ -95,7 +94,6 @@ describe('ResultDetail', () => {
       },
       availableFieldOptions,
       exampleDocuments,
-      schemaFields,
     });
     const wrapper = shallow(<ResultDetail />);
 
@@ -124,7 +122,6 @@ describe('ResultDetail', () => {
       },
       availableFieldOptions,
       exampleDocuments,
-      schemaFields,
     });
     const wrapper = mount(<ResultDetail />);
 
