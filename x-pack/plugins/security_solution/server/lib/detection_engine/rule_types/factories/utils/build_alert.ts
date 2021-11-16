@@ -35,6 +35,7 @@ import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
+  ALERT_THRESHOLD_RESULT,
   ALERT_ORIGINAL_EVENT,
 } from '../../../../../../common/field_maps/field_names';
 
@@ -59,10 +60,10 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
     id: doc._id,
     type: isSignal ? 'signal' : 'event',
     index: doc._index,
-    depth: isSignal ? getField(doc, 'signal.depth') ?? 1 : 0,
+    depth: isSignal ? getField(doc, ALERT_DEPTH) ?? 1 : 0,
   };
   if (isSignal) {
-    parent.rule = getField(doc, 'signal.rule.id');
+    parent.rule = getField(doc, ALERT_RULE_UUID);
   }
   return parent;
 };
@@ -73,9 +74,8 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
  * @param doc The parent event for which to extend the ancestry.
  */
 export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
-  // TODO: handle alerts-on-legacy-alerts
   const newAncestor = buildParent(doc);
-  const existingAncestors: Ancestor[] = getField(doc, 'signal.ancestors') ?? [];
+  const existingAncestors: Ancestor[] = getField(doc, ALERT_ANCESTORS) ?? [];
   return [...existingAncestors, newAncestor];
 };
 
@@ -130,7 +130,7 @@ export const additionalAlertFields = (doc: BaseSignalHit) => {
   });
   const additionalFields: Record<string, unknown> = {
     [ALERT_ORIGINAL_TIME]: originalTime != null ? originalTime.toISOString() : undefined,
-    ...(thresholdResult != null ? { threshold_result: thresholdResult } : {}),
+    ...(thresholdResult != null ? { [ALERT_THRESHOLD_RESULT]: thresholdResult } : {}),
   };
 
   for (const [key, val] of Object.entries(doc._source ?? {})) {
