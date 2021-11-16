@@ -5,13 +5,24 @@
  * 2.0.
  */
 
+import type { Map as MbMap } from '@kbn/mapbox-gl';
+// @ts-expect-error
 import { RGBAImage } from './image_utils';
 import { isGlDrawLayer } from './sort_layers';
+import { ILayer } from '../../classes/layers/layer';
+import { EmsSpriteSheet } from '../../classes/layers/vector_tile_layer/vector_tile_layer';
 
-export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLayer) {
+export function removeOrphanedSourcesAndLayers(
+  mbMap: MbMap,
+  layerList: ILayer[],
+  spatialFilterLayer: ILayer
+) {
   const mbStyle = mbMap.getStyle();
+  if (!mbStyle.layers) {
+    return;
+  }
 
-  const mbLayerIdsToRemove = [];
+  const mbLayerIdsToRemove: string[] = [];
   mbStyle.layers.forEach((mbLayer) => {
     // ignore mapbox layers from spatial filter layer
     if (spatialFilterLayer.ownsMbLayerId(mbLayer.id)) {
@@ -23,10 +34,10 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
       return;
     }
 
-    const layer = layerList.find((layer) => {
+    const targetLayer = layerList.find((layer) => {
       return layer.ownsMbLayerId(mbLayer.id);
     });
-    if (!layer) {
+    if (!targetLayer) {
       mbLayerIdsToRemove.push(mbLayer.id);
     }
   });
@@ -40,10 +51,10 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
         return;
       }
 
-      const layer = layerList.find((layer) => {
+      const targetLayer = layerList.find((layer) => {
         return layer.ownsMbSourceId(mbSourceId);
       });
-      if (!layer) {
+      if (!targetLayer) {
         mbSourcesToRemove.push(mbSourceId);
       }
     }
@@ -51,7 +62,7 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
   mbSourcesToRemove.forEach((mbSourceId) => mbMap.removeSource(mbSourceId));
 }
 
-function getImageData(img) {
+function getImageData(img: HTMLImageElement) {
   const canvas = window.document.createElement('canvas');
   const context = canvas.getContext('2d');
   if (!context) {
@@ -63,7 +74,7 @@ function getImageData(img) {
   return context.getImageData(0, 0, img.width, img.height);
 }
 
-function isCrossOriginUrl(url) {
+function isCrossOriginUrl(url: string) {
   const a = window.document.createElement('a');
   a.href = url;
   return (
@@ -73,15 +84,14 @@ function isCrossOriginUrl(url) {
   );
 }
 
-export async function loadSpriteSheetImageData(imgUrl) {
+export async function loadSpriteSheetImageData(imgUrl: string): Promise<ImageData> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     if (isCrossOriginUrl(imgUrl)) {
       image.crossOrigin = 'Anonymous';
     }
-    image.onload = (el) => {
-      const imgData = getImageData(el.currentTarget);
-      resolve(imgData);
+    image.onload = (event) => {
+      resolve(getImageData(image));
     };
     image.onerror = (e) => {
       reject(e);
@@ -90,7 +100,11 @@ export async function loadSpriteSheetImageData(imgUrl) {
   });
 }
 
-export function addSpriteSheetToMapFromImageData(json, imgData, mbMap) {
+export function addSpriteSheetToMapFromImageData(
+  json: EmsSpriteSheet,
+  imgData: ImageData,
+  mbMap: MbMap
+) {
   for (const imageId in json) {
     if (!(json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId))) {
       continue;

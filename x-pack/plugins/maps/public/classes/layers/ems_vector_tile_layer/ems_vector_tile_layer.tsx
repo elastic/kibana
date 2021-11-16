@@ -15,7 +15,6 @@ import { isRetina } from '../../../util';
 import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
-  // @ts-expect-error
 } from '../../../connected_components/mb_map/utils';
 import { DataRequestContext } from '../../../actions';
 import { EMSTMSSource } from '../../sources/ems_tms_source';
@@ -29,12 +28,13 @@ interface SourceRequestMeta {
 interface EmsSprite {
   height: number;
   pixelRatio: number;
+  sdf?: boolean;
   width: number;
   x: number;
   y: number;
 }
 
-interface EmsSpriteSheet {
+export interface EmsSpriteSheet {
   [spriteName: string]: EmsSprite;
 }
 

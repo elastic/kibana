@@ -682,7 +682,11 @@ export interface DocLinksStart {
             uptimeDurationAnomaly: string;
         }>;
         readonly alerting: Record<string, string>;
-        readonly maps: Record<string, string>;
+        readonly maps: Readonly<{
+            guide: string;
+            importGeospatialPrivileges: string;
+            gdalTutorial: string;
+        }>;
         readonly monitoring: Record<string, string>;
         readonly security: Readonly<{
             apiKeyServiceSettings: string;
