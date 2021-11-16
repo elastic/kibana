@@ -10,15 +10,16 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { StatusFilter } from './status_filter';
-import { AddMonitorModal } from './actions/add_monitor_modal';
+import { MonitorConfigFlyout } from './actions/monitor_config_flyout';
+import { SyntheticsCreateProviders } from '../../fleet_package/contexts';
 
 const FlexGroupContainer = styled(EuiFlexGroup)`
   position: relative;
 `;
 
 export const MonitorListHeader: React.FC = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const showModal = () => setIsModalVisible(true);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const showFlyout = () => setIsFlyoutVisible(true);
 
   return (
     <>
@@ -37,13 +38,15 @@ export const MonitorListHeader: React.FC = () => {
           <StatusFilter />
         </EuiFlexItem>
         <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
-          <EuiButton iconType="plus" fullWidth={false} onClick={showModal} style={{ width: 150 }}>
+          <EuiButton iconType="plus" fullWidth={false} onClick={showFlyout} style={{ width: 150 }}>
             Add monitor
           </EuiButton>
         </EuiFlexItem>
       </FlexGroupContainer>
-      {isModalVisible && (
-        <AddMonitorModal isModalVisible={isModalVisible} setIsModalVisible={setIsModalVisible} />
+      {isFlyoutVisible && (
+        <SyntheticsCreateProviders>
+          <MonitorConfigFlyout setIsFlyoutVisible={setIsFlyoutVisible} />
+        </SyntheticsCreateProviders>
       )}
     </>
   );

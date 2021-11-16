@@ -14,11 +14,14 @@ import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/server';
 import { SecurityPluginStart } from '../../../../../security/server';
 import type { CloudSetup } from '../../../../../cloud/server';
-
 import {
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '../../../../../task_manager/server';
+import {
+  FleetSetupContract as FleetPluginSetup,
+  FleetStartContract as FleetPluginStart,
+} from '../../../../../fleet/server';
 import { UptimeESClient } from '../../lib';
 import type { UptimeRouter } from '../../../types';
 import { UptimeConfig } from '../../../config';
@@ -35,6 +38,7 @@ export interface UptimeCoreSetup {
   router: UptimeRouter;
   cloud?: CloudSetup;
   security?: SecurityPluginStart;
+  fleet: FleetPluginStart;
 }
 
 export interface UptimeCorePluginsSetup {
@@ -47,11 +51,13 @@ export interface UptimeCorePluginsSetup {
   ruleRegistry: RuleRegistryPluginSetupContract;
   taskManager: TaskManagerSetupContract;
   cloud?: CloudSetup;
+  fleet: FleetPluginSetup;
 }
 
 export interface UptimeCorePluginsStart {
   security: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
+  fleet: FleetPluginStart;
 }
 
 export interface UMBackendFrameworkAdapter {

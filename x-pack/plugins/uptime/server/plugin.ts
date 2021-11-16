@@ -86,6 +86,7 @@ export class Plugin implements PluginType {
           router: self.router!,
           cloud: this.cloud,
           security: startPlugins.security,
+          fleet: startPlugins.fleet,
           config,
         },
         startPlugins,
