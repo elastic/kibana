@@ -192,7 +192,6 @@ function putComponentTemplate(
   const { name, body, create = false } = params;
   return {
     clusterPromise: esClient.cluster.putComponentTemplate(
-      // @ts-expect-error body is missing required key `settings`. TemplateMapEntry has settings *or* mappings
       { name, body, create },
       { ignore: [404] }
     ),

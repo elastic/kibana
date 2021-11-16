@@ -107,7 +107,7 @@ export async function getMemoryChartData({
       operationName: 'get_cgroup_memory_metrics_charts',
     });
 
-    if (cgroupResponse.noHits) {
+    if (cgroupResponse.series.length === 0) {
       return await fetchAndTransformMetrics({
         environment,
         kuery,

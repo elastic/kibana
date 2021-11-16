@@ -34,7 +34,7 @@ export const getReasonMessageForGroupedCountAlert = (
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.groupedCountAlertReasonDescription', {
     defaultMessage:
-      '{groupName}: {actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries} } ({translatedComparator} {expectedCount}) match the conditions.',
+      '{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries} } ({translatedComparator} {expectedCount}) match the conditions for {groupName}.',
     values: {
       actualCount,
       expectedCount,
@@ -66,7 +66,7 @@ export const getReasonMessageForGroupedRatioAlert = (
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.groupedRatioAlertReasonDescription', {
     defaultMessage:
-      '{groupName}: The log entries ratio is {actualRatio} ({translatedComparator} {expectedRatio}).',
+      'The log entries ratio is {actualRatio} ({translatedComparator} {expectedRatio}) for {groupName}.',
     values: {
       actualRatio,
       expectedRatio,

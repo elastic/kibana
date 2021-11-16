@@ -16,7 +16,6 @@ import type {
   CapabilitiesStart,
   IClusterClient,
   SavedObjectsServiceStart,
-  SharedGlobalConfig,
   UiSettingsServiceStart,
 } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../security/server';
@@ -82,14 +81,11 @@ export class MlServerPlugin
   private dataViews: DataViewsPluginStart | null = null;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
-  private readonly kibanaIndexConfig: SharedGlobalConfig;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
-
-    this.kibanaIndexConfig = ctx.config.legacy.get();
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -235,7 +231,7 @@ export class MlServerPlugin
     }
 
     if (plugins.usageCollection) {
-      registerCollector(plugins.usageCollection, this.kibanaIndexConfig.kibana.index);
+      registerCollector(plugins.usageCollection, coreSetup.savedObjects.getKibanaIndex());
     }
 
     return sharedServicesProviders;

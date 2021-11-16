@@ -19,20 +19,13 @@ import { createLoadedResourceState, isLoadedResourceState } from '../../../../..
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
-import { licenseService } from '../../../../../../common/hooks/use_license';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '../../../../../../../../fleet/common';
 
 jest.mock('../../../../trusted_apps/service');
-jest.mock('../../../../../../common/hooks/use_license', () => {
-  const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-  };
-  return {
-    licenseService: licenseServiceInstance,
-    useLicense: () => {
-      return licenseServiceInstance;
-    },
-  };
-});
+jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
 
 let mockedContext: AppContextTestRender;
 let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
@@ -42,8 +35,7 @@ let coreStart: AppContextTestRender['coreStart'];
 let http: typeof coreStart.http;
 const generator = new EndpointDocGenerator();
 
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-describe.skip('Policy trusted apps layout', () => {
+describe('Policy trusted apps layout', () => {
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     http = mockedContext.coreStart.http;
@@ -52,9 +44,17 @@ describe.skip('Policy trusted apps layout', () => {
       const [path] = args;
       if (typeof path === 'string') {
         // GET datasouce
-        if (path === '/api/fleet/package_policies/1234') {
+        if (path === `${PACKAGE_POLICY_API_ROOT}/1234`) {
           return Promise.resolve({
             item: generator.generatePolicyPackagePolicy(),
+            success: true,
+          });
+        }
+
+        // GET Agent status for agent policy
+        if (path === `${AGENT_API_ROUTES.STATUS_PATTERN}`) {
+          return Promise.resolve({
+            results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },
             success: true,
           });
         }
@@ -76,6 +76,10 @@ describe.skip('Policy trusted apps layout', () => {
 
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     render = () => mockedContext.render(<PolicyTrustedAppsLayout />);
+  });
+
+  afterAll(() => {
+    mockUseEndpointPrivileges.mockReset();
   });
 
   afterEach(() => reactTestingLibrary.cleanup());
@@ -117,11 +121,15 @@ describe.skip('Policy trusted apps layout', () => {
 
     await waitForAction('assignedTrustedAppsListStateChanged');
 
-    expect(component.getByTestId('policyDetailsTrustedAppsCount')).not.toBeNull();
+    expect(component.getAllByTestId('policyTrustedAppsGrid-card')).toHaveLength(10);
   });
 
   it('should hide assign button on empty state with unassigned policies when downgraded to a gold or below license', async () => {
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    mockUseEndpointPrivileges.mockReturnValue(
+      getEndpointPrivilegesInitialStateMock({
+        isPlatinumPlus: false,
+      })
+    );
     const component = render();
     mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234'));
 
@@ -133,8 +141,13 @@ describe.skip('Policy trusted apps layout', () => {
     });
     expect(component.queryByTestId('assign-ta-button')).toBeNull();
   });
+
   it('should hide the `Assign trusted applications` button when there is data and the license is downgraded to gold or below', async () => {
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    mockUseEndpointPrivileges.mockReturnValue(
+      getEndpointPrivilegesInitialStateMock({
+        isPlatinumPlus: false,
+      })
+    );
     TrustedAppsHttpServiceMock.mockImplementation(() => {
       return {
         getTrustedAppsList: () => getMockListResponse(),

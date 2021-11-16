@@ -58,6 +58,10 @@ const packages: Package[] = [
         url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/linux-arm64-93.gz',
         sha256: '7a786e0b75985e5aafdefa9af55cad8e85e69a3326f16d8c63d21d6b5b3bff1b',
       },
+      'darwin-arm64': {
+        url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/darwin-arm64-93.gz',
+        sha256: '28b540cdddf13578f1bd28a03e29ffdc26a7f00ec859c369987b8d51ec6357c8',
+      },
       'win32-x64': {
         url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/win32-x64-93.gz',
         sha256: '37245ceb59a086b5e7e9de8746a3cdf148c383be9ae2580f92baea90d0d39947',
@@ -100,7 +104,8 @@ async function patchModule(
     log,
     url: archive.url,
     destination: downloadPath,
-    sha256: archive.sha256,
+    shaChecksum: archive.sha256,
+    shaAlgorithm: 'sha256',
     retries: 3,
   });
   switch (pkg.extractMethod) {

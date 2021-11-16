@@ -32,7 +32,7 @@ export async function getTransaction({
   );
 
   const params = {
-    terminateAfter: 1,
+    terminate_after: 1,
     apm: {
       events: [ProcessorEvent.transaction as const],
     },

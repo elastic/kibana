@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { map as mapAsync } from 'bluebird';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
@@ -43,10 +42,10 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickKibanaIndexPatterns() {
-    this.log.debug('clickKibanaIndexPatterns link');
+    this.log.debug('clickKibanaDataViews link');
     const currentUrl = await this.browser.getCurrentUrl();
-    if (!currentUrl.endsWith('indexPatterns')) {
-      await this.testSubjects.click('indexPatterns');
+    if (!currentUrl.endsWith('dataViews')) {
+      await this.testSubjects.click('dataViews');
     }
 
     await this.header.waitUntilLoadingHasFinished();
@@ -234,23 +233,29 @@ export class SettingsPageObject extends FtrService {
 
   async getFieldNames() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldName');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async getFieldTypes() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldType');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async getScriptedFieldLangs() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > scriptedFieldLang');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async setFieldTypeFilter(type: string) {
@@ -327,9 +332,11 @@ export class SettingsPageObject extends FtrService {
 
   async getAllIndexPatternNames() {
     const indexPatterns = await this.getIndexPatternList();
-    return await mapAsync(indexPatterns, async (index) => {
-      return await index.getVisibleText();
-    });
+    return await Promise.all(
+      indexPatterns.map(async (index) => {
+        return await index.getVisibleText();
+      })
+    );
   }
 
   async isIndexPatternListEmpty() {
@@ -384,10 +391,10 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
       this.log.info('currentUrl', currentUrl);
-      if (!currentUrl.match(/indexPatterns\/.+\?/)) {
-        throw new Error('Index pattern not created');
+      if (!currentUrl.match(/dataViews\/.+\?/)) {
+        throw new Error('Data view not created');
       } else {
-        this.log.debug('Index pattern created: ' + currentUrl);
+        this.log.debug('Data view created: ' + currentUrl);
       }
     });
 
@@ -437,7 +444,8 @@ export class SettingsPageObject extends FtrService {
   async setIndexPatternField(indexPatternName = 'logstash-*') {
     this.log.debug(`setIndexPatternField(${indexPatternName})`);
     const field = await this.getIndexPatternField();
-    await field.clearValue();
+    await field.clearValueWithKeyboard();
+
     if (
       indexPatternName.charAt(0) === '*' &&
       indexPatternName.charAt(indexPatternName.length - 1) === '*'
@@ -558,6 +566,22 @@ export class SettingsPageObject extends FtrService {
     }
   }
 
+  async addFieldFilter(name: string) {
+    await this.testSubjects.click('tab-sourceFilters');
+    await this.find.setValue('.euiFieldText', name);
+    await this.find.clickByButtonText('Add');
+    const table = await this.find.byClassName('euiTable');
+    await this.retry.waitFor('field filter to be added', async () => {
+      const tableCells = await table.findAllByCssSelector('td');
+      const fieldNames = await Promise.all(
+        tableCells.map(async (cell) => {
+          return (await cell.getVisibleText()).trim();
+        })
+      );
+      return fieldNames.includes(name);
+    });
+  }
+
   public async confirmSave() {
     await this.testSubjects.setValue('saveModalConfirmText', 'change');
     await this.testSubjects.click('confirmModalConfirmButton');
@@ -604,23 +628,9 @@ export class SettingsPageObject extends FtrService {
 
   async setFieldScript(script: string) {
     this.log.debug('set script = ' + script);
-    const valueRow = await this.toggleRow('valueRow');
-    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
-    this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
-    const monacoTextArea = await getMonacoTextArea();
-    await monacoTextArea.focus();
-    this.browser.pressKeys(script);
-  }
-
-  async changeFieldScript(script: string) {
-    this.log.debug('set script = ' + script);
-    const valueRow = await this.testSubjects.find('valueRow');
-    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
-    this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
-    const monacoTextArea = await getMonacoTextArea();
-    await monacoTextArea.focus();
-    this.browser.pressKeys(this.browser.keys.DELETE.repeat(30));
-    this.browser.pressKeys(script);
+    await this.toggleRow('valueRow');
+    await this.monacoEditor.waitCodeEditorReady('valueRow');
+    await this.monacoEditor.setCodeEditorValue(script);
   }
 
   async clickAddScriptedField() {

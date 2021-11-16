@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { IndicesAlias, IndicesIndexStatePrefixedSettings } from '@elastic/elasticsearch/api/types';
-import { estypes } from '@elastic/elasticsearch';
+import {
+  IndicesAlias,
+  IndicesIndexStatePrefixedSettings,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asyncForEach } from '@kbn/std';
 import { getIlmPolicy, getIndexTemplate } from './documents';
 import { EsContext } from './context';

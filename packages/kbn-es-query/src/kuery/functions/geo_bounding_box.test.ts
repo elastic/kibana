@@ -109,7 +109,6 @@ describe('kuery functions', () => {
         const node = nodeTypes.function.buildNode('geoBoundingBox', 'geo', params);
         const result = geoBoundingBox.toElasticsearchQuery(node, indexPattern);
 
-        // @ts-expect-error @elastic/elasticsearch doesn't support ignore_unmapped in QueryDslGeoBoundingBoxQuery
         expect(result.geo_bounding_box!.ignore_unmapped).toBe(true);
       });
 

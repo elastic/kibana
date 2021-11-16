@@ -40,6 +40,7 @@ import {
   checkXAccessorCompatibility,
   getAxisName,
 } from './visualization_helpers';
+import { groupAxesByType } from './axes_configuration';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -273,7 +274,7 @@ export const getXyVisualization = ({
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {
-      return { groups: [], supportStaticValue: true };
+      return { groups: [] };
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
@@ -344,8 +345,6 @@ export const getXyVisualization = ({
         frame?.activeData
       );
       return {
-        supportFieldFormat: false,
-        supportStaticValue: true,
         // Each reference lines layer panel will have sections for each available axis
         // (horizontal axis, vertical axis left, vertical axis right).
         // Only axes that support numeric reference lines should be shown
@@ -361,6 +360,13 @@ export const getXyVisualization = ({
           supportsMoreColumns: true,
           required: false,
           enableDimensionEditor: true,
+          supportStaticValue: true,
+          paramEditorCustomProps: {
+            label: i18n.translate('xpack.lens.indexPattern.staticValue.label', {
+              defaultMessage: 'Reference line value',
+            }),
+          },
+          supportFieldFormat: false,
           dataTestSubj,
           invalid: !valid,
           invalidMessage:
@@ -377,6 +383,40 @@ export const getXyVisualization = ({
         })),
       };
     }
+
+    const { left, right } = groupAxesByType([layer], frame.activeData);
+    // Check locally if it has one accessor OR one accessor per axis
+    const layerHasOnlyOneAccessor = Boolean(
+      layer.accessors.length < 2 ||
+        (left.length && left.length < 2) ||
+        (right.length && right.length < 2)
+    );
+    // Check also for multiple layers that can stack for percentage charts
+    // Make sure that if multiple dimensions are defined for a single layer, they should belong to the same axis
+    const hasOnlyOneAccessor =
+      layerHasOnlyOneAccessor &&
+      getLayersByType(state, layerTypes.DATA).filter(
+        // check that the other layers are compatible with this one
+        (dataLayer) => {
+          if (
+            dataLayer.seriesType === layer.seriesType &&
+            Boolean(dataLayer.xAccessor) === Boolean(layer.xAccessor) &&
+            Boolean(dataLayer.splitAccessor) === Boolean(layer.splitAccessor)
+          ) {
+            const { left: localLeft, right: localRight } = groupAxesByType(
+              [dataLayer],
+              frame.activeData
+            );
+            // return true only if matching axis are found
+            return (
+              dataLayer.accessors.length &&
+              (Boolean(localLeft.length) === Boolean(left.length) ||
+                Boolean(localRight.length) === Boolean(right.length))
+            );
+          }
+          return false;
+        }
+      ).length < 2;
 
     return {
       groups: [
@@ -417,7 +457,7 @@ export const getXyVisualization = ({
           filterOperations: isBucketed,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
-          required: layer.seriesType.includes('percentage'),
+          required: layer.seriesType.includes('percentage') && hasOnlyOneAccessor,
           enableDimensionEditor: true,
         },
       ],

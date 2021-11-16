@@ -6,7 +6,7 @@
 
 The Kibana Core APIs for client-side plugins.
 
-A plugin's `public/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) which returns an object that implements [Plugin](./kibana-plugin-core-public.plugin.md)<!-- -->.
+A plugin's `public/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) which returns an object that implements .
 
 The plugin integrates with the core system via lifecycle events: `setup`<!-- -->, `start`<!-- -->, and `stop`<!-- -->. In each lifecycle method, the plugin will receive the corresponding core services available (either [CoreSetup](./kibana-plugin-core-public.coresetup.md) or [CoreStart](./kibana-plugin-core-public.corestart.md)<!-- -->) and any interfaces returned by dependency plugins' lifecycle method. Anything returned by the plugin's lifecycle method will be exposed to downstream dependencies when their corresponding lifecycle methods are invoked.
 
@@ -94,9 +94,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayModalStart](./kibana-plugin-core-public.overlaymodalstart.md) | APIs to open and manage modal dialogs. |
 |  [OverlayRef](./kibana-plugin-core-public.overlayref.md) | Returned by [OverlayStart](./kibana-plugin-core-public.overlaystart.md) methods for closing a mounted overlay. |
 |  [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |  |
-|  [Plugin](./kibana-plugin-core-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
+|  [Plugin\_2](./kibana-plugin-core-public.plugin_2.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-core-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [ResolvedSimpleSavedObject](./kibana-plugin-core-public.resolvedsimplesavedobject.md) | This interface is a very simple wrapper for SavedObjects resolved from the server with the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md)<!-- -->. |
+|  [ResponseErrorBody](./kibana-plugin-core-public.responseerrorbody.md) |  |
 |  [SavedObject](./kibana-plugin-core-public.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-core-public.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [SavedObjectError](./kibana-plugin-core-public.savedobjecterror.md) |  |

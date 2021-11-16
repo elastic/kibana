@@ -40,6 +40,7 @@ import { UsageCollector } from './usage/usage_collector';
 import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
 import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 import { RulesService } from './services/rules';
+import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 
 export const config: PluginConfigDescriptor = {
   schema: schema.object({
@@ -50,16 +51,9 @@ export const config: PluginConfigDescriptor = {
       schema.object({
         default: schema.maybe(
           schema.object({
-            logAlias: schema.maybe(schema.string()), // NOTE / TODO: Should be deprecated in 8.0.0
-            metricAlias: schema.maybe(schema.string()),
             fields: schema.maybe(
               schema.object({
-                timestamp: schema.maybe(schema.string()),
                 message: schema.maybe(schema.arrayOf(schema.string())),
-                tiebreaker: schema.maybe(schema.string()),
-                host: schema.maybe(schema.string()),
-                container: schema.maybe(schema.string()),
-                pod: schema.maybe(schema.string()),
               })
             ),
           })
@@ -67,6 +61,7 @@ export const config: PluginConfigDescriptor = {
       })
     ),
   }),
+  deprecations: configDeprecations,
 };
 
 export type InfraConfig = TypeOf<typeof config.schema>;
@@ -158,7 +153,8 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {
-        path: `/app/logs`,
+        sampleObject: null, // indicates that there is no sample object associated with this app link's path
+        getPath: () => `/app/logs`,
         label: logsSampleDataLinkLabel,
         icon: 'logsApp',
       },
@@ -190,6 +186,11 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
 
     const logEntriesService = new LogEntriesService();
     logEntriesService.setup(core, { ...plugins, sources });
+
+    // register deprecated source configuration fields
+    core.deprecations.registerDeprecations({
+      getDeprecations: getInfraDeprecationsFactory(sources),
+    });
 
     return {
       defineInternalSourceConfiguration(sourceId, sourceProperties) {

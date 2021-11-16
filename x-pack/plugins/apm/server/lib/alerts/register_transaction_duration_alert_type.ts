@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import type {
-  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
-  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
-  ALERT_REASON as ALERT_REASON_TYPED,
-} from '@kbn/rule-data-utils';
 import {
-  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
-  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
-  ALERT_REASON as ALERT_REASON_NON_TYPED,
-  // @ts-expect-error
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils/technical_field_names';
 import { take } from 'rxjs/operators';
 import { asDuration } from '../../../../observability/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
@@ -41,19 +35,13 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getDurationFormatter } from '../../../common/utils/formatters';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+} from '../helpers/transactions';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
-
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
-  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
-  ALERT_EVALUATION_VALUE_NON_TYPED;
-const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
@@ -122,7 +110,7 @@ export function registerTransactionDurationAlertType({
         ? indices.metric
         : indices.transaction;
 
-      const field = getTransactionDurationFieldForAggregatedTransactions(
+      const field = getTransactionDurationFieldForTransactions(
         searchAggregatedTransactions
       );
 
@@ -140,7 +128,7 @@ export function registerTransactionDurationAlertType({
                     },
                   },
                 },
-                ...getDocumentTypeFilterForAggregatedTransactions(
+                ...getDocumentTypeFilterForTransactions(
                   searchAggregatedTransactions
                 ),
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },

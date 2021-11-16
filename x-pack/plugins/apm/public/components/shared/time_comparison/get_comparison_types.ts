@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
+import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { getDateDifference } from '../../../../common/utils/formatters';
-import { TimeRangeComparisonType } from './get_time_range_comparison';
 
 export function getComparisonTypes({
   start,
@@ -29,17 +29,17 @@ export function getComparisonTypes({
   // Less than or equals to one day
   if (dateDiff <= 1) {
     return [
-      TimeRangeComparisonType.DayBefore,
-      TimeRangeComparisonType.WeekBefore,
+      TimeRangeComparisonEnum.DayBefore,
+      TimeRangeComparisonEnum.WeekBefore,
     ];
   }
 
   // Less than or equals to one week
   if (dateDiff <= 7) {
-    return [TimeRangeComparisonType.WeekBefore];
+    return [TimeRangeComparisonEnum.WeekBefore];
   }
   // }
 
   // above one week or when rangeTo is not "now"
-  return [TimeRangeComparisonType.PeriodBefore];
+  return [TimeRangeComparisonEnum.PeriodBefore];
 }

@@ -43,7 +43,7 @@ interface AgentsTableProps {
 }
 
 const perPage = 10;
-const DEBOUNCE_DELAY = 100; // ms
+const DEBOUNCE_DELAY = 300; // ms
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange }) => {
   // search related

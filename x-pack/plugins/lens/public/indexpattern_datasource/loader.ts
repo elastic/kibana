@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq, mapValues } from 'lodash';
+import { uniq, mapValues, difference } from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { HttpSetup, SavedObjectReference } from 'kibana/public';
 import { InitializationOptions, StateSetter } from '../types';
@@ -38,10 +38,12 @@ type ErrorHandler = (err: Error) => void;
 export async function loadIndexPatterns({
   indexPatternsService,
   patterns,
+  notUsedPatterns,
   cache,
 }: {
   indexPatternsService: IndexPatternsService;
   patterns: string[];
+  notUsedPatterns?: string[];
   cache: Record<string, IndexPattern>;
 }) {
   const missingIds = patterns.filter((id) => !cache[id]);
@@ -59,12 +61,22 @@ export async function loadIndexPatterns({
     missingIds.map((id) => indexPatternsService.get(id))
   );
   // ignore rejected indexpatterns here, they're already handled at the app level
-  const indexPatterns = allIndexPatterns
+  let indexPatterns = allIndexPatterns
     .filter(
       (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
         response.status === 'fulfilled'
     )
     .map((response) => response.value);
+
+  // if all of the used index patterns failed to load, try loading one of not used ones till one succeeds
+  for (let i = 0; notUsedPatterns && i < notUsedPatterns?.length && !indexPatterns.length; i++) {
+    const resp = await indexPatternsService.get(notUsedPatterns[i]).catch((e) => {
+      // do nothing
+    });
+    if (resp) {
+      indexPatterns = [resp];
+    }
+  }
 
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => {
@@ -220,65 +232,62 @@ export async function loadInitialState({
   const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
     ? loadIndexPatternRefs(indexPatternsService)
     : []);
+
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
+  const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
 
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
-
-  const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
-
-  const requiredPatterns: string[] = uniq(
-    state
-      ? Object.values(state.layers)
-          .map((l) => l.indexPatternId)
-          .concat(state.currentIndexPatternId)
-      : [fallbackId]
+  const usedPatterns = (
+    initialContext
+      ? [initialContext.indexPatternId]
+      : uniq(
+          state
+            ? Object.values(state.layers)
+                .map((l) => l.indexPatternId)
+                .concat(state.currentIndexPatternId)
+            : [fallbackId]
+        )
   )
     // take out the undefined from the list
     .filter(Boolean);
 
+  const notUsedPatterns: string[] = difference(
+    uniq(indexPatternRefs.map(({ id }) => id)),
+    usedPatterns
+  );
+
   const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
+
+  const indexPatterns = await loadIndexPatterns({
+    indexPatternsService,
+    cache: {},
+    patterns: usedPatterns,
+    notUsedPatterns,
+  });
+
   // Priority list:
   // * start with the indexPattern in context
-  // * then fallback to the required ones
-  // * then as last resort use a random one from the available list
+  // * then fallback to the used ones
+  // * then as last resort use a first one from not used refs
   const availableIndexPatternIds = [
     initialContext?.indexPatternId,
-    ...requiredPatterns,
-    indexPatternRefs[0]?.id,
-  ].filter((id) => id != null && availableIndexPatterns.has(id));
+    ...usedPatterns,
+    ...notUsedPatterns,
+  ].filter((id) => id != null && availableIndexPatterns.has(id) && indexPatterns[id]);
 
   const currentIndexPatternId = availableIndexPatternIds[0];
 
   if (currentIndexPatternId) {
     setLastUsedIndexPatternId(storage, currentIndexPatternId);
-
-    if (!requiredPatterns.includes(currentIndexPatternId)) {
-      requiredPatterns.push(currentIndexPatternId);
-    }
-  }
-
-  const indexPatterns = await loadIndexPatterns({
-    indexPatternsService,
-    cache: {},
-    patterns: initialContext ? [initialContext.indexPatternId] : requiredPatterns,
-  });
-  if (state) {
-    return {
-      ...state,
-      currentIndexPatternId: currentIndexPatternId ?? fallbackId,
-      indexPatternRefs,
-      indexPatterns,
-      existingFields: {},
-      isFirstExistenceFetch: true,
-    };
   }
 
   return {
-    currentIndexPatternId: currentIndexPatternId ?? fallbackId,
+    layers: {},
+    ...state,
+    currentIndexPatternId,
     indexPatternRefs,
     indexPatterns,
-    layers: {},
     existingFields: {},
     isFirstExistenceFetch: true,
   };

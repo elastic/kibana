@@ -63,6 +63,26 @@
           },
           {
             "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainer.controlGroup",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroup",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ControlGroupContainer",
+                "text": "ControlGroupContainer"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainer.getPanelCount",
             "type": "Function",
             "tags": [],
@@ -155,6 +175,35 @@
                     "text": "ContainerOutput"
                   },
                   "> | undefined"
+                ],
+                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.DashboardContainer.Unnamed.$4",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "controlGroup",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ControlGroupContainer",
+                    "text": "ControlGroupContainer"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.ErrorEmbeddable",
+                    "text": "ErrorEmbeddable"
+                  },
+                  " | undefined"
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
@@ -472,7 +521,7 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<EEI, EEO>>(type: string, explicitInput: Partial<EEI>, embeddableId?: string | undefined) => Promise<void | E | ",
+              "<EEI, EEO>>(type: string, explicitInput: Partial<EEI>, embeddableId?: string | undefined) => Promise<void | ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -480,7 +529,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              ">"
+              " | E>"
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
@@ -558,6 +607,21 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainer.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -1154,6 +1218,20 @@
             "description": [],
             "signature": [
               "DashboardAppCapabilities",
+              " | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerInput.controlGroupInput",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroupInput",
+            "description": [],
+            "signature": [
+              "DashboardControlGroupInput",
               " | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
@@ -1807,6 +1885,45 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardSavedObject.outcome",
+            "type": "string",
+            "tags": [],
+            "label": "outcome",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardSavedObject.aliasId",
+            "type": "string",
+            "tags": [],
+            "label": "aliasId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardSavedObject.controlGroupInput",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroupInput",
+            "description": [],
+            "signature": [
+              "{ controlStyle?: \"twoLine\" | \"oneLine\" | undefined; panelsJSON?: string | undefined; } | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2817,6 +2934,20 @@
                 "text": "EmbeddableInput"
               },
               " & { [k: string]: unknown; }>; }"
+            ],
+            "path": "src/plugins/dashboard/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.DashboardContainerStateWithType.controlGroupInput",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroupInput",
+            "description": [],
+            "signature": [
+              "DashboardContainerControlGroupInput",
+              " | undefined"
             ],
             "path": "src/plugins/dashboard/common/types.ts",
             "deprecated": false

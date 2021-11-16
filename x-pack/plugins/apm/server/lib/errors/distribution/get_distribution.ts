@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Setup } from '../../helpers/setup_request';
 import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
 import { getBuckets } from './get_buckets';
@@ -21,6 +22,8 @@ export async function getErrorDistribution({
   setup,
   start,
   end,
+  comparisonStart,
+  comparisonEnd,
 }: {
   environment: string;
   kuery: string;
@@ -29,22 +32,43 @@ export async function getErrorDistribution({
   setup: Setup;
   start: number;
   end: number;
+  comparisonStart?: number;
+  comparisonEnd?: number;
 }) {
   const bucketSize = getBucketSize({ start, end });
-  const { buckets, noHits } = await getBuckets({
+  const commonProps = {
     environment,
     kuery,
     serviceName,
     groupId,
-    bucketSize,
     setup,
+    bucketSize,
+  };
+  const currentPeriodPromise = getBuckets({
+    ...commonProps,
     start,
     end,
   });
+  const previousPeriodPromise =
+    comparisonStart && comparisonEnd
+      ? getBuckets({
+          ...commonProps,
+          start: comparisonStart,
+          end: comparisonEnd,
+        })
+      : { buckets: [], bucketSize: null };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    currentPeriodPromise,
+    previousPeriodPromise,
+  ]);
 
   return {
-    noHits,
-    buckets,
+    currentPeriod: currentPeriod.buckets,
+    previousPeriod: offsetPreviousPeriodCoordinates({
+      currentPeriodTimeseries: currentPeriod.buckets,
+      previousPeriodTimeseries: previousPeriod.buckets,
+    }),
     bucketSize,
   };
 }

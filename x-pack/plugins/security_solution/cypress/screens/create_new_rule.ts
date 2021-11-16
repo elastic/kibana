@@ -201,6 +201,12 @@ export const SCHEDULE_INTERVAL_AMOUNT_INPUT =
 export const SCHEDULE_INTERVAL_UNITS_INPUT =
   '[data-test-subj="detectionEngineStepScheduleRuleInterval"] [data-test-subj="timeType"]';
 
+export const SCHEDULE_LOOKBACK_AMOUNT_INPUT =
+  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="interval"]';
+
+export const SCHEDULE_LOOKBACK_UNITS_INPUT =
+  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
+
 export const SEVERITY_DROPDOWN =
   '[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]';
 

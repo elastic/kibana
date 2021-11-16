@@ -25,6 +25,7 @@ import { ILayer } from '../../../../classes/layers/layer';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 import { getIndexPatternService } from '../../../../kibana_services';
+import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
 import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import type { JoinField } from '../join_editor';
 
@@ -72,10 +73,7 @@ export class Join extends Component<Props, State> {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: i18n.translate('xpack.maps.layerPanel.join.noIndexPatternErrorMessage', {
-            defaultMessage: `Unable to find Index pattern {indexPatternId}`,
-            values: { indexPatternId },
-          }),
+          loadError: getDataViewNotFoundMessage(indexPatternId),
         });
       }
       return;

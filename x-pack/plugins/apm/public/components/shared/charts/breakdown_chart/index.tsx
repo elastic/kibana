@@ -44,6 +44,8 @@ import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { getTimeZone } from '../helper/timezone';
 
 interface Props {
   fetchStatus: FETCH_STATUS;
@@ -66,15 +68,12 @@ export function BreakdownChart({
 }: Props) {
   const history = useHistory();
   const chartTheme = useChartTheme();
-
+  const { core } = useApmPluginContext();
   const { chartRef, setPointerEvent } = useChartPointerEventContext();
-
   const {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}');
-
   const theme = useTheme();
-
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const min = moment.utc(start).valueOf();
@@ -91,6 +90,8 @@ export function BreakdownChart({
     yAxisType === 'duration'
       ? getResponseTimeTickFormatter(getDurationFormatter(maxY))
       : asPercentBound;
+
+  const timeZone = getTimeZone(core.uiSettings);
 
   return (
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
@@ -150,6 +151,7 @@ export function BreakdownChart({
           timeseries.map((serie) => {
             return (
               <AreaSeries
+                timeZone={timeZone}
                 key={serie.title}
                 id={serie.title}
                 name={serie.title}

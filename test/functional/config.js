@@ -45,7 +45,6 @@ export default async function ({ readConfigFile }) {
         '--savedObjects.maxImportPayloadBytes=10485760',
 
         // to be re-enabled once kibana/issues/102552 is completed
-        '--xpack.security.enabled=false',
         '--xpack.reporting.enabled=false',
       ],
     },
@@ -55,6 +54,7 @@ export default async function ({ readConfigFile }) {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
         'visualization:visualize:legacyPieChartsLibrary': true,
+        'visualization:useLegacyTimeAxis': true,
       },
     },
 

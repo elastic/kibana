@@ -10,7 +10,8 @@ import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo, useCallback } from 'react';
 import uuid from 'uuid';
 
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
@@ -22,12 +23,7 @@ import { eventsStackByOptions } from '../../../hosts/pages/navigation';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { histogramConfigs } from '../../../hosts/pages/navigation/events_query_tab_body';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { HostsTableType } from '../../../hosts/store/model';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
@@ -46,7 +42,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   combinedQueries?: string;
   filters: Filter[];
   headerChildren?: React.ReactNode;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   indexNames: string[];
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
@@ -101,7 +97,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const goToHostEvents = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.events, urlSearch),
       });

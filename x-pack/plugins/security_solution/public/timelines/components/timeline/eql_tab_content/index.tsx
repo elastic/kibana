@@ -14,7 +14,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -42,12 +42,11 @@ import { requiredFieldsForActions } from '../../../../detections/components/aler
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import { PickEventType } from '../search_or_filter/pick_events';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useEqlEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
@@ -55,8 +54,10 @@ import { useTimelineFullScreen } from '../../../../common/containers/use_full_sc
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { EqlQueryBarTimeline } from '../query_bar/eql';
-import { defaultControlColumn } from '../body/control_columns';
+import { HeaderActions } from '../body/actions/header_actions';
+import { getDefaultControlColumn } from '../body/control_columns';
 import { Sort } from '../body/sort';
+import { Sourcerer } from '../../../../common/components/sourcerer';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -151,6 +152,8 @@ export type Props = OwnProps & PropsFromRedux;
 
 const NO_SORTING: Sort[] = [];
 
+const trailingControlColumns: ControlColumnProps[] = []; // stable reference
+
 export const EqlTabContentComponent: React.FC<Props> = ({
   activeTab,
   columns,
@@ -178,8 +181,10 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     browserFields,
     docValueFields,
     loading: loadingSourcerer,
+    runtimeMappings,
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.timeline);
+  } = useSourcererDataView(SourcererScopeName.timeline);
+  const ACTION_BUTTON_COUNT = 5;
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
@@ -216,6 +221,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       language: 'eql',
       limit: itemsPerPage,
       filterQuery: eqlQuery ?? '',
+      runtimeMappings,
       startDate: start,
       skip: !canQueryTimeline(),
       timerangeKind,
@@ -242,8 +248,14 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     );
   }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
-  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
-  const trailingControlColumns: ControlColumnProps[] = [];
+  const leadingControlColumns = useMemo(
+    () =>
+      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+        ...x,
+        headerCellRender: HeaderActions,
+      })),
+    []
+  );
 
   return (
     <>
@@ -281,10 +293,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 <TimelineDatePickerLock />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <PickEventType
-                  eventType={eventType}
-                  onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
-                />
+                <Sourcerer scope={SourcererScopeName.timeline} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
@@ -346,6 +355,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
               <DetailsPanel
                 browserFields={browserFields}
                 docValueFields={docValueFields}
+                runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.eql}
                 timelineId={timelineId}
                 handleOnPanelClosed={handleOnPanelClosed}
@@ -395,12 +405,23 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateEventTypeAndIndexesName: (newEventType: TimelineEventsType, newIndexNames: string[]) => {
+  updateEventTypeAndIndexesName: (
+    newEventType: TimelineEventsType,
+    newIndexNames: string[],
+    newDataViewId: string
+  ) => {
     dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
-    dispatch(timelineActions.updateIndexNames({ id: timelineId, indexNames: newIndexNames }));
     dispatch(
-      sourcererActions.setSelectedIndexPatterns({
+      timelineActions.updateDataView({
+        dataViewId: newDataViewId,
+        id: timelineId,
+        indexNames: newIndexNames,
+      })
+    );
+    dispatch(
+      sourcererActions.setSelectedDataView({
         id: SourcererScopeName.timeline,
+        selectedDataViewId: newDataViewId,
         selectedPatterns: newIndexNames,
       })
     );

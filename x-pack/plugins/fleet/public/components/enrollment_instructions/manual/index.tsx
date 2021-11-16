@@ -38,9 +38,9 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
 
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
-  const linuxMacCommand = `sudo ./elastic-agent install -f ${enrollArgs}`;
+  const linuxMacCommand = `sudo ./elastic-agent install ${enrollArgs}`;
 
-  const windowsCommand = `.\\elastic-agent.exe install -f ${enrollArgs}`;
+  const windowsCommand = `.\\elastic-agent.exe install ${enrollArgs}`;
 
   return (
     <>
@@ -78,7 +78,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
             defaultMessage="See the {link} for RPM / DEB deploy instructions."
             values={{
               link: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.elasticAgent}>
+                <EuiLink target="_blank" external href={docLinks.links.fleet.installElasticAgent}>
                   <FormattedMessage
                     id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
                     defaultMessage="Elastic Agent docs"

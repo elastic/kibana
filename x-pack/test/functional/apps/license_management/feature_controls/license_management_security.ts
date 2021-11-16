@@ -68,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(sections).to.have.length(3);
           expect(sections[2]).to.eql({
             sectionId: 'stack',
-            sectionLinks: ['license_management', 'upgrade_assistant'],
+            sectionLinks: ['license_management'],
           });
         });
       });

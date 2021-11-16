@@ -34,7 +34,7 @@ import {
 } from '../screens/alerts_details';
 
 export const addExceptionFromFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
   cy.get(ADD_EXCEPTION_BTN).click();
 };
 
@@ -100,6 +100,12 @@ export const goToOpenedAlerts = () => {
   cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
   cy.get(LOADING_INDICATOR).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
+};
+
+export const refreshAlerts = () => {
+  // ensure we've refetched fields the first time index is defined
+  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).first().click({ force: true });
 };
 
 export const openFirstAlert = () => {

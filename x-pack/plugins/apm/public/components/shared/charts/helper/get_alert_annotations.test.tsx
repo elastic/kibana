@@ -16,13 +16,13 @@ import {
   ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
   ALERT_UUID,
   SPACE_IDS,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
-} from '@kbn/rule-data-utils';
+} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
 import { ValuesType } from 'utility-types';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public';
@@ -110,7 +110,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Alert');
+      ).toEqual('Alert - Experimental');
     });
 
     it('uses the reason in the annotation details', () => {
@@ -123,7 +123,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].details
-      ).toEqual('a good reason');
+      ).toEqual('a good reason. Click to see more details.');
     });
 
     describe('with no formatter', () => {
@@ -140,7 +140,7 @@ describe('getAlertAnnotations', () => {
             setSelectedAlertId,
             theme,
           })![0].props.dataValues[0].details
-        ).toEqual(alert[ALERT_RULE_NAME]![0]);
+        ).toEqual(`${alert[ALERT_RULE_NAME]![0]}. Click to see more details.`);
       });
     });
 
@@ -191,7 +191,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Warning Alert');
+      ).toEqual('Warning Alert - Experimental');
     });
   });
 
@@ -224,7 +224,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Critical Alert');
+      ).toEqual('Critical Alert - Experimental');
     });
   });
 });

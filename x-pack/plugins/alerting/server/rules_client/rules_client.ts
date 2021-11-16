@@ -9,7 +9,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -30,7 +30,7 @@ import {
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
-  AlertInstanceSummary,
+  AlertSummary,
   AlertExecutionStatusValues,
   AlertNotifyWhenType,
   AlertTypeParams,
@@ -68,7 +68,7 @@ import {
   SAVED_OBJECT_REL_PRIMARY,
 } from '../../../event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
-import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
+import { alertSummaryFromEventLog } from '../lib/alert_summary_from_event_log';
 import { AuditLogger } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
@@ -193,7 +193,7 @@ export interface UpdateOptions<Params extends AlertTypeParams> {
   };
 }
 
-export interface GetAlertInstanceSummaryParams {
+export interface GetAlertSummaryParams {
   id: string;
   dateStart?: string;
 }
@@ -377,10 +377,11 @@ export class RulesClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleAlert(
+        scheduledTask = await this.scheduleRule(
           createdAlert.id,
           rawAlert.alertTypeId,
-          data.schedule
+          data.schedule,
+          true
         );
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
@@ -508,29 +509,26 @@ export class RulesClient {
     }
   }
 
-  public async getAlertInstanceSummary({
-    id,
-    dateStart,
-  }: GetAlertInstanceSummaryParams): Promise<AlertInstanceSummary> {
-    this.logger.debug(`getAlertInstanceSummary(): getting alert ${id}`);
-    const alert = (await this.get({ id, includeLegacyId: true })) as SanitizedAlertWithLegacyId;
+  public async getAlertSummary({ id, dateStart }: GetAlertSummaryParams): Promise<AlertSummary> {
+    this.logger.debug(`getAlertSummary(): getting alert ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedAlertWithLegacyId;
 
     await this.authorization.ensureAuthorized({
-      ruleTypeId: alert.alertTypeId,
-      consumer: alert.consumer,
+      ruleTypeId: rule.alertTypeId,
+      consumer: rule.consumer,
       operation: ReadOperations.GetAlertSummary,
       entity: AlertingAuthorizationEntity.Rule,
     });
 
-    // default duration of instance summary is 60 * alert interval
+    // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
-    const durationMillis = parseDuration(alert.schedule.interval) * 60;
+    const durationMillis = parseDuration(rule.schedule.interval) * 60;
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
     const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
 
     const eventLogClient = await this.getEventLogClient();
 
-    this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
+    this.logger.debug(`getAlertSummary(): search the event log for rule ${id}`);
     let events: IEvent[];
     try {
       const queryResults = await eventLogClient.findEventsBySavedObjectIds(
@@ -543,18 +541,18 @@ export class RulesClient {
           end: dateNow.toISOString(),
           sort_order: 'desc',
         },
-        alert.legacyId !== null ? [alert.legacyId] : undefined
+        rule.legacyId !== null ? [rule.legacyId] : undefined
       );
       events = queryResults.data;
     } catch (err) {
       this.logger.debug(
-        `rulesClient.getAlertInstanceSummary(): error searching event log for alert ${id}: ${err.message}`
+        `rulesClient.getAlertSummary(): error searching event log for rule ${id}: ${err.message}`
       );
       events = [];
     }
 
-    return alertInstanceSummaryFromEventLog({
-      alert,
+    return alertSummaryFromEventLog({
+      rule,
       events,
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
@@ -579,11 +577,7 @@ export class RulesClient {
       );
       throw error;
     }
-    const {
-      filter: authorizationFilter,
-      ensureRuleTypeIsAuthorized,
-      logSuccessfulAuthorization,
-    } = authorizationTuple;
+    const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
 
     const {
       page,
@@ -638,8 +632,6 @@ export class RulesClient {
       )
     );
 
-    logSuccessfulAuthorization();
-
     return {
       page,
       perPage,
@@ -654,11 +646,10 @@ export class RulesClient {
     // Replace this when saved objects supports aggregations https://github.com/elastic/kibana/pull/64002
     const alertExecutionStatus = await Promise.all(
       AlertExecutionStatusValues.map(async (status: string) => {
-        const { filter: authorizationFilter, logSuccessfulAuthorization } =
-          await this.authorization.getFindAuthorizationFilter(
-            AlertingAuthorizationEntity.Rule,
-            alertingAuthorizationFilterOpts
-          );
+        const { filter: authorizationFilter } = await this.authorization.getFindAuthorizationFilter(
+          AlertingAuthorizationEntity.Rule,
+          alertingAuthorizationFilterOpts
+        );
         const filter = options.filter
           ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
           : `alert.attributes.executionStatus.status:(${status})`;
@@ -675,8 +666,6 @@ export class RulesClient {
           perPage: 0,
           type: 'alert',
         });
-
-        logSuccessfulAuthorization();
 
         return { [status]: total };
       })
@@ -1161,10 +1150,11 @@ export class RulesClient {
         );
         throw e;
       }
-      const scheduledTask = await this.scheduleAlert(
+      const scheduledTask = await this.scheduleRule(
         id,
         attributes.alertTypeId,
-        attributes.schedule as IntervalSchedule
+        attributes.schedule as IntervalSchedule,
+        false
       );
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
@@ -1575,9 +1565,15 @@ export class RulesClient {
     return this.spaceId;
   }
 
-  private async scheduleAlert(id: string, alertTypeId: string, schedule: IntervalSchedule) {
-    return await this.taskManager.schedule({
-      taskType: `alerting:${alertTypeId}`,
+  private async scheduleRule(
+    id: string,
+    ruleTypeId: string,
+    schedule: IntervalSchedule,
+    throwOnConflict: boolean // whether to throw conflict errors or swallow them
+  ) {
+    const taskInstance = {
+      id, // use the same ID for task document as the rule
+      taskType: `alerting:${ruleTypeId}`,
       schedule,
       params: {
         alertId: id,
@@ -1589,7 +1585,15 @@ export class RulesClient {
         alertInstances: {},
       },
       scope: ['alerting'],
-    });
+    };
+    try {
+      return await this.taskManager.schedule(taskInstance);
+    } catch (err) {
+      if (err.statusCode === 409 && !throwOnConflict) {
+        return taskInstance;
+      }
+      throw err;
+    }
   }
 
   private injectReferencesIntoActions(

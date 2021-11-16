@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
-import { TransformPivotConfig } from '../../../../common/types/transform';
+import { TransformConfigUnion } from '../../../../common/types/transform';
 
 import { isHttpFetchError } from '../../common/request';
 import { useApi } from '../../hooks/use_api';
@@ -50,7 +50,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
 
   const transformId = match.params.transformId;
 
-  const [transformConfig, setTransformConfig] = useState<TransformPivotConfig>();
+  const [transformConfig, setTransformConfig] = useState<TransformConfigUnion>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
   const { error: searchItemsError, searchItems, setSavedObjectId } = useSearchItems(undefined);
@@ -75,7 +75,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
       if (indexPatternId === undefined) {
         throw new Error(
           i18n.translate('xpack.transform.clone.fetchErrorPromptText', {
-            defaultMessage: 'Could not fetch the Kibana index pattern ID.',
+            defaultMessage: 'Could not fetch the Kibana data view ID.',
           })
         );
       }

@@ -19,10 +19,10 @@ import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
@@ -72,7 +72,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     searchAggregatedTransactions,
   });
 
-  const field = getTransactionDurationFieldForAggregatedTransactions(
+  const field = getTransactionDurationFieldForTransactions(
     searchAggregatedTransactions
   );
 
@@ -81,9 +81,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     {
       apm: {
         events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
+          getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
       body: {
@@ -93,7 +91,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
-              ...getDocumentTypeFilterForAggregatedTransactions(
+              ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
               ...rangeQuery(start, end),

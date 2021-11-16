@@ -30,7 +30,6 @@ import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import {
-  createUninitialisedResourceState,
   createLoadingResourceState,
   FailedResourceState,
   isFailedResourceState,
@@ -61,8 +60,7 @@ jest.mock('../../../../common/lib/kibana');
 
 type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
 
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-describe.skip('endpoint list middleware', () => {
+describe('endpoint list middleware', () => {
   const getKibanaServicesMock = KibanaServices.get as jest.Mock;
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
@@ -256,9 +254,7 @@ describe.skip('endpoint list middleware', () => {
     const dispatchGetActivityLogLoading = () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
-        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-        // @ts-ignore
-        payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+        payload: createLoadingResourceState(),
       });
     };
 
@@ -390,7 +386,6 @@ describe.skip('endpoint list middleware', () => {
 
     it('should call get Activity Log API with correct paging options', async () => {
       dispatchUserChangedUrl();
-
       const updatePagingDispatched = waitForAction('endpointDetailsActivityLogUpdatePaging');
       dispatchGetActivityLogPaging({ page: 3 });
 

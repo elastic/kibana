@@ -5,7 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
@@ -23,7 +23,10 @@ import {
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
-import { InlineScript, QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import {
+  InlineScript,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
 import {
   ReadOperations,
@@ -41,7 +44,7 @@ import {
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { Dataset, RuleDataPluginService } from '../rule_data_plugin_service';
+import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
 
 const getEsQueryConfig: typeof getEsQueryConfigTyped = getEsQueryConfigNonTyped;
 const getSafeSortIds: typeof getSafeSortIdsTyped = getSafeSortIdsNonTyped;
@@ -71,7 +74,7 @@ export interface ConstructorOptions {
   authorization: PublicMethodsOf<AlertingAuthorization>;
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
-  ruleDataService: RuleDataPluginService;
+  ruleDataService: IRuleDataService;
 }
 
 export interface UpdateOptions<Params extends AlertTypeParams> {
@@ -116,7 +119,7 @@ export class AlertsClient {
   private readonly authorization: PublicMethodsOf<AlertingAuthorization>;
   private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string | undefined;
-  private readonly ruleDataService: RuleDataPluginService;
+  private readonly ruleDataService: IRuleDataService;
 
   constructor(options: ConstructorOptions) {
     this.logger = options.logger;

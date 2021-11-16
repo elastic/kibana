@@ -29,6 +29,7 @@ import {
   SYNTHETICS_FCP,
   SYNTHETICS_LCP,
 } from '../constants/field_names/synthetics';
+import { buildExistsFilter } from '../utils';
 
 export function getSyntheticsDistributionConfig({
   series,
@@ -58,7 +59,10 @@ export function getSyntheticsDistributionConfig({
       'url.port',
     ],
     baseFilters: [],
-    definitionFields: ['monitor.name', 'url.full'],
+    definitionFields: [
+      { field: 'monitor.name', nested: 'synthetics.step.name.keyword', singleSelection: true },
+      { field: 'url.full', filters: buildExistsFilter('summary.up', indexPattern) },
+    ],
     metricOptions: [
       {
         label: MONITORS_DURATION_LABEL,

@@ -10,16 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { LastUpdated } from './last_updated';
 import { ExpViewActionMenu } from '../components/action_menu';
 import { useExpViewTimeRange } from '../hooks/use_time_range';
+import { LastUpdated } from './last_updated';
+import type { ChartTimeRange } from './last_updated';
 
 interface Props {
-  lastUpdated?: number;
+  chartTimeRange?: ChartTimeRange;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
-export function ExploratoryViewHeader({ lensAttributes, lastUpdated }: Props) {
+export function ExploratoryViewHeader({ lensAttributes, chartTimeRange }: Props) {
   const { setLastRefresh } = useSeriesStorage();
 
   const timeRange = useExpViewTimeRange();
@@ -46,7 +47,7 @@ export function ExploratoryViewHeader({ lensAttributes, lastUpdated }: Props) {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LastUpdated lastUpdated={lastUpdated} />
+          <LastUpdated chartTimeRange={chartTimeRange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>

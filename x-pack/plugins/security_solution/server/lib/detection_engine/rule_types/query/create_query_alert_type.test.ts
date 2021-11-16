@@ -51,6 +51,7 @@ describe('Custom Query Alerts', () => {
       index: ['*'],
       from: 'now-1m',
       to: 'now',
+      language: 'kuery',
     };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
@@ -95,6 +96,8 @@ describe('Custom Query Alerts', () => {
       index: ['*'],
       from: 'now-1m',
       to: 'now',
+      language: 'kuery',
+      type: 'query',
     };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(

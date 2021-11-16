@@ -7,7 +7,7 @@
  */
 
 import { AddToLibraryAction } from '.';
-import { DashboardContainer } from '../embeddable';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput } from '../test_helpers';
 
 import { CoreStart } from 'kibana/public';

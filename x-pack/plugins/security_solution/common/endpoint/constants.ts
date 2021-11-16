@@ -10,10 +10,13 @@
 export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
 export const ENDPOINT_ACTIONS_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;
 export const ENDPOINT_ACTION_RESPONSES_DS = '.logs-endpoint.action.responses';
-export const ENDPOINT_ACTION_RESPONSES_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;
+export const ENDPOINT_ACTION_RESPONSES_INDEX = `${ENDPOINT_ACTION_RESPONSES_DS}-default`;
 
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
+
+// metadata datastream
+export const METADATA_DATASTREAM = 'metrics-endpoint.metadata-default';
 
 /** index pattern for the data source index (data stream) that the Endpoint streams documents to */
 export const metadataIndexPattern = 'metrics-endpoint.metadata-*';
@@ -60,3 +63,5 @@ export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
 /** Endpoint Actions Log Routes */
 export const ENDPOINT_ACTION_LOG_ROUTE = `/api/endpoint/action_log/{agent_id}`;
 export const ACTION_STATUS_ROUTE = `/api/endpoint/action_status`;
+
+export const failedFleetActionErrorCode = '424';

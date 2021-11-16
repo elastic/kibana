@@ -11,6 +11,7 @@ import { catchError } from 'rxjs/operators';
 import { Execution, ExecutionResult } from './execution';
 import { ExpressionValueError } from '../expression_types/specs';
 import { ExpressionAstExpression } from '../ast';
+import { Adapters } from '../../../inspector/common/adapters';
 
 /**
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the
@@ -75,5 +76,5 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
    * Get Inspector adapters provided to all functions of expression through
    * execution context.
    */
-  inspect = () => this.execution.inspectorAdapters;
+  inspect = (): Adapters => this.execution.inspectorAdapters;
 }

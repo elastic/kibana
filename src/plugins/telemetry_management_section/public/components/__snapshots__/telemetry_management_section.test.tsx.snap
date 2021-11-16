@@ -53,7 +53,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           loading={false}
           setting={
             Object {
-              "ariaName": "Provide usage statistics",
+              "ariaName": "Provide usage data",
               "category": Array [],
               "defVal": true,
               "description": <React.Fragment>
@@ -109,7 +109,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                   />
                 </p>
               </React.Fragment>,
-              "displayName": "Provide usage statistics",
+              "displayName": "Provide usage data",
               "isCustom": true,
               "isOverridden": false,
               "name": "telemetry:enabled",

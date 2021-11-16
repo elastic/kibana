@@ -230,7 +230,7 @@ export class DataViewsService {
    * @param force
    */
   setDefault = async (id: string | null, force = false) => {
-    if (force || !this.config.get('defaultIndex')) {
+    if (force || !(await this.config.get('defaultIndex'))) {
       await this.config.set('defaultIndex', id);
     }
   };
@@ -295,7 +295,7 @@ export class DataViewsService {
 
       this.onError(err, {
         title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
           values: { id: indexPattern.id, title: indexPattern.title },
         }),
       });
@@ -341,7 +341,7 @@ export class DataViewsService {
 
       this.onError(err, {
         title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
           values: { id, title },
         }),
       });
@@ -423,11 +423,7 @@ export class DataViewsService {
     );
 
     if (!savedObject.version) {
-      throw new SavedObjectNotFound(
-        DATA_VIEW_SAVED_OBJECT_TYPE,
-        id,
-        'management/kibana/indexPatterns'
-      );
+      throw new SavedObjectNotFound(DATA_VIEW_SAVED_OBJECT_TYPE, id, 'management/kibana/dataViews');
     }
 
     return this.initFromSavedObject(savedObject);
@@ -483,7 +479,7 @@ export class DataViewsService {
       } else {
         this.onError(err, {
           title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
             values: { id: savedObject.id, title },
           }),
         });
@@ -654,7 +650,7 @@ export class DataViewsService {
             }
             const title = i18n.translate('dataViews.unableWriteLabel', {
               defaultMessage:
-                'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
+                'Unable to write data view! Refresh the page to get the most up to date changes for this data view.',
             });
 
             this.onNotification({ title, color: 'danger' });

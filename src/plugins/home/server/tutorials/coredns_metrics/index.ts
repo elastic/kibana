@@ -23,16 +23,16 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'corednsMetrics',
     name: i18n.translate('home.tutorials.corednsMetrics.nameTitle', {
-      defaultMessage: 'CoreDNS metrics',
+      defaultMessage: 'CoreDNS Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.corednsMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the CoreDNS server.',
+      defaultMessage: 'Collect metrics from CoreDNS servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.corednsMetrics.longDescription', {
       defaultMessage:
-        'The `coredns` Metricbeat module fetches monitoring metrics from CoreDNS. \
+        'The `coredns` Metricbeat module fetches metrics from CoreDNS. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-coredns.html',

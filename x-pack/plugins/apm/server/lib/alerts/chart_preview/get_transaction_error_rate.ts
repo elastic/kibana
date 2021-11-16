@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeQuery } from '../../../../../observability/server';
+import { rangeQuery, termQuery } from '../../../../../observability/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -13,10 +13,10 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
   getSearchAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../../helpers/transactions';
 import { Setup } from '../../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
@@ -45,24 +45,18 @@ export async function getTransactionErrorRateChartPreview({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-            ...(transactionType
-              ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-              : []),
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
-            ...getDocumentTypeFilterForAggregatedTransactions(
+            ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
           ],

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useEffect, useMemo } from 'react';
 
 import {

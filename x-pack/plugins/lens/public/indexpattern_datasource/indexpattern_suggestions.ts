@@ -21,6 +21,7 @@ import {
   getExistingColumnGroups,
   isReferenced,
   getReferencedColumnIds,
+  hasTermsWithManyBuckets,
 } from './operations';
 import { hasField } from './utils';
 import type {
@@ -406,7 +407,7 @@ export function getDatasourceSuggestionsFromCurrentState(
             layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
         );
         const timeField =
-          indexPattern.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
+          indexPattern?.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
 
         const hasNumericDimension =
           buckets.length === 1 &&
@@ -424,17 +425,25 @@ export function getDatasourceSuggestionsFromCurrentState(
         );
 
         if (!references.length && metrics.length && buckets.length === 0) {
-          if (timeField) {
+          if (timeField && buckets.length < 1 && !hasTermsWithManyBuckets(layer)) {
             // suggest current metric over time if there is a default time field
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
-          suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
+          if (indexPattern) {
+            suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
+          }
         } else {
           suggestions.push(...createSimplifiedTableSuggestions(state, layerId));
 
           // base range intervals are of number dataType.
           // Custom range/intervals have a different dataType so they still receive the Over Time suggestion
-          if (!timeDimension && timeField && !hasNumericDimension) {
+          if (
+            !timeDimension &&
+            timeField &&
+            buckets.length < 2 &&
+            !hasNumericDimension &&
+            !hasTermsWithManyBuckets(layer)
+          ) {
             // suggest current configuration over time if there is a default time field
             // and no time dimension yet
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));

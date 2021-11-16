@@ -134,7 +134,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     const hasDateFields = indexPattern && getDateFields(indexPattern).length;
     if (!hasDateFields) {
       return i18n.translate('xpack.lens.indexPattern.lastValue.disabled', {
-        defaultMessage: 'This function requires the presence of a date field in your index',
+        defaultMessage: 'This function requires the presence of a date field in your data view',
       });
     }
   },
@@ -162,7 +162,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     if (!sortField) {
       throw new Error(
         i18n.translate('xpack.lens.functions.lastValue.missingSortField', {
-          defaultMessage: 'This index pattern does not contain any date fields',
+          defaultMessage: 'This data view does not contain any date fields',
         })
       );
     }
@@ -206,7 +206,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       newField &&
         newField.type === column.dataType &&
         !newField.aggregationRestrictions &&
-        newTimeField?.type === 'date'
+        newTimeField?.type === 'date' &&
+        supportedTypes.has(newField.type)
     );
   },
 
@@ -225,7 +226,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
           display="columnCompressed"
           fullWidth
           error={i18n.translate('xpack.lens.indexPattern.sortField.invalid', {
-            defaultMessage: 'Invalid field. Check your index pattern or pick another field.',
+            defaultMessage: 'Invalid field. Check your data view or pick another field.',
           })}
           isInvalid={isSortFieldInvalid}
         >
@@ -284,7 +285,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     }),
     description: i18n.translate('xpack.lens.indexPattern.lastValue.documentation.markdown', {
       defaultMessage: `
-Returns the value of a field from the last document, ordered by the default time field of the index pattern.
+Returns the value of a field from the last document, ordered by the default time field of the data view.
 
 This function is usefull the retrieve the latest state of an entity.
 

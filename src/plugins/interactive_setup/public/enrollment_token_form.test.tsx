@@ -89,6 +89,20 @@ describe('decodeEnrollmentToken', () => {
     });
   });
 
+  it('should sort IPv4 before IPv6 addresses', () => {
+    expect(
+      decodeEnrollmentToken(
+        btoa(
+          JSON.stringify({ ...token, adr: ['[::1]:9200', '127.0.0.1:9200', '10.17.1.163:9200'] })
+        )
+      )
+    ).toEqual(
+      expect.objectContaining({
+        adr: ['https://127.0.0.1:9200', 'https://10.17.1.163:9200', 'https://[::1]:9200'],
+      })
+    );
+  });
+
   it('should not decode an invalid token', () => {
     expect(decodeEnrollmentToken(JSON.stringify(token))).toBeUndefined();
     expect(

@@ -15,8 +15,7 @@ export default function ({ getPageObjects, getService }) {
   const find = getService('find');
   const security = getService('security');
 
-  // Failing: See https://github.com/elastic/kibana/issues/115262
-  describe.skip('geo top hits', () => {
+  describe('geo top hits', () => {
     describe('split on string field', () => {
       before(async () => {
         await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], false);

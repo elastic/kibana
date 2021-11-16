@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
@@ -13,7 +13,6 @@ import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { PackForm } from '../../../packs/form';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const AddPackPageComponent = () => {
   useBreadcrumbs('pack_add');
@@ -31,12 +30,11 @@ const AddPackPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage id="xpack.osquery.addPack.pageTitle" defaultMessage="Add pack" />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

@@ -24,3 +24,5 @@ export const LIST_ENDPOINT_EXCEPTION = 'endpoint_exception';
 export const LIST_ENDPOINT_EVENT_FILTER = 'endpoint_event_filter';
 
 export const LIST_TRUSTED_APPLICATION = 'trusted_application';
+
+export const INSIGHTS_CHANNEL = 'security-insights-v1';

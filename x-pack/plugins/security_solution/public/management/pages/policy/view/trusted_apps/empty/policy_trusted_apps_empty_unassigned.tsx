@@ -10,7 +10,7 @@ import { EuiEmptyPrompt, EuiButton, EuiPageTemplate, EuiLink } from '@elastic/eu
 import { FormattedMessage } from '@kbn/i18n/react';
 import { usePolicyDetailsNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_trusted_apps_empty_hooks';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 
 interface CommonProps {
   policyId: string;

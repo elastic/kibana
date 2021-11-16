@@ -24,9 +24,14 @@ export function getIntervalAndTimefield(
   { min, max, maxBuckets }: IntervalParams,
   series?: Series
 ) {
-  const timeField =
+  let timeField =
     (series?.override_index_pattern ? series.series_time_field : panel.time_field) ||
     index.indexPattern?.timeFieldName;
+
+  // should use @timestamp as default timeField for es indeces if user doesn't provide timeField
+  if (!panel.use_kibana_indexes && !timeField) {
+    timeField = '@timestamp';
+  }
 
   if (panel.use_kibana_indexes) {
     validateField(timeField!, index);

@@ -38,6 +38,7 @@ import {
   createMockDatasource,
   DatasourceMock,
   createExpressionRendererMock,
+  mockStoreDeps,
 } from '../../mocks';
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
@@ -144,21 +145,19 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      const lensStore = (
-        await mountWithProvider(<EditorFrame {...props} />, {
-          preloadedState: {
-            activeDatasourceId: 'testDatasource',
-            datasourceStates: {
-              testDatasource: {
-                isLoading: true,
-                state: {
-                  internalState1: '',
-                },
+      const { lensStore } = await mountWithProvider(<EditorFrame {...props} />, {
+        preloadedState: {
+          activeDatasourceId: 'testDatasource',
+          datasourceStates: {
+            testDatasource: {
+              isLoading: true,
+              state: {
+                internalState1: '',
               },
             },
           },
-        })
-      ).lensStore;
+        },
+      });
       expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
       lensStore.dispatch(
         setState({
@@ -553,6 +552,7 @@ describe('editor_frame', () => {
     }
 
     beforeEach(async () => {
+      mockVisualization2.initialize.mockReturnValue({ initial: true });
       mockDatasource.getLayers.mockReturnValue(['first', 'second']);
       mockDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
         {
@@ -567,20 +567,27 @@ describe('editor_frame', () => {
         },
       ]);
 
+      const visualizationMap = {
+        testVis: mockVisualization,
+        testVis2: mockVisualization2,
+      };
+
+      const datasourceMap = {
+        testDatasource: mockDatasource,
+        testDatasource2: mockDatasource2,
+      };
+
       const props = {
         ...getDefaultProps(),
-        visualizationMap: {
-          testVis: mockVisualization,
-          testVis2: mockVisualization2,
-        },
-        datasourceMap: {
-          testDatasource: mockDatasource,
-          testDatasource2: mockDatasource2,
-        },
-
+        visualizationMap,
+        datasourceMap,
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
+      instance = (
+        await mountWithProvider(<EditorFrame {...props} />, {
+          storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
+        })
+      ).instance;
 
       // necessary to flush elements to dom synchronously
       instance.update();

@@ -130,7 +130,7 @@ interface SourceActivity {
 
 export interface SyncEstimate {
   duration?: string;
-  nextStart: string;
+  nextStart?: string;
   lastRun?: string;
 }
 

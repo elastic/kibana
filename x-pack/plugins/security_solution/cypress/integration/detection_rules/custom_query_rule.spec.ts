@@ -133,7 +133,7 @@ describe('Custom detection rules creation', () => {
     });
   });
 
-  it('Creates and activates a new rule', function () {
+  it.skip('Creates and activates a new rule', function () {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();

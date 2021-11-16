@@ -25,6 +25,7 @@ import type {
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import { tGridActions } from '../../../../../timelines/public';
+import { ResolveTimelineConfig } from '../../components/open_timeline/types';
 export const {
   applyDeltaToColumnWidth,
   clearEventsDeleted,
@@ -91,6 +92,7 @@ export const updateTimeline = actionCreator<{
 export const addTimeline = actionCreator<{
   id: string;
   timeline: TimelineModel;
+  resolveTimelineConfig?: ResolveTimelineConfig;
   savedTimeline?: boolean;
 }>('ADD_TIMELINE');
 
@@ -191,10 +193,11 @@ export const setExcludedRowRendererIds = actionCreator<{
   excludedRowRendererIds: RowRendererId[];
 }>('SET_TIMELINE_EXCLUDED_ROW_RENDERER_IDS');
 
-export const updateIndexNames = actionCreator<{
+export const updateDataView = actionCreator<{
   id: string;
+  dataViewId: string;
   indexNames: string[];
-}>('UPDATE_INDEXES_NAME');
+}>('UPDATE_DATA_VIEW');
 
 export const setActiveTabTimeline = actionCreator<{
   id: string;

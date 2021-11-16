@@ -7,85 +7,23 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiIconTip, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { fittingFunctionDefinitions } from '../../../../common/expressions';
-import type { FittingFunction, ValueLabelConfig } from '../../../../common/expressions';
+import type { FittingFunction } from '../../../../common/expressions';
 
 export interface MissingValuesOptionProps {
-  valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
-  onValueLabelChange: (newMode: ValueLabelConfig) => void;
   onFittingFnChange: (newMode: FittingFunction) => void;
-  isValueLabelsEnabled?: boolean;
   isFittingEnabled?: boolean;
 }
 
-const valueLabelsOptions: Array<{
-  id: string;
-  value: 'hide' | 'inside' | 'outside';
-  label: string;
-  'data-test-subj': string;
-}> = [
-  {
-    id: `value_labels_hide`,
-    value: 'hide',
-    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.auto', {
-      defaultMessage: 'Hide',
-    }),
-    'data-test-subj': 'lnsXY_valueLabels_hide',
-  },
-  {
-    id: `value_labels_inside`,
-    value: 'inside',
-    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.inside', {
-      defaultMessage: 'Show',
-    }),
-    'data-test-subj': 'lnsXY_valueLabels_inside',
-  },
-];
-
 export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
-  onValueLabelChange,
   onFittingFnChange,
-  valueLabels,
   fittingFunction,
-  isValueLabelsEnabled = true,
   isFittingEnabled = true,
 }) => {
-  const valueLabelsVisibilityMode = valueLabels || 'hide';
-
   return (
     <>
-      {isValueLabelsEnabled && (
-        <EuiFormRow
-          display="columnCompressed"
-          label={
-            <span>
-              {i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-                defaultMessage: 'Labels',
-              })}
-            </span>
-          }
-        >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-              defaultMessage: 'Labels',
-            })}
-            data-test-subj="lnsValueLabelsDisplay"
-            name="valueLabelsDisplay"
-            buttonSize="compressed"
-            options={valueLabelsOptions}
-            idSelected={
-              valueLabelsOptions.find(({ value }) => value === valueLabelsVisibilityMode)!.id
-            }
-            onChange={(modeId) => {
-              const newMode = valueLabelsOptions.find(({ id }) => id === modeId)!.value;
-              onValueLabelChange(newMode);
-            }}
-          />
-        </EuiFormRow>
-      )}
       {isFittingEnabled && (
         <EuiFormRow
           display="columnCompressed"

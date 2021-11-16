@@ -12,9 +12,9 @@ import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { MonitoringConfig } from '../server';
+export type { MonitoringConfig } from '../server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { MLJobs } from '../server/lib/elasticsearch/get_ml_jobs';
+export type { MLJobs } from '../server/lib/elasticsearch/get_ml_jobs';
 
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;

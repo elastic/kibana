@@ -13,13 +13,10 @@ import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../helpers/setup_request';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
-import {
-  calculateThroughputWithInterval,
-  calculateThroughputWithRange,
-} from '../helpers/calculate_throughput';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
+import { calculateThroughputWithRange } from '../helpers/calculate_throughput';
 
 export async function getTransactionsPerMinute({
   setup,
@@ -43,9 +40,7 @@ export async function getTransactionsPerMinute({
     {
       apm: {
         events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
+          getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
       body: {
@@ -54,7 +49,7 @@ export async function getTransactionsPerMinute({
           bool: {
             filter: [
               ...rangeQuery(start, end),
-              ...getDocumentTypeFilterForAggregatedTransactions(
+              ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
             ],
@@ -71,6 +66,9 @@ export async function getTransactionsPerMinute({
                   field: '@timestamp',
                   fixed_interval: intervalString,
                   min_doc_count: 0,
+                },
+                aggs: {
+                  throughput: { rate: { unit: 'minute' as const } },
                 },
               },
             },
@@ -100,10 +98,7 @@ export async function getTransactionsPerMinute({
     timeseries:
       topTransactionTypeBucket?.timeseries.buckets.map((bucket) => ({
         x: bucket.key,
-        y: calculateThroughputWithInterval({
-          bucketSize,
-          value: bucket.doc_count,
-        }),
+        y: bucket.throughput.value,
       })) || [],
   };
 }

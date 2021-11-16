@@ -62,3 +62,6 @@ export interface CustomPaletteParams {
 export type RequiredPaletteParamTypes = Required<CustomPaletteParams>;
 
 export type LayerType = 'data' | 'referenceLine';
+
+// Shared by XY Chart and Heatmap as for now
+export type ValueLabelConfig = 'hide' | 'inside' | 'outside';

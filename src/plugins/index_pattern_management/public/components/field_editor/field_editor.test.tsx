@@ -292,4 +292,25 @@ describe('FieldEditor', () => {
     component.update();
     expect(component).toMatchSnapshot();
   });
+
+  it('should not allow field to have * in the name', async () => {
+    const testField = {
+      ...field,
+      name: 'test-field',
+    };
+    const component = createComponentWithContext<FieldEdiorProps>(
+      FieldEditor,
+      {
+        indexPattern,
+        spec: testField as unknown as IndexPatternField,
+        services,
+      },
+      mockContext
+    );
+
+    await new Promise((resolve) => process.nextTick(resolve));
+    (component.instance() as FieldEditor).onFieldChange('name', 'test*123');
+    component.update();
+    expect(component.html().includes('The field cannot have * in the name.')).toBe(true);
+  });
 });

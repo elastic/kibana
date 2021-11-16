@@ -41,7 +41,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
               <p>
                 <FormattedMessage
                   id="xpack.fleet.epm.pageSubtitle"
-                  defaultMessage="Choose an integration to start collecting and analyzing your data"
+                  defaultMessage="Choose an integration to start collecting and analyzing your data."
                 />
               </p>
             </EuiText>
