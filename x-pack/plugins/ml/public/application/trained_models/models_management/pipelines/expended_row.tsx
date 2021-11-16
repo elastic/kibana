@@ -62,7 +62,7 @@ export const ProcessorsStats: FC<ProcessorsStatsProps> = ({ stats }) => {
     {
       field: 'stats.time_in_millis',
       name: i18n.translate(
-        'xpack.ml.trainedModels.modelsList.pipelines.processorStats.typePerDocHeader',
+        'xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocHeader',
         {
           defaultMessage: 'Time per doc',
         }
@@ -77,7 +77,7 @@ export const ProcessorsStats: FC<ProcessorsStatsProps> = ({ stats }) => {
     {
       field: 'stats.current',
       name: i18n.translate(
-        'xpack.ml.trainedModels.modelsList.pipelines.processorStats.currenteHeader',
+        'xpack.ml.trainedModels.modelsList.pipelines.processorStats.currentHeader',
         {
           defaultMessage: 'Current',
         }
