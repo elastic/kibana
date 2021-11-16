@@ -11,12 +11,20 @@ import type { SuggestionRequest, VisualizationSuggestion } from '../types';
 import { layerTypes } from '../../common';
 import type { PieVisualizationState } from '../../common/expressions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
+import { isTreemapOrMosaicShape, isPartitionShape } from './render_helpers';
 
-function shouldReject({ table, keptLayerIds }: SuggestionRequest<PieVisualizationState>) {
+function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisualizationState>) {
+  // Histograms are not good for pi. But we should not reject them on switching between partition charts.
+  const shouldRejectDateHistogram =
+    state?.shape && isPartitionShape(state.shape)
+      ? false
+      : table.columns.some((col) => col.operation.scale === 'interval');
+
   return (
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
-    table.changeType === 'reorder'
+    table.changeType === 'reorder' ||
+    shouldRejectDateHistogram
   );
 }
 

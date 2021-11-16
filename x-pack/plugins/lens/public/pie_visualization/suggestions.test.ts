@@ -6,9 +6,9 @@
  */
 
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { DataType, SuggestionRequest } from '../types';
 import { suggestions } from './suggestions';
-import { PieVisualizationState } from '../../common/expressions';
+import type { DataType, SuggestionRequest } from '../types';
+import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
 import { layerTypes } from '../../common';
 
 describe('suggestions', () => {
@@ -84,6 +84,96 @@ describe('suggestions', () => {
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
+    });
+
+    it('should reject date operations', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'b',
+                operation: {
+                  label: 'Days',
+                  dataType: 'date' as DataType,
+                  isBucketed: true,
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'c',
+                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: undefined,
+          keptLayerIds: ['first'],
+        })
+      ).toHaveLength(0);
+    });
+
+    it('should reject histogram operations', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'b',
+                operation: {
+                  label: 'Durations',
+                  dataType: 'number' as DataType,
+                  isBucketed: true,
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'c',
+                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: undefined,
+          keptLayerIds: ['first'],
+        })
+      ).toHaveLength(0);
+    });
+
+    it('should not reject histogram operations in case of switching between partition charts', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'b',
+                operation: {
+                  label: 'Durations',
+                  dataType: 'number' as DataType,
+                  isBucketed: true,
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'c',
+                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            shape: 'mosaic',
+            layers: [{} as PieLayerState],
+          },
+          keptLayerIds: ['first'],
+        }).length
+      ).toBeGreaterThan(0);
     });
 
     it('should reject when there are too many buckets', () => {

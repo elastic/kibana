@@ -31,8 +31,8 @@ import type { PieExpressionProps } from '../../common/expressions';
 import {
   getSliceValue,
   getFilterContext,
-  isTreemapOrMosaic,
-  generateByDataColorPalette,
+  isTreemapOrMosaicShape,
+  byDataColorPaletteMap,
 } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
@@ -114,17 +114,12 @@ export function PieComponent(
     })
   ).length;
 
-  let byDataPalette: Record<string, string> | undefined;
+  let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
 
   const shouldUseByDataPalette = !syncColors && ['mosaic'].includes(shape) && bucketColumns[1]?.id;
 
   if (shouldUseByDataPalette) {
-    byDataPalette = generateByDataColorPalette(
-      firstTable,
-      bucketColumns[1].id,
-      paletteService,
-      palette
-    );
+    byDataPalette = byDataColorPaletteMap(firstTable, bucketColumns[1].id, paletteService, palette);
   }
 
   const layers: PartitionLayer[] = bucketColumns.map((col, layerIndex) => {
@@ -163,10 +158,10 @@ export function PieComponent(
           }
 
           if (byDataPalette && seriesLayers[1]) {
-            return byDataPalette[seriesLayers[1].name] || defaultColor;
+            return byDataPalette.getColor(seriesLayers[1].name) || defaultColor;
           }
 
-          if (isTreemapOrMosaic(shape)) {
+          if (isTreemapOrMosaicShape(shape)) {
             // Only highlight the innermost color of the treemap, as it accurately represents area
             if (layerIndex < bucketColumns.length - 1) {
               return defaultColor;
@@ -215,7 +210,7 @@ export function PieComponent(
     sectorLineWidth: 1.5,
     circlePadding: 4,
   };
-  if (isTreemapOrMosaic(shape)) {
+  if (isTreemapOrMosaicShape(shape)) {
     if (hideLabels || categoryDisplay === 'hide') {
       config.fillLabel = { textColor: 'rgba(0,0,0,0)' };
     }
@@ -321,7 +316,7 @@ export function PieComponent(
             (legendDisplay === 'show' ||
               (legendDisplay === 'default' &&
                 bucketColumns.length > 1 &&
-                !isTreemapOrMosaic(shape)))
+                !isTreemapOrMosaicShape(shape)))
           }
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}

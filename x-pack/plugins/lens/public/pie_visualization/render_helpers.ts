@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Datum, LayerValue } from '@elastic/charts';
-import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
-import { LensFilterEvent } from '../types';
-import { PieChartTypes, PieExpressionProps } from '../../common/expressions/pie_chart/types';
-import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import type { Datum, LayerValue } from '@elastic/charts';
+import type { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
+import type { LensFilterEvent } from '../types';
+import type { PieChartTypes, PieExpressionProps } from '../../common/expressions/pie_chart/types';
+import type { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 
 export function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
   const value = d[metricColumn.id];
@@ -38,26 +38,51 @@ export function getFilterContext(
   };
 }
 
-const extractUniqueTerms = (columnId: string, data: Datatable) => [
-  ...new Set(data.rows.map((item) => item[columnId])),
-];
+export const isPartitionShape = (shape: PieChartTypes | string) =>
+  ['donut', 'pie', 'treemap', 'mosaic'].includes(shape);
 
-export const isTreemapOrMosaic = (shape: PieChartTypes) => ['treemap', 'mosaic'].includes(shape);
+export const isTreemapOrMosaicShape = (shape: PieChartTypes | string) =>
+  ['treemap', 'mosaic'].includes(shape);
 
-export const generateByDataColorPalette = (
-  data: Datatable,
+export const byDataColorPaletteMap = (
+  dataTable: Datatable,
   columnId: string,
   paletteService: PaletteRegistry,
   { name, params }: PieExpressionProps['args']['palette']
 ) => {
-  const uniqTerms = extractUniqueTerms(columnId, data);
-  const colors = paletteService.get(name).getCategoricalColors(uniqTerms.length, params);
-
-  return uniqTerms.reduce<Record<string, string>>(
-    (acc, item, index) => ({
-      ...acc,
-      [item]: colors[index],
-    }),
-    {}
+  const colorMap = new Map<string, string | undefined>(
+    dataTable.rows.map((item) => [String(item[columnId]), undefined])
   );
+  let rankAtDepth = 0;
+
+  return {
+    getColor: (item: unknown) => {
+      const key = String(item);
+
+      if (colorMap.has(key)) {
+        let color = colorMap.get(key);
+
+        if (color) {
+          return color;
+        }
+        color =
+          paletteService.get(name).getCategoricalColor(
+            [
+              {
+                name: key,
+                totalSeriesAtDepth: colorMap.size,
+                rankAtDepth: rankAtDepth++,
+              },
+            ],
+            {
+              behindText: false,
+            },
+            params
+          ) || undefined;
+
+        colorMap.set(key, color);
+        return color;
+      }
+    },
+  };
 };
