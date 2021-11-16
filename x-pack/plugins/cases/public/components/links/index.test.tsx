@@ -7,11 +7,19 @@
 
 import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiText } from '@elastic/eui';
 
 import '../../common/mock/match_media';
-import { ConfigureCaseButton, ConfigureCaseButtonProps } from '.';
+import {
+  ConfigureCaseButton,
+  ConfigureCaseButtonProps,
+  CaseDetailsLink,
+  CaseDetailsLinkProps,
+} from '.';
 import { TestProviders } from '../../common/mock';
+import { useCaseViewNavigation } from '../../common/navigation/hooks';
 
 jest.mock('../../common/navigation/hooks');
 
@@ -96,5 +104,62 @@ describe('Configuration button', () => {
 
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();
+  });
+});
+
+describe('CaseDetailsLink', () => {
+  const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
+  const getCaseViewUrl = jest.fn().mockReturnValue('/cases/test');
+  const navigateToCaseView = jest.fn();
+
+  const props: CaseDetailsLinkProps = {
+    detailName: 'test detail name',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useCaseViewNavigationMock.mockReturnValue({ getCaseViewUrl, navigateToCaseView });
+  });
+
+  test('it renders', () => {
+    render(<CaseDetailsLink {...props} />);
+    expect(screen.getByText('test detail name')).toBeInTheDocument();
+  });
+
+  test('it renders the children instead of the detail name if provided', () => {
+    render(<CaseDetailsLink {...props}>{'children'}</CaseDetailsLink>);
+    expect(screen.queryByText('test detail name')).toBeFalsy();
+    expect(screen.getByText('children')).toBeInTheDocument();
+  });
+
+  test('it uses the detailName in the aria-label if the title is not provided', () => {
+    render(<CaseDetailsLink {...props} />);
+    expect(
+      screen.getByLabelText(`click to visit case with title ${props.detailName}`)
+    ).toBeInTheDocument();
+  });
+
+  test('it uses the title in the aria-label if provided', () => {
+    render(<CaseDetailsLink {...props} title={'my title'} />);
+    expect(screen.getByText('test detail name')).toBeInTheDocument();
+    expect(screen.getByLabelText(`click to visit case with title my title`)).toBeInTheDocument();
+  });
+
+  test('it calls navigateToCaseViewClick on click', () => {
+    render(<CaseDetailsLink {...props} subCaseId="sub-case-id" />);
+    userEvent.click(screen.getByText('test detail name'));
+    expect(navigateToCaseView).toHaveBeenCalledWith({
+      detailName: props.detailName,
+      subCaseId: 'sub-case-id',
+    });
+  });
+
+  test('it set the href correctly', () => {
+    render(<CaseDetailsLink {...props} subCaseId="sub-case-id" />);
+    expect(getCaseViewUrl).toHaveBeenCalledWith({
+      detailName: props.detailName,
+      subCaseId: 'sub-case-id',
+    });
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/cases/test');
   });
 });

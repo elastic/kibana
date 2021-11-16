@@ -32,12 +32,19 @@ export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
 
-const CaseDetailsLinkComponent: React.FC<{
+export interface CaseDetailsLinkProps {
   children?: React.ReactNode;
   detailName: string;
   subCaseId?: string;
   title?: string;
-}> = ({ children, detailName, subCaseId, title }) => {
+}
+
+const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
+  children,
+  detailName,
+  subCaseId,
+  title,
+}) => {
   const { getCaseViewUrl, navigateToCaseView } = useCaseViewNavigation();
   const navigateToCaseViewClick = useCallback(
     (ev) => {
