@@ -320,7 +320,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   useEffect(() => {
     onTotalItemsChange?.(totalCount);
-  }, [totalCount]);
+  }, [onTotalItemsChange, totalCount]);
 
   useEffect(() => {
     setIsQueryLoading(loading);
@@ -365,9 +365,11 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     if (selectedAlertIndex != null) {
       const item = nonDeletedEvents[selectedAlertIndex];
       const alert = parseAlert?.(item);
-      alert && setExpanded?.(alert);
+      if (alert) {
+        setExpanded?.(alert);
+      }
     }
-  }, [parseAlert, selectedAlertIndex]);
+  }, [parseAlert, selectedAlertIndex, nonDeletedEvents, setExpanded]);
 
   const timelineContext = {
     timelineId: STANDALONE_ID,

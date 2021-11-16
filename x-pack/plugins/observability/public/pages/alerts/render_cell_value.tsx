@@ -69,7 +69,7 @@ export const getRenderCellValue = ({
         setFlyoutAlert?.(alert);
         setSelectedAlertIndex?.(rowIndex);
       },
-      [setFlyoutAlert, setSelectedAlertIndex, data, rowIndex]
+      [setSelectedAlertIndex, rowIndex]
     );
 
     useEffect(() => {
