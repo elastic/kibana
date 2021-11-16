@@ -40,4 +40,5 @@ export enum API_URLS {
   SYNC_CONFIG = '/api/uptime/service/config/refresh',
   DELETE_CONFIG = '/api/uptime/service/config/delete',
   GET_IN_PROGRESS_JOBS = '/api/uptime/service/config/get',
+  INDEX_TEMPLATES = '/api/uptime/service/index_templates',
 }

@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { useState } from 'react';
-import { AddMonitorModal } from './add_monitor_modal';
+import { AddMonitorModal } from './monitor_config_flyout';
 import { MonitorSavedObject } from '../../../../../common/types';
 
 interface Props {

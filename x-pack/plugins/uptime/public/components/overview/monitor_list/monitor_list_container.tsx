@@ -16,7 +16,7 @@ import { getConnectorsAction, getMonitorAlertsAction } from '../../../state/aler
 import { useMappingCheck } from '../../../hooks/use_mapping_check';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { uptimeMonitorType } from './actions/add_monitor_modal';
+import { uptimeMonitorType } from './actions/monitor_config_flyout';
 import { useFetcher } from '../../../../../observability/public';
 
 export interface MonitorListProps {

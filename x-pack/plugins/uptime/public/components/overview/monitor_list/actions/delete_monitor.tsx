@@ -9,7 +9,7 @@ import * as React from 'react';
 import { EuiButtonIcon, EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
 import { useState } from 'react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { uptimeMonitorType } from './add_monitor_modal';
+import { uptimeMonitorType } from './monitor_config_flyout';
 import { useUptimeRefreshContext } from '../../../../contexts/uptime_refresh_context';
 import { apiService } from '../../../../state/api/utils';
 import { API_URLS } from '../../../../../common/constants';

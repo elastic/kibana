@@ -37,7 +37,17 @@ export const generateAPIKey = async ({
 
     const apiKey = await security?.authc.apiKeys?.grantAsInternalUser(request, {
       name: 'synthetics-api-key',
-      role_descriptors: {},
+      role_descriptors: {
+        synthetics_writer: {
+          cluster: ['monitor', 'read_ilm', 'read_pipeline'],
+          index: [
+            {
+              names: ['synthetics-*'],
+              privileges: ['view_index_metadata', 'create_doc'],
+            },
+          ],
+        },
+      },
     });
 
     if (apiKey) {
