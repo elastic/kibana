@@ -14,6 +14,7 @@ import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
+  mockSourcererState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../../common/mock';
@@ -29,41 +30,59 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-describe('pick_events', () => {
+describe('Pick Events/Timeline Sourcerer', () => {
   const defaultProps = {
     eventType: 'all' as TimelineEventsType,
     onChangeEventTypeAndIndexesName: jest.fn(),
   };
   const initialPatterns = [
-    ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns,
-    mockGlobalState.sourcerer.signalIndexName,
+    ...mockSourcererState.defaultDataView.patternList.filter(
+      (p) => p !== mockSourcererState.signalIndexName
+    ),
+    mockSourcererState.signalIndexName,
   ];
   const { storage } = createSecuritySolutionStorageMock();
+
+  // const state = {
+  //   ...mockGlobalState,
+  //   sourcerer: {
+  //     ...mockGlobalState.sourcerer,
+  //     kibanaIndexPatterns: [
+  //       { id: '1234', title: 'auditbeat-*' },
+  //       { id: '9100', title: 'filebeat-*' },
+  //       { id: '9100', title: 'auditbeat-*,filebeat-*' },
+  //       { id: '5678', title: 'auditbeat-*,.siem-signals-default' },
+  //     ],
+  //     configIndexPatterns:
+  //       mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns,
+  //     signalIndexName: mockGlobalState.sourcerer.signalIndexName,
+  //     sourcererScopes: {
+  //       ...mockGlobalState.sourcerer.sourcererScopes,
+  //       [SourcererScopeName.timeline]: {
+  //         ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+  //         loading: false,
+  //         selectedPatterns: ['filebeat-*'],
+  //       },
+  //     },
+  //   },
+  // };
+  // const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const state = {
     ...mockGlobalState,
     sourcerer: {
       ...mockGlobalState.sourcerer,
-      kibanaIndexPatterns: [
-        { id: '1234', title: 'auditbeat-*' },
-        { id: '9100', title: 'filebeat-*' },
-        { id: '9100', title: 'auditbeat-*,filebeat-*' },
-        { id: '5678', title: 'auditbeat-*,.siem-signals-default' },
-      ],
-      configIndexPatterns:
-        mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns,
-      signalIndexName: mockGlobalState.sourcerer.signalIndexName,
       sourcererScopes: {
         ...mockGlobalState.sourcerer.sourcererScopes,
         [SourcererScopeName.timeline]: {
           ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
           loading: false,
+          selectedDataViewId: mockGlobalState.sourcerer.defaultDataView.id,
           selectedPatterns: ['filebeat-*'],
         },
       },
     },
   };
   const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
   const mockTooltip = ({
     tooltipContent,
     children,
@@ -94,6 +113,57 @@ describe('pick_events', () => {
     expect(wrapper.getByTestId('timeline-sourcerer').textContent).toEqual(
       initialPatterns.sort().join('')
     );
+    fireEvent.click(wrapper.getByTestId(`sourcerer-accordion`));
+    fireEvent.click(wrapper.getByTestId('comboBoxToggleListButton'));
+    const optionNodes = wrapper.getAllByTestId('sourcerer-option');
+    expect(optionNodes.length).toBe(1);
+  });
+  it('Removes duplicate options from options list', () => {
+    const store2 = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          defaultDataView: {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            id: '1234',
+            title: 'filebeat-*,auditbeat-*,auditbeat-*,auditbeat-*,auditbeat-*',
+            patternList: ['filebeat-*', 'auditbeat-*'],
+          },
+          kibanaDataViews: [
+            {
+              ...mockGlobalState.sourcerer.defaultDataView,
+              id: '1234',
+              title: 'filebeat-*,auditbeat-*,auditbeat-*,auditbeat-*,auditbeat-*',
+              patternList: ['filebeat-*', 'auditbeat-*'],
+            },
+          ],
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            [SourcererScopeName.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+              loading: false,
+              selectedDataViewId: '1234',
+              selectedPatterns: ['filebeat-*'],
+            },
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    const wrapper = render(
+      <TestProviders store={store2}>
+        <PickEventType {...defaultProps} />
+      </TestProviders>
+    );
+    fireEvent.click(wrapper.getByTestId(`sourcerer-timeline-trigger`));
+    fireEvent.click(wrapper.getByTestId(`sourcerer-accordion`));
+    fireEvent.click(wrapper.getByTestId(`comboBoxToggleListButton`));
+    expect(
+      wrapper.getByTestId('comboBoxOptionsList timeline-sourcerer-optionsList').textContent
+    ).toEqual('auditbeat-*');
   });
 
   it('renders tooltip', () => {
@@ -129,6 +199,7 @@ describe('pick_events', () => {
     );
     fireEvent.click(wrapper.getByTestId('sourcerer-timeline-trigger'));
     fireEvent.click(wrapper.getByTestId('comboBoxToggleListButton'));
+    fireEvent.click(wrapper.getByTestId('sourcerer-accordion'));
     const optionNodes = wrapper.getAllByTestId('sourcerer-option');
     expect(optionNodes.length).toBe(9);
   });
@@ -145,8 +216,5 @@ describe('pick_events', () => {
     expect(wrapper.getByTestId('timeline-sourcerer').textContent).toEqual(
       initialPatterns.sort().join('')
     );
-    fireEvent.click(wrapper.getByTestId('comboBoxToggleListButton'));
-    const optionNodes = wrapper.getAllByTestId('sourcerer-option');
-    expect(optionNodes.length).toBe(2);
   });
 });

@@ -293,8 +293,6 @@ export class DataRecognizer {
       index,
       size,
       body: searchBody,
-      // Ignored indices that are frozen
-      ignore_throttled: true,
     });
 
     // @ts-expect-error incorrect search response type

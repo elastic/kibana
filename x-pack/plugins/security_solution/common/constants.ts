@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ENABLE_ITOM } from '../../actions/server/constants/connectors';
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
 
+/**
+ * as const
+ *
+ * The const assertion ensures that type widening does not occur
+ * https://mariusschulz.com/blog/literal-type-widening-in-typescript
+ * Please follow this convention when adding to this file
+ */
+
 export const APP_ID = 'securitySolution' as const;
-export const APP_UI_ID = 'securitySolutionUI';
+export const APP_UI_ID = 'securitySolutionUI' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const APP_NAME = 'Security' as const;
@@ -26,6 +32,8 @@ export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
+export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
+export const DEFAULT_TIME_FIELD = '@timestamp' as const;
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults' as const;
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults' as const;
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults' as const;
@@ -51,7 +59,6 @@ export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges' as const
 export const DEFAULT_TRANSFORMS = 'securitySolution:transforms' as const;
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled' as const;
 export const GLOBAL_HEADER_HEIGHT = 96 as const; // px
-export const GLOBAL_HEADER_HEIGHT_WITH_GLOBAL_BANNER = 128 as const; // px
 export const FILTERS_GLOBAL_HEIGHT = 109 as const; // px
 export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled' as const;
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51' as const;
@@ -268,6 +275,7 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
 
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
+export const SOURCERER_API_URL = '/api/sourcerer' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -316,6 +324,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.resilient',
   '.servicenow',
   '.servicenow-sir',
+  '.servicenow-itom',
   '.slack',
   '.swimlane',
   '.teams',
@@ -324,11 +333,6 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
 
 if (ENABLE_CASE_CONNECTOR) {
   NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
-}
-
-// TODO: Remove when ITOM is ready
-if (ENABLE_ITOM) {
-  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.servicenow-itom');
 }
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
@@ -355,7 +359,7 @@ export const ELASTIC_NAME = 'estc' as const;
 
 export const METADATA_TRANSFORM_STATS_URL = `/api/transform/transforms/${METADATA_TRANSFORMS_PATTERN}/_stats`;
 
-export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_latest_';
+export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_latest_' as const;
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',

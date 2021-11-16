@@ -206,6 +206,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    it('should be able to mute the rule with non "alerts" consumer from a non editable context', async () => {
+      const createdAlert = await createAlert({ consumer: 'siem' });
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      await testSubjects.click('collapsedItemActions');
+
+      await testSubjects.click('muteButton');
+
+      await retry.tryForTime(30000, async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+        const muteBadge = await testSubjects.find('mutedActionsBadge');
+        expect(await muteBadge.isDisplayed()).to.eql(true);
+      });
+    });
+
     it('should unmute single alert', async () => {
       const createdAlert = await createAlert();
       await muteAlert(createdAlert.id);

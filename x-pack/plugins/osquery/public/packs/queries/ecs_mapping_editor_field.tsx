@@ -6,7 +6,18 @@
  */
 
 import { produce } from 'immer';
-import { each, isEmpty, find, orderBy, sortedUniqBy, isArray, map, reduce, get } from 'lodash';
+import {
+  castArray,
+  each,
+  isEmpty,
+  find,
+  orderBy,
+  sortedUniqBy,
+  isArray,
+  map,
+  reduce,
+  get,
+} from 'lodash';
 import React, {
   forwardRef,
   useCallback,
@@ -81,30 +92,24 @@ const typeMap = {
 };
 
 const StyledEuiSuperSelect = styled(EuiSuperSelect)`
-  &.euiFormControlLayout__prepend {
-    padding-left: 8px;
-    padding-right: 24px;
-    box-shadow: none;
+  min-width: 70px;
+  border-radius: 6px 0 0 6px;
 
-    .euiIcon {
-      padding: 0;
-      width: 18px;
-      background: none;
-    }
+  .euiIcon {
+    padding: 0;
+    width: 18px;
+    background: none;
   }
 `;
 
 // @ts-expect-error update types
 const ResultComboBox = styled(EuiComboBox)`
-  &.euiComboBox--prepended .euiSuperSelect {
-    border-right: 1px solid ${(props) => props.theme.eui.euiBorderColor};
+  &.euiComboBox {
+    position: relative;
+    left: -1px;
 
-    .euiFormControlLayout__childrenWrapper {
-      border-radius: 6px 0 0 6px;
-
-      .euiFormControlLayoutIcons--right {
-        right: 6px;
-      }
+    .euiComboBox__inputWrap {
+      border-radius: 0 6px 6px 0;
     }
   }
 `;
@@ -311,9 +316,11 @@ const OSQUERY_COLUMN_VALUE_TYPE_OPTIONS = [
   },
 ];
 
+const EMPTY_ARRAY: EuiComboBoxOptionOption[] = [];
+
 interface OsqueryColumnFieldProps {
   resultType: FieldHook<string>;
-  resultValue: FieldHook<string>;
+  resultValue: FieldHook<string | string[]>;
   euiFieldProps: EuiComboBoxProps<OsquerySchemaOption>;
   idAria?: string;
 }
@@ -324,6 +331,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   euiFieldProps = {},
   idAria,
 }) => {
+  const inputRef = useRef<HTMLInputElement>();
   const { setValue } = resultValue;
   const { setValue: setType } = resultType;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(resultValue);
@@ -367,16 +375,27 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     (newType) => {
       if (newType !== resultType.value) {
         setType(newType);
+        setValue(newType === 'value' && euiFieldProps.singleSelection === false ? [] : '');
       }
     },
-    [setType, resultType.value]
+    [resultType.value, setType, setValue, euiFieldProps.singleSelection]
   );
 
   const handleCreateOption = useCallback(
-    (newOption) => {
-      setValue(newOption);
+    (newOption: string) => {
+      if (euiFieldProps.singleSelection === false) {
+        setValue([newOption]);
+        if (resultValue.value.length) {
+          setValue([...castArray(resultValue.value), newOption]);
+        } else {
+          setValue([newOption]);
+        }
+        inputRef.current?.blur();
+      } else {
+        setValue(newOption);
+      }
     },
-    [setValue]
+    [euiFieldProps.singleSelection, resultValue.value, setValue]
   );
 
   const Prepend = useMemo(
@@ -400,6 +419,11 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     setSelected(() => {
       if (!resultValue.value.length) return [];
 
+      // Static array values
+      if (isArray(resultValue.value)) {
+        return resultValue.value.map((value) => ({ label: value }));
+      }
+
       const selectedOption = find(euiFieldProps?.options, ['label', resultValue.value]);
 
       return selectedOption ? [selectedOption] : [{ label: resultValue.value }];
@@ -416,18 +440,26 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       describedByIds={describedByIds}
       isDisabled={euiFieldProps.isDisabled}
     >
-      <ResultComboBox
-        fullWidth
-        prepend={Prepend}
-        singleSelection={singleSelection}
-        selectedOptions={selectedOptions}
-        onChange={handleChange}
-        onCreateOption={handleCreateOption}
-        renderOption={renderOsqueryOption}
-        rowHeight={32}
-        isClearable
-        {...euiFieldProps}
-      />
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>{Prepend}</EuiFlexItem>
+        <EuiFlexItem>
+          <ResultComboBox
+            // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+            inputRef={(ref: HTMLInputElement) => {
+              inputRef.current = ref;
+            }}
+            fullWidth
+            selectedOptions={selectedOptions}
+            onChange={handleChange}
+            onCreateOption={handleCreateOption}
+            renderOption={renderOsqueryOption}
+            rowHeight={32}
+            isClearable
+            {...euiFieldProps}
+            options={(resultType.value === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 };
@@ -497,7 +529,7 @@ const getOsqueryResultFieldValidator =
   ) => {
     const fieldRequiredError = fieldValidators.emptyField(
       i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage', {
-        defaultMessage: 'Osquery result is required.',
+        defaultMessage: 'Value is required.',
       })
     )(args);
 
@@ -551,6 +583,7 @@ interface ECSMappingEditorFormRef {
 export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappingEditorFormProps>(
   ({ isDisabled, osquerySchemaOptions, defaultValue, onAdd, onChange, onDelete }, ref) => {
     const editForm = !!defaultValue;
+    const multipleValuesField = useRef(false);
     const currentFormData = useRef(defaultValue);
     const formSchema = {
       key: {
@@ -648,6 +681,8 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                 // @ts-expect-error update types
                 options: osquerySchemaOptions,
                 isDisabled,
+                // @ts-expect-error update types
+                singleSelection: !multipleValuesField.current ? { asPlainText: true } : false,
               }}
             />
           )}
@@ -687,16 +722,12 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
     useEffect(() => {
       if (!deepEqual(formData, currentFormData.current)) {
         currentFormData.current = formData;
+        const ecsOption = find(ECSSchemaOptions, ['label', formData.key]);
+        multipleValuesField.current =
+          ecsOption?.value?.normalization === 'array' && formData.result.type === 'value';
         handleSubmit();
       }
     }, [handleSubmit, formData, onAdd]);
-
-    // useEffect(() => {
-    //   if (defaultValue) {
-    //     validate();
-    //     __validateFields(['result.value']);
-    //   }
-    // }, [defaultValue, osquerySchemaOptions, validate, __validateFields]);
 
     return (
       <Form form={form}>

@@ -21,17 +21,19 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { State } from '../../../../common/store';
+import { sourcererSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { TimelineEventsType } from '../../../../../common/types/timeline';
-import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
+import { TimelineEventsType } from '../../../../../common';
 import * as i18n from './translations';
+import { getScopePatternListSelection } from '../../../../common/store/sourcerer/helpers';
+import { SIEM_DATA_VIEW_LABEL } from '../../../../common/components/sourcerer/translations';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -89,7 +91,7 @@ const PickEventContainer = styled.div`
   }
 `;
 
-const getEventTypeOptions = (isCustomDisabled: boolean = true) => [
+const getEventTypeOptions = (isCustomDisabled: boolean = true, isDefaultPattern: boolean) => [
   {
     id: 'all',
     label: (
@@ -101,10 +103,12 @@ const getEventTypeOptions = (isCustomDisabled: boolean = true) => [
   {
     id: 'raw',
     label: <EuiHealth color="subdued"> {i18n.RAW_EVENT}</EuiHealth>,
+    disabled: !isDefaultPattern,
   },
   {
     id: 'alert',
     label: <EuiHealth color="warning"> {i18n.DETECTION_ALERTS_EVENT}</EuiHealth>,
+    disabled: !isDefaultPattern,
   },
   {
     id: 'custom',
@@ -115,9 +119,14 @@ const getEventTypeOptions = (isCustomDisabled: boolean = true) => [
 
 interface PickEventTypeProps {
   eventType: TimelineEventsType;
-  onChangeEventTypeAndIndexesName: (value: TimelineEventsType, indexNames: string[]) => void;
+  onChangeEventTypeAndIndexesName: (
+    value: TimelineEventsType,
+    indexNames: string[],
+    dataViewId: string
+  ) => void;
 }
 
+// AKA TimelineSourcerer
 const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   eventType = 'all',
   onChangeEventTypeAndIndexesName,
@@ -125,81 +134,63 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const [isPopoverOpen, setPopover] = useState(false);
   const [showAdvanceSettings, setAdvanceSettings] = useState(eventType === 'custom');
   const [filterEventType, setFilterEventType] = useState<TimelineEventsType>(eventType);
-  const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { configIndexPatterns, kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
-    State,
-    SourcererScopeSelector
-  >((state) => sourcererScopeSelector(state, SourcererScopeName.timeline), deepEqual);
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
+  const {
+    defaultDataView,
+    kibanaDataViews,
+    signalIndexName,
+    sourcererScope: { loading, selectedPatterns, selectedDataViewId },
+  }: sourcererSelectors.SourcererScopeSelector = useDeepEqualSelector((state) =>
+    sourcererScopeSelector(state, SourcererScopeName.timeline)
+  );
+
+  const [dataViewId, setDataViewId] = useState<string>(selectedDataViewId ?? '');
+  const { patternList, selectablePatterns } = useMemo(() => {
+    const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
+    return theDataView != null
+      ? {
+          patternList: theDataView.title
+            .split(',')
+            // remove duplicates patterns from selector
+            .filter((pattern, i, self) => self.indexOf(pattern) === i),
+          selectablePatterns: theDataView.patternList,
+        }
+      : { patternList: [], selectablePatterns: [] };
+  }, [kibanaDataViews, dataViewId]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    sourcererScope.selectedPatterns.map((indexSelected) => ({
-      label: indexSelected,
-      value: indexSelected,
+    selectedPatterns.map((indexName) => ({
+      label: indexName,
+      value: indexName,
     }))
   );
-
-  const indexesPatternOptions = useMemo(
+  const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
+  const selectableOptions = useMemo(
     () =>
-      [
-        ...configIndexPatterns,
-        ...kibanaIndexPatterns.map((kip) => kip.title),
-        signalIndexName,
-      ].reduce<Array<EuiComboBoxOptionOption<string>>>((acc, index) => {
-        if (index != null && !acc.some((o) => o.label === index)) {
-          return [...acc, { label: index, value: index }];
-        }
-        return acc;
-      }, []),
-    [configIndexPatterns, kibanaIndexPatterns, signalIndexName]
-  );
-
-  const renderOption = useCallback(
-    ({ value }) => {
-      if (kibanaIndexPatterns.some((kip) => kip.title === value)) {
-        return (
-          <span data-test-subj="sourcerer-option">
-            <EuiIcon type="logoKibana" size="s" /> {value}
-          </span>
-        );
-      }
-      return <span data-test-subj="sourcerer-option">{value}</span>;
-    },
-    [kibanaIndexPatterns]
-  );
-
-  const onChangeCombo = useCallback(
-    (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const localSelectedPatterns = newSelectedOptions.map((nso) => nso.label);
-      if (
-        localSelectedPatterns.sort().join() ===
-        [...configIndexPatterns, signalIndexName].sort().join()
-      ) {
-        setFilterEventType('all');
-      } else if (localSelectedPatterns.sort().join() === configIndexPatterns.sort().join()) {
-        setFilterEventType('raw');
-      } else if (localSelectedPatterns.sort().join() === signalIndexName) {
-        setFilterEventType('alert');
-      } else {
-        setFilterEventType('custom');
-      }
-
-      setSelectedOptions(newSelectedOptions);
-    },
-    [configIndexPatterns, signalIndexName]
+      patternList.map((indexName) => ({
+        label: indexName,
+        value: indexName,
+        'data-test-subj': 'sourcerer-option',
+        disabled: !selectablePatterns.includes(indexName),
+      })),
+    [selectablePatterns, patternList]
   );
 
   const onChangeFilter = useCallback(
     (filter) => {
       setFilterEventType(filter);
-      if (filter === 'all') {
+      if (filter === 'all' || filter === 'kibana') {
         setSelectedOptions(
-          [...configIndexPatterns.sort(), signalIndexName ?? ''].map((indexSelected) => ({
+          selectablePatterns.map((indexSelected) => ({
             label: indexSelected,
             value: indexSelected,
           }))
         );
       } else if (filter === 'raw') {
         setSelectedOptions(
-          configIndexPatterns.sort().map((indexSelected) => ({
+          (signalIndexName == null
+            ? selectablePatterns
+            : selectablePatterns.filter((index) => index !== signalIndexName)
+          ).map((indexSelected) => ({
             label: indexSelected,
             value: indexSelected,
           }))
@@ -211,16 +202,56 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             value: signalIndexName ?? '',
           },
         ]);
-      } else if (filter === 'kibana') {
-        setSelectedOptions(
-          kibanaIndexPatterns.map((kip) => ({
-            label: kip.title,
-            value: kip.title,
-          }))
-        );
       }
     },
-    [configIndexPatterns, kibanaIndexPatterns, signalIndexName]
+    [selectablePatterns, signalIndexName]
+  );
+
+  const onChangeCombo = useCallback(
+    (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      const localSelectedPatterns = newSelectedOptions
+        .map((nso) => nso.label)
+        .sort()
+        .join();
+      if (localSelectedPatterns === selectablePatterns.sort().join()) {
+        setFilterEventType('all');
+      } else if (
+        dataViewId === defaultDataView.id &&
+        localSelectedPatterns ===
+          selectablePatterns
+            .filter((index) => index !== signalIndexName)
+            .sort()
+            .join()
+      ) {
+        setFilterEventType('raw');
+      } else if (dataViewId === defaultDataView.id && localSelectedPatterns === signalIndexName) {
+        setFilterEventType('alert');
+      } else {
+        setFilterEventType('custom');
+      }
+
+      setSelectedOptions(newSelectedOptions);
+    },
+    [defaultDataView.id, dataViewId, selectablePatterns, signalIndexName]
+  );
+
+  const onChangeSuper = useCallback(
+    (newSelectedOption) => {
+      setFilterEventType('all');
+      setDataViewId(newSelectedOption);
+      setSelectedOptions(
+        getScopePatternListSelection(
+          kibanaDataViews.find((dataView) => dataView.id === newSelectedOption),
+          SourcererScopeName.timeline,
+          signalIndexName,
+          newSelectedOption === defaultDataView.id
+        ).map((indexSelected: string) => ({
+          label: indexSelected,
+          value: indexSelected,
+        }))
+      );
+    },
+    [defaultDataView.id, kibanaDataViews, signalIndexName]
   );
 
   const togglePopover = useCallback(
@@ -233,66 +264,69 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const handleSaveIndices = useCallback(() => {
     onChangeEventTypeAndIndexesName(
       filterEventType,
-      selectedOptions.map((so) => so.label)
+      selectedOptions.map((so) => so.label),
+      dataViewId
     );
     setPopover(false);
-  }, [filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
+  }, [dataViewId, filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
 
   const resetDataSources = useCallback(() => {
-    onChangeFilter('all');
-  }, [onChangeFilter]);
+    setDataViewId(defaultDataView.id);
+    setSelectedOptions(
+      getScopePatternListSelection(
+        defaultDataView,
+        SourcererScopeName.timeline,
+        signalIndexName,
+        true
+      ).map((indexSelected: string) => ({
+        label: indexSelected,
+        value: indexSelected,
+      }))
+    );
+    setFilterEventType(eventType);
+  }, [defaultDataView, eventType, signalIndexName]);
 
-  const comboBox = useMemo(
-    () => (
-      <EuiComboBox
-        data-test-subj="timeline-sourcerer"
-        fullWidth
-        onChange={onChangeCombo}
-        options={indexesPatternOptions}
-        placeholder={i18n.PICK_INDEX_PATTERNS}
-        renderOption={renderOption}
-        selectedOptions={selectedOptions}
-      />
-    ),
-    [onChangeCombo, indexesPatternOptions, renderOption, selectedOptions]
+  const dataViewSelectOptions = useMemo(
+    () =>
+      kibanaDataViews.map(({ title, id }) => ({
+        inputDisplay:
+          id === defaultDataView.id ? (
+            <span data-test-subj="dataView-option-super">
+              <EuiIcon type="logoSecurity" size="s" /> {SIEM_DATA_VIEW_LABEL}
+            </span>
+          ) : (
+            <span data-test-subj="dataView-option-super">
+              <EuiIcon type="logoKibana" size="s" /> {title}
+            </span>
+          ),
+        value: id,
+      })),
+    [defaultDataView.id, kibanaDataViews]
   );
 
   const filterOptions = useMemo(
-    () => getEventTypeOptions(filterEventType !== 'custom'),
-    [filterEventType]
-  );
-
-  const filter = useMemo(
-    () => (
-      <Filter
-        data-test-subj="timeline-sourcerer-radio"
-        options={filterOptions}
-        idSelected={filterEventType}
-        onChange={onChangeFilter}
-        name={i18n.SELECT_INDEX_PATTERNS}
-      />
-    ),
-    [filterEventType, filterOptions, onChangeFilter]
+    () => getEventTypeOptions(filterEventType !== 'custom', dataViewId === defaultDataView.id),
+    [defaultDataView.id, filterEventType, dataViewId]
   );
 
   const button = useMemo(() => {
-    const options = getEventTypeOptions();
+    const options = getEventTypeOptions(true, dataViewId === defaultDataView.id);
     return (
       <MyEuiButton
         data-test-subj="sourcerer-timeline-trigger"
         iconType="arrowDown"
         iconSide="right"
-        isLoading={sourcererScope.loading}
+        isLoading={loading}
         onClick={togglePopover}
       >
         {options.find((opt) => opt.id === eventType)?.label}
       </MyEuiButton>
     );
-  }, [eventType, sourcererScope.loading, togglePopover]);
+  }, [defaultDataView.id, eventType, dataViewId, loading, togglePopover]);
 
   const tooltipContent = useMemo(
-    () => (isPopoverOpen ? null : sourcererScope.selectedPatterns.sort().join(', ')),
-    [isPopoverOpen, sourcererScope.selectedPatterns]
+    () => (isPopoverOpen ? null : selectedPatterns.sort().join(', ')),
+    [isPopoverOpen, selectedPatterns]
   );
 
   const buttonWithTooptip = useMemo(() => {
@@ -321,7 +355,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   );
 
   useEffect(() => {
-    const newSelectedOptions = sourcererScope.selectedPatterns.map((indexSelected) => ({
+    const newSelectedOptions = selectedPatterns.map((indexSelected) => ({
       label: indexSelected,
       value: indexSelected,
     }));
@@ -331,7 +365,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       }
       return prevSelectedOptions;
     });
-  }, [sourcererScope.selectedPatterns]);
+  }, [selectedPatterns]);
 
   useEffect(() => {
     setFilterEventType((prevFilter) => (prevFilter !== eventType ? eventType : prevFilter));
@@ -352,9 +386,16 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             <>{i18n.SELECT_INDEX_PATTERNS}</>
           </EuiPopoverTitle>
           <EuiSpacer size="s" />
-          {filter}
+          <Filter
+            data-test-subj="timeline-sourcerer-radio"
+            options={filterOptions}
+            idSelected={filterEventType}
+            onChange={onChangeFilter}
+            name={i18n.SELECT_INDEX_PATTERNS}
+          />
           <EuiSpacer size="m" />
           <EuiAccordion
+            data-test-subj="sourcerer-accordion"
             id="accordion1"
             forceState={showAdvanceSettings ? 'open' : 'closed'}
             buttonContent={ButtonContent}
@@ -362,7 +403,23 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           >
             <>
               <EuiSpacer size="s" />
-              {comboBox}
+              <EuiSuperSelect
+                data-test-subj="sourcerer-select"
+                placeholder={i18n.PICK_INDEX_PATTERNS}
+                fullWidth
+                options={dataViewSelectOptions}
+                valueOfSelected={dataViewId}
+                onChange={onChangeSuper}
+              />
+              <EuiSpacer size="xs" />
+              <EuiComboBox
+                data-test-subj="timeline-sourcerer"
+                fullWidth
+                onChange={onChangeCombo}
+                options={selectableOptions}
+                placeholder={i18n.PICK_INDEX_PATTERNS}
+                selectedOptions={selectedOptions}
+              />
             </>
           </EuiAccordion>
           {!showAdvanceSettings && (
@@ -389,7 +446,8 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={handleSaveIndices}
-                data-test-subj="add-index"
+                data-test-subj="sourcerer-save"
+                disabled={isSavingDisabled}
                 fill
                 fullWidth
                 size="s"

@@ -51,7 +51,7 @@ import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
@@ -190,9 +190,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     docValueFields,
     loading: loadingSourcerer,
     indexPattern,
+    runtimeMappings,
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.timeline);
-
+  } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
@@ -282,6 +282,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       language: kqlQuery.language,
       limit: itemsPerPage,
       filterQuery: combinedQueries?.filterQuery,
+      runtimeMappings,
       startDate: start,
       skip: !canQueryTimeline,
       sort: timelineQuerySortField,
@@ -429,6 +430,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
+                runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.query}
                 timelineId={timelineId}
               />
@@ -502,13 +504,24 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateEventTypeAndIndexesName: (newEventType: TimelineEventsType, newIndexNames: string[]) => {
+  updateEventTypeAndIndexesName: (
+    newEventType: TimelineEventsType,
+    newIndexNames: string[],
+    newDataViewId: string
+  ) => {
     dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
-    dispatch(timelineActions.updateIndexNames({ id: timelineId, indexNames: newIndexNames }));
     dispatch(
-      sourcererActions.setSelectedIndexPatterns({
+      timelineActions.updateDataView({
+        dataViewId: newDataViewId,
+        id: timelineId,
+        indexNames: newIndexNames,
+      })
+    );
+    dispatch(
+      sourcererActions.setSelectedDataView({
         id: SourcererScopeName.timeline,
         selectedPatterns: newIndexNames,
+        selectedDataViewId: newDataViewId,
       })
     );
   },
