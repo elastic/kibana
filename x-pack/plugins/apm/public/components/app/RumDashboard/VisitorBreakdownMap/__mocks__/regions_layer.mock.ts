@@ -79,7 +79,7 @@ export const mockLayerList = [
     maxZoom: 24,
     alpha: 0.75,
     visible: true,
-    type: 'VECTOR',
+    type: 'GEOJSON_VECTOR',
   },
   {
     joins: [
@@ -148,6 +148,6 @@ export const mockLayerList = [
     maxZoom: 24,
     alpha: 0.75,
     visible: true,
-    type: 'VECTOR',
+    type: 'GEOJSON_VECTOR',
   },
 ];

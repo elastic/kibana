@@ -90,7 +90,7 @@ export default function ({ getService }) {
         }
         expect(panels.length).to.be(1);
         expect(panels[0].type).to.be('map');
-        expect(panels[0].version).to.be('8.0.0');
+        expect(panels[0].version).to.be('8.1.0');
       });
     });
   });
