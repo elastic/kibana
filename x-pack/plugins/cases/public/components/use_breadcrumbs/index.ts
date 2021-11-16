@@ -24,7 +24,7 @@ const casesBreadcrumbTitle: Record<ICasesDeepLinkId, string> = {
   }),
 };
 
-function getTitleFromBreadCrumbs(breadcrumbs: ChromeBreadcrumb[]) {
+function getTitleFromBreadcrumbs(breadcrumbs: ChromeBreadcrumb[]): string[] {
   return breadcrumbs.map(({ text }) => text?.toString() ?? '').reverse();
 }
 
@@ -35,22 +35,24 @@ const useApplyBreadcrumbs = () => {
   } = useKibana().services;
   return useCallback(
     (breadcrumbs: ChromeBreadcrumb[]) => {
-      docTitle.change(getTitleFromBreadCrumbs(breadcrumbs));
+      docTitle.change(getTitleFromBreadcrumbs(breadcrumbs));
       setBreadcrumbs(
-        breadcrumbs.map((breadcrumb) => ({
-          ...breadcrumb,
-          ...(breadcrumb.href && !breadcrumb.onClick
-            ? {
-                onClick: (event) => {
-                  if (event) {
-                    event.preventDefault();
-                  }
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  navigateToUrl(breadcrumb.href!);
-                },
-              }
-            : {}),
-        }))
+        breadcrumbs.map((breadcrumb) => {
+          const { href, onClick } = breadcrumb;
+          return {
+            ...breadcrumb,
+            ...(href && !onClick
+              ? {
+                  onClick: (event) => {
+                    if (event) {
+                      event.preventDefault();
+                    }
+                    navigateToUrl(href);
+                  },
+                }
+              : {}),
+          };
+        })
       );
     },
     [docTitle, setBreadcrumbs, navigateToUrl]
@@ -63,26 +65,24 @@ export const useCasesBreadcrumbs = (pageDeepLink: ICasesDeepLinkId) => {
   const applyBreadcrumbs = useApplyBreadcrumbs();
 
   useEffect(() => {
-    if (rootBreadcrumbs) {
-      const casesBreadcrumbs: ChromeBreadcrumb[] = [...rootBreadcrumbs];
-
-      if (pageDeepLink === CasesDeepLinkId.cases) {
-        casesBreadcrumbs.push({
-          text: casesBreadcrumbTitle[CasesDeepLinkId.cases],
-        });
-      } else {
-        casesBreadcrumbs.push(
-          {
-            text: casesBreadcrumbTitle[CasesDeepLinkId.cases],
-            href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
-          },
-          {
-            text: casesBreadcrumbTitle[pageDeepLink],
-          }
-        );
-      }
-      applyBreadcrumbs(casesBreadcrumbs);
-    }
+    applyBreadcrumbs([
+      ...rootBreadcrumbs,
+      {
+        text: casesBreadcrumbTitle[CasesDeepLinkId.cases],
+        ...(pageDeepLink !== CasesDeepLinkId.cases
+          ? {
+              href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
+            }
+          : {}),
+      },
+      ...(pageDeepLink !== CasesDeepLinkId.cases
+        ? [
+            {
+              text: casesBreadcrumbTitle[pageDeepLink],
+            },
+          ]
+        : []),
+    ]);
   }, [pageDeepLink, rootBreadcrumbs, getAppUrl, applyBreadcrumbs]);
 };
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { Case, CaseViewRefreshPropInterface } from '../../../../cases/common';
+import { CaseViewRefreshPropInterface } from '../../../../cases/common';
 import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
@@ -66,19 +66,6 @@ const CaseContainerComponent: React.FC = () => {
     SecurityPageName.rules
   );
 
-  const [spyState, setSpyState] = useState<{ caseTitle: string | undefined }>({
-    caseTitle: undefined,
-  });
-
-  const onCaseDataSuccess = useCallback(
-    (data: Case) => {
-      if (spyState.caseTitle === undefined || spyState.caseTitle !== data.title) {
-        setSpyState({ caseTitle: data.title });
-      }
-    },
-    [spyState.caseTitle]
-  );
-
   const getDetectionsRuleDetailsHref = useCallback(
     (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
     [detectionsFormatUrl, detectionsUrlSearch]
@@ -131,7 +118,6 @@ const CaseContainerComponent: React.FC = () => {
           owner: [APP_ID],
           appId: APP_UI_ID,
           refreshRef,
-          onCaseDataSuccess,
           onComponentInitialized,
           actionsNavigation: {
             href: endpointDetailsHref,
@@ -179,7 +165,7 @@ const CaseContainerComponent: React.FC = () => {
           rootBreadcrumbs: [rootBreadcrumb],
         })}
       </CaseDetailsRefreshContext.Provider>
-      <SpyRoute state={spyState} pageName={SecurityPageName.case} />
+      <SpyRoute pageName={SecurityPageName.case} />
     </SecuritySolutionPageWrapper>
   );
 };

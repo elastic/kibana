@@ -44,17 +44,6 @@ describe('useCasesBreadcrumbs', () => {
     jest.clearAllMocks();
   });
 
-  describe('when rootBreadcrumbs not defined', () => {
-    it('does not set breadcrumbs or the title', () => {
-      renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.cases), {
-        wrapper: getWrapper(),
-      });
-
-      expect(mockSetBreadcrumbs).not.toHaveBeenCalled();
-      expect(mockSetTitle).not.toHaveBeenCalled();
-    });
-  });
-
   describe('with empty rootBreadcrumbs', () => {
     it('sets the cases breadcrumb text only', () => {
       renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.cases), { wrapper: getWrapper([]) });

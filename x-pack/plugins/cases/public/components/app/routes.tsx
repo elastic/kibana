@@ -36,7 +36,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   useFetchAlertData,
   refreshRef,
   hideSyncAlerts,
-  onCaseDataSuccess,
   timelineIntegration,
 }) => {
   const { basePath, userCanCrud } = useCasesContext();
@@ -93,7 +92,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           useFetchAlertData={useFetchAlertData}
           refreshRef={refreshRef}
           hideSyncAlerts={hideSyncAlerts}
-          onCaseDataSuccess={onCaseDataSuccess}
           timelineIntegration={timelineIntegration}
         />
       </Route>
