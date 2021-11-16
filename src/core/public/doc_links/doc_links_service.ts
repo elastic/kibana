@@ -81,6 +81,20 @@ export class DocLinksService {
           base: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}`,
           appSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}`,
           workplaceSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}`,
+          workplaceSearchPermissions: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-permissions.html#organizational-sources-private-sources`,
+          workplaceSearchDocumentPermissions: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-sources-document-permissions.html`,
+          workplaceSearchExternalIdentities: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-external-identities-api.html`,
+          workplaceSearchSecurity: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-security.html`,
+          workplaceSearchBox: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-box-connector.html`,
+          workplaceSearchConfluenceCloud: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-confluence-cloud-connector.html`,
+          workplaceSearchConfluenceServer: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-confluence-server-connector.html`,
+          workplaceSearchDropbox: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-dropbox-connector.html`,
+          workplaceSearchGitHub: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-github-connector.html`,
+          workplaceSearchGmail: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-gmail-connector.html`,
+          workplaceSearchGoogleDrive: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-google-drive-connector.html`,
+          workplaceSearchJiraCloud: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-jira-cloud-connector.html`,
+          workplaceSearchJiraServer: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-jira-server-connector.html`,
+          workplaceSearchOneDrive: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-onedrive-connector.html`,
         },
         metricbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
@@ -584,6 +598,20 @@ export interface DocLinksStart {
       readonly base: string;
       readonly appSearchBase: string;
       readonly workplaceSearchBase: string;
+      readonly workplaceSearchPermissions: string;
+      readonly workplaceSearchDocumentPermissions: string;
+      readonly workplaceSearchExternalIdentities: string;
+      readonly workplaceSearchSecurity: string;
+      readonly workplaceSearchBox: string;
+      readonly workplaceSearchConfluenceCloud: string;
+      readonly workplaceSearchConfluenceServer: string;
+      readonly workplaceSearchDropbox: string;
+      readonly workplaceSearchGitHub: string;
+      readonly workplaceSearchGmail: string;
+      readonly workplaceSearchGoogleDrive: string;
+      readonly workplaceSearchJiraCloud: string;
+      readonly workplaceSearchJiraServer: string;
+      readonly workplaceSearchOneDrive: string;
     };
     readonly heartbeat: {
       readonly base: string;
