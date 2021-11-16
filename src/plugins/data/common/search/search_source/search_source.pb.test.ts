@@ -12,7 +12,6 @@ import fc from 'fast-check';
 import { of } from 'rxjs';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { createStubDataView } from '../../../../data_views/common/mocks';
 import { IAggConfigs } from '../aggs';
 import { Query } from '../..';
 import { IndexPatternsContract } from '../..';
@@ -233,7 +232,6 @@ describe('Search source properties', () => {
           const indexPatterns = {
             get: jest.fn().mockResolvedValue(searchSourceFields.index),
           } as unknown as IndexPatternsContract;
-
           const create = createSearchSource(indexPatterns, searchSourceDependencies);
           const serializedFields = searchSource.getSerializedFields(true);
 
