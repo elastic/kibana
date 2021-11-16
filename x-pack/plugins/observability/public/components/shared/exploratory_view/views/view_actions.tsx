@@ -10,9 +10,21 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual, pickBy } from 'lodash';
 import { allSeriesKey, convertAllShortSeries, useSeriesStorage } from '../hooks/use_series_storage';
+import { SeriesUrl } from '../types';
 
 interface Props {
   onApply?: () => void;
+}
+
+export function removeUndefinedEmptyValues(series: SeriesUrl) {
+  const resultSeries = removeUndefinedProps(series) as SeriesUrl;
+  Object.entries(resultSeries).forEach(([prop, value]) => {
+    if (typeof value === 'object') {
+      // @ts-expect-error
+      resultSeries[prop] = removeUndefinedEmptyValues(value);
+    }
+  });
+  return resultSeries;
 }
 
 export function removeUndefinedProps<T extends object>(obj: T): Partial<T> {
@@ -29,7 +41,10 @@ export function ViewActions({ onApply }: Props) {
   if (noChanges) {
     noChanges = !allSeries.some(
       (series, index) =>
-        !isEqual(removeUndefinedProps(series), removeUndefinedProps(urlAllSeries[index]))
+        !isEqual(
+          removeUndefinedEmptyValues(series),
+          removeUndefinedEmptyValues(urlAllSeries[index])
+        )
     );
   }
 

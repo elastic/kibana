@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { EMSTMSSource, getSourceTitle } from './ems_tms_source';
 import { EmsVectorTileLayer } from '../../layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import { EmsTmsSourceConfig } from './tile_service_select';
 import { CreateSourceEditor } from './create_source_editor';
 import { getEMSSettings } from '../../../kibana_services';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { WorldMapLayerIcon } from '../../layers/icons/world_map_layer_icon';
+import { WorldMapLayerIcon } from '../../layers/wizards/icons/world_map_layer_icon';
 
 function getDescription() {
   const emsSettings = getEMSSettings();
