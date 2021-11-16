@@ -18,10 +18,7 @@ describe('correlations', () => {
         start: 1577836800000,
         end: 1609459200000,
       });
-      expect(requestBase).toEqual({
-        index: 'apm-*',
-        ignore_unavailable: true,
-      });
+      expect(requestBase.ignore_throttled).toEqual(undefined);
     });
 
     it('adds `ignore_throttled=false` when `includeFrozen=true`', () => {
@@ -33,11 +30,7 @@ describe('correlations', () => {
         start: 1577836800000,
         end: 1609459200000,
       });
-      expect(requestBase).toEqual({
-        index: 'apm-*',
-        ignore_throttled: false,
-        ignore_unavailable: true,
-      });
+      expect(requestBase.ignore_throttled).toEqual(false);
     });
   });
 });
