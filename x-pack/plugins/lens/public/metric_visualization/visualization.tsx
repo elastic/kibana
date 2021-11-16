@@ -106,6 +106,7 @@ export const metricVisualization: Visualization<MetricState> = {
           accessors: props.state.accessor ? [{ columnId: props.state.accessor }] : [],
           supportsMoreColumns: !props.state.accessor,
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
+          required: true,
         },
       ],
     };
