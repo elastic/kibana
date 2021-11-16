@@ -17,11 +17,11 @@ export function registerIntegrations(
   customIntegrations.registerCustomIntegration({
     id: 'ingest_with_gdal',
     title: i18n.translate('xpack.maps.registerIntegrations.gdal.integrationTitle', {
-      defaultMessage: 'Upload geo data with GDAL',
+      defaultMessage: 'GDAL',
     }),
     description: i18n.translate('xpack.maps.registerIntegrations.gdal.integrationDescription', {
       defaultMessage:
-        'Upload shapefiles and ingest from relational databases such as PostGOIS or Oracle Spatial with GDAL.',
+        'Upload shapefiles and ingest from relational databases such as PostGIS or Oracle Spatial with GDAL.',
     }),
     uiInternalPath:
       'https://www.elastic.co/blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal',
