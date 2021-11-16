@@ -9,7 +9,7 @@
 import { first } from 'rxjs/operators';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
+import { installBrowser } from '../../../../x-pack/plugins/screenshotting/server/browsers/install';
 
 export const InstallChromium = {
   description: 'Installing Chromium',
@@ -24,7 +24,7 @@ export const InstallChromium = {
 
       const { binaryPath$ } = installBrowser(
         log,
-        build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
+        build.resolvePathForPlatform(platform, 'x-pack/plugins/screenshotting/chromium'),
         platform.getName(),
         platform.getArchitecture()
       );
