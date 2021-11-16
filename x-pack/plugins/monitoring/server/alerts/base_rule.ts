@@ -228,7 +228,7 @@ export class BaseRule {
     );
 
     const esClient = services.scopedClusterClient.asCurrentUser;
-    const availableCcs = Globals.app.config.ui.ccs.enabled ? await fetchAvailableCcs(esClient) : [];
+    const availableCcs = Globals.app.config.ui.ccs.enabled;
     const clusters = await this.fetchClusters(esClient, params as CommonAlertParams, availableCcs);
     const data = await this.fetchData(params, esClient, clusters, availableCcs);
     return await this.processData(data, clusters, services, state);
@@ -237,10 +237,10 @@ export class BaseRule {
   protected async fetchClusters(
     esClient: ElasticsearchClient,
     params: CommonAlertParams,
-    ccs?: string[]
+    ccs?: boolean
   ) {
     let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (ccs?.length) {
+    if (ccs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
     }
     if (!params.limit) {
@@ -262,7 +262,7 @@ export class BaseRule {
     params: CommonAlertParams | unknown,
     esClient: ElasticsearchClient,
     clusters: AlertCluster[],
-    availableCcs: string[]
+    availableCcs: boolean
   ): Promise<Array<AlertData & unknown>> {
     throw new Error('Child classes must implement `fetchData`');
   }
