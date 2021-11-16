@@ -118,32 +118,40 @@ export const TestRunResult = ({ monitorId, monitor }: Props) => {
     setStepEnds(stepEndsT);
   }, [data]);
 
-  const myContent = stepEnds.map((stepDoc) => ({
-    label: (
-      <>
-        <span>{stepDoc.synthetics.step.name}</span>
-        <EuiText className="eui-displayInline" color="subdued" size="s">
-          {formatDuration(stepDoc.synthetics.step.duration.us)}
-        </EuiText>
-      </>
-    ),
-    href: `${basePath}/app/uptime/journey/${stepDoc.monitor.check_group}/steps`,
-    icon: <EuiBadge color="success">{stepDoc.synthetics.step.status}</EuiBadge>,
-    size: 's',
-    extraAction: {
-      color: 'text',
-      onClick: () => {
-        window.open(
-          `${basePath}/app/uptime/journey/${stepDoc.monitor.check_group}/step/${stepDoc.synthetics.step.index}`
-        );
+  const myContent = stepEnds
+    .sort((stepA, stepB) => stepA.synthetics.step.index - stepB.synthetics.step.index)
+    .map((stepDoc) => ({
+      label: (
+        <>
+          <span>{stepDoc.synthetics.step.name}</span>
+          <EuiText className="eui-displayInline" color="subdued" size="s">
+            {formatDuration(stepDoc.synthetics.step.duration.us)}
+          </EuiText>
+        </>
+      ),
+      href: `${basePath}/app/uptime/journey/${stepDoc.monitor.check_group}/steps`,
+      icon: (
+        <span style={{ width: 90 }}>
+          <EuiBadge color={stepDoc.synthetics.step.status === 'failed' ? 'danger' : 'success'}>
+            {stepDoc.synthetics.step.status}
+          </EuiBadge>
+        </span>
+      ),
+      size: 's',
+      extraAction: {
+        color: 'text',
+        onClick: () => {
+          window.open(
+            `${basePath}/app/uptime/journey/${stepDoc.monitor.check_group}/step/${stepDoc.synthetics.step.index}`
+          );
+        },
+        iconType: 'visArea',
+        iconSize: 's',
+        'aria-label': 'Favorite link2',
+        alwaysShow: true,
+        title: 'View performance breakdown',
       },
-      iconType: 'visArea',
-      iconSize: 's',
-      'aria-label': 'Favorite link2',
-      alwaysShow: true,
-      title: 'View performance breakdown',
-    },
-  }));
+    }));
 
   const hits = data?.hits.hits;
 
@@ -172,7 +180,9 @@ export const TestRunResult = ({ monitorId, monitor }: Props) => {
           ) : (
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem style={{ width: 100 }}>
-                <EuiBadge color="primary">IN PROGRESS</EuiBadge>
+                <EuiBadge color={journeyStarted ? 'primary' : 'warning'}>
+                  {journeyStarted ? 'IN PROGRESS' : 'PENDING'}
+                </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLoadingSpinner />
