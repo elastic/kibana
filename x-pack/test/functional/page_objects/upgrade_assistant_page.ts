@@ -29,7 +29,7 @@ export class UpgradeAssistantPageObject extends FtrService {
     });
   }
 
-  async navigateToFixDeprecationLogs() {
+  async navigateToEsDeprecationLogs() {
     return await this.retry.try(async () => {
       await this.common.navigateToApp('settings');
       await this.testSubjects.click('upgrade_assistant');

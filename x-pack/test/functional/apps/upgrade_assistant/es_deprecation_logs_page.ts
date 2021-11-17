@@ -31,16 +31,7 @@ export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
     });
 
     beforeEach(async () => {
-      await PageObjects.upgradeAssistant.navigateToFixDeprecationLogs();
-
-      // Only click deprecation logging toggle if its not already enabled
-      if (!(await testSubjects.isDisplayed('externalLinksTitle'))) {
-        await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
-      }
-
-      await retry.waitFor('UA external links title to be present', async () => {
-        return testSubjects.isDisplayed('externalLinksTitle');
-      });
+      await PageObjects.upgradeAssistant.navigateToEsDeprecationLogs();
     });
 
     it('Shows warnings callout if there are deprecations', async () => {

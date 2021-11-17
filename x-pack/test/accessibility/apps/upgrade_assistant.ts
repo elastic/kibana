@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('ES deprecations logs page', () => {
       beforeEach(async () => {
-        await PageObjects.upgradeAssistant.navigateToFixDeprecationLogs();
+        await PageObjects.upgradeAssistant.navigateToEsDeprecationLogs();
       });
 
       it('with logs collection disabled', async () => {
