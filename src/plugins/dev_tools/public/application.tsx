@@ -9,7 +9,7 @@
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
-import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
@@ -64,23 +64,19 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
           >
             <EuiToolTip content={currentDevTool.tooltipContent}>
               <span>
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>{currentDevTool.title}</EuiFlexItem>
-
-                  {currentDevTool.isBeta && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBetaBadge
-                        label={i18n.translate('devTools.badge.betaLabel', {
-                          defaultMessage: 'Beta',
-                        })}
-                        tooltipContent={i18n.translate('devTools.badge.betaTooltipText', {
-                          defaultMessage:
-                            'This feature might change drastically in future releases',
-                        })}
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
+                {currentDevTool.title}{' '}
+                {currentDevTool.isBeta && (
+                  <EuiBetaBadge
+                    size="s"
+                    className="devApp__tabBeta"
+                    label={i18n.translate('devTools.badge.betaLabel', {
+                      defaultMessage: 'Beta',
+                    })}
+                    tooltipContent={i18n.translate('devTools.badge.betaTooltipText', {
+                      defaultMessage: 'This feature might change drastically in future releases',
+                    })}
+                  />
+                )}
               </span>
             </EuiToolTip>
           </EuiTab>
