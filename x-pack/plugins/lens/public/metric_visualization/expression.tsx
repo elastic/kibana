@@ -104,15 +104,11 @@ export function MetricChart({
   formatFactory,
   uiSettings,
 }: MetricChartProps & { formatFactory: FormatFactory; uiSettings: IUiSettingsClient }) {
-  const { metricTitle, title, description, accessor, mode, colorMode, palette } = args;
+  const { metricTitle, accessor, mode, colorMode, palette } = args;
   const firstTable = Object.values(data.tables)[0];
 
   const getEmptyState = () => (
-    <VisualizationContainer
-      reportTitle={title}
-      reportDescription={description}
-      className="lnsMetricExpression__container"
-    >
+    <VisualizationContainer className="lnsMetricExpression__container">
       <EmptyPlaceholder icon={LensIconChartMetric} />
     </VisualizationContainer>
   );
@@ -142,11 +138,7 @@ export function MetricChart({
   const color = getColorStyling(rawValue, colorMode, palette, uiSettings.get('theme:darkMode'));
 
   return (
-    <VisualizationContainer
-      reportTitle={title}
-      reportDescription={description}
-      className="lnsMetricExpression__container"
-    >
+    <VisualizationContainer className="lnsMetricExpression__container">
       <AutoScale key={value}>
         <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value" style={color}>
           {value}

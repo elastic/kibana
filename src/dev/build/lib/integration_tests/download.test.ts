@@ -93,7 +93,8 @@ it('downloads from URL and checks that content matches sha256', async () => {
     log,
     url: serverUrl,
     destination: TMP_DESTINATION,
-    sha256: FOO_SHA256,
+    shaChecksum: FOO_SHA256,
+    shaAlgorithm: 'sha256',
   });
   expect(readFileSync(TMP_DESTINATION, 'utf8')).toBe('foo');
 });
@@ -106,7 +107,8 @@ it('rejects and deletes destination if sha256 does not match', async () => {
       log,
       url: serverUrl,
       destination: TMP_DESTINATION,
-      sha256: 'bar',
+      shaChecksum: 'bar',
+      shaAlgorithm: 'sha256',
     });
     throw new Error('Expected download() to reject');
   } catch (error) {
@@ -141,7 +143,8 @@ describe('reties download retries: number of times', () => {
       log,
       url: serverUrl,
       destination: TMP_DESTINATION,
-      sha256: FOO_SHA256,
+      shaChecksum: FOO_SHA256,
+      shaAlgorithm: 'sha256',
       retries: 2,
     });
 
@@ -167,7 +170,8 @@ describe('reties download retries: number of times', () => {
       log,
       url: serverUrl,
       destination: TMP_DESTINATION,
-      sha256: FOO_SHA256,
+      shaChecksum: FOO_SHA256,
+      shaAlgorithm: 'sha256',
       retries: 2,
     });
   });
@@ -185,7 +189,8 @@ describe('reties download retries: number of times', () => {
         log,
         url: serverUrl,
         destination: TMP_DESTINATION,
-        sha256: FOO_SHA256,
+        shaChecksum: FOO_SHA256,
+        shaAlgorithm: 'sha256',
         retries: 5,
       });
       throw new Error('Expected download() to reject');
