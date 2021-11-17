@@ -7,18 +7,17 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { JourneyStep } from '../../../common/runtime_types/ping';
+import { Ping } from '../../../common/runtime_types/ping';
+import { REMOVE_NON_SUMMARY_BROWSER_CHECKS } from '../helper/filter_heartbeat_summary';
 
 export interface GetStepScreenshotParams {
   monitorId: string;
   timestamp: string;
-  stepIndex: number;
   location?: string;
 }
 
 export const getLastSuccessfulStepParams = ({
   monitorId,
-  stepIndex,
   timestamp,
   location,
 }: GetStepScreenshotParams): estypes.SearchRequest['body'] => {
@@ -33,6 +32,18 @@ export const getLastSuccessfulStepParams = ({
     ],
     query: {
       bool: {
+        must_not: [
+          ...REMOVE_NON_SUMMARY_BROWSER_CHECKS.must_not,
+          ...(!location
+            ? [
+                {
+                  exists: {
+                    field: 'observer.geo.name',
+                  },
+                },
+              ]
+            : []),
+        ],
         filter: [
           {
             range: {
@@ -48,17 +59,7 @@ export const getLastSuccessfulStepParams = ({
           },
           {
             term: {
-              'synthetics.type': 'step/end',
-            },
-          },
-          {
-            term: {
-              'synthetics.step.status': 'succeeded',
-            },
-          },
-          {
-            term: {
-              'synthetics.step.index': stepIndex,
+              'monitor.status': 'up',
             },
           },
           ...(location
@@ -71,41 +72,30 @@ export const getLastSuccessfulStepParams = ({
               ]
             : []),
         ],
-        ...(!location
-          ? {
-              must_not: {
-                exists: {
-                  field: 'observer.geo.name',
-                },
-              },
-            }
-          : {}),
       },
     },
   };
 };
 
-export const getStepLastSuccessfulStep: UMElasticsearchQueryFn<
-  GetStepScreenshotParams,
-  JourneyStep | null
-> = async ({ uptimeEsClient, monitorId, stepIndex, timestamp, location }) => {
-  const lastSuccessCheckParams = getLastSuccessfulStepParams({
-    monitorId,
-    stepIndex,
-    timestamp,
-    location,
-  });
+export const getLastSuccessfulCheck: UMElasticsearchQueryFn<GetStepScreenshotParams, Ping | null> =
+  async ({ uptimeEsClient, monitorId, timestamp, location }) => {
+    const lastSuccessCheckParams = getLastSuccessfulStepParams({
+      monitorId,
+      timestamp,
+      location,
+    });
 
-  const { body: result } = await uptimeEsClient.search({ body: lastSuccessCheckParams });
+    const { body: result } = await uptimeEsClient.search({ body: lastSuccessCheckParams });
 
-  if (result.hits.total.value < 1) {
-    return null;
-  }
+    if (result.hits.total.value < 1) {
+      return null;
+    }
 
-  const step = result.hits.hits[0]._source as JourneyStep & { '@timestamp': string };
+    const check = result.hits.hits[0]._source as Ping & { '@timestamp': string };
 
-  return {
-    ...step,
-    timestamp: step['@timestamp'],
+    return {
+      ...check,
+      timestamp: check['@timestamp'],
+      docId: result.hits.hits[0]._id,
+    };
   };
-};

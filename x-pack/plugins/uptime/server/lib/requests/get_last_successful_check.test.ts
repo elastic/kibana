@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { getLastSuccessfulStepParams } from './get_last_successful_step';
+import { getLastSuccessfulStepParams } from './get_last_successful_check';
+import { REMOVE_NON_SUMMARY_BROWSER_CHECKS } from '../helper/filter_heartbeat_summary';
 
 describe('getLastSuccessfulStep', () => {
   describe('getLastSuccessfulStepParams', () => {
     it('formats ES params with location', () => {
       const monitorId = 'my-monitor';
-      const stepIndex = 1;
       const location = 'au-heartbeat';
       const timestamp = '2021-10-31T19:47:52.392Z';
       const params = getLastSuccessfulStepParams({
         monitorId,
-        stepIndex,
         location,
         timestamp,
       });
@@ -34,27 +33,41 @@ describe('getLastSuccessfulStep', () => {
               },
               {
                 term: {
-                  'monitor.id': monitorId,
+                  'monitor.id': 'my-monitor',
                 },
               },
               {
                 term: {
-                  'synthetics.type': 'step/end',
+                  'monitor.status': 'up',
                 },
               },
               {
                 term: {
-                  'synthetics.step.status': 'succeeded',
+                  'observer.geo.name': 'au-heartbeat',
                 },
               },
+            ],
+            must_not: [
               {
-                term: {
-                  'synthetics.step.index': stepIndex,
-                },
-              },
-              {
-                term: {
-                  'observer.geo.name': location,
+                bool: {
+                  filter: [
+                    {
+                      term: {
+                        'monitor.type': 'browser',
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: [
+                          {
+                            exists: {
+                              field: 'summary',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
                 },
               },
             ],
@@ -74,7 +87,6 @@ describe('getLastSuccessfulStep', () => {
     it('formats ES params without location', () => {
       const params = getLastSuccessfulStepParams({
         monitorId: 'my-monitor',
-        stepIndex: 1,
         location: undefined,
         timestamp: '2021-10-31T19:47:52.392Z',
       });
@@ -97,25 +109,39 @@ describe('getLastSuccessfulStep', () => {
               },
               {
                 term: {
-                  'synthetics.type': 'step/end',
-                },
-              },
-              {
-                term: {
-                  'synthetics.step.status': 'succeeded',
-                },
-              },
-              {
-                term: {
-                  'synthetics.step.index': 1,
+                  'monitor.status': 'up',
                 },
               },
             ],
-            must_not: {
-              exists: {
-                field: 'observer.geo.name',
+            must_not: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      term: {
+                        'monitor.type': 'browser',
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: [
+                          {
+                            exists: {
+                              field: 'summary',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
               },
-            },
+              {
+                exists: {
+                  field: 'observer.geo.name',
+                },
+              },
+            ],
           },
         },
         size: 1,
