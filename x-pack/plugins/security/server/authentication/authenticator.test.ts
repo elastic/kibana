@@ -1872,6 +1872,27 @@ describe('Authenticator', () => {
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
+    it('if session does not exist and providers is empty, returns whatever authentication provider returns.', async () => {
+      mockOptions = getMockOptions({ providers: [] });
+      mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
+      const request = httpServerMock.createKibanaRequest();
+      mockOptions.session.get.mockResolvedValue(null);
+
+      mockBasicAuthenticationProvider.logout.mockResolvedValue(
+        DeauthenticationResult.redirectTo('some-url')
+      );
+
+      await expect(authenticator.logout(request)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('some-url')
+      );
+
+      expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
+      expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+    });
+
+
+
     it('redirects to login form if session does not exist and provider name is invalid', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { provider: 'foo' } });
       mockOptions.session.get.mockResolvedValue(null);

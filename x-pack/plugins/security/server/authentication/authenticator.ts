@@ -806,10 +806,7 @@ export class Authenticator {
    * @param providerType Type of the provider that handles logout. If not specified, then the first
    * provider in the chain (default) is assumed.
    */
-  private getLoggedOutURL(
-    request: KibanaRequest,
-    providerType: string = this.options.config.authc.sortedProviders[0].type
-  ) {
+  private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
     // The app that handles logout needs to know the reason of the logout and the URL we may need to
     // redirect user to once they log in again (e.g. when session expires).
     const searchParams = new URLSearchParams();
@@ -821,6 +818,12 @@ export class Authenticator {
       if (value) {
         searchParams.append(key, value);
       }
+    }
+    if (!providerType) {
+      providerType =
+        this.options.config.authc.sortedProviders.length > 0
+          ? this.options.config.authc.sortedProviders[0].type
+          : '';
     }
 
     // Query string may contain the path where logout has been called or

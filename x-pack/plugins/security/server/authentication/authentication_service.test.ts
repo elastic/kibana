@@ -128,6 +128,17 @@ describe('AuthenticationService', () => {
         expect.any(Function)
       );
     });
+
+    it('properly registers auth handler with no providers', () => {
+      const mockAuthGet = mockStartAuthenticationParams.http.auth.get as jest.Mock;
+      mockAuthGet.mockReturnValue({ sortedProviders: [] });
+      service.setup(mockSetupAuthenticationParams);
+
+      expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledTimes(1);
+      expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledWith(
+        expect.any(Function)
+      );
+    });
   });
 
   describe('#start()', () => {

@@ -236,4 +236,35 @@ describe('SecurityNavControl', () => {
       'Log out',
     ]);
   });
+
+  it('does not render the action logout popover when authentication_provider.type === "http', async () => {
+    const props = {
+      user: Promise.resolve(
+        mockAuthenticatedUser({
+          authentication_provider: { type: 'http', name: 'does no matter' },
+        })
+      ),
+      editProfileUrl: '',
+      logoutUrl: '',
+      userMenuLinks$: new BehaviorSubject([
+        { label: 'link1', href: 'path-to-link-1', iconType: 'empty', order: 1 },
+        { label: 'link2', href: 'path-to-link-2', iconType: 'empty', order: 2 },
+        { label: 'link3', href: 'path-to-link-3', iconType: 'empty', order: 3 },
+      ]),
+    };
+
+    const wrapper = mountWithIntl(<SecurityNavControl {...props} />);
+    await nextTick();
+    wrapper.update();
+
+    expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(0);
+
+    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+
+    expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(0);
+  });
 });
