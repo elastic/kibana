@@ -28,6 +28,9 @@ const MOCK_EVENT: CrawlEvent = {
   beganAt: null,
   completedAt: null,
   type: CrawlType.Full,
+  crawlConfig: {
+    domainAllowlist: ['https://www.elastic.co'],
+  },
 };
 
 const values: { events: CrawlEvent[] } = {
@@ -64,6 +67,11 @@ describe('CrawlRequestsTable', () => {
     it('renders a type column', () => {
       expect(tableContent).toContain('Crawl Type');
       expect(tableContent).toContain('Full');
+    });
+
+    it('renders a domains column', () => {
+      expect(tableContent).toContain('Domains');
+      // TODO How to test for the contents of this badge?
     });
 
     it('renders a status column', () => {

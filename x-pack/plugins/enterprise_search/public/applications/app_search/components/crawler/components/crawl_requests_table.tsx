@@ -9,7 +9,13 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiBadge, EuiBasicTable, EuiEmptyPrompt, EuiTableFieldDataColumnType } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiEmptyPrompt,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,7 +24,7 @@ import { CrawlEvent, CrawlType, readableCrawlerStatuses, readableCrawlTypes } fr
 
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
-const columns: Array<EuiTableFieldDataColumnType<CrawlEvent>> = [
+const columns: Array<EuiBasicTableColumn<CrawlEvent>> = [
   {
     field: 'id',
     name: i18n.translate(
@@ -49,6 +55,15 @@ const columns: Array<EuiTableFieldDataColumnType<CrawlEvent>> = [
       }
     ),
     render: (_, event: CrawlEvent) => <CrawlEventTypeBadge event={event} />,
+  },
+  {
+    name: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.domains',
+      {
+        defaultMessage: 'Domains',
+      }
+    ),
+    render: (event: CrawlEvent) => <EuiBadge>{event.crawlConfig.domainAllowlist.length}</EuiBadge>,
   },
   {
     field: 'status',
