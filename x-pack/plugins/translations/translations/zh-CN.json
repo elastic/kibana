@@ -23376,7 +23376,7 @@
     "xpack.snapshotRestore.policyForm.stepLogistics.snapshotNameDescription": "快照的名称。唯一标识符将自动添加到每个名称中。",
     "xpack.snapshotRestore.policyForm.stepLogistics.snapshotNameDescriptionTitle": "快照名称",
     "xpack.snapshotRestore.policyForm.stepLogisticsTitle": "运筹",
-    "xpack.snapshotRestore.policyForm.stepRetention.countDescription": "在您的集群中要存储的最小和最大快照数目。不应超过 {maxNumber}。",
+    "xpack.snapshotRestore.policyForm.stepRetention.countDescription": "在您的集群中要存储的最小和最大快照数目。",
     "xpack.snapshotRestore.policyForm.stepRetention.countTitle": "要保留的快照",
     "xpack.snapshotRestore.policyForm.stepRetention.docsButtonLabel": "快照保留文档",
     "xpack.snapshotRestore.policyForm.stepRetention.expirationDescription": "删除快照前要等候的时间。",

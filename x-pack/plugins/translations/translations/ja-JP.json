@@ -22989,7 +22989,7 @@
     "xpack.snapshotRestore.policyForm.stepLogistics.snapshotNameDescription": "スナップショットの名前です。それぞれの名前に自動的に追加される固有の識別子です。",
     "xpack.snapshotRestore.policyForm.stepLogistics.snapshotNameDescriptionTitle": "スナップショット名",
     "xpack.snapshotRestore.policyForm.stepLogisticsTitle": "ロジスティクス",
-    "xpack.snapshotRestore.policyForm.stepRetention.countDescription": "クラスターに格納するスナップショットの最少数と最大数。{maxNumber} 以下でなければなりません。",
+    "xpack.snapshotRestore.policyForm.stepRetention.countDescription": "クラスターに格納するスナップショットの最少数と最大数。",
     "xpack.snapshotRestore.policyForm.stepRetention.countTitle": "保存するスナップショット",
     "xpack.snapshotRestore.policyForm.stepRetention.docsButtonLabel": "スナップショット保存ドキュメント",
     "xpack.snapshotRestore.policyForm.stepRetention.expirationDescription": "スナップショットの削除までに待つ時間です。",
