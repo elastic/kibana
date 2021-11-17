@@ -564,6 +564,13 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
                 options={policies.options}
                 onChange={handlePolicySelectChange}
                 isLoading={policies?.isLoading}
+                description={i18n.translate(
+                  'xpack.securitySolution.trustedApps.assignmentSectionDescription',
+                  {
+                    defaultMessage:
+                      'Assign this trusted application globally across all policies, or assign it to specific policies.',
+                  }
+                )}
                 data-test-subj={getTestId('effectedPolicies')}
               />
             </EuiFormRow>

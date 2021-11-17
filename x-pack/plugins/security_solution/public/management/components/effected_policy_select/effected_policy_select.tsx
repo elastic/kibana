@@ -57,6 +57,7 @@ export type EffectedPolicySelectProps = Omit<
   options: PolicyData[];
   isGlobal: boolean;
   isPlatinumPlus: boolean;
+  description?: string;
   onChange: (selection: EffectedPolicySelection) => void;
   selected?: PolicyData[];
 };
@@ -64,6 +65,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   ({
     isGlobal,
     isPlatinumPlus,
+    description,
     onChange,
     listProps,
     options,
@@ -79,7 +81,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       () => [
         {
           id: 'globalPolicy',
-          label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.global', {
+          label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.global', {
             defaultMessage: 'Global',
           }),
           iconType: isGlobal ? 'checkInCircleFilled' : '',
@@ -87,7 +89,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         },
         {
           id: 'perPolicy',
-          label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.perPolicy', {
+          label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.perPolicy', {
             defaultMessage: 'Per Policy',
           }),
           iconType: !isGlobal ? 'checkInCircleFilled' : '',
@@ -169,7 +171,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         <EuiText size="xs">
           <h3>
             <FormattedMessage
-              id="xpack.securitySolution.trustedapps.policySelect.assignmentSectionTitle"
+              id="xpack.securitySolution.effectedPolicySelect.assignmentSectionTitle"
               defaultMessage="Assignment"
             />
           </h3>
@@ -179,10 +181,15 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           <EuiFlexItem grow={2}>
             <EuiText size="s">
               <p>
-                {i18n.translate('xpack.securitySolution.trustedApps.assignmentSectionDescription', {
-                  defaultMessage:
-                    'Assign this trusted application globally across all policies, or assign it to specific policies.',
-                })}
+                {description
+                  ? description
+                  : i18n.translate(
+                      'xpack.securitySolution.effectedPolicySelect.assignmentSectionDescription',
+                      {
+                        defaultMessage:
+                          'Assign globally across all policies, or assign it to specific policies.',
+                      }
+                    )}
               </p>
             </EuiText>
           </EuiFlexItem>
