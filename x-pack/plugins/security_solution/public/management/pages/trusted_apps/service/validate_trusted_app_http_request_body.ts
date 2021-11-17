@@ -6,19 +6,22 @@
  */
 
 import type { HttpStart } from 'kibana/public';
-import { NewTrustedApp, UpdateTrustedApp } from '../../../../../common/endpoint/types';
+import {
+  PostTrustedAppCreateRequest,
+  PutTrustedAppUpdateRequest,
+} from '../../../../../common/endpoint/types';
 import { HttpRequestValidationError } from './errors';
 import { sendGetAgentPolicyList } from '../../policy/store/services/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 
 /**
- * Validates that the Trusted App is valid for sending to the API for a create (`POST`)
+ * Validates that the Trusted App is valid for sending to the API (`POST` + 'PUT')
  *
  * @throws
  */
-export const validateTrustedAppHttpPostBody = async (
+export const validateTrustedAppHttpRequestBody = async (
   http: HttpStart,
-  trustedApp: NewTrustedApp
+  trustedApp: PostTrustedAppCreateRequest | PutTrustedAppUpdateRequest
 ): Promise<true> => {
   const failedValidations: string[] = [];
 
@@ -52,20 +55,6 @@ export const validateTrustedAppHttpPostBody = async (
   if (failedValidations.length) {
     throw new HttpRequestValidationError(failedValidations);
   }
-
-  return true;
-};
-
-/**
- * Validates that the Trusted App is valid for sending to the API for a update (`PUT`)
- *
- * @throws
- */
-export const validateTrustedAppHttpPutBody = async (
-  http: HttpStart,
-  trustedApp: UpdateTrustedApp
-): Promise<true> => {
-  await validateTrustedAppHttpPostBody(http, trustedApp);
 
   return true;
 };

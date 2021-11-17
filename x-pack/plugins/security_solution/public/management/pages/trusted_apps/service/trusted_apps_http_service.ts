@@ -35,10 +35,7 @@ import {
 import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/services/ingest';
 import { isGlobalEffectScope } from '../state/type_guards';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
-import {
-  validateTrustedAppHttpPostBody,
-  validateTrustedAppHttpPutBody,
-} from './validate_trusted_app_http_body';
+import { validateTrustedAppHttpRequestBody } from './validate_trusted_app_http_request_body';
 import {
   exceptionListItemToTrustedApp,
   newTrustedAppToCreateExceptionListItem,
@@ -137,7 +134,7 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   }
 
   async createTrustedApp(request: PostTrustedAppCreateRequest) {
-    await validateTrustedAppHttpPostBody(this.http, request);
+    await validateTrustedAppHttpRequestBody(this.http, request);
 
     const createdExceptionItem = await this.http.post<ExceptionListItemSchema>(
       EXCEPTION_LIST_ITEM_URL,
@@ -157,7 +154,7 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   ) {
     const [currentExceptionListItem] = await Promise.all([
       await this.getExceptionListItem(params.id),
-      await validateTrustedAppHttpPutBody(this.http, updatedTrustedApp),
+      await validateTrustedAppHttpRequestBody(this.http, updatedTrustedApp),
     ]);
 
     const updatedExceptionListItem = await this.http.put<ExceptionListItemSchema>(
