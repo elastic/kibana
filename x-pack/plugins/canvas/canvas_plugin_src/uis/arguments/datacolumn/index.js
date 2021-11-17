@@ -28,7 +28,9 @@ const getMathValue = (argValue, columns) => {
     const matchedCol = columns.find(({ name }) => argValue === name);
     const val = matchedCol ? maybeQuoteValue(matchedCol.name) : argValue;
     const mathValue = getFormObject(val);
-    return { ...mathValue, column: mathValue.column || '' };
+
+    const validColumn = columns.some(({ name }) => mathValue.column === name);
+    return { ...mathValue, column: validColumn ? mathValue.column : '' };
   } catch (e) {
     return { error: e.message };
   }
