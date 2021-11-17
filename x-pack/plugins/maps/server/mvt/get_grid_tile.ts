@@ -38,7 +38,7 @@ export async function getEsGridTile({
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
     const body = {
       size: 0, // no hits
-      grid_precision: 7,
+      grid_precision: 8,
       exact_bounds: false,
       extent: 4096, // full resolution,
       query: requestBody.query,

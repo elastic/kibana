@@ -37,7 +37,7 @@ export default function ({ getService }) {
       expect(clusterFeature.id).to.be(undefined);
       expect(clusterFeature.properties).to.eql({
         _count: 1,
-        _key: '10/258/404',
+        _key: '11/517/809',
         'avg_of_bytes.value': 9252,
       });
       expect(clusterFeature.loadGeometry()).to.eql([[{ x: 87, y: 667 }]]);
@@ -97,16 +97,16 @@ export default function ({ getService }) {
       expect(gridFeature.id).to.be(undefined);
       expect(gridFeature.properties).to.eql({
         _count: 1,
-        _key: '10/258/404',
+        _key: '11/517/809',
         'avg_of_bytes.value': 9252,
       });
       expect(gridFeature.loadGeometry()).to.eql([
         [
-          { x: 64, y: 672 },
+          { x: 80, y: 672 },
           { x: 96, y: 672 },
-          { x: 96, y: 640 },
-          { x: 64, y: 640 },
-          { x: 64, y: 672 },
+          { x: 96, y: 656 },
+          { x: 80, y: 656 },
+          { x: 80, y: 672 },
         ],
       ]);
 
