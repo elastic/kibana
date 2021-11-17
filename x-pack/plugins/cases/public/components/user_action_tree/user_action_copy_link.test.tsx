@@ -11,26 +11,20 @@ import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import copy from 'copy-to-clipboard';
 
+import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import { UserActionCopyLink } from './user_action_copy_link';
 
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
 jest.mock('../../common/navigation/hooks');
 jest.mock('copy-to-clipboard', () => jest.fn());
+jest.mock('../../common/lib/kibana');
 
 const mockGetUrlForApp = jest.fn(
   (appId: string, options?: { path?: string; absolute?: boolean }) =>
     `${appId}${options?.path ?? ''}`
 );
-
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: mockGetUrlForApp,
-      },
-    },
-  }),
-}));
 
 const props = {
   id: 'comment-id',
@@ -41,6 +35,11 @@ describe('UserActionCopyLink ', () => {
 
   beforeAll(() => {
     wrapper = mount(<UserActionCopyLink {...props} />, { wrappingComponent: TestProviders });
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useKibanaMock().services.application.getUrlForApp = mockGetUrlForApp;
   });
 
   it('it renders', async () => {

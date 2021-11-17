@@ -9,6 +9,7 @@
 
 import React from 'react';
 
+import { PublicAppInfo } from 'kibana/public';
 import { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
@@ -17,11 +18,12 @@ import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { securityMock } from '../../../../../security/public/mocks';
 import { spacesPluginMock } from '../../../../../spaces/public/mocks';
 import { triggersActionsUiMock } from '../../../../../triggers_actions_ui/public/mocks';
+import { BehaviorSubject } from 'rxjs';
 
 export const createStartServicesMock = (): StartServices => {
   const services = {
     ...coreMock.createStart(),
-    storage: { ...coreMock.createStorage(), remove: jest.fn() },
+    storage: { ...coreMock.createStorage(), get: jest.fn(), set: jest.fn(), remove: jest.fn() },
     lens: {
       canUseEditor: jest.fn(),
       navigateToPrefilledEditor: jest.fn(),
@@ -30,6 +32,11 @@ export const createStartServicesMock = (): StartServices => {
     triggersActionsUi: triggersActionsUiMock.createStart(),
     spaces: spacesPluginMock.createStartContract(),
   } as unknown as StartServices;
+
+  services.application.currentAppId$ = new BehaviorSubject<string>('testAppId');
+  services.application.applications$ = new BehaviorSubject<Map<string, PublicAppInfo>>(
+    new Map([['testAppId', { category: { label: 'Test' } } as unknown as PublicAppInfo]])
+  );
 
   return services;
 };

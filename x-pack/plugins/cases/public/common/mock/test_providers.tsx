@@ -8,14 +8,10 @@
 import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { CasesProvider } from '../../components/cases_context';
-import {
-  createKibanaContextProviderMock,
-  createStartServicesMock,
-} from '../lib/kibana/kibana_react.mock';
+import { createKibanaContextProviderMock } from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
 
 interface Props {
@@ -23,7 +19,12 @@ interface Props {
   userCanCrud?: boolean;
 }
 
-export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
+// jest.mock('../../components/cases_context/use_application', () => ({
+//   useApplication: () => ({
+//     appId: 'testAppId',
+//     appTitle: 'TestAppTitle',
+//   }),
+// }));
 
 window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();

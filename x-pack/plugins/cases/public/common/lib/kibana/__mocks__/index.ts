@@ -45,8 +45,3 @@ export const useNavigation = jest.fn().mockReturnValue({
   getAppUrl: jest.fn(),
   navigateTo: jest.fn(),
 });
-
-export const useApplication = jest.fn().mockReturnValue({
-  appId: 'testAppId',
-  appTitle: 'testAppTitle',
-});

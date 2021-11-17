@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
-import { useApplication } from '../../common/lib/kibana';
+import { useApplication } from './use_application';
 
 export interface CasesContextValue {
   owner: string[];

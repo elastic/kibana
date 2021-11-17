@@ -24,7 +24,7 @@ const updateCase = jest.fn();
 
 describe('AllCasesSelectorModal', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders', () => {
