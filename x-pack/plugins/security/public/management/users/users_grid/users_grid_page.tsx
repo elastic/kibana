@@ -75,7 +75,7 @@ export class UsersGridPage extends Component<Props, State> {
   }
 
   public render() {
-    const { users, roles, permissionDenied, showDeleteConfirmation, selection } = this.state;
+    const { roles, permissionDenied, showDeleteConfirmation, selection } = this.state;
 
     if (permissionDenied) {
       return (
