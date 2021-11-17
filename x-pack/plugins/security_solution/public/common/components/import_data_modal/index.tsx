@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { ImportExceptionsResponseSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback, useState } from 'react';
 
 import {
@@ -34,7 +35,17 @@ interface ImportDataModalProps {
   errorMessage: (totalCount: number) => string;
   failedDetailed: (message: string) => string;
   importComplete: () => void;
-  importData: (arg: ImportDataProps) => Promise<ImportDataResponse>;
+  importData:
+    | ((arg: ImportDataProps) => Promise<ImportDataResponse>)
+    | (({
+        fileToImport,
+        overwrite,
+        signal,
+      }: {
+        fileToImport: File;
+        overwrite?: boolean;
+        signal: AbortSignal;
+      }) => Promise<ImportExceptionsResponseSchema>);
   showCheckBox: boolean;
   showModal: boolean;
   submitBtnText: string;
@@ -44,7 +55,7 @@ interface ImportDataModalProps {
 }
 
 /**
- * Modal component for importing Rules from a json file
+ * Modal component for importing rules and exceptions from a ndjson file
  */
 export const ImportDataModalComponent = ({
   checkBoxLabel,
@@ -138,7 +149,7 @@ export const ImportDataModalComponent = ({
 
             <EuiSpacer size="s" />
             <EuiFilePicker
-              id="rule-file-picker"
+              id="import-file-picker"
               initialPromptText={subtitle}
               onChange={(files: FileList | null) => {
                 setSelectedFiles(files && files.length > 0 ? files : null);
@@ -146,7 +157,6 @@ export const ImportDataModalComponent = ({
               display={'large'}
               fullWidth={true}
               isLoading={isImporting}
-              data-test-subj="importFilePicker"
             />
             <EuiSpacer size="s" />
             {showCheckBox && (

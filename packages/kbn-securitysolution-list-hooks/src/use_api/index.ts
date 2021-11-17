@@ -46,9 +46,13 @@ export interface ExceptionsApi {
   ) => Promise<void>;
   getExceptionListsItems: (arg: ApiCallFindListsItemsMemoProps) => Promise<void>;
   exportExceptionList: (arg: ApiListExportProps) => Promise<void>;
-  importExceptions: (arg: {
+  importExceptions: ({
+    fileToImport,
+    overwrite,
+    signal,
+  }: {
     fileToImport: File;
-    overwrite: boolean;
+    overwrite?: boolean;
     signal: AbortSignal;
   }) => Promise<ImportExceptionsResponseSchema>;
 }
