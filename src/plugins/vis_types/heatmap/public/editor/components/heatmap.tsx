@@ -134,7 +134,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
         <EuiToolTip
           content={
             showElasticChartsOptions
-              ? i18n.translate('visTypeHeatmap.editors.heatmap.highlightLabelTooltipNotAvailable', {
+              ? i18n.translate('visTypeHeatmap.editors.heatmap.colorScaleTooltipNotAvailable', {
                   defaultMessage:
                     'Color scale is not supported with the new charts library. Please enable the heatmap legacy charts library advanced setting.',
                 })
