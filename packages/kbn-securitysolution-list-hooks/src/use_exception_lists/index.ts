@@ -95,6 +95,7 @@ export const useExceptionLists = ({
         },
         signal: abortCtrlRef.current.signal,
       });
+
       setPagination({
         page,
         perPage,

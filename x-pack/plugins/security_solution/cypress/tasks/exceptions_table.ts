@@ -13,7 +13,6 @@ import {
   EXCEPTIONS_TABLE_MODAL,
   EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN,
   EXCEPTIONS_TABLE_EXPORT_BTN,
-  EXEPTIONS_IMPORT_BUTTON,
 } from '../screens/exceptions';
 
 export const waitForExceptionsTableToBeLoaded = () => {
