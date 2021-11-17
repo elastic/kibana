@@ -28,14 +28,18 @@ export function getColumns({
   serviceName: string;
   errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
-}): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['error_groups'][0]>> {
+}): Array<
+  EuiBasicTableColumn<
+    ErrorGroupMainStatistics['errorGroups']['error_groups'][0]
+  >
+> {
   return [
     {
       field: 'name',
       name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
         defaultMessage: 'Name',
       }),
-      render: (_, { name, group_id: errorGroupId }) => {
+      render: (_, { name, groupId: errorGroupId }) => {
         return (
           <TruncateWithTooltip
             text={name}
@@ -77,7 +81,7 @@ export function getColumns({
         }
       ),
       align: RIGHT_ALIGNMENT,
-      render: (_, { occurrences, group_id: errorGroupId }) => {
+      render: (_, { occurrences, groupId: errorGroupId }) => {
         const currentPeriodTimeseries =
           errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]
             ?.timeseries;

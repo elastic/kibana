@@ -22,8 +22,6 @@ import { getServiceAlerts } from './get_service_alerts';
 import { getServiceDependencies } from './get_service_dependencies';
 import { getServiceInstanceMetadataDetails } from './get_service_instance_metadata_details';
 import { getServiceErrorGroupPeriods } from './get_service_error_groups/get_service_error_group_detailed_statistics';
-import { getServiceErrorGroupMainStatistics } from './get_service_error_groups/get_service_error_group_main_statistics';
-import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
 import { getServiceInstancesMainStatistics } from './get_service_instances/main_statistics';
 import { getServiceMetadataDetails } from './get_service_metadata_details';
 import { getServiceMetadataIcons } from './get_service_metadata_icons';
@@ -374,97 +372,60 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
   },
 });
 
-const serviceErrorGroupsMainStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.type({
-        transactionType: t.string,
-      }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
-    const {
-      path: { serviceName },
-      query: { kuery, transactionType, environment, start, end },
-    } = params;
+// const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
+//   endpoint:
+//     'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
+//   params: t.type({
+//     path: t.type({
+//       serviceName: t.string,
+//     }),
+//     query: t.intersection([
+//       environmentRt,
+//       kueryRt,
+//       rangeRt,
+//       comparisonRangeRt,
+//       t.type({
+//         numBuckets: toNumberRt,
+//         transactionType: t.string,
+//         groupIds: jsonRt.pipe(t.array(t.string)),
+//       }),
+//     ]),
+//   }),
+//   options: { tags: ['access:apm'] },
+//   handler: async (resources) => {
+//     const setup = await setupRequest(resources);
+//     const { params } = resources;
 
-    return getServiceErrorGroupMainStatistics({
-      kuery,
-      serviceName,
-      setup,
-      transactionType,
-      environment,
-      start,
-      end,
-    });
-  },
-});
+//     const {
+//       path: { serviceName },
+//       query: {
+//         environment,
+//         kuery,
+//         numBuckets,
+//         transactionType,
+//         groupIds,
+//         comparisonStart,
+//         comparisonEnd,
+//         start,
+//         end,
+//       },
+//     } = params;
 
-const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      comparisonRangeRt,
-      t.type({
-        numBuckets: toNumberRt,
-        transactionType: t.string,
-        groupIds: jsonRt.pipe(t.array(t.string)),
-      }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
-
-    const {
-      path: { serviceName },
-      query: {
-        environment,
-        kuery,
-        numBuckets,
-        transactionType,
-        groupIds,
-        comparisonStart,
-        comparisonEnd,
-        start,
-        end,
-      },
-    } = params;
-
-    return getServiceErrorGroupPeriods({
-      environment,
-      kuery,
-      serviceName,
-      setup,
-      numBuckets,
-      transactionType,
-      groupIds,
-      comparisonStart,
-      comparisonEnd,
-      start,
-      end,
-    });
-  },
-});
+//     return getServiceErrorGroupPeriods({
+//       environment,
+//       kuery,
+//       serviceName,
+//       setup,
+//       numBuckets,
+//       transactionType,
+//       groupIds,
+//       comparisonStart,
+//       comparisonEnd,
+//       start,
+//       end,
+//     });
+//   },
+// });
 
 const serviceThroughputRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
@@ -952,8 +913,6 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceNodeMetadataRoute)
   .add(serviceAnnotationsRoute)
   .add(serviceAnnotationsCreateRoute)
-  .add(serviceErrorGroupsMainStatisticsRoute)
-  .add(serviceErrorGroupsDetailedStatisticsRoute)
   .add(serviceInstancesMetadataDetails)
   .add(serviceThroughputRoute)
   .add(serviceInstancesMainStatisticsRoute)

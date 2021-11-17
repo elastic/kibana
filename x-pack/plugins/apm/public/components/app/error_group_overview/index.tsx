@@ -25,7 +25,7 @@ import { ErrorDistribution } from '../error_group_details/Distribution';
 import { ErrorGroupList } from './error_group_list';
 
 export function ErrorGroupOverview() {
-  const { serviceName } = useApmServiceContext();
+  const { serviceName, transactionType } = useApmServiceContext();
 
   const {
     query: { environment, kuery, sortField, sortDirection, rangeFrom, rangeTo },
@@ -44,15 +44,21 @@ export function ErrorGroupOverview() {
     (callApmApi) => {
       const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
 
+      if (!start || !end || !transactionType) {
+        return;
+      }
+
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/errors',
+          endpoint:
+            'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
           params: {
             path: {
               serviceName,
             },
             query: {
               environment,
+              transactionType,
               kuery,
               start,
               end,
@@ -63,7 +69,16 @@ export function ErrorGroupOverview() {
         });
       }
     },
-    [environment, kuery, serviceName, start, end, sortField, sortDirection]
+    [
+      environment,
+      kuery,
+      serviceName,
+      transactionType,
+      start,
+      end,
+      sortField,
+      sortDirection,
+    ]
   );
 
   if (!errorDistributionData || !errorGroupListData) {
@@ -110,7 +125,7 @@ export function ErrorGroupOverview() {
           <EuiSpacer size="s" />
 
           <ErrorGroupList
-            items={errorGroupListData.errorGroups}
+            items={errorGroupListData.errorGroups.error_groups}
             serviceName={serviceName}
           />
         </EuiPanel>

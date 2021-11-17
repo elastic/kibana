@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
+import { jsonRt } from '@kbn/io-ts-utils/json_rt';
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getErrorDistribution } from './distribution/get_distribution';
 import { getErrorGroupSample } from './get_error_group_sample';
-import { getErrorGroups } from './get_error_groups';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import {
   environmentRt,
@@ -19,8 +20,9 @@ import {
 } from '../default_api_types';
 import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 
-const errorsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/errors',
+const errorsMainStadisticsRoute = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -33,6 +35,9 @@ const errorsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
+      t.type({
+        transactionType: t.string,
+      }),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -40,13 +45,21 @@ const errorsRoute = createApmServerRoute({
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName } = params.path;
-    const { environment, kuery, sortField, sortDirection, start, end } =
-      params.query;
+    const {
+      environment,
+      transactionType,
+      kuery,
+      sortField,
+      sortDirection,
+      start,
+      end,
+    } = params.query;
 
-    const errorGroups = await getErrorGroups({
+    const errorGroups = await getServiceErrorGroupMainStatistics({
       environment,
       kuery,
       serviceName,
+      transactionType,
       sortField,
       sortDirection,
       setup,
@@ -55,6 +68,61 @@ const errorsRoute = createApmServerRoute({
     });
 
     return { errorGroups };
+  },
+});
+
+const errorsDetailedStadisticsRoute = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      comparisonRangeRt,
+      t.type({
+        numBuckets: toNumberRt,
+        transactionType: t.string,
+        groupIds: jsonRt.pipe(t.array(t.string)),
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+
+    const {
+      path: { serviceName },
+      query: {
+        environment,
+        kuery,
+        numBuckets,
+        transactionType,
+        groupIds,
+        comparisonStart,
+        comparisonEnd,
+        start,
+        end,
+      },
+    } = params;
+
+    return getServiceErrorGroupPeriods({
+      environment,
+      kuery,
+      serviceName,
+      setup,
+      numBuckets,
+      transactionType,
+      groupIds,
+      comparisonStart,
+      comparisonEnd,
+      start,
+      end,
+    });
   },
 });
 
@@ -131,6 +199,7 @@ const errorDistributionRoute = createApmServerRoute({
 });
 
 export const errorsRouteRepository = createApmServerRouteRepository()
-  .add(errorsRoute)
+  .add(errorsMainStadisticsRoute)
+  .add(errorsDetailedStadisticsRoute)
   .add(errorGroupsRoute)
   .add(errorDistributionRoute);

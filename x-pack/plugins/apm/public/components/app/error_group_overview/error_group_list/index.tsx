@@ -48,7 +48,7 @@ const Culprit = euiStyled.div`
 `;
 
 type ErrorGroupItem =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors'>['errorGroups'][0];
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>['errorGroups']['error_groups'][0];
 
 interface Props {
   items: ErrorGroupItem[];
@@ -132,13 +132,13 @@ function ErrorGroupList({ items, serviceName }: Props) {
             <MessageAndCulpritCell>
               <EuiToolTip
                 id="error-message-tooltip"
-                content={item.message || NOT_AVAILABLE_LABEL}
+                content={item.name || NOT_AVAILABLE_LABEL}
               >
                 <MessageLink
                   serviceName={serviceName}
                   errorGroupId={item.groupId}
                 >
-                  {item.message || NOT_AVAILABLE_LABEL}
+                  {item.name || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
               <br />
@@ -173,9 +173,9 @@ function ErrorGroupList({ items, serviceName }: Props) {
         field: 'occurrenceCount',
         sortable: true,
         dataType: 'number',
-        render: (_, { occurrenceCount }) =>
-          occurrenceCount
-            ? numeral(occurrenceCount).format('0.[0]a')
+        render: (_, { occurrences }) =>
+          occurrences
+            ? numeral(occurrences).format('0.[0]a')
             : NOT_AVAILABLE_LABEL,
       },
       {
@@ -188,9 +188,9 @@ function ErrorGroupList({ items, serviceName }: Props) {
           }
         ),
         align: RIGHT_ALIGNMENT,
-        render: (_, { latestOccurrenceAt }) =>
-          latestOccurrenceAt ? (
-            <TimestampTooltip time={latestOccurrenceAt} timeUnit="minutes" />
+        render: (_, { lastSeen }) =>
+          lastSeen ? (
+            <TimestampTooltip time={lastSeen} timeUnit="minutes" />
           ) : (
             NOT_AVAILABLE_LABEL
           ),

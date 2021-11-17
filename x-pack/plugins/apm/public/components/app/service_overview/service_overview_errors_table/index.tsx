@@ -44,7 +44,7 @@ const DEFAULT_SORT = {
 };
 
 const INITIAL_STATE_MAIN_STATISTICS: {
-  items: ErrorGroupMainStatistics['error_groups'];
+  items: ErrorGroupMainStatistics['errorGroups']['error_groups'];
   totalItems: number;
   requestId?: string;
 } = {
@@ -110,7 +110,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         },
       }).then((response) => {
         const currentPageErrorGroups = orderBy(
-          response.error_groups,
+          response.errorGroups.error_groups,
           field,
           direction
         ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
@@ -119,7 +119,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
           requestId: uuid(),
           items: currentPageErrorGroups,
-          totalItems: response.error_groups.length,
+          totalItems: response.errorGroups.error_groups.length,
         };
       });
     },
@@ -161,7 +161,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               numBuckets: 20,
               transactionType,
               groupIds: JSON.stringify(
-                items.map(({ group_id: groupId }) => groupId).sort()
+                items.map(({ groupId: groupId }) => groupId).sort()
               ),
               comparisonStart,
               comparisonEnd,

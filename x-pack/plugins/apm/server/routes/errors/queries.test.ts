@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getErrorGroupSample } from './get_error_group_sample';
+import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
 import { getErrorGroups } from './get_error_groups';
 import {
   SearchParamsMock,
