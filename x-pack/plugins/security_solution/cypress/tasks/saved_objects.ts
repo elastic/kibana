@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { IMPORT_BTN, IMPORT_OBJECTS, INPUT } from '../screens/saved_objects';
+
 export const importCase = (casePath: string) => {
-  cy.get('[data-test-subj="importObjects"]').click();
-  cy.get('.euiFilePicker__input')
-    .trigger('click', { force: true })
-    .attachFile(casePath)
-    .trigger('change');
-  cy.get('[data-test-subj="importSavedObjectsImportBtn"]').click({ force: true });
-  cy.get('[data-test-subj="importSavedObjectsImportBtn"]').should('not.exist');
+  cy.get(IMPORT_OBJECTS).click();
+  cy.get(INPUT).trigger('click', { force: true }).attachFile(casePath).trigger('change');
+  cy.get(IMPORT_BTN).click({ force: true });
+  cy.get(IMPORT_BTN).should('not.exist');
 };
