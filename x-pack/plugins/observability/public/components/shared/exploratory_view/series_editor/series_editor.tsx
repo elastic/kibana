@@ -7,14 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiSpacer,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonEmpty,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 import { rgba } from 'polished';
 import { euiStyled } from './../../../../../../../../src/plugins/kibana_react/common';
 import { AppDataType, ReportViewType, BuilderItem } from '../types';
@@ -62,7 +55,7 @@ export const getSeriesToEdit = ({
 export const SeriesEditor = React.memo(function () {
   const [editorItems, setEditorItems] = useState<BuilderItem[]>([]);
 
-  const { getSeries, allSeries, reportType, removeSeries } = useSeriesStorage();
+  const { getSeries, allSeries, reportType } = useSeriesStorage();
 
   const { loading, indexPatterns } = useAppIndexPatternContext();
 
@@ -120,31 +113,19 @@ export const SeriesEditor = React.memo(function () {
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
-  const resetView = () => {
-    const totalSeries = allSeries.length;
-    for (let i = totalSeries; i >= 0; i--) {
-      removeSeries(i);
-    }
-    setEditorItems([]);
-    setItemIdToExpandedRowMap({});
-  };
-
   return (
     <Wrapper>
       <div>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label={REPORT_TYPE_LABEL} display="columnCompressed">
-              <ReportTypesSelect />
+            <EuiFormRow
+              aria-label={REPORT_TYPE_ARIA_LABEL}
+              id="report-type-label"
+              isDisabled={true}
+            >
+              <ReportTypesSelect prepend={REPORT_TYPE_LABEL} />
             </EuiFormRow>
           </EuiFlexItem>
-          {reportType && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => resetView()} color="text">
-                {RESET_LABEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
           <EuiFlexItem>
             <ViewActions onApply={() => setItemIdToExpandedRowMap({})} />
           </EuiFlexItem>
@@ -226,5 +207,12 @@ export const REPORT_TYPE_LABEL = i18n.translate(
   'xpack.observability.expView.seriesBuilder.reportType',
   {
     defaultMessage: 'Report type',
+  }
+);
+
+export const REPORT_TYPE_ARIA_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.reportType.aria',
+  {
+    defaultMessage: 'This select allows you to choose the type of report you wish to create',
   }
 );
