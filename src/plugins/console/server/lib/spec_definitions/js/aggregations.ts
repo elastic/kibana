@@ -82,9 +82,10 @@ const rules = {
     boxplot: {
       __template: {
         field: '',
-        compression: 0,
-        missing: 0,
       },
+      field: '{field}',
+      compression: 100,
+      missing: 0,
     },
     adjacency_matrix: {
       filters: {},
