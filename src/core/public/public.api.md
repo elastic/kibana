@@ -541,6 +541,20 @@ export interface DocLinksStart {
             readonly base: string;
             readonly appSearchBase: string;
             readonly workplaceSearchBase: string;
+            readonly workplaceSearchPermissions: string;
+            readonly workplaceSearchDocumentPermissions: string;
+            readonly workplaceSearchExternalIdentities: string;
+            readonly workplaceSearchSecurity: string;
+            readonly workplaceSearchBox: string;
+            readonly workplaceSearchConfluenceCloud: string;
+            readonly workplaceSearchConfluenceServer: string;
+            readonly workplaceSearchDropbox: string;
+            readonly workplaceSearchGitHub: string;
+            readonly workplaceSearchGmail: string;
+            readonly workplaceSearchGoogleDrive: string;
+            readonly workplaceSearchJiraCloud: string;
+            readonly workplaceSearchJiraServer: string;
+            readonly workplaceSearchOneDrive: string;
         };
         readonly heartbeat: {
             readonly base: string;
