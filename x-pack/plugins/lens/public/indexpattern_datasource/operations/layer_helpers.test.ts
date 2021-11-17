@@ -3008,7 +3008,13 @@ describe('state_helpers', () => {
           indexPatternId: '1',
           columnOrder: [],
           columns: {
-            col1: { operationType: 'testReference', references: [] },
+            col1: {
+              operationType: 'testReference',
+              references: [],
+              dataType: 'number',
+              isBucketed: false,
+              label: '',
+            },
           },
         },
         'col1',
