@@ -145,7 +145,7 @@ You might be managing tens, hundreds, or even thousands of dashboards, visualiza
 ==== Collect related items in a space
 
 {kib}
-<<xpack-spaces, Spaces>> is built for organizing your visualizations, dashboards, {data-sources}, and more
+<<xpack-spaces, Spaces>> is built for organizing your visualizations, dashboards, {data-sources}, and more.
 Think of a space as its own mini {kib} installation&mdash;it’s isolated from all other spaces,
 so you can tailor it to your specific needs without impacting others.
 
