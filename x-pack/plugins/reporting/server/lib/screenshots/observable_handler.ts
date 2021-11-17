@@ -7,7 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
+import { catchError, mergeMap, switchMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import { Writable } from 'stream';
 import { startTrace } from '..';
 import { numberToDuration } from '../../../common/schema_utils';
@@ -177,49 +177,50 @@ export class ScreenshotObservableHandler {
         mergeMap(async (page: PageSetupResults): Promise<ScreenshotResults> => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
 
-          const { timeRange, error: setupError } = page;
           const [element] =
             page.elementsPositionAndAttributes ??
             getDefaultElementPosition(this.layout.getViewport(1));
+          const { title, description } = element.attributes;
+          const { timeRange, error: setupError } = page;
 
-          this.logger.info(`taking screenshots`);
+          this.logger.info(`streaming screenshots`);
 
           const stitcher = new ScreenshotStitcher({
             outputClip: element.position,
             zoom: 2,
-            max: 400,
           });
           const endTrace = startTrace('get_screenshots', 'read');
 
           let byteLength = 0;
           let screenshotCount = 0;
-          await stitcher.stream(
-            // captureFn
-            async (position) => {
-              console.log(JSON.stringify({ position }));
-              let data: Buffer | undefined;
-              try {
-                data = await this.driver.screenshot(position);
-              } catch (err) {
-                const myError = new Error(`Unable to capture screenshot: ${err}`);
-                throw myError;
-              }
-              return data as Buffer;
-            },
-            // handlerFn
-            (data, clip) => {
-              console.log(JSON.stringify({ clip }));
-              stream.write(data);
-              byteLength += data.byteLength;
-              screenshotCount += 1;
-            }
-          );
+
+          await stitcher
+            .getClips$()
+            .pipe(
+              switchMap(async (clip) => {
+                let data: Buffer | undefined;
+                try {
+                  data = await this.driver.screenshot(clip);
+                  if (!data || !data?.byteLength) {
+                    throw new Error(`Buffer data is void!`);
+                  }
+                } catch (err) {
+                  throw new Error(`Unable to capture screenshot: ${err}`);
+                }
+
+                stream.write(data);
+                byteLength += data.byteLength;
+                screenshotCount += 1;
+              })
+            )
+            .toPromise();
 
           endTrace();
 
-          this.logger.info(`screenshots taken: ${screenshotCount}`);
+          this.logger.info(`screenshots streamed: ${screenshotCount}`);
 
           return {
+            screenshots: [{ title, description, byteLength }],
             timeRange,
             byteLength,
             error: setupError,
