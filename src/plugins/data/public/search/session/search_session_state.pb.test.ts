@@ -246,7 +246,7 @@ const SearchStateContainerCommands = fc.commands(
 describe('Search session state', () => {
   it('should function as expected', () => {
     fc.assert(
-      fc.property(SearchStateContainerCommands, fc.anything(), (commands, anything) => {
+      fc.property(SearchStateContainerCommands, (commands) => {
         const { stateContainer: real } = createSessionStateContainer();
         const model = new SearchSessionStateContainerModel();
         fc.modelRun(() => ({ real, model }), commands);
