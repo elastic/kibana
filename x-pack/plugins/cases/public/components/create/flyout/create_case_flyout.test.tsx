@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { act } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { CreateCaseFlyout } from './create_case_flyout';
 import { TestProviders } from '../../../common/mock';
+
+jest.mock('../../../common/lib/kibana');
 
 const onClose = jest.fn();
 const onSuccess = jest.fn();
@@ -26,27 +28,23 @@ describe('CreateCaseFlyout', () => {
   });
 
   it('renders', async () => {
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <CreateCaseFlyout {...defaultProps} />
-        </TestProviders>
-      );
+    render(
+      <TestProviders>
+        <CreateCaseFlyout {...defaultProps} />
+      </TestProviders>
+    );
 
-      expect(wrapper.find(`[data-test-subj='create-case-flyout']`).exists()).toBeTruthy();
-    });
+    await waitFor(() => expect(screen.getByText('Create new case')).toBeInTheDocument());
   });
 
   it('Closing flyout calls onCloseCaseModal', async () => {
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <CreateCaseFlyout {...defaultProps} />
-        </TestProviders>
-      );
+    render(
+      <TestProviders>
+        <CreateCaseFlyout {...defaultProps} />
+      </TestProviders>
+    );
 
-      wrapper.find(`[data-test-subj='euiFlyoutCloseButton']`).first().simulate('click');
-      expect(onClose).toBeCalled();
-    });
+    userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    await waitFor(() => expect(onClose).toBeCalled());
   });
 });

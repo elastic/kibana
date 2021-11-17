@@ -19,13 +19,6 @@ interface Props {
   userCanCrud?: boolean;
 }
 
-// jest.mock('../../components/cases_context/use_application', () => ({
-//   useApplication: () => ({
-//     appId: 'testAppId',
-//     appTitle: 'TestAppTitle',
-//   }),
-// }));
-
 window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
