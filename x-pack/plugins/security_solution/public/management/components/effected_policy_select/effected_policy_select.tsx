@@ -31,7 +31,7 @@ import { useAppUrl } from '../../../common/lib/kibana/hooks';
 
 const NOOP = () => {};
 const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = { bordered: true, showIcons: false };
-const EFFECTED_POLICIES_SEARCH_PROPS = { className: 'effected-policies-search' };
+const SEARCH_PROPS = { className: 'effected-policies-search' };
 
 const StyledEuiSelectable = styled.div`
   .effected-policies-search {
@@ -228,7 +228,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 options={selectableOptions}
                 listProps={listProps || DEFAULT_LIST_PROPS}
                 onChange={handleOnPolicySelectChange}
-                searchProps={EFFECTED_POLICIES_SEARCH_PROPS}
+                searchProps={SEARCH_PROPS}
                 searchable={true}
                 data-test-subj={getTestId('policiesSelectable')}
               >
