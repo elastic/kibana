@@ -25,27 +25,27 @@ To switch to a
 Beats integration, use the filter on the left.
 
 [role="screenshot"]
-image::images/integration-filter.png[Filter for determining whether to show Elasic Agent or Beats integrations in the Integrations view, width=50%]
+image::images/integration-filter.png[Filter for Elasic Agent or Beats in Integrations, width=50%]
 
 
 [float]
-==== Enterprise Search
+==== Enterprise Search integrations
 Discover, extract, and index your web content into App Search engines using the
 {app-search-ref}/web-crawler.html[Enterprise Search web crawler].
 Search across Google Drive, GitHub, Salesforce, and many other web services using
 {workplace-search-ref}/workplace-search-content-sources.html[Workplace Search content sources].
 
 [float]
-==== Observability
+==== Observability integrations
 
 Get logs, metrics, and uptime data into the Elastic Stack.
 Integrations are available for popular services and platforms,
 such as Nginx, AWS, and MongoDB,
-and generic input types like log files.  For more information,
-refer to .....
+and generic input types like log files.
+Refer to {observability-guide}/observability-introduction.html[What is Elastic Observability] for more information.
 
 [float]
-==== Security
+==== Security integrations
 
 Collect threat intelligence from a variety of sources.
 
