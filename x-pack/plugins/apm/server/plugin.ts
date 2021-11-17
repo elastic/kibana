@@ -194,6 +194,7 @@ export class APMPlugin
       ruleDataClient,
       config: currentConfig,
       logger: this.logger,
+      kibanaVersion: this.initContext.env.packageInfo.version,
     });
 
     core.deprecations.registerDeprecations({
