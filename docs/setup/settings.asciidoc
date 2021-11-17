@@ -110,7 +110,7 @@ in this setting.
  currently do not have an inspector, for example Timelion and Monitoring.
  *Default: `false`*
 
-The following example shows a valid `elasticsearch.query` logger configuration:
+The following example shows a valid verbose `elasticsearch.query` logger configuration:
 |===
 
 [source,text]
@@ -299,13 +299,14 @@ suggestions. This value must be a whole number greater than zero.
 [NOTE]
 ============
 To reload the logging settings, send a SIGHUP signal to {kib}.
+For more logging configuration options, see the <<logging-configuration, Configure Logging in {kib}>> guide.
 ============
 
 [cols="2*<"]
 |===
 
 |[[logging-root]] `logging.root:`
-| The {kibana-ref}/logging-service.html#logging-service[`root` logger] has a dedicated configuration node since this context name is special and is pre-configured for logging by default.
+| The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured and will log at an `info` level if not specifically declared. If any other logging configuration is specified, `root` _must_ also be explicitly configured.
 // TODO: add link to the advanced logging documentation.
 
 |[[logging-root-appenders]] `logging.root.appenders:`

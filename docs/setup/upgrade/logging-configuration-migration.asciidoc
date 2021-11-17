@@ -49,32 +49,3 @@ the log messages aren't handled by the `root` logger anymore and are not forward
 
 |===
 
-[[logging-cli-migration]]
-=== Logging configuration via CLI
-
-As is the case for any of Kibana's config settings, you can specify your logging configuration via the CLI. For convenience, the `--verbose` and `--silent` flags exist as shortcuts and will continue to be supported beyond v7.
-
-If you wish to override these flags, you can always do so by passing your preferred logging configuration directly to the CLI. For example, with the following configuration:
-
-[source,yaml]
-----
-logging:
-  appenders:
-    custom:
-      type: console
-      layout:
-        type: pattern
-        pattern: "[%date][%level] %message"
-----
-
-you can override the flags with:
-
-[options="header"]
-|===
-
-| legacy logging | {kib} Platform logging | cli shortcuts
-
-|--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=custom | --verbose
-
-|--silent| --logging.root.level=off | --silent
-|===
