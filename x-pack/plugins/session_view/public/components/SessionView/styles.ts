@@ -38,18 +38,18 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
     const slideIn = keyframes({
       to: {
         right: '0',
-      }
+      },
     });
-    
+
     const slideOut = keyframes({
       from: {
         right: '0',
       },
       to: {
         right: '-100%',
-      }
+      },
     });
-    
+
     const detailPanel: CSSObject = {
       width: '424px',
       height: `${height}px`,
@@ -66,7 +66,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
         animation: `${slideIn.name} 200ms ease forwards`,
       },
     ];
-    
+
     const detailPanelOut: Array<string | CSSObject> = [
       slideOut.styles,
       {
@@ -82,7 +82,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       detailPanelIn,
       detailPanelOut,
     };
-  }, [euiTheme]);
+  }, [height, euiTheme]);
 
   return cached;
 };

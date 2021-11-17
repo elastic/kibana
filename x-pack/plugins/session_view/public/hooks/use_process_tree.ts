@@ -47,7 +47,7 @@ interface ProcessFields {
   exit_code?: number;
 }
 
-interface ProcessSelf extends ProcessFields {
+export interface ProcessSelf extends ProcessFields {
   parent: ProcessFields;
   session: ProcessFields;
   entry: ProcessFields;
@@ -134,7 +134,9 @@ class ProcessImpl implements Process {
   }
 
   getDetails() {
-    const execsForks = this.events.filter(({ event }) => [EventAction.exec, EventAction.fork].includes(event.action));
+    const execsForks = this.events.filter(({ event }) =>
+      [EventAction.exec, EventAction.fork].includes(event.action)
+    );
 
     return execsForks[execsForks.length - 1];
   }
@@ -199,8 +201,8 @@ export const useProcessTree = ({
     if (processMap[sessionEntityId].events.length === 0) {
       processMap[sessionEntityId].events.push({
         ...events[0],
-        ...events[0].process.entry
-      })
+        ...events[0].process.entry,
+      });
     }
   };
 

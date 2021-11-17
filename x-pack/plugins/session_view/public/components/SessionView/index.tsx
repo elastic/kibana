@@ -6,6 +6,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
+import MonacoEditor from 'react-monaco-editor';
 import {
   EuiSearchBar,
   EuiSearchBarOnChangeArgs,
@@ -17,6 +18,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
@@ -24,6 +27,7 @@ import { ProcessTree } from '../ProcessTree';
 import { Process, ProcessEvent } from '../../hooks/use_process_tree';
 import { useStyles } from './styles';
 import { PROCESS_EVENTS_ROUTE } from '../../../common/constants';
+import { flattenJSON } from '../../../common/utils/flatten_json';
 
 interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session.entity_id
@@ -47,8 +51,9 @@ interface ProcessEventResults {
 export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [data, setData] = useState<any[]>([]);
-  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
-  const [isDetailMounted, setIsDetailMounted] = useState<boolean>(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isDetailMounted, setIsDetailMounted] = useState(false);
+  const [selectedDetailTab, setSelectedDetailTab] = useState('tree');
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
 
   const { http } = useKibana<CoreStart>().services;
@@ -75,7 +80,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
       http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
         query: {
           indexes: ['cmd*', '.siem-signals-*'],
-          sessionEntityId
+          sessionEntityId,
         },
       })
   );
@@ -107,10 +112,127 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     if (!isDetailOpen) setIsDetailOpen(true);
   };
 
+  const detailPanelTabs = [
+    {
+      id: 'tree',
+      name: 'Tree view',
+      content: (
+        <>
+          {selectedProcess && (
+            <>
+              <EuiTitle size="s">
+                <span>Command Detail</span>
+              </EuiTitle>
+              <EuiSpacer />
+              {selectedProcess.events.map((event) => {
+                const flattenedSelectedProcess = flattenJSON(event);
+                return (
+                  <>
+                    <EuiTitle size="xs">
+                      <span>{flattenedSelectedProcess['event.action']}</span>
+                    </EuiTitle>
+                    <EuiDescriptionList
+                      type="column"
+                      compressed
+                      listItems={Object.keys(flattenedSelectedProcess).map((title) => ({
+                        title,
+                        description: flattenedSelectedProcess[title],
+                      }))}
+                    />
+                    <EuiSpacer />
+                  </>
+                );
+              })}
+              <EuiSpacer size="xxl" />
+            </>
+          )}
+          <EuiTitle size="s">
+            <span>Session Detail</span>
+          </EuiTitle>
+          <EuiSpacer />
+          {(() => {
+            const flattenedSession = flattenJSON(data?.[0]?.process.session);
+            return (
+              <EuiDescriptionList
+                type="column"
+                compressed
+                listItems={Object.keys(flattenedSession).map((title) => ({
+                  title,
+                  description: flattenedSession[title],
+                }))}
+              />
+            );
+          })()}
+          <EuiSpacer size="xxl" />
+          <EuiTitle size="s">
+            <span>Server Detail</span>
+          </EuiTitle>
+          {/* Add server detail */}
+          <EuiSpacer size="xxl" />
+          <EuiTitle size="s">
+            <span>Alert Detail</span>
+          </EuiTitle>
+          {/* Add alert detail conditionally */}
+        </>
+      ),
+    },
+    {
+      id: 'json',
+      name: 'JSON view',
+      content: (
+        <>
+          {selectedProcess && (
+            <>
+              <EuiTitle size="s">
+                <span>Command Detail</span>
+              </EuiTitle>
+              <EuiSpacer />
+              <MonacoEditor
+                height={400}
+                language="javascript"
+                options={{
+                  lineNumbers: 'on',
+                  language: 'json',
+                  readOnly: true,
+                }}
+                value={JSON.stringify(selectedProcess?.events || {}, null, 4)}
+              />
+              <EuiSpacer size="xxl" />
+            </>
+          )}
+          <EuiTitle size="s">
+            <span>Session Detail</span>
+          </EuiTitle>
+          <EuiSpacer />
+          <MonacoEditor
+            height={400}
+            language="javascript"
+            options={{
+              lineNumbers: 'on',
+              language: 'json',
+              readOnly: true,
+            }}
+            value={JSON.stringify(data?.[0]?.process.session || {}, null, 4)}
+          />
+          <EuiSpacer size="xxl" />
+          <EuiTitle size="s">
+            <span>Server Detail</span>
+          </EuiTitle>
+          {/* Add server detail */}
+          <EuiSpacer size="xxl" />
+          <EuiTitle size="s">
+            <span>Alert Detail</span>
+          </EuiTitle>
+          {/* Add alert detail conditionally */}
+        </>
+      ),
+    },
+  ];
+
   if (!data.length) {
     return renderNoData();
   }
-console.log(selectedProcess)
+
   return (
     <>
       <EuiFlexGroup>
@@ -123,7 +245,12 @@ console.log(selectedProcess)
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSplitPanel.Outer direction="row" color="transparent" borderRadius="none" css={styles.outerPanel}>
+      <EuiSplitPanel.Outer
+        direction="row"
+        color="transparent"
+        borderRadius="none"
+        css={styles.outerPanel}
+      >
         <EuiSplitPanel.Inner paddingSize="none" css={styles.treePanel}>
           <div css={styles.processTree}>
             <ProcessTree
@@ -144,44 +271,19 @@ console.log(selectedProcess)
               if (!isDetailMounted) setIsDetailOpen(false);
             }}
           >
-            {selectedProcess && (
-              <>
-                <EuiTitle size="xs"><span>Command Detail</span></EuiTitle>
-                <EuiSpacer />
-                {selectedProcess.events.map((event) => {
-                  return (<EuiDescriptionList
-                    type="column"
-                    compressed
-                    listItems={Object.keys(event).map((title) => ({
-                      title,
-                      description: JSON.stringify(event[title as keyof ProcessEvent], null, 4),
-                    }))}
-                  />)
-                })}
-                <EuiSpacer size="xxl"/>
-              </>
-            )}
-
-            <EuiTitle size="xs"><span>Session Detail</span></EuiTitle>
-            <EuiSpacer />
-            <EuiDescriptionList
-              type="column"
-              compressed
-              listItems={Object.keys(data?.[0].process.session).map((title) => ({
-                title,
-                description: JSON.stringify(data?.[0].process.session[title], null, 4),
-              }))}
-            />
-
-            <EuiSpacer size="xxl"/>
-
-            <EuiTitle size="xs"><span>Server Detail</span></EuiTitle>
-            {/* Add server detail */}
-
-            <EuiSpacer size="xxl"/>
-            
-            <EuiTitle size="xs"><span>Alert Detail</span></EuiTitle>
-            {/* Add alert detail conditionally */}
+            <EuiTabs>
+              {detailPanelTabs.map((tab, idx) => (
+                <EuiTab
+                  key={idx}
+                  onClick={() => setSelectedDetailTab(tab.id)}
+                  isSelected={tab.id === selectedDetailTab}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+            <EuiSpacer size="xxl" />
+            {detailPanelTabs.find((obj) => obj.id === selectedDetailTab)?.content}
           </EuiSplitPanel.Inner>
         )}
       </EuiSplitPanel.Outer>
