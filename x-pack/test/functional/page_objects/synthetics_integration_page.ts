@@ -425,9 +425,24 @@ export function SyntheticsIntegrationPageProvider({
      * @params name {string} the name of the monitor
      * @params zipUrl {string} the zip url of the synthetics suites
      */
-    async configureBrowserAdvancedOptions({ screenshots, syntheticsArgs }: Record<string, string>) {
+    async configureBrowserAdvancedOptions({
+      screenshots,
+      syntheticsArgs,
+      downloadSpeed,
+      uploadSpeed,
+      latency,
+    }: {
+      screenshots: string;
+      syntheticsArgs: string;
+      downloadSpeed: string;
+      uploadSpeed: string;
+      latency: string;
+    }) {
       await testSubjects.click('syntheticsBrowserAdvancedFieldsAccordion');
       await testSubjects.selectValue('syntheticsBrowserScreenshots', screenshots);
+      await this.fillTextInputByTestSubj('syntheticsBrowserDownloadSpeed', downloadSpeed);
+      await this.fillTextInputByTestSubj('syntheticsBrowserUploadSpeed', uploadSpeed);
+      await this.fillTextInputByTestSubj('syntheticsBrowserLatency', latency);
       await this.setComboBox('syntheticsBrowserSyntheticsArgs', syntheticsArgs);
     },
   };
