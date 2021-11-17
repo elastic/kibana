@@ -8,17 +8,22 @@ import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React from 'react';
 
-const RemoveButtonLabelInActionsCellCss = css`
-  .euiTableRowCell--hasActions .euiButtonEmpty .euiButtonContent {
-    padding: 0px 0px;
-    .euiButtonEmpty__text {
-      display: none;
-    }
-  }
-`;
 interface ActionsEuiTableFormattingProps {
   children: ReactNode;
 }
 export const ActionsEuiTableFormatting = React.memo<ActionsEuiTableFormattingProps>(
-  ({ children }) => <div css={RemoveButtonLabelInActionsCellCss}>{children}</div>
+  ({ children }) => (
+    <div
+      css={css`
+        .euiTableRowCell--hasActions .euiButtonEmpty .euiButtonContent {
+          padding: 0px 0px;
+          .euiButtonEmpty__text {
+            display: none;
+          }
+        }
+      `}
+    >
+      {children}
+    </div>
+  )
 );

@@ -294,7 +294,7 @@ export class RolesGridPage extends Component<Props, State> {
             isPrimary: true,
             render: (role: Role) => {
               const title = i18n.translate('xpack.security.management.roles.editRoleActionName', {
-                defaultMessage: `Clone`,
+                defaultMessage: `Edit`,
               });
 
               const label = i18n.translate('xpack.security.management.roles.editRoleActionLabel', {
