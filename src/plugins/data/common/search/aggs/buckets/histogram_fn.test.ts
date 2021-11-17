@@ -34,6 +34,7 @@ describe('agg_expression_functions', () => {
               "json": undefined,
               "maxBars": undefined,
               "min_doc_count": undefined,
+              "autoExtendBounds": false,
             },
             "schema": undefined,
             "type": "histogram",
@@ -50,6 +51,7 @@ describe('agg_expression_functions', () => {
         maxBars: 25,
         min_doc_count: false,
         has_extended_bounds: false,
+        autoExtendBounds: true,
         extended_bounds: {
           type: 'extended_bounds',
           min: 1,
@@ -74,6 +76,7 @@ describe('agg_expression_functions', () => {
             "json": undefined,
             "maxBars": 25,
             "min_doc_count": false,
+            "autoExtendBounds": true,
           },
           "schema": undefined,
           "type": "histogram",
