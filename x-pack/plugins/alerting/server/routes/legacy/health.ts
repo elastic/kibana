@@ -12,6 +12,7 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { AlertingFrameworkHealth } from '../../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { getSecurityHealth } from '../../lib/get_security_health';
 
 export function healthRoute(
   router: AlertingRouter,
@@ -31,22 +32,16 @@ export function healthRoute(
       }
       trackLegacyRouteUsage('health', usageCounter);
       try {
-        const isEsSecurityEnabled: boolean | null = licenseState.getIsSecurityEnabled();
         const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
-        const areApiKeysEnabled = await context.alerting.areApiKeysEnabled();
 
-        let isSufficientlySecure;
-        if (isEsSecurityEnabled === null) {
-          isSufficientlySecure = false;
-        } else {
-          // if isEsSecurityEnabled = true, then areApiKeysEnabled must be true to enable alerting
-          // if isEsSecurityEnabled = false, then it does not matter what areApiKeysEnabled is
-          isSufficientlySecure = !isEsSecurityEnabled || (isEsSecurityEnabled && areApiKeysEnabled);
-        }
+        const securityHealth = await getSecurityHealth(
+          async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
+          async () => encryptedSavedObjects.canEncrypt,
+          context.alerting.areApiKeysEnabled
+        );
 
         const frameworkHealth: AlertingFrameworkHealth = {
-          isSufficientlySecure,
-          hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
+          ...securityHealth,
           alertingFrameworkHeath,
         };
 

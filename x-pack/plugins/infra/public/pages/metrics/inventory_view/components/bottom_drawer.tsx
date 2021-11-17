@@ -52,6 +52,7 @@ export const BottomDrawer: React.FC<{
             aria-expanded={isOpen}
             iconType={isOpen ? 'arrowDown' : 'arrowRight'}
             onClick={onClick}
+            data-test-subj="toggleTimelineButton"
           >
             {isOpen ? hideHistory : showHistory}
           </ShowHideButton>
