@@ -11,10 +11,6 @@ import type { ExpressionFunctionDefinition } from '../../../../expressions/commo
 import { EXPRESSION_HEATMAP_LEGEND_NAME } from '../constants';
 import { HeatmapLegendConfig, HeatmapLegendConfigResult } from '../types';
 
-/**
- * TODO check if it's possible to make a shared function
- * based on the XY chart
- */
 export const heatmapLegendConfig: ExpressionFunctionDefinition<
   typeof EXPRESSION_HEATMAP_LEGEND_NAME,
   null,

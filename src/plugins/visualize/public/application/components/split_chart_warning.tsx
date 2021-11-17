@@ -50,7 +50,7 @@ export const SplitChartWarning = () => {
                 {!canEditAdvancedSettings && (
                   <FormattedMessage
                     id="visualize.legacyCharts.conditionalMessage.noPermissions"
-                    defaultMessage="Contact your system administrator to switch to the new library."
+                    defaultMessage="Contact your system administrator to switch to the old library."
                   />
                 )}
               </>

@@ -36,7 +36,7 @@ export const getColorPicker =
   ({ anchor, color, onClose, onChange, seriesIdentifiers: [seriesIdentifier] }) => {
     const seriesName = seriesIdentifier.key;
     const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {}) ?? {};
-    const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName.toString());
+    const colorIsOverwritten = seriesName.toString() in overwriteColors;
     let keyDownEventOn = false;
     const handleChange = (newColor: string | null) => {
       if (newColor) {

@@ -11,7 +11,6 @@ import { Settings, TooltipType, Heatmap } from '@elastic/charts';
 import { chartPluginMock } from '../../../../charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
 import type { Datatable } from '../../../../expressions/public';
-// import { shallow, mount } from 'enzyme';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
@@ -48,7 +47,7 @@ const args: HeatmapArguments = {
     type: 'palette',
     name: '',
     params: {
-      colors: ['rgb(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
+      colors: ['rgb(0, 0, 0)', 'rgb(112, 38, 231)'],
       stops: [0, 150],
       gradient: false,
       rangeMin: 0,
@@ -83,7 +82,7 @@ const uiState = {
   setSilent: jest.fn(),
 } as any;
 
-describe('PieComponent', function () {
+describe('HeatmapComponent', function () {
   let wrapperProps: HeatmapRenderProps;
 
   beforeAll(() => {
@@ -139,7 +138,7 @@ describe('PieComponent', function () {
     await act(async () => {
       expect(component.find(Heatmap).prop('colorScale')).toEqual({
         bands: [
-          { color: 'rgb(0, 0, 0, 0)', end: 0, start: 0 },
+          { color: 'rgb(0, 0, 0)', end: 0, start: 0 },
           { color: 'rgb(112, 38, 231)', end: Infinity, start: 0 },
         ],
         type: 'bands',
@@ -156,7 +155,7 @@ describe('PieComponent', function () {
     await act(async () => {
       expect(component.find(Heatmap).prop('colorScale')).toEqual({
         bands: [
-          { color: 'rgb(0, 0, 0, 0)', end: 0, start: 0 },
+          { color: 'rgb(0, 0, 0)', end: 0, start: 0 },
           { color: 'rgb(112, 38, 231)', end: 150, start: 0 },
         ],
         type: 'bands',

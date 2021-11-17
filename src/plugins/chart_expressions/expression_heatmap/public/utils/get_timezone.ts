@@ -15,8 +15,7 @@ import type { IUiSettingsClient } from '../../../../../core/public';
 export function getTimeZone(uiSettings: IUiSettingsClient) {
   if (uiSettings.isDefault('dateFormat:tz')) {
     const detectedTimeZone = moment.tz.guess();
-    if (detectedTimeZone) return detectedTimeZone;
-    else return moment().format('Z');
+    return detectedTimeZone || moment().format('Z');
   } else {
     return uiSettings.get('dateFormat:tz', 'Browser');
   }

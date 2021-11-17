@@ -115,14 +115,12 @@ function computeColorRanges(
 const getAccessor = (value: string | ExpressionValueVisDimension, columns: DatatableColumn[]) => {
   if (typeof value === 'string') {
     return value;
-  } else {
-    const accessor = value.accessor;
-    if (typeof accessor === 'number') {
-      return columns[accessor].id;
-    } else {
-      return accessor.id;
-    }
   }
+  const accessor = value.accessor;
+  if (typeof accessor === 'number') {
+    return columns[accessor].id;
+  }
+  return accessor.id;
 };
 
 const HeatmapComponent: FC<HeatmapRenderProps> = ({
@@ -140,7 +138,7 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const isDarkTheme = chartsThemeService.useDarkMode();
   // legacy heatmap legend is handled by the uiState
   const [showLegend, setShowLegend] = useState<boolean>(() => {
-    const bwcLegendStateDefault = args.legend.isVisible == null ? true : args.legend.isVisible;
+    const bwcLegendStateDefault = args.legend.isVisible ?? true;
     return uiState?.get('vis.legendOpen', bwcLegendStateDefault);
   });
 

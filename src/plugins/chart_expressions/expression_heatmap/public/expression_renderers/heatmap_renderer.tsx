@@ -19,7 +19,7 @@ import {
 import { getFormatService, getPaletteService, getUISettings, getThemeService } from '../services';
 import { getTimeZone } from '../utils/get_timezone';
 
-import HeatmapComponent from '../compoments/heatmap_component';
+import HeatmapComponent from '../components/heatmap_component';
 import './index.scss';
 const MemoizedChart = memo(HeatmapComponent);
 
