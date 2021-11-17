@@ -15,12 +15,12 @@ import {
   FoundExceptionListItemSchema,
   FindExceptionListItemSchema,
   UpdateExceptionListItemSchema,
+  ReadExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   httpHandlerMockFactory,
   ResponseProvidersInterface,
 } from '../../../common/mock/endpoint/http_handler_mock_factory';
-import { TRUSTED_APPS_UPDATE_API } from '../../../../common/endpoint/constants';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { POLICY_REFERENCE_PREFIX } from '../../../../common/endpoint/service/trusted_apps/mapping';
 
@@ -77,7 +77,7 @@ export type TrustedAppPutHttpMocksInterface = ResponseProvidersInterface<{
 export const trustedAppPutHttpMocks = httpHandlerMockFactory<TrustedAppPutHttpMocksInterface>([
   {
     id: 'trustedAppUpdate',
-    path: TRUSTED_APPS_UPDATE_API,
+    path: EXCEPTION_LIST_ITEM_URL,
     method: 'put',
     handler: ({ body, path }): ExceptionListItemSchema => {
       const response: ExceptionListItemSchema = {
@@ -98,3 +98,28 @@ export const trustedAppPutHttpMocks = httpHandlerMockFactory<TrustedAppPutHttpMo
     },
   },
 ]);
+
+export type TrustedAppsGetOneHttpMocksInterface = ResponseProvidersInterface<{
+  trustedApp: (options: HttpFetchOptionsWithPath) => ExceptionListItemSchema;
+}>;
+/**
+ * HTTP mock for retrieving list of Trusted Apps
+ */
+export const trustedAppsGetOneHttpMocks =
+  httpHandlerMockFactory<TrustedAppsGetOneHttpMocksInterface>([
+    {
+      id: 'trustedApp',
+      path: EXCEPTION_LIST_ITEM_URL,
+      method: 'get',
+      handler: ({ query }): ExceptionListItemSchema => {
+        const apiQueryParams = query as ReadExceptionListItemSchema;
+        const exceptionItem = new ExceptionsListItemGenerator('seed').generate();
+
+        exceptionItem.item_id = apiQueryParams.item_id ?? exceptionItem.item_id;
+        exceptionItem.namespace_type =
+          apiQueryParams.namespace_type ?? exceptionItem.namespace_type;
+
+        return exceptionItem;
+      },
+    },
+  ]);
