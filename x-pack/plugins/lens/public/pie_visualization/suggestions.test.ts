@@ -304,7 +304,7 @@ describe('suggestions', () => {
         state: undefined,
         keptLayerIds: ['first'],
       });
-      expect(currentSuggestions).toHaveLength(3);
+      expect(currentSuggestions).toHaveLength(4);
       expect(currentSuggestions.every((s) => s.hide)).toEqual(true);
     });
 
@@ -324,7 +324,7 @@ describe('suggestions', () => {
         state: undefined,
         keptLayerIds: ['first'],
       });
-      expect(currentSuggestions).toHaveLength(3);
+      expect(currentSuggestions).toHaveLength(4);
       expect(currentSuggestions.every((s) => s.hide)).toEqual(true);
     });
 
@@ -900,6 +900,7 @@ describe('suggestions', () => {
         keptLayerIds: ['first'],
       };
 
+      // test with 1 group
       expect(
         suggestions(meta).filter(({ hide, state }) => !hide && state.shape === 'mosaic')
       ).toMatchInlineSnapshot(`Array []`);
@@ -914,6 +915,7 @@ describe('suggestions', () => {
         operation: { label: 'Top 7', dataType: 'string' as DataType, isBucketed: true },
       });
 
+      // test with 3 groups
       expect(
         suggestions(meta).filter(({ hide, state }) => !hide && state.shape === 'mosaic')
       ).toMatchInlineSnapshot(`Array []`);
