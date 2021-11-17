@@ -120,9 +120,8 @@ export const createRules = async ({
         threatFilters: threatFilters as PartialFilter[] | undefined,
         threatIndex,
         threatIndicatorPath:
-          threatIndicatorPath ?? type === 'threat_match'
-            ? DEFAULT_INDICATOR_SOURCE_PATH
-            : undefined,
+          threatIndicatorPath ??
+          (type === 'threat_match' ? DEFAULT_INDICATOR_SOURCE_PATH : undefined),
         threatQuery,
         concurrentSearches,
         itemsPerSearch,
