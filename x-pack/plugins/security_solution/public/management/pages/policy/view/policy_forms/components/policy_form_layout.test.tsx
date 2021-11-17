@@ -16,9 +16,9 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getEndpointListPath } from '../../../../../common/routing';
-import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
 import { licenseService } from '../../../../../../common/hooks/use_license';
 import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '../../../../../../../../fleet/common';
+import { policyListApiPathHandlers } from '../../../../../services/policy/test_mock_utils';
 
 jest.mock('../../../../../../common/hooks/use_license');
 

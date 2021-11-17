@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import {
-  INGEST_API_EPM_PACKAGES,
-  sendGetPackagePolicy,
-  sendGetEndpointSecurityPackage,
-  sendGetEndpointSpecificPackagePolicies,
-} from './ingest';
-import { httpServiceMock } from '../../../../../../../../../src/core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 import {
   EPM_API_ROUTES,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_API_ROOT,
   PACKAGE_POLICY_API_ROUTES,
-} from '../../../../../../../fleet/common';
-import { policyListApiPathHandlers } from '../test_mock_utils';
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../../fleet/common';
+import {
+  INGEST_API_EPM_PACKAGES,
+  sendGetEndpointSecurityPackage,
+  sendGetEndpointSpecificPackagePolicies,
+  sendGetPackagePolicy,
+} from './ingest';
+import { policyListApiPathHandlers } from './test_mock_utils';
 
 describe('ingest service', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;

@@ -6,19 +6,23 @@
  */
 
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
+import { NewPolicyData } from '../../../../common/endpoint/types';
 import {
-  GetPackagePoliciesRequest,
-  GetAgentStatusResponse,
-  GetAgentsResponse,
-  DeletePackagePoliciesResponse,
   DeletePackagePoliciesRequest,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  GetPackagesResponse,
+  DeletePackagePoliciesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
-} from '../../../../../../../fleet/common';
-import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../types';
-import { NewPolicyData } from '../../../../../../common/endpoint/types';
+  GetAgentsResponse,
+  GetAgentStatusResponse,
+  GetPackagePoliciesRequest,
+  GetPackagesResponse,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../../fleet/common';
+import {
+  GetPolicyListResponse,
+  GetPolicyResponse,
+  UpdatePolicyResponse,
+} from '../../pages/policy/types';
 
 const INGEST_API_ROOT = `/api/fleet`;
 export const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;

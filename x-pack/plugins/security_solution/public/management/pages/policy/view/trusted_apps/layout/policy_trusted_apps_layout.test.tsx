@@ -18,10 +18,10 @@ import { getMockListResponse } from '../../../test_utils';
 import { createLoadedResourceState, isLoadedResourceState } from '../../../../../state';
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
-import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
 import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '../../../../../../../../fleet/common';
+import { policyListApiPathHandlers } from '../../../../../services/policy/test_mock_utils';
 
 jest.mock('../../../../trusted_apps/service');
 jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');

@@ -29,7 +29,6 @@ import {
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
-import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../../../common/lib/kibana';
 import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
@@ -55,6 +54,7 @@ import {
   metadataTransformPrefix,
   METADATA_UNITED_TRANSFORM,
 } from '../../../../../common/endpoint/constants';
+import { mockPolicyResultList } from '../../../services/policy/test_mock_utils';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -68,8 +68,8 @@ jest.mock('@kbn/i18n/react', () => {
   };
 });
 jest.mock('../../../../common/components/link_to');
-jest.mock('../../policy/store/services/ingest', () => {
-  const originalModule = jest.requireActual('../../policy/store/services/ingest');
+jest.mock('../../../services/policy/ingest', () => {
+  const originalModule = jest.requireActual('../../../services/policy/ingest');
   return {
     ...originalModule,
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),

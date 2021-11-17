@@ -16,12 +16,6 @@ import {
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
-  INGEST_API_AGENT_POLICIES,
-  INGEST_API_EPM_PACKAGES,
-  INGEST_API_PACKAGE_POLICIES,
-  INGEST_API_FLEET_AGENTS,
-} from '../../policy/store/services/ingest';
-import {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
@@ -32,6 +26,12 @@ import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pend
 import { ACTION_STATUS_ROUTE } from '../../../../../common/endpoint/constants';
 import { METADATA_TRANSFORM_STATS_URL } from '../../../../../common/constants';
 import { TransformStats, TransformStatsResponse } from '../types';
+import {
+  INGEST_API_AGENT_POLICIES,
+  INGEST_API_EPM_PACKAGES,
+  INGEST_API_FLEET_AGENTS,
+  INGEST_API_PACKAGE_POLICIES,
+} from '../../../services/policy/ingest';
 
 const generator = new EndpointDocGenerator('seed');
 
