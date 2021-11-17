@@ -13,13 +13,12 @@ import { fireEvent } from '@testing-library/dom';
 import { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
 import {
   ConditionEntryField,
-  GetTrustedAppsListResponse,
   NewTrustedApp,
   OperatingSystem,
   PostTrustedAppCreateResponse,
   TrustedApp,
 } from '../../../../../common/endpoint/types';
-import { HttpFetchOptions } from 'kibana/public';
+import { HttpFetchOptions, HttpFetchOptionsWithPath } from 'kibana/public';
 import {
   TRUSTED_APPS_GET_API,
   TRUSTED_APPS_LIST_API,
@@ -35,6 +34,8 @@ import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trust
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { licenseService } from '../../../../common/hooks/use_license';
+import { trustedAppsPageHttpApiMocks } from '../test_utils/mocks';
+import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 // TODO: remove this mock when feature flag is removed
 jest.mock('../../../../common/hooks/use_experimental_features');
@@ -66,58 +67,11 @@ describe('When on the Trusted Apps Page', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let render: () => ReturnType<AppContextTestRender['render']>;
+  let mockedApis: ReturnType<typeof trustedAppsPageHttpApiMocks>;
+
   const originalScrollTo = window.scrollTo;
   const act = reactTestingLibrary.act;
-
   const getFakeTrustedApp = jest.fn();
-
-  const createListApiResponse = (
-    page: number = 1,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    per_page: number = 20
-  ): GetTrustedAppsListResponse => {
-    return {
-      data: [getFakeTrustedApp()],
-      total: 50, // << Should be a value large enough to fulfill two pages
-      page,
-      per_page,
-    };
-  };
-
-  const mockListApis = (http: AppContextTestRender['coreStart']['http']) => {
-    const currentGetHandler = http.get.getMockImplementation();
-
-    http.get.mockImplementation(async (...args) => {
-      const path = args[0] as unknown as string;
-      // @ts-expect-error TS2352
-      const httpOptions = args[1] as HttpFetchOptions;
-
-      if (path === TRUSTED_APPS_LIST_API) {
-        return createListApiResponse(
-          Number(httpOptions?.query?.page ?? 1),
-          Number(httpOptions?.query?.per_page ?? 20)
-        );
-      }
-
-      if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
-        const policy = generator.generatePolicyPackagePolicy();
-        policy.name = 'test policy A';
-        policy.id = 'abc123';
-
-        const response: GetPackagePoliciesResponse = {
-          items: [policy],
-          page: 1,
-          perPage: 1000,
-          total: 1,
-        };
-        return response;
-      }
-
-      if (currentGetHandler) {
-        return currentGetHandler(...args);
-      }
-    });
-  };
 
   beforeAll(() => {
     window.scrollTo = () => {};
@@ -131,15 +85,15 @@ describe('When on the Trusted Apps Page', () => {
     mockedContext = createAppRootMockRenderer();
     getFakeTrustedApp.mockImplementation(
       (): TrustedApp => ({
-        id: '1111-2222-3333-4444',
+        id: '2d95bec3-b48f-4db7-9622-a2b061cc031d',
         version: 'abc123',
-        name: 'one app',
+        name: 'Generated Exception (3xnng)',
         os: OperatingSystem.WINDOWS,
         created_at: '2021-01-04T13:55:00.561Z',
         created_by: 'me',
         updated_at: '2021-01-04T13:55:00.561Z',
         updated_by: 'me',
-        description: 'a good one',
+        description: 'created by ExceptionListItemGenerator',
         effectScope: { type: 'global' },
         entries: [
           {
@@ -156,6 +110,7 @@ describe('When on the Trusted Apps Page', () => {
     coreStart = mockedContext.coreStart;
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     waitForAction = mockedContext.middlewareSpy.waitForAction;
+    mockedApis = trustedAppsPageHttpApiMocks(coreStart.http);
     render = () => mockedContext.render(<TrustedAppsPage />);
     reactTestingLibrary.act(() => {
       history.push('/administration/trusted_apps');
@@ -173,8 +128,6 @@ describe('When on the Trusted Apps Page', () => {
       });
       return renderResult;
     };
-
-    beforeEach(() => mockListApis(coreStart.http));
 
     it('should display subtitle info about trusted apps', async () => {
       const { getByTestId } = await renderWithListData();
@@ -199,7 +152,7 @@ describe('When on the Trusted Apps Page', () => {
         renderResult = await renderWithListData();
 
         await act(async () => {
-          (await renderResult.findAllByTestId('trustedAppCard-header-actions-button'))[0].click();
+          (await renderResult.findAllByTestId('trustedAppCard-header-actions-button'))[2].click();
         });
 
         act(() => {
@@ -284,7 +237,9 @@ describe('When on the Trusted Apps Page', () => {
         });
 
         it('should persist edit params to url', () => {
-          expect(history.location.search).toEqual('?show=edit&id=1111-2222-3333-4444');
+          expect(history.location.search).toEqual(
+            '?show=edit&id=2d95bec3-b48f-4db7-9622-a2b061cc031d'
+          );
         });
 
         it('should display the Edit flyout', () => {
@@ -315,14 +270,19 @@ describe('When on the Trusted Apps Page', () => {
             'addTrustedAppFlyout-createForm-descriptionField'
           ) as HTMLTextAreaElement;
 
-          expect(formNameInput.value).toEqual('one app');
-          expect(formDescriptionInput.value).toEqual('a good one');
+          expect(formNameInput.value).toEqual('Generated Exception (3xnng)');
+          expect(formDescriptionInput.value).toEqual('created by ExceptionListItemGenerator');
         });
 
         describe('and when Save is clicked', () => {
-          it('should call the correct api (PUT)', () => {
-            act(() => {
+          it('should call the correct api (PUT)', async () => {
+            await act(async () => {
               fireEvent.click(renderResult.getByTestId('addTrustedAppFlyout-createButton'));
+              await waitForAction('trustedAppCreationSubmissionResourceStateChanged', {
+                validate({ payload }) {
+                  return isLoadedResourceState(payload.newState);
+                },
+              });
             });
 
             expect(coreStart.http.put).toHaveBeenCalledTimes(1);
@@ -332,9 +292,11 @@ describe('When on the Trusted Apps Page', () => {
               HttpFetchOptions
             ];
 
-            expect(lastCallToPut[0]).toEqual('/api/endpoint/trusted_apps/1111-2222-3333-4444');
+            expect(lastCallToPut[0]).toEqual(
+              '/api/endpoint/trusted_apps/2d95bec3-b48f-4db7-9622-a2b061cc031d'
+            );
             expect(JSON.parse(lastCallToPut[1].body as string)).toEqual({
-              name: 'one app',
+              name: 'Generated Exception (3xnng)',
               os: 'windows',
               entries: [
                 {
@@ -344,7 +306,7 @@ describe('When on the Trusted Apps Page', () => {
                   type: 'match',
                 },
               ],
-              description: 'a good one',
+              description: 'created by ExceptionListItemGenerator',
               effectScope: {
                 type: 'global',
               },
@@ -485,8 +447,6 @@ describe('When on the Trusted Apps Page', () => {
 
       return renderResult;
     };
-
-    beforeEach(() => mockListApis(coreStart.http));
 
     it('should display the create flyout', async () => {
       const { getByTestId } = await renderAndClickAddButton();
@@ -773,7 +733,7 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and there are no trusted apps', () => {
-    const releaseExistsResponse: jest.MockedFunction<() => Promise<GetTrustedAppsListResponse>> =
+    const releaseExistsResponse: jest.MockedFunction<() => Promise<FoundExceptionListItemSchema>> =
       jest.fn(async () => {
         return {
           data: [],
@@ -782,7 +742,7 @@ describe('When on the Trusted Apps Page', () => {
           per_page: 1,
         };
       });
-    const releaseListResponse: jest.MockedFunction<() => Promise<GetTrustedAppsListResponse>> =
+    const releaseListResponse: jest.MockedFunction<() => Promise<FoundExceptionListItemSchema>> =
       jest.fn(async () => {
         return {
           data: [],
@@ -793,34 +753,13 @@ describe('When on the Trusted Apps Page', () => {
       });
 
     beforeEach(() => {
-      const priorMockImplementation = coreStart.http.get.getMockImplementation();
-      // @ts-expect-error TS7006
-      coreStart.http.get.mockImplementation((path, options) => {
-        if (path === TRUSTED_APPS_LIST_API) {
-          const { page, per_page: perPage } = options.query as { page: number; per_page: number };
+      mockedApis.responseProvider.trustedAppsList.mockImplementation(({ query }) => {
+        const { page, per_page: perPage } = query as { page: number; per_page: number };
 
-          if (page === 1 && perPage === 1) {
-            return releaseExistsResponse();
-          } else {
-            return releaseListResponse();
-          }
-        }
-
-        if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
-          const policy = generator.generatePolicyPackagePolicy();
-          policy.name = 'test policy A';
-          policy.id = 'abc123';
-
-          const response: GetPackagePoliciesResponse = {
-            items: [policy],
-            page: 1,
-            perPage: 1000,
-            total: 1,
-          };
-          return response;
-        }
-        if (priorMockImplementation) {
-          return priorMockImplementation(path);
+        if (page === 1 && perPage === 1) {
+          return releaseExistsResponse();
+        } else {
+          return releaseListResponse();
         }
       });
     });
@@ -852,13 +791,13 @@ describe('When on the Trusted Apps Page', () => {
       });
       expect(await renderResult.findByTestId('trustedAppEmptyState')).not.toBeNull();
       releaseListResponse.mockResolvedValueOnce({
-        data: [getFakeTrustedApp()],
+        data: [mockedApis.responseProvider.trustedApp({ query: {} } as HttpFetchOptionsWithPath)],
         total: 1,
         page: 1,
         per_page: 20,
       });
       releaseExistsResponse.mockResolvedValueOnce({
-        data: [getFakeTrustedApp()],
+        data: [mockedApis.responseProvider.trustedApp({ query: {} } as HttpFetchOptionsWithPath)],
         total: 1,
         page: 1,
         per_page: 1,
@@ -876,13 +815,13 @@ describe('When on the Trusted Apps Page', () => {
 
     it('should should show empty prompt once the last trusted app entry is deleted', async () => {
       releaseListResponse.mockResolvedValueOnce({
-        data: [getFakeTrustedApp()],
+        data: [mockedApis.responseProvider.trustedApp({ query: {} } as HttpFetchOptionsWithPath)],
         total: 1,
         page: 1,
         per_page: 20,
       });
       releaseExistsResponse.mockResolvedValueOnce({
-        data: [getFakeTrustedApp()],
+        data: [mockedApis.responseProvider.trustedApp({ query: {} } as HttpFetchOptionsWithPath)],
         total: 1,
         page: 1,
         per_page: 1,
@@ -931,7 +870,6 @@ describe('When on the Trusted Apps Page', () => {
   describe('and the search is dispatched', () => {
     let renderResult: ReturnType<AppContextTestRender['render']>;
     beforeEach(async () => {
-      mockListApis(coreStart.http);
       reactTestingLibrary.act(() => {
         history.push('/administration/trusted_apps?filter=test');
       });
