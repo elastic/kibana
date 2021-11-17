@@ -35,7 +35,7 @@ export const useSendCurrentRequestToES = () => {
           i18n.translate('console.notification.error.noRequestSelectedTitle', {
             defaultMessage:
               'No request selected. Select a request by placing the cursor inside it.',
-          }),
+          })
         );
         return;
       }
@@ -68,15 +68,16 @@ export const useSendCurrentRequestToES = () => {
           defaultMessage: 'Could not save request to Console history.',
         });
         if (isQuotaExceededError(saveToHistoryError)) {
-          notifications.toasts.addWarning(
-            {
-              title: 'Request history is full. Clear the console history or disable saving new requests.',
-              text: toMountPoint(StorageQuotaError({
+          notifications.toasts.addWarning({
+            title:
+              'Request history is full. Clear the console history or disable saving new requests.',
+            text: toMountPoint(
+              StorageQuotaError({
                 onClearHistory: () => history.clearHistory(),
                 onDisableSavingToHistory: () => settings.setHistoryDisabled(true),
-              })),
-            },
-          );
+              })
+            ),
+          });
         } else {
           // Best effort, but still notify the user.
           notifications.toasts.addError(saveToHistoryError, {

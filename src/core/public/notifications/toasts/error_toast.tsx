@@ -86,7 +86,10 @@ function showErrorDialog({
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButton onClick={() => modal.close()} fill>
-              <FormattedMessage id="core.notifications.errorToast.closeModal" defaultMessage="Close" />
+              <FormattedMessage
+                id="core.notifications.errorToast.closeModal"
+                defaultMessage="Close"
+              />
             </EuiButton>
           </EuiModalFooter>
         </I18nContext>
