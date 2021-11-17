@@ -6,7 +6,7 @@
  */
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { pushConfigs } from '../../lib/synthetics_service/push_configs';
+import { getServiceCredentials, pushConfigs } from '../../lib/synthetics_service/push_configs';
 import { generateAPIKey } from './generate_service_api_key';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types';
 import { savedObjectsAdapter, syntheticsServiceApiKey } from '../../lib/saved_objects';
@@ -21,7 +21,15 @@ export const createSyncSyntheticsConfig: UMRestApiRouteFactory = () => ({
       security: server.security,
     });
 
-    await pushConfigs({ savedObjectsClient, config: server.config, cloud: server.cloud, apiKey });
+    const settings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
+
+    await pushConfigs({
+      savedObjectsClient,
+      config: server.config,
+      cloud: server.cloud,
+      apiKey,
+      settings,
+    });
   },
 });
 export const fetchAPIKey = async ({ savedObjects, server, request }: any) => {

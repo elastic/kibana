@@ -52,6 +52,9 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSe
   validate: {
     body: schema.object({
       heartbeatIndices: schema.string(),
+      serviceUrl: schema.maybe(schema.string()),
+      serviceUsername: schema.maybe(schema.string()),
+      servicePassword: schema.maybe(schema.string()),
       certAgeThreshold: schema.number(),
       certExpirationThreshold: schema.number(),
       defaultConnectors: schema.arrayOf(schema.string()),

@@ -16,8 +16,8 @@ export const config: PluginConfigDescriptor = {
         schema.object({
           service: schema.maybe(
             schema.object({
-              username: schema.string(),
-              password: schema.string(),
+              username: schema.maybe(schema.string()),
+              password: schema.maybe(schema.string()),
               url: schema.maybe(schema.string()),
               hosts: schema.arrayOf(schema.string()),
             })

@@ -7,12 +7,19 @@
 
 import * as t from 'io-ts';
 
-export const DynamicSettingsType = t.type({
-  heartbeatIndices: t.string,
-  certAgeThreshold: t.number,
-  certExpirationThreshold: t.number,
-  defaultConnectors: t.array(t.string),
-});
+export const DynamicSettingsType = t.intersection([
+  t.type({
+    heartbeatIndices: t.string,
+    certAgeThreshold: t.number,
+    certExpirationThreshold: t.number,
+    defaultConnectors: t.array(t.string),
+  }),
+  t.partial({
+    serviceUrl: t.string,
+    serviceUsername: t.string,
+    servicePassword: t.string,
+  }),
+]);
 
 export const DynamicSettingsSaveType = t.intersection([
   t.type({

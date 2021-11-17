@@ -10,6 +10,8 @@ import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { fetchAPIKey } from './sync_synthetics_config';
 import { getDefaultESHosts } from '../../lib/synthetics_service/get_cloud_es_host';
+import { getServiceCredentials } from '../../lib/synthetics_service/push_configs';
+import { savedObjectsAdapter } from '../../lib/saved_objects';
 
 export const getSyntheticsConfig: UMRestApiRouteFactory = () => ({
   method: 'POST',
@@ -19,13 +21,26 @@ export const getSyntheticsConfig: UMRestApiRouteFactory = () => ({
       monitor: schema.any(),
     }),
   },
-  handler: async ({ savedObjectsClient, request, server, context }): Promise<any> => {
+  handler: async ({
+    savedObjectsClient,
+    request,
+    server,
+    context,
+    uptimeEsClient,
+  }): Promise<any> => {
     const { monitor } = request.body;
     const { config, cloud } = server;
 
     const apiKey = await fetchAPIKey({
       savedObjects: context.core.savedObjects,
       security: server.security,
+    });
+
+    const settings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
+
+    const { serviceUrl, servicePassword, serviceUsername } = getServiceCredentials({
+      config,
+      settings,
     });
 
     const esHosts = getDefaultESHosts({ config, cloud });
@@ -43,16 +58,13 @@ export const getSyntheticsConfig: UMRestApiRouteFactory = () => ({
       // service doesn't currently take api key, but will need to be passed
       const response = await axios({
         method: 'GET',
-        url: config.unsafe.service.url + '/cronjob',
+        url: serviceUrl + '/cronjob',
         data,
         /* these credentials will come from user input, most likely in the form of a saved object when the admin
          * enables the synthetics service */
         headers: {
           Authorization:
-            'Basic ' +
-            Buffer.from(
-              `${config.unsafe.service.username}:${config.unsafe.service.password}`
-            ).toString('base64'),
+            'Basic ' + Buffer.from(`${serviceUsername}:${servicePassword}`).toString('base64'),
         },
       });
       return { list: response.data };

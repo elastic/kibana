@@ -29,5 +29,7 @@ export async function syncSyntheticsConfig({
   // }
 
   const apiKey = await savedObjectsAdapter.getSyntheticsServiceApiKey(savedObjectsClient!);
-  if (apiKey) await pushConfigs({ core, config, cloud, apiKey });
+  const settings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
+
+  if (apiKey) await pushConfigs({ core, config, cloud, apiKey, settings });
 }

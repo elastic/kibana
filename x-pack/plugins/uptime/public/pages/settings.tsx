@@ -34,11 +34,15 @@ import {
 } from '../../common/translations';
 import { AlertDefaultsForm } from '../components/settings/alert_defaults_form';
 import { BLANK_STR, SPACE_STR } from './translations';
+import { ServiceForm } from '../components/settings/service_form';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';
   expirationThresholdError?: string;
   ageThresholdError?: string;
+  serviceUsernameError?: string;
+  servicePasswordError?: string;
+  serviceUrlError?: string;
 }
 
 export interface SettingsFormProps {
@@ -86,6 +90,9 @@ const isDirtyForm = (formFields: DynamicSettings | null, settings?: DynamicSetti
     settings?.certAgeThreshold !== formFields?.certAgeThreshold ||
     settings?.certExpirationThreshold !== formFields?.certExpirationThreshold ||
     settings?.heartbeatIndices !== formFields?.heartbeatIndices ||
+    settings?.serviceUrl !== formFields?.serviceUrl ||
+    settings?.serviceUsername !== formFields?.serviceUsername ||
+    settings?.servicePassword !== formFields?.servicePassword ||
     JSON.stringify(settings?.defaultConnectors) !== JSON.stringify(formFields?.defaultConnectors)
   );
 };
@@ -156,6 +163,13 @@ export const SettingsPage: React.FC = () => {
           <div id="settings-form">
             <EuiForm>
               <IndicesForm
+                loading={dss.loading}
+                onChange={onChangeFormField}
+                formFields={formFields}
+                fieldErrors={fieldErrors}
+                isDisabled={isFormDisabled}
+              />
+              <ServiceForm
                 loading={dss.loading}
                 onChange={onChangeFormField}
                 formFields={formFields}
