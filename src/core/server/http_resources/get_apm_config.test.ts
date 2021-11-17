@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getConfigurationMock, agentMock } from './get_apm_config.test.mocks';
+import {
+  getConfigurationMock,
+  agentMock,
+  shouldInstrumentClientMock,
+} from './get_apm_config.test.mocks';
 import { getApmConfig } from './get_apm_config';
 
 const defaultApmConfig = {
@@ -17,6 +21,7 @@ const defaultApmConfig = {
 describe('getApmConfig', () => {
   beforeEach(() => {
     getConfigurationMock.mockReturnValue(defaultApmConfig);
+    shouldInstrumentClientMock.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -25,29 +30,8 @@ describe('getApmConfig', () => {
   });
 
   it('returns null if apm is disabled', () => {
-    getConfigurationMock.mockReturnValue({
-      active: false,
-    });
+    shouldInstrumentClientMock.mockReturnValue(false);
     expect(getApmConfig('/path')).toBeNull();
-
-    getConfigurationMock.mockReturnValue(undefined);
-    expect(getApmConfig('/path')).toBeNull();
-  });
-
-  it('returns null if apm is enabled with contextPropagationOnly: true', () => {
-    getConfigurationMock.mockReturnValue({
-      active: true,
-      contextPropagationOnly: true,
-    });
-    expect(getApmConfig('/path')).toBeDefined();
-  });
-
-  it('returns null if apm is enabled with disableSend: true', () => {
-    getConfigurationMock.mockReturnValue({
-      active: true,
-      disableSend: true,
-    });
-    expect(getApmConfig('/path')).toBeDefined();
   });
 
   it('calls `getConfig` with the correct parameters', () => {
