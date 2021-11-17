@@ -530,7 +530,7 @@ export async function createInstallation(options: {
   installSource: InstallSource;
 }) {
   const { savedObjectsClient, packageInfo, installSource } = options;
-  const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
+  const { name: pkgName, version: pkgVersion } = packageInfo;
   const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
@@ -549,7 +549,6 @@ export async function createInstallation(options: {
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,
-      internal,
       removable,
       install_version: pkgVersion,
       install_status: 'installing',

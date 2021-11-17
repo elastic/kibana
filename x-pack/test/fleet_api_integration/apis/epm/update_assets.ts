@@ -457,7 +457,6 @@ export default function (providerContext: FtrProviderContext) {
         ],
         name: 'all_assets',
         version: '0.2.0',
-        internal: false,
         removable: true,
         install_version: '0.2.0',
         install_status: 'installed',
