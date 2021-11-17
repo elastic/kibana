@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment-timezone';
+import useObservable from 'react-use/lib/useObservable';
 
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -154,4 +155,20 @@ export const useNavigation = (appId: string) => {
   const { navigateTo } = useNavigateTo(appId);
   const { getAppUrl } = useAppUrl(appId);
   return { navigateTo, getAppUrl };
+};
+
+interface UseApplicationReturn {
+  appId: string;
+  appTitle: string;
+}
+
+export const useApplication = (): UseApplicationReturn => {
+  const { currentAppId$, applications$ } = useKibana().services.application;
+  // retrieve the most recent value from the BehaviorSubject
+  const appId = useObservable(currentAppId$) ?? '';
+  const applications = useObservable(applications$);
+
+  const appTitle = applications?.get(appId)?.category?.label ?? '';
+
+  return { appId, appTitle };
 };

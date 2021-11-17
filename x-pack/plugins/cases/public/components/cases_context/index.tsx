@@ -6,9 +6,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
-import { useKibana } from '../../common/lib/kibana';
+import { useApplication } from '../../common/lib/kibana';
 
 export interface CasesContextValue {
   owner: string[];
@@ -36,10 +35,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
   value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH },
 }) => {
-  const { currentAppId$, applications$ } = useKibana().services.application;
-  const appId = useObservable(currentAppId$);
-  const applications = useObservable(applications$);
-  const appTitle = appId ? applications?.get(appId)?.category?.label : undefined;
+  const { appId, appTitle } = useApplication();
 
   const [value, setValue] = useState<CasesContextStateValue>({
     owner,
