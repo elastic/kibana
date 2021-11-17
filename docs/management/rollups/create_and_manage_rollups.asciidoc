@@ -5,7 +5,7 @@
 experimental::[]
 
 A rollup job is a periodic task that aggregates data from indices specified
-by an index pattern, and then rolls it into a new index. Rollup indices are a good way to
+by a data view, and then rolls it into a new index. Rollup indices are a good way to
 compactly store months or years of historical
 data for use in visualizations and reports.
 
@@ -33,9 +33,9 @@ the process. You fill in the name, data flow, and how often you want to roll
 up the data.  Then you define a date histogram aggregation for the rollup job
 and optionally define terms, histogram, and metrics aggregations.
 
-When defining the index pattern, you must enter a name that is different than
+When defining the data view, you must enter a name that is different than
 the output rollup index. Otherwise, the job
-will attempt to capture the data in the rollup index. For example, if your index pattern is `metricbeat-*`,
+will attempt to capture the data in the rollup index. For example, if your data view is `metricbeat-*`,
 you can name your rollup index `rollup-metricbeat`, but not `metricbeat-rollup`.
 
 [role="screenshot"]
@@ -66,7 +66,7 @@ You can read more at {ref}/rollup-job-config.html[rollup job configuration].
 This example creates a rollup job to capture log data from sample web logs.
 Before you start, <<add-sample-data, add the web logs sample data set>>.
 
-In this example, you want data that is older than 7 days in the target index pattern `kibana_sample_data_logs`
+In this example, you want data that is older than 7 days in the target data view `kibana_sample_data_logs`
 to roll up into the `rollup_logstash` index. You’ll bucket the
 rolled up data on an hourly basis, using 60m for the time bucket configuration.
 This allows for more granular queries, such as 2h and 12h.
@@ -85,7 +85,7 @@ As you walk through the *Create rollup job* UI, enter the data:
 |Name
 |`logs_job`
 
-|Index pattern
+|Data view
 |`kibana_sample_data_logs`
 
 |Rollup index name
@@ -139,27 +139,23 @@ rollup index, or you can remove or archive it using <<creating-index-lifecycle-p
 Your next step is to visualize your rolled up data in a vertical bar chart.
 Most visualizations support rolled up data, with the exception of Timelion and Vega visualizations.
 
-. Open the main menu, then click *Stack Management > Index Patterns*.
+. Open the main menu, then click *Stack Management > Data Views*.
 
-. Click *Create index pattern*, and select *Rollup index pattern* from the dropdown.
-+
-[role="screenshot"]
-image::images/management-rollup-index-pattern.png[][Create rollup index pattern]
+. Click *Create data view*, and select *Rollup data view* from the dropdown.
 
-. Enter *rollup_logstash,kibana_sample_logs* as your *Index Pattern* and `@timestamp`
+. Enter *rollup_logstash,kibana_sample_logs* as your *Data View* and `@timestamp`
 as the *Time Filter field name*.
 +
-The notation for a combination index pattern with both raw and rolled up data
-is `rollup_logstash,kibana_sample_data_logs`. In this index pattern, `rollup_logstash`
-matches the rolled up index pattern and `kibana_sample_data_logs` matches the index
-pattern for raw data.
+The notation for a combination data view with both raw and rolled up data
+is `rollup_logstash,kibana_sample_data_logs`. In this data view, `rollup_logstash`
+matches the rolled up data view and `kibana_sample_data_logs` matches the data view for raw data.
 
 . Open the main menu, click *Dashboard*, then *Create dashboard*.
 
 . Set the <<set-time-filter,time filter>> to *Last 90 days*.
 
 . On the dashboard, click *Create visualization*.
- 
+
 . Choose `rollup_logstash,kibana_sample_data_logs`
 as your source to see both the raw and rolled up data.
 +
