@@ -8,14 +8,13 @@
   text-align: center;
 
   .lnsMetricExpression__value {
-    font-size: 60pt;
-    font-weight: 600;
+    font-size: $euiSizeXXL * 2;
+    font-weight: $euiFontWeightSemiBold;
     border-radius: $euiBorderRadius;
-    padding-left: $euiSize;
-    padding-right: $euiSize;
+    padding: 0 $euiSize;
   }
 
   .lnsMetricExpression__title {
-    font-size: 24pt;
+    font-size: $euiSizeXL;
   }
 }
