@@ -72,7 +72,7 @@ For a comprehensive overview of the upgrade process, refer to
 {es} can read indices created in the previous major version. Before you upgrade
 to 7.0.0, you must reindex or delete any indices created in 5.x or earlier.
 For more information, refer to
-{stack-ref}/upgrading-elastic-stack[Upgrading the Elastic Stack].
+{stack-ref}/upgrading-elastic-stack.html[Upgrading the Elastic Stack].
 
 When your reindex is complete, follow the <<upgrade-standard, Standard upgrade>>
 instructions.
