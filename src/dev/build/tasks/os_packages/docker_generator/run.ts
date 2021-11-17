@@ -38,7 +38,7 @@ export async function runDockerGenerator(
   }
 ) {
   let baseOSImage = '';
-  if (flags.ubuntu || flags.cloud) baseOSImage = 'ubuntu:20.04';
+  if (flags.ubuntu) baseOSImage = 'ubuntu:20.04';
   if (flags.ubi) baseOSImage = 'docker.elastic.co/ubi8/ubi-minimal:latest';
   const ubiVersionTag = 'ubi8';
 
