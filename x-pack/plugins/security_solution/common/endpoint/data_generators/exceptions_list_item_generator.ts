@@ -6,12 +6,11 @@
  */
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { DeepPartial } from 'utility-types';
 import { BaseDataGenerator } from './base_data_generator';
 import { POLICY_REFERENCE_PREFIX } from '../service/trusted_apps/mapping';
 
 export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
-  generate(overrides: DeepPartial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+  generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
     return {
       _version: this.randomString(5),
       comments: [],

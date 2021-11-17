@@ -7,28 +7,27 @@
 
 import { HttpFetchOptionsWithPath } from 'kibana/public';
 import {
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  EXCEPTION_LIST_ITEM_URL,
+} from '@kbn/securitysolution-list-constants';
+import {
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+  FindExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   httpHandlerMockFactory,
   ResponseProvidersInterface,
 } from '../../../common/mock/endpoint/http_handler_mock_factory';
 import { TRUSTED_APPS_UPDATE_API } from '../../../../common/endpoint/constants';
-import {
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  EXCEPTION_LIST_ITEM_URL,
-} from '../../../../../../../../../../../private/var/tmp/_bazel_ptavares/a4a237a05d507fc23e0818d3647eedfe/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-securitysolution-list-constants';
-import {
-  ExceptionListItemSchema,
-  FoundExceptionListItemSchema,
-} from '../../../../../../../../../../../private/var/tmp/_bazel_ptavares/a4a237a05d507fc23e0818d3647eedfe/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-securitysolution-io-ts-list-types';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { POLICY_REFERENCE_PREFIX } from '../../../../common/endpoint/service/trusted_apps/mapping';
-import {
-  FindExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-} from '../../../../../../../packages/kbn-securitysolution-io-ts-list-types/src';
 
-interface FindExceptionListItemSchemaQueryParams extends FindExceptionListItemSchema {
-  page: number;
-  per_page: number;
+interface FindExceptionListItemSchemaQueryParams
+  extends Omit<FindExceptionListItemSchema, 'page' | 'per_page'> {
+  page?: number;
+  per_page?: number;
 }
 
 export type PolicyDetailsGetTrustedAppsListHttpMocksInterface = ResponseProvidersInterface<{
@@ -44,7 +43,7 @@ export const trustedAppsGetListHttpMocks =
       path: `${EXCEPTION_LIST_ITEM_URL}/_find`,
       method: 'get',
       handler: ({ query }): FoundExceptionListItemSchema => {
-        const apiQueryParams = query as FindExceptionListItemSchemaQueryParams;
+        const apiQueryParams = query as unknown as FindExceptionListItemSchemaQueryParams;
         const generator = new ExceptionsListItemGenerator('seed');
         const perPage = apiQueryParams.per_page ?? 10;
         const data = Array.from({ length: Math.min(perPage, 50) }, () => generator.generate());
