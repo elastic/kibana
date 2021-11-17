@@ -8,7 +8,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { isColumnActionEnabled } from '@elastic/eui/src/components/datagrid/body/header/column_actions';
 import { SerializableRecord } from '@kbn/utility-types';
 import fc from 'fast-check';
 
