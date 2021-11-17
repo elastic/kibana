@@ -58,7 +58,7 @@ export function shiftPalette(stops: ColorStop[], max: number) {
   // shift everything right and add an additional stop at the end
   const result = stops.map((entry, i, array) => ({
     ...entry,
-    stop: i + 1 < array.length ? Math.min(array[i + 1].stop, max) : max,
+    stop: i + 1 < array.length ? array[i + 1].stop : max,
   }));
   if (stops[stops.length - 1].stop === max) {
     // extends the range by a fair amount to make it work the extra case for the last stop === max
