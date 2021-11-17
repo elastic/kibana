@@ -131,6 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
 
+      // Failing: See https://github.com/elastic/kibana/issues/115859
       it.skip('Index settings deprecation flyout', async () => {
         await PageObjects.upgradeAssistant.clickEsDeprecation(
           'indexSettings' // An index setting deprecation was added in the before() hook so should be guaranteed
@@ -141,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
 
-      it.skip('Default deprecation flyout', async () => {
+      it('Default deprecation flyout', async () => {
         await PageObjects.upgradeAssistant.clickEsDeprecation(
           'default' // A default deprecation was added in the before() hook so should be guaranteed
         );
