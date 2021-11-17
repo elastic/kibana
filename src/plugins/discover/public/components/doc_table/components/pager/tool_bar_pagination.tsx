@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 
 interface ToolBarPaginationProps {
   pageSize: number;
@@ -26,6 +27,11 @@ interface ToolBarPaginationProps {
   onPageClick: (page: number) => void;
   onPageSizeChange: (size: number) => void;
 }
+
+const TOOL_BAR_PAGINATION_STYLES = {
+  marginLeft: 'auto',
+  marginRight: euiLightVars.euiSizeL,
+};
 
 export const ToolBarPagination = ({
   pageSize,
@@ -61,12 +67,7 @@ export const ToolBarPagination = ({
   ));
 
   return (
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      alignItems="center"
-      gutterSize="xs"
-      responsive={false}
-    >
+    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={
@@ -92,7 +93,7 @@ export const ToolBarPagination = ({
         </EuiPopover>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={TOOL_BAR_PAGINATION_STYLES}>
         <EuiPagination
           aria-label={i18n.translate('discover.docTable.documentsNavigation', {
             defaultMessage: 'Documents navigation',
