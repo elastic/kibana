@@ -20,7 +20,6 @@ import {
   PageSetupResults,
   PhaseInstance,
   PhaseTimeouts,
-  Screenshot,
   ScreenshotObservableOpts,
   ScreenshotResults,
 } from './';
@@ -31,6 +30,7 @@ import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
+import { ScreenshotStitcher } from './stitcher';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
@@ -182,31 +182,47 @@ export class ScreenshotObservableHandler {
             page.elementsPositionAndAttributes ??
             getDefaultElementPosition(this.layout.getViewport(1));
 
+          this.logger.info(`taking screenshots`);
+
+          const stitcher = new ScreenshotStitcher({
+            outputClip: element.position,
+            zoom: 2,
+            max: 400,
+          });
           const endTrace = startTrace('get_screenshots', 'read');
 
-          // spit the screenshots into the stream
-          const data = await this.driver.screenshot(element.position);
-          stream.write(data);
-
-          if (!data?.byteLength) {
-            throw new Error(`Failure in getScreenshots! Screenshot data is void`);
-          }
-
-          const screenshots: Screenshot[] = [
-            {
-              title: element.attributes.title,
-              description: element.attributes.description,
-              byteLength: data.byteLength,
+          let byteLength = 0;
+          let screenshotCount = 0;
+          await stitcher.stream(
+            // captureFn
+            async (position) => {
+              console.log(JSON.stringify({ position }));
+              let data: Buffer | undefined;
+              try {
+                data = await this.driver.screenshot(position);
+              } catch (err) {
+                const myError = new Error(`Unable to capture screenshot: ${err}`);
+                throw myError;
+              }
+              return data as Buffer;
             },
-          ];
+            // handlerFn
+            (data, clip) => {
+              console.log(JSON.stringify({ clip }));
+              stream.write(data);
+              byteLength += data.byteLength;
+              screenshotCount += 1;
+            }
+          );
 
           endTrace();
 
+          this.logger.info(`screenshots taken: ${screenshotCount}`);
+
           return {
-            screenshots,
             timeRange,
+            byteLength,
             error: setupError,
-            byteLength: 1999,
             elementsPositionAndAttributes: [element],
           };
         })

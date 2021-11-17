@@ -39,9 +39,6 @@ export interface AttributesMap {
 
 export interface ElementPosition {
   boundingClientRect: {
-    // modern browsers support x/y, but older ones don't
-    top: number;
-    left: number;
     width: number;
     height: number;
   };

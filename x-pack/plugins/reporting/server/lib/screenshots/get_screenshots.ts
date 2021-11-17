@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Writable } from 'stream';
 import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ElementsPositionAndAttribute, Screenshot } from './';
@@ -55,68 +54,3 @@ export const getScreenshots = async (
 
   return screenshots;
 };
-
-export const streamScreenshots = async (
-  browser: HeadlessChromiumDriver,
-  stream: Writable,
-  elementsPositionAndAttributes: ElementsPositionAndAttribute[],
-  logger: LevelLogger
-): Promise<Screenshot[]> => {
-  logger.info(`taking screenshots`);
-
-  const screenshots: Screenshot[] = [];
-
-  for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
-    const endTrace = startTrace('get_screenshots', 'read');
-    const item = elementsPositionAndAttributes[i];
-
-    const data = await browser.screenshot(item.position);
-
-    if (!data?.byteLength) {
-      throw new Error(`Failure in getScreenshots! Screenshot data is void`);
-    }
-
-    // FIXME: figure out how to send multiple parts
-    stream.write(data);
-
-    screenshots.push({
-      title: item.attributes.title,
-      description: item.attributes.description,
-      byteLength: data.byteLength,
-    });
-
-    endTrace();
-  }
-
-  logger.info(`screenshots taken: ${screenshots.length}`);
-
-  return screenshots;
-};
-
-/*
- *
- *
-{
-  "elementsPositionAndAttributes": [
-    {
-      "position": {
-        "boundingClientRect": {
-          "top": 96,
-          "left": 0,
-          "width": 2553,
-          "height": 1100
-        },
-        "scroll": {
-          "x": 0,
-          "y": 0
-        }
-      },
-      "attributes": {
-        "title": "[Tim] Test Dashboard",
-        "description": ""
-      }
-    }
-  ]
-}
-
-*/

@@ -164,8 +164,8 @@ export class HeadlessChromiumDriver {
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
       clip: {
-        x: boundingClientRect.left + scroll.x,
-        y: boundingClientRect.top + scroll.y,
+        x: boundingClientRect.width + scroll.x,
+        y: boundingClientRect.height + scroll.y,
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       },
