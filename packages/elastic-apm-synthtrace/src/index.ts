@@ -7,13 +7,6 @@
  */
 
 export type { Exception } from './lib/entity';
-export type {
-  ElasticsearchOutput,
-  ElasticsearchOutputWriteTargets,
-} from './lib/output/to_elasticsearch_output';
-export type { Service } from './lib/service';
-export type { Browser } from './lib/browser';
-export type { Timerange } from './lib/timerange';
 export { service } from './lib/service';
 export { browser } from './lib/browser';
 export { timerange } from './lib/timerange';
