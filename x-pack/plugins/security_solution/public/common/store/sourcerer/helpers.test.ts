@@ -7,11 +7,7 @@
 
 import { mockGlobalState } from '../../mock';
 import { SourcererScopeName } from './model';
-import {
-  defaultDataViewByEventType,
-  getScopePatternListSelection,
-  validateSelectedPatterns,
-} from './helpers';
+import { getScopePatternListSelection, validateSelectedPatterns } from './helpers';
 
 const signalIndexName = mockGlobalState.sourcerer.signalIndexName;
 
@@ -23,10 +19,6 @@ const dataView = {
 const patternListNoSignals = mockGlobalState.sourcerer.defaultDataView.patternList
   .filter((p) => p !== signalIndexName)
   .sort();
-const patternListSignals = [
-  signalIndexName,
-  ...mockGlobalState.sourcerer.defaultDataView.patternList.filter((p) => p !== signalIndexName),
-].sort();
 
 describe('sourcerer store helpers', () => {
   describe('getScopePatternListSelection', () => {
@@ -130,6 +122,29 @@ describe('sourcerer store helpers', () => {
         },
       });
     });
+    it('sets to alerts in timeline even when does not yet exist', () => {
+      const dataViewNoSignals = {
+        ...mockGlobalState.sourcerer.defaultDataView,
+        patternList: patternListNoSignals,
+      };
+      const stateNoSignals = {
+        ...mockGlobalState.sourcerer,
+        defaultDataView: dataViewNoSignals,
+        kibanaDataViews: [dataViewNoSignals],
+      };
+      const result = validateSelectedPatterns(stateNoSignals, {
+        ...payload,
+        id: SourcererScopeName.timeline,
+        selectedPatterns: [`${mockGlobalState.sourcerer.signalIndexName}`],
+      });
+      expect(result).toEqual({
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          selectedDataViewId: dataView.id,
+          selectedPatterns: [signalIndexName],
+        },
+      });
+    });
     describe('handles missing dataViewId, 7.16 -> 8.0', () => {
       it('selectedPatterns.length > 0 & all selectedPatterns exist in defaultDataView, set dataViewId to defaultDataView.id', () => {
         const result = validateSelectedPatterns(mockGlobalState.sourcerer, {
@@ -172,75 +187,6 @@ describe('sourcerer store helpers', () => {
             ],
           },
         });
-      });
-    });
-  });
-  describe('defaultDataViewByEventType', () => {
-    it('defaults with no eventType', () => {
-      const result = defaultDataViewByEventType({ state: mockGlobalState.sourcerer });
-      expect(result).toEqual({
-        selectedDataViewId: dataView.id,
-        selectedPatterns: patternListSignals,
-      });
-    });
-    it('defaults with eventType: all', () => {
-      const result = defaultDataViewByEventType({
-        state: mockGlobalState.sourcerer,
-        eventType: 'all',
-      });
-      expect(result).toEqual({
-        selectedDataViewId: dataView.id,
-        selectedPatterns: patternListSignals,
-      });
-    });
-    it('defaults with eventType: raw', () => {
-      const result = defaultDataViewByEventType({
-        state: mockGlobalState.sourcerer,
-        eventType: 'raw',
-      });
-      expect(result).toEqual({
-        selectedDataViewId: dataView.id,
-        selectedPatterns: patternListNoSignals,
-      });
-    });
-    it('defaults with eventType: alert', () => {
-      const result = defaultDataViewByEventType({
-        state: mockGlobalState.sourcerer,
-        eventType: 'alert',
-      });
-      expect(result).toEqual({
-        selectedDataViewId: dataView.id,
-        selectedPatterns: [signalIndexName],
-      });
-    });
-    it('defaults with eventType: signal', () => {
-      const result = defaultDataViewByEventType({
-        state: mockGlobalState.sourcerer,
-        eventType: 'signal',
-      });
-      expect(result).toEqual({
-        selectedDataViewId: dataView.id,
-        selectedPatterns: [signalIndexName],
-      });
-    });
-    it('defaults with eventType: custom', () => {
-      const result = defaultDataViewByEventType({
-        state: mockGlobalState.sourcerer,
-        eventType: 'custom',
-      });
-      expect(result).toEqual({
-        selectedDataViewId: dataView.id,
-        selectedPatterns: patternListSignals,
-      });
-    });
-    it('defaults with eventType: eql', () => {
-      const result = defaultDataViewByEventType({
-        state: mockGlobalState.sourcerer,
-        eventType: 'eql',
-      });
-      expect(result).toEqual({
-        selectedDataViewId: dataView.id,
-        selectedPatterns: patternListSignals,
       });
     });
   });
