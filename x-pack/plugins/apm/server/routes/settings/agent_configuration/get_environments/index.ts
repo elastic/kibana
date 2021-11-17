@@ -8,7 +8,6 @@
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { getAllEnvironments } from '../../../environments/get_all_environments';
 import { Setup } from '../../../../lib/helpers/setup_request';
-import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { getExistingEnvironmentsForService } from './get_existing_environments_for_service';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 
