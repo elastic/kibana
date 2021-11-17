@@ -7,24 +7,26 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { SuggestionRequest, VisualizationSuggestion } from '../types';
+import type { SuggestionRequest, TableSuggestionColumn, VisualizationSuggestion } from '../types';
 import { layerTypes } from '../../common';
 import type { PieVisualizationState } from '../../common/expressions';
-import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
-import { isPartitionShape } from './render_helpers';
+import { CHART_NAMES, MAX_MOSAIC_BUCKETS, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
+import { isPartitionShape, isTreemapOrMosaicShape } from './render_helpers';
+
+function hasIntervalScale(columns: TableSuggestionColumn[]) {
+  return columns.some((col) => col.operation.scale === 'interval');
+}
 
 function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisualizationState>) {
   // Histograms are not good for pi. But we should not reject them on switching between partition charts.
-  const shouldRejectDateHistogram =
-    state?.shape && isPartitionShape(state.shape)
-      ? false
-      : table.columns.some((col) => col.operation.scale === 'interval');
+  const shouldRejectIntervals =
+    state?.shape && isPartitionShape(state.shape) ? false : hasIntervalScale(table.columns);
 
   return (
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    shouldRejectDateHistogram
+    shouldRejectIntervals
   );
 }
 
@@ -59,7 +61,7 @@ export function suggestions({
 
   const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
 
-  if (groups.length <= MAX_PIE_BUCKETS && subVisualizationId !== 'treemap') {
+  if (groups.length <= MAX_PIE_BUCKETS && !isTreemapOrMosaicShape(subVisualizationId!)) {
     let newShape: PieVisualizationState['shape'] =
       (subVisualizationId as PieVisualizationState['shape']) || 'donut';
     if (groups.length !== 1 && !subVisualizationId) {
@@ -99,7 +101,10 @@ export function suggestions({
       },
       previewIcon: 'bullseye',
       // dont show suggestions for same type
-      hide: table.changeType === 'reduced' || (state && state.shape !== 'treemap'),
+      hide:
+        table.changeType === 'reduced' ||
+        hasIntervalScale(groups) ||
+        (state && !isTreemapOrMosaicShape(state.shape)),
     };
 
     results.push(baseSuggestion);
@@ -160,16 +165,23 @@ export function suggestions({
       },
       previewIcon: 'bullseye',
       // hide treemap suggestions from bottom bar, but keep them for chart switcher
-      hide: table.changeType === 'reduced' || !state || (state && state.shape === 'treemap'),
+      hide:
+        table.changeType === 'reduced' ||
+        !state ||
+        hasIntervalScale(groups) ||
+        (state && state.shape === 'treemap'),
     });
   }
 
-  if (groups.length === 2 && state && state.shape !== 'mosaic') {
+  if (
+    groups.length <= MAX_MOSAIC_BUCKETS &&
+    (!subVisualizationId || subVisualizationId === 'mosaic')
+  ) {
     results.push({
       title: i18n.translate('xpack.lens.pie.mosaicSuggestionLabel', {
         defaultMessage: 'As Mosaic',
       }),
-      score: state.shape === 'treemap' ? 0.7 : 0.5,
+      score: state?.shape === 'treemap' ? 0.7 : 0.5,
       state: {
         shape: 'mosaic',
         palette: mainPalette || state?.palette,
@@ -199,7 +211,11 @@ export function suggestions({
         ],
       },
       previewIcon: 'bullseye',
-      hide: table.changeType === 'reduced',
+      hide:
+        groups.length !== 2 ||
+        table.changeType === 'reduced' ||
+        hasIntervalScale(groups) ||
+        (state && state.shape === 'mosaic'),
     });
   }
 

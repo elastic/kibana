@@ -53,5 +53,6 @@ export const CHART_NAMES = {
 
 export const MAX_PIE_BUCKETS = 3;
 export const MAX_TREEMAP_BUCKETS = 2;
+export const MAX_MOSAIC_BUCKETS = 2;
 
 export const DEFAULT_PERCENT_DECIMALS = 2;
