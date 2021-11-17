@@ -9,9 +9,8 @@ import { compact } from 'lodash';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
-import { AUTO_UPDATE_PACKAGES } from '../../common';
 import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
-import { SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
+import { AUTO_UPDATE_PACKAGES, SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
@@ -28,9 +27,9 @@ import { awaitIfPending } from './setup_utils';
 import { ensureFleetServerAgentPoliciesExists } from './agents';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
-import { getInstallations, installPackage } from './epm/packages';
+import { getInstallations, installPackage, removeInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
-import { pkgToPkgKey } from './epm/registry';
+import { pkgToPkgKey, fetchFindLatestPackage } from './epm/registry';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 
 export interface SetupStatus {
@@ -115,8 +114,11 @@ async function createSetupSideEffects(
   logger.debug('Setting up Fleet Server agent policies');
   await ensureFleetServerAgentPoliciesExists(soClient, esClient);
 
+  logger.debug("Verifying installed versions of Fleet's managed packages");
+  await ensureManagedPackageVersions(soClient, esClient);
+
   if (nonFatalErrors.length > 0) {
-    logger.info('Encountered non fatal errors during Fleet setup');
+    logger.info(`Encountered ${nonFatalErrors.length} non fatal errors during Fleet setup`);
     formatNonFatalErrors(nonFatalErrors).forEach((error) => logger.info(JSON.stringify(error)));
   }
 
@@ -229,4 +231,59 @@ export function formatNonFatalErrors(
       });
     }
   });
+}
+
+/**
+ * Ensures that "managed" packages are using the latest comptabile version. In cases where
+ * Kibana has been upgraded or rolled back, we need to ensure the versions of packages that are
+ * installed by default or designated as "auto update" are aligned with the stack version.
+ */
+export async function ensureManagedPackageVersions(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) {
+  const logger = appContextService.getLogger();
+
+  const managedPackageNames = [...DEFAULT_PACKAGES, ...AUTO_UPDATE_PACKAGES].map(
+    ({ name }) => name
+  );
+
+  const installedManagedPackages = await getInstallations(soClient, {
+    search: managedPackageNames.join(' | '),
+    searchFields: ['name'],
+    perPage: SO_SEARCH_LIMIT,
+  });
+
+  for (const managedPackageSo of installedManagedPackages.saved_objects) {
+    const {
+      attributes: { name, version },
+    } = managedPackageSo;
+
+    const latestPackage = await fetchFindLatestPackage(name);
+
+    if (version === latestPackage.version) {
+      continue;
+    }
+
+    logger.debug(
+      `Found out-of-sync package version ${version} for package ${name}. Replacing with latest compatible version ${latestPackage.version}`
+    );
+
+    // Uninstall the out-of-sync version of the package
+    await removeInstallation({
+      savedObjectsClient: soClient,
+      esClient,
+      pkgkey: pkgToPkgKey({ name, version }),
+    });
+
+    // Install the latest comptatible version from the registry
+    await installPackage({
+      savedObjectsClient: soClient,
+      esClient,
+      pkgkey: pkgToPkgKey({ name, version: latestPackage.version }),
+      installSource: 'registry',
+      skipPostInstall: true,
+      force: true,
+    });
+  }
 }
