@@ -58,9 +58,8 @@ export function getScreenshots$(
       const screen = new ScreenshotObservableHandler(driver, opts, getTimeouts(captureConfig));
 
       return Rx.from(opts.urlsOrUrlLocatorTuples).pipe(
-        concatMap((urlOrUrlLocatorTuple, index) => {
-          return Rx.of(1).pipe(
-            screen.setupPage(index, urlOrUrlLocatorTuple, apmTrans),
+        concatMap((urlOrUrlLocatorTuple, index) =>
+          screen.setupPage(index, urlOrUrlLocatorTuple, apmTrans).pipe(
             catchError((err) => {
               screen.checkPageIsOpen(); // this fails the job if the browser has closed
 
@@ -69,8 +68,8 @@ export function getScreenshots$(
             }),
             takeUntil(exit$),
             screen.getScreenshots()
-          );
-        }),
+          )
+        ),
         take(opts.urlsOrUrlLocatorTuples.length),
         toArray()
       );
