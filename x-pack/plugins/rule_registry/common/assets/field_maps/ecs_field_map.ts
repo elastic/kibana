@@ -75,11 +75,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'client.geo.continent_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'client.geo.continent_name': {
     type: 'keyword',
     array: false,
@@ -105,22 +100,12 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'client.geo.postal_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'client.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'client.geo.region_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'client.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -270,11 +255,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'cloud.service.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'container.id': {
     type: 'keyword',
     array: false,
@@ -302,21 +282,6 @@ export const ecsFieldMap = {
   },
   'container.runtime': {
     type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'data_stream.dataset': {
-    type: 'constant_keyword',
-    array: false,
-    required: false,
-  },
-  'data_stream.namespace': {
-    type: 'constant_keyword',
-    array: false,
-    required: false,
-  },
-  'data_stream.type': {
-    type: 'constant_keyword',
     array: false,
     required: false,
   },
@@ -350,11 +315,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'destination.geo.continent_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'destination.geo.continent_name': {
     type: 'keyword',
     array: false,
@@ -380,22 +340,12 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'destination.geo.postal_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'destination.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'destination.geo.region_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'destination.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -495,18 +445,8 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
-  'dll.code_signature.digest_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'dll.code_signature.exists': {
     type: 'boolean',
-    array: false,
-    required: false,
-  },
-  'dll.code_signature.signing_id': {
-    type: 'keyword',
     array: false,
     required: false,
   },
@@ -517,16 +457,6 @@ export const ecsFieldMap = {
   },
   'dll.code_signature.subject_name': {
     type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'dll.code_signature.team_id': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'dll.code_signature.timestamp': {
-    type: 'date',
     array: false,
     required: false,
   },
@@ -556,11 +486,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'dll.hash.sha512': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'dll.hash.ssdeep': {
     type: 'keyword',
     array: false,
     required: false,
@@ -870,18 +795,8 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
-  'file.code_signature.digest_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'file.code_signature.exists': {
     type: 'boolean',
-    array: false,
-    required: false,
-  },
-  'file.code_signature.signing_id': {
-    type: 'keyword',
     array: false,
     required: false,
   },
@@ -892,16 +807,6 @@ export const ecsFieldMap = {
   },
   'file.code_signature.subject_name': {
     type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.code_signature.team_id': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.code_signature.timestamp': {
-    type: 'date',
     array: false,
     required: false,
   },
@@ -940,157 +845,7 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'file.elf.architecture': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.byte_order': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.cpu_type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.creation_date': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'file.elf.exports': {
-    type: 'flattened',
-    array: true,
-    required: false,
-  },
-  'file.elf.header.abi_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.header.class': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.header.data': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.header.entrypoint': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'file.elf.header.object_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.header.os_abi': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.header.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.header.version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.imports': {
-    type: 'flattened',
-    array: true,
-    required: false,
-  },
-  'file.elf.sections': {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'file.elf.sections.chi2': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'file.elf.sections.entropy': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'file.elf.sections.flags': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.sections.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.sections.physical_offset': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.sections.physical_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'file.elf.sections.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.sections.virtual_address': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'file.elf.sections.virtual_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'file.elf.segments': {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'file.elf.segments.sections': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.segments.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.elf.shared_libraries': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'file.elf.telfhash': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'file.extension': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.fork_name': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1121,11 +876,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'file.hash.sha512': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'file.hash.ssdeep': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1360,32 +1110,12 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'host.cpu.usage': {
-    type: 'scaled_float',
-    array: false,
-    required: false,
-  },
-  'host.disk.read.bytes': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'host.disk.write.bytes': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
   'host.domain': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'host.geo.city_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.geo.continent_code': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1415,22 +1145,12 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'host.geo.postal_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'host.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'host.geo.region_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1457,26 +1177,6 @@ export const ecsFieldMap = {
   },
   'host.name': {
     type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'host.network.egress.bytes': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'host.network.egress.packets': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'host.network.ingress.bytes': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'host.network.ingress.packets': {
-    type: 'long',
     array: false,
     required: false,
   },
@@ -1587,11 +1287,6 @@ export const ecsFieldMap = {
   },
   'http.request.bytes': {
     type: 'long',
-    array: false,
-    required: false,
-  },
-  'http.request.id': {
-    type: 'keyword',
     array: false,
     required: false,
   },
@@ -1835,11 +1530,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'observer.geo.continent_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'observer.geo.continent_name': {
     type: 'keyword',
     array: false,
@@ -1865,22 +1555,12 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'observer.geo.postal_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'observer.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'observer.geo.region_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'observer.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2000,51 +1680,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'orchestrator.api_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'orchestrator.cluster.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'orchestrator.cluster.url': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'orchestrator.cluster.version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'orchestrator.namespace': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'orchestrator.organization': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'orchestrator.resource.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'orchestrator.resource.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'orchestrator.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'organization.id': {
     type: 'keyword',
     array: false,
@@ -2130,18 +1765,8 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'process.code_signature.digest_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'process.code_signature.exists': {
     type: 'boolean',
-    array: false,
-    required: false,
-  },
-  'process.code_signature.signing_id': {
-    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2152,16 +1777,6 @@ export const ecsFieldMap = {
   },
   'process.code_signature.subject_name': {
     type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.code_signature.team_id': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.code_signature.timestamp': {
-    type: 'date',
     array: false,
     required: false,
   },
@@ -2177,156 +1792,6 @@ export const ecsFieldMap = {
   },
   'process.command_line': {
     type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.architecture': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.byte_order': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.cpu_type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.creation_date': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'process.elf.exports': {
-    type: 'flattened',
-    array: true,
-    required: false,
-  },
-  'process.elf.header.abi_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.header.class': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.header.data': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.header.entrypoint': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.elf.header.object_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.header.os_abi': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.header.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.header.version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.imports': {
-    type: 'flattened',
-    array: true,
-    required: false,
-  },
-  'process.elf.sections': {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'process.elf.sections.chi2': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.elf.sections.entropy': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.elf.sections.flags': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.sections.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.sections.physical_offset': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.sections.physical_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.elf.sections.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.sections.virtual_address': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.elf.sections.virtual_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.elf.segments': {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'process.elf.segments.sections': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.segments.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.elf.shared_libraries': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'process.elf.telfhash': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.end': {
-    type: 'date',
     array: false,
     required: false,
   },
@@ -2365,11 +1830,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'process.hash.ssdeep': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'process.name': {
     type: 'keyword',
     array: false,
@@ -2385,18 +1845,8 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'process.parent.code_signature.digest_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'process.parent.code_signature.exists': {
     type: 'boolean',
-    array: false,
-    required: false,
-  },
-  'process.parent.code_signature.signing_id': {
-    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2407,16 +1857,6 @@ export const ecsFieldMap = {
   },
   'process.parent.code_signature.subject_name': {
     type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.code_signature.team_id': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.code_signature.timestamp': {
-    type: 'date',
     array: false,
     required: false,
   },
@@ -2432,156 +1872,6 @@ export const ecsFieldMap = {
   },
   'process.parent.command_line': {
     type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.architecture': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.byte_order': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.cpu_type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.creation_date': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.exports': {
-    type: 'flattened',
-    array: true,
-    required: false,
-  },
-  'process.parent.elf.header.abi_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.header.class': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.header.data': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.header.entrypoint': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.header.object_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.header.os_abi': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.header.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.header.version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.imports': {
-    type: 'flattened',
-    array: true,
-    required: false,
-  },
-  'process.parent.elf.sections': {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'process.parent.elf.sections.chi2': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.sections.entropy': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.sections.flags': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.sections.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.sections.physical_offset': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.sections.physical_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.sections.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.sections.virtual_address': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.sections.virtual_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.segments': {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'process.parent.elf.segments.sections': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.segments.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.elf.shared_libraries': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'process.parent.elf.telfhash': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.end': {
-    type: 'date',
     array: false,
     required: false,
   },
@@ -2616,11 +1906,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'process.parent.hash.sha512': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'process.parent.hash.ssdeep': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2863,7 +2148,7 @@ export const ecsFieldMap = {
   'rule.id': {
     type: 'keyword',
     array: false,
-    required: false,
+    required: true,
   },
   'rule.license': {
     type: 'keyword',
@@ -2925,11 +2210,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'server.geo.continent_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'server.geo.continent_name': {
     type: 'keyword',
     array: false,
@@ -2955,22 +2235,12 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'server.geo.postal_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'server.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'server.geo.region_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'server.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -3070,16 +2340,6 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
-  'service.address': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'service.environment': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'service.ephemeral_id': {
     type: 'keyword',
     array: false,
@@ -3145,11 +2405,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'source.geo.continent_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'source.geo.continent_name': {
     type: 'keyword',
     array: false,
@@ -3175,22 +2430,12 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'source.geo.postal_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'source.geo.region_iso_code': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'source.geo.region_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'source.geo.timezone': {
     type: 'keyword',
     array: false,
     required: false,
@@ -3298,6 +2543,11 @@ export const ecsFieldMap = {
   tags: {
     type: 'keyword',
     array: true,
+    required: false,
+  },
+  'threat.framework': {
+    type: 'keyword',
+    array: false,
     required: false,
   },
   'threat.enrichments': {
@@ -3411,151 +2661,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'threat.enrichments.indicator.file.drive_letter': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.architecture': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.byte_order': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.cpu_type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.creation_date': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.exports': {
-    type: 'flattened',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.header.abi_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.header.class': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.header.data': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.header.entrypoint': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.header.object_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.header.os_abi': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.header.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.header.version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.imports': {
-    type: 'flattened',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.sections': {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.sections.chi2': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.sections.entropy': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.sections.flags': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.sections.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.sections.physical_offset': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.sections.physical_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.sections.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.sections.virtual_address': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.sections.virtual_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.segments': {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.segments.sections': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.segments.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.shared_libraries': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.elf.telfhash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -3691,126 +2796,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'threat.enrichments.indicator.file.uid': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.alternative_names': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.issuer.common_name': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.issuer.country': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.issuer.distinguished_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.issuer.locality': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.issuer.organization': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.issuer.organizational_unit': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.issuer.state_or_province': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.not_after': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.not_before': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.public_key_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.public_key_curve': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.public_key_exponent': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.public_key_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.serial_number': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.signature_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.subject.common_name': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.subject.country': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.subject.distinguished_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.subject.locality': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.subject.organization': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.subject.organizational_unit': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.subject.state_or_province': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.x509.version_number': {
     type: 'keyword',
     array: false,
     required: false,
@@ -4030,126 +3015,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'threat.enrichments.indicator.x509.alternative_names': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.issuer.common_name': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.issuer.country': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.issuer.distinguished_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.issuer.locality': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.issuer.organization': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.issuer.organizational_unit': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.issuer.state_or_province': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.not_after': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.not_before': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.public_key_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.public_key_curve': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.public_key_exponent': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.public_key_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.serial_number': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.signature_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.subject.common_name': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.subject.country': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.subject.distinguished_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.subject.locality': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.subject.organization': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.subject.organizational_unit': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.subject.state_or_province': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.enrichments.indicator.x509.version_number': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'threat.enrichments.matched.atomic': {
     type: 'keyword',
     array: false,
@@ -4171,11 +3036,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'threat.enrichments.matched.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.framework': {
     type: 'keyword',
     array: false,
     required: false,
@@ -4301,151 +3161,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'threat.indicator.file.drive_letter': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.architecture': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.byte_order': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.cpu_type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.creation_date': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.exports': {
-    type: 'flattened',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.elf.header.abi_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.header.class': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.header.data': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.header.entrypoint': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.header.object_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.header.os_abi': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.header.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.header.version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.imports': {
-    type: 'flattened',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.elf.sections': {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.elf.sections.chi2': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.sections.entropy': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.sections.flags': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.sections.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.sections.physical_offset': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.sections.physical_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.sections.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.sections.virtual_address': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.sections.virtual_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.segments': {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.elf.segments.sections': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.segments.type': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.elf.shared_libraries': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.elf.telfhash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -4581,126 +3296,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'threat.indicator.file.uid': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.x509.alternative_names': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.issuer.common_name': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.issuer.country': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.issuer.distinguished_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.x509.issuer.locality': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.issuer.organization': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.issuer.organizational_unit': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.issuer.state_or_province': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.not_after': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.x509.not_before': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.x509.public_key_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.x509.public_key_curve': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.x509.public_key_exponent': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.x509.public_key_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.x509.serial_number': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.x509.signature_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.x509.subject.common_name': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.subject.country': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.subject.distinguished_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.x509.subject.locality': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.subject.organization': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.subject.organizational_unit': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.subject.state_or_province': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.file.x509.version_number': {
     type: 'keyword',
     array: false,
     required: false,
@@ -4916,156 +3511,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'threat.indicator.url.username': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.x509.alternative_names': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.issuer.common_name': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.issuer.country': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.issuer.distinguished_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.x509.issuer.locality': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.issuer.organization': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.issuer.organizational_unit': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.issuer.state_or_province': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.not_after': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.x509.not_before': {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.x509.public_key_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.x509.public_key_curve': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.x509.public_key_exponent': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.x509.public_key_size': {
-    type: 'long',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.x509.serial_number': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.x509.signature_algorithm': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.x509.subject.common_name': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.subject.country': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.subject.distinguished_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.x509.subject.locality': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.subject.organization': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.subject.organizational_unit': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.subject.state_or_province': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.indicator.x509.version_number': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.software.alias': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.software.id': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.software.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.software.platforms': {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  'threat.software.reference': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.software.type': {
     type: 'keyword',
     array: false,
     required: false,
