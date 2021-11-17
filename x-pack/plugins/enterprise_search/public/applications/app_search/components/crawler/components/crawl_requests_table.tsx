@@ -9,13 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiEmptyPrompt,
-  EuiTableFieldDataColumnType,
-} from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
