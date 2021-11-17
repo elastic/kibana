@@ -1334,10 +1334,8 @@ export const waitForRuleSuccessOrStatus = async (
             )}, status: ${JSON.stringify(response.status)}`
           );
         }
-        if (currentStatus == null) {
-          return false;
-        }
         return (
+          currentStatus != null &&
           currentStatus.status === status &&
           (afterDate ? new Date(currentStatus.status_date) > afterDate : true)
         );
