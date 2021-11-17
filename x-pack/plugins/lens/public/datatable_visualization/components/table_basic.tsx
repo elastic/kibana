@@ -30,6 +30,7 @@ import type {
   LensSortAction,
   LensResizeAction,
   LensToggleAction,
+  LensPagesizeAction,
 } from './types';
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
@@ -79,34 +80,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     );
   }, [props.args.pageSize]);
 
-  const onChangeItemsPerPage = useCallback(
-    (pageSize) =>
-      setPagination((_pagination) => ({
-        ..._pagination,
-        pageSize,
-        pageIndex: 0,
-      })),
-    [setPagination]
-  );
-
-  const onChangePage = useCallback(
-    (pageIndex) => {
-      setPagination((_pagination) => {
-        if (_pagination) {
-          return { pageSize: _pagination?.pageSize, pageIndex };
-        }
-      });
-    },
-    [setPagination]
-  );
-
-  const paginationConfig = pagination && {
-    ...pagination,
-    pageSizeOptions: PAGE_SIZE_OPTIONS,
-    onChangeItemsPerPage,
-    onChangePage,
-  };
-
   useDeepCompareEffect(() => {
     setColumnConfig({
       columns: props.args.columns,
@@ -149,11 +122,35 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onEditAction = useCallback(
-    (data: LensSortAction['data'] | LensResizeAction['data'] | LensToggleAction['data']) => {
+    (
+      data:
+        | LensSortAction['data']
+        | LensResizeAction['data']
+        | LensToggleAction['data']
+        | LensPagesizeAction['data']
+    ) => {
       dispatchEvent({ name: 'edit', data });
     },
     [dispatchEvent]
   );
+
+  const onChangeItemsPerPage = useCallback(
+    (pageSize) => onEditAction({ action: 'pagesize', size: pageSize }),
+    [onEditAction]
+  );
+
+  // active page isn't persisted, so we manage this state locally
+  const onChangePage = useCallback(
+    (pageIndex) => {
+      setPagination((_pagination) => {
+        if (_pagination) {
+          return { pageSize: _pagination?.pageSize, pageIndex };
+        }
+      });
+    },
+    [setPagination]
+  );
+
   const onRowContextMenuClick = useCallback(
     (data: LensTableRowContextMenuEvent['data']) => {
       dispatchEvent({ name: 'tableRowContextMenuClick', data });
@@ -409,7 +406,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           renderCellValue={renderCellValue}
           gridStyle={gridStyle}
           sorting={sorting}
-          pagination={paginationConfig}
+          pagination={
+            pagination && {
+              ...pagination,
+              pageSizeOptions: PAGE_SIZE_OPTIONS,
+              onChangeItemsPerPage,
+              onChangePage,
+            }
+          }
           onColumnResize={onColumnResize}
           toolbarVisibility={false}
           renderFooterCellValue={renderSummaryRow}

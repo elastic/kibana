@@ -668,5 +668,23 @@ describe('Datatable Visualization', () => {
         columns: [{ columnId: 'saved', width: undefined }],
       });
     });
+
+    it('should update page size', () => {
+      const currentState: DatatableVisualizationState = {
+        layerId: 'foo',
+        layerType: layerTypes.DATA,
+        columns: [{ columnId: 'saved', width: 5000 }],
+        paging: { enabled: true, size: 10 },
+      };
+      expect(
+        datatableVisualization.onEditAction!(currentState, {
+          name: 'edit',
+          data: { action: 'pagesize', size: 30 },
+        })
+      ).toEqual({
+        ...currentState,
+        paging: { enabled: true, size: 30 },
+      });
+    });
   });
 });

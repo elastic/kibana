@@ -26,6 +26,8 @@ import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { IUiSettingsClient } from 'kibana/public';
 import { RenderMode } from 'src/plugins/expressions';
 
+import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
+
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
   const data: LensMultiTable = {
@@ -756,6 +758,40 @@ describe('DatatableComponent', () => {
       wrapper.update();
 
       expect(wrapper.find(EuiDataGrid).prop('pagination')).not.toBeTruthy();
+    });
+
+    it('dispatches event when page size changed', async () => {
+      const { data, args } = sampleArgs();
+
+      args.pageSize = 10;
+
+      const wrapper = mount(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+        />
+      );
+
+      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(paginationConfig).toBeTruthy();
+
+      const sizeToChangeTo = 100;
+      paginationConfig?.onChangeItemsPerPage(sizeToChangeTo);
+
+      expect(onDispatchEvent).toHaveBeenCalledTimes(1);
+      expect(onDispatchEvent).toHaveBeenCalledWith({
+        name: 'edit',
+        data: {
+          action: LENS_EDIT_PAGESIZE_ACTION,
+          size: sizeToChangeTo,
+        },
+      });
     });
   });
 });

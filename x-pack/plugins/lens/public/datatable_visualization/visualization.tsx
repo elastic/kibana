@@ -423,10 +423,11 @@ export const getDatatableVisualization = ({
           },
         };
       case 'toggle':
+        const toggleColumnId = event.data.columnId;
         return {
           ...state,
           columns: state.columns.map((column) => {
-            if (column.columnId === event.data.columnId) {
+            if (column.columnId === toggleColumnId) {
               return {
                 ...column,
                 hidden: !column.hidden,
@@ -438,10 +439,11 @@ export const getDatatableVisualization = ({
         };
       case 'resize':
         const targetWidth = event.data.width;
+        const resizeColumnId = event.data.columnId;
         return {
           ...state,
           columns: state.columns.map((column) => {
-            if (column.columnId === event.data.columnId) {
+            if (column.columnId === resizeColumnId) {
               return {
                 ...column,
                 width: targetWidth,
@@ -450,6 +452,14 @@ export const getDatatableVisualization = ({
               return column;
             }
           }),
+        };
+      case 'pagesize':
+        return {
+          ...state,
+          paging: {
+            enabled: state.paging?.enabled || false,
+            size: event.data.size,
+          },
         };
       default:
         return state;

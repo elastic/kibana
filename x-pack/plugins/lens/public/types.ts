@@ -26,6 +26,7 @@ import type {
   LensSortActionData,
   LensResizeActionData,
   LensToggleActionData,
+  LensPagesizeActionData,
 } from './datatable_visualization/components/types';
 import type {
   UiActionsStart,
@@ -37,6 +38,7 @@ import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
+  LENS_EDIT_PAGESIZE_ACTION,
 } from './datatable_visualization/components/constants';
 import type { LensInspector } from './lens_inspector_service';
 
@@ -782,6 +784,7 @@ export interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
   [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
   [LENS_TOGGLE_ACTION]: LensToggleActionData;
+  [LENS_EDIT_PAGESIZE_ACTION]: LensPagesizeActionData;
 }
 
 type LensEditSupportedActions = keyof LensEditContextMapping;
