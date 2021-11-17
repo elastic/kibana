@@ -122,11 +122,11 @@ export function MetricChart({
   if (!column || !row) {
     return getEmptyState();
   }
-  const rawValue = row[accessor] as number | undefined;
+  const rawValue = row[accessor];
 
   // NOTE: Cardinality and Sum never receives "null" as value, but always 0, even for empty dataset.
   // Mind falsy values here as 0!
-  if (rawValue == null) {
+  if (typeof rawValue !== 'number') {
     return getEmptyState();
   }
 

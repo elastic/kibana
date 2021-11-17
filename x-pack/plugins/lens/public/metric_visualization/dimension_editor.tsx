@@ -14,7 +14,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ColorMode } from '../../../../../src/plugins/charts/common';
 import type { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { isNumericFieldForDatatable, MetricState } from '../../common/expressions';
@@ -40,6 +40,10 @@ export function MetricDimensionEditor(
 ) {
   const { state, setState, frame, accessor } = props;
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+
+  const togglePalette = useCallback(() => {
+    setIsPaletteOpen(!isPaletteOpen);
+  }, [isPaletteOpen]);
 
   const currentData = frame.activeData?.[state.layerId];
   const [firstRow] = currentData?.rows || [];
@@ -127,7 +131,7 @@ export function MetricDimensionEditor(
                   // fake data range
                   stops: displayStops.map((v, i, array) => ({
                     ...v,
-                    stop: i === 0 ? currentMinMax.min : array[i - 1].stop,
+                    stop: currentMinMax.min + (i === 0 ? 0 : array[i - 1].stop),
                   })),
                 },
               };
@@ -170,18 +174,14 @@ export function MetricDimensionEditor(
                     : displayStops.map(({ color }) => color)
                 }
                 type={FIXED_PROGRESSION}
-                onClick={() => {
-                  setIsPaletteOpen(!isPaletteOpen);
-                }}
+                onClick={togglePalette}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="lnsMetric_dynamicColoring_trigger"
                 iconType="controlsHorizontal"
-                onClick={() => {
-                  setIsPaletteOpen(!isPaletteOpen);
-                }}
+                onClick={togglePalette}
                 size="xs"
                 flush="both"
               >
@@ -192,7 +192,7 @@ export function MetricDimensionEditor(
               <PalettePanelContainer
                 siblingRef={props.panelRef}
                 isOpen={isPaletteOpen}
-                handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+                handleClose={togglePalette}
               >
                 <CustomizablePalette
                   palettes={props.paletteService}

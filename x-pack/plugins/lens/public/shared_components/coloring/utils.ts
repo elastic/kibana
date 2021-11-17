@@ -58,7 +58,7 @@ export function shiftPalette(stops: ColorStop[], max: number) {
   // shift everything right and add an additional stop at the end
   const result = stops.map((entry, i, array) => ({
     ...entry,
-    stop: i + 1 < array.length ? array[i + 1].stop : max,
+    stop: i + 1 < array.length ? Math.min(array[i + 1].stop, max) : max,
   }));
   if (stops[stops.length - 1].stop === max) {
     // extends the range by a fair amount to make it work the extra case for the last stop === max
@@ -200,7 +200,8 @@ export function isValidColor(colorString: string) {
 
 export function roundStopValues(colorStops: ColorStop[]) {
   return colorStops.map(({ color, stop }) => {
-    const roundedStop = Number(stop.toFixed(2));
+    // when rounding mind to not go in excess, rather use the floor function
+    const roundedStop = Number((Math.floor(stop * 100) / 100).toFixed(2));
     return { color, stop: roundedStop };
   });
 }

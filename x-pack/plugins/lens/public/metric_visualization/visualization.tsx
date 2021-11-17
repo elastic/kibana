@@ -42,7 +42,10 @@ const toExpression = (
     stops:
       isCustomPalette || state.palette?.params?.rangeMax == null
         ? stops.map(({ stop }) => stop)
-        : shiftPalette(stops, state.palette?.params?.rangeMax).map(({ stop }) => stop),
+        : shiftPalette(
+            stops,
+            Math.max(state.palette?.params?.rangeMax, ...stops.map(({ stop }) => stop))
+          ).map(({ stop }) => stop),
     reverse: false,
   };
 
