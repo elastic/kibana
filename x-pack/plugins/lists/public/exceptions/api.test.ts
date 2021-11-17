@@ -16,12 +16,10 @@ import {
   fetchExceptionListItemById,
   fetchExceptionLists,
   fetchExceptionListsItemsByListIds,
-  importExceptions,
   updateExceptionList,
   updateExceptionListItem,
 } from '@kbn/securitysolution-list-api';
 
-import { getImportExceptionsResponseSchemaMock } from '../../common/schemas/response/import_exceptions_schema.mock';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { getExceptionListSchemaMock } from '../../common/schemas/response/exception_list_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
@@ -780,50 +778,6 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(blob);
-    });
-  });
-
-  describe('#importExceptions', () => {
-    beforeEach(() => {
-      httpMock.fetch.mockResolvedValue(getImportExceptionsResponseSchemaMock());
-    });
-
-    test('it invokes "importExceptions" with expected url and body values', async () => {
-      const payload = new File(['foo'], 'foo.ndjson', {
-        type: 'text/plain',
-      });
-      const formData = new FormData();
-      formData.append('file', payload, 'exceptions.ndjson');
-      await importExceptions({
-        fileToImport: payload,
-        http: httpMock,
-        overwrite: false,
-        signal: abortCtrl.signal,
-      });
-
-      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_import', {
-        body: formData,
-        headers: { 'Content-Type': undefined },
-        method: 'POST',
-        query: { overwrite: false },
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('it returns expected import summary on success', async () => {
-      const payload = new File(['foo'], 'foo.ndjson', {
-        type: 'text/plain',
-      });
-      const formData = new FormData();
-      formData.append('file', payload, 'exceptions.ndjson');
-      const response = await importExceptions({
-        fileToImport: payload,
-        http: httpMock,
-        overwrite: false,
-        signal: abortCtrl.signal,
-      });
-
-      expect(response).toEqual(getImportExceptionsResponseSchemaMock());
     });
   });
 });

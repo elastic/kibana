@@ -9,10 +9,7 @@ import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import {
   CriteriaWithPagination,
   EuiBasicTable,
-  EuiButton,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingContent,
   EuiProgress,
   EuiSearchBarProps,
@@ -42,7 +39,6 @@ import { useUserData } from '../../../../../components/user_info';
 import { userHasPermissions } from '../../helpers';
 import { useListsConfig } from '../../../../../containers/detection_engine/lists/use_lists_config';
 import { ExceptionsTableItem } from './types';
-import { ImportDataModal } from '../../../../../../common/components/import_data_modal';
 
 export type Func = () => Promise<void>;
 
@@ -73,7 +69,7 @@ export const ExceptionListsTable = React.memo(() => {
   const {
     services: { http, notifications, timelines, application },
   } = useKibana();
-  const { exportExceptionList, importExceptions, deleteExceptionList } = useApi(http);
+  const { exportExceptionList, deleteExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
   const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
@@ -99,7 +95,6 @@ export const ExceptionListsTable = React.memo(() => {
   const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
   const [exportingListIds, setExportingListIds] = useState<string[]>([]);
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
-  const [showExceptionsImportModal, setShowExceptionsImportModal] = useState(false);
   const { navigateToUrl } = application;
   const { addError } = useAppToasts();
 
@@ -344,54 +339,14 @@ export const ExceptionListsTable = React.memo(() => {
     [setPagination]
   );
 
-  const handleCloseImportModal = useCallback(() => {
-    setShowExceptionsImportModal(false);
-  }, []);
-
-  const handleRefreshRules = useCallback(async () => {
-    if (refreshExceptions != null) {
-      await refreshExceptions();
-    }
-  }, [refreshExceptions]);
-
   return (
     <>
-      <ImportDataModal
-        checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
-        closeModal={handleCloseImportModal}
-        description={i18n.SELECT_EXCEPTIONS}
-        errorMessage={i18n.IMPORT_FAILED}
-        failedDetailed={i18n.IMPORT_FAILED_DETAILED}
-        importComplete={handleRefreshRules}
-        importData={importExceptions}
-        successMessage={i18n.SUCCESSFULLY_IMPORTED_EXCEPTIONS}
-        showCheckBox={true}
-        showModal={showExceptionsImportModal}
-        submitBtnText={i18n.IMPORT_EXCEPTIONS_BTN_TITLE}
-        subtitle={i18n.INITIAL_PROMPT_TEXT}
-        title={i18n.IMPORT_EXCEPTIONS}
-      />
       <DetectionEngineHeaderPage
         title={i18n.ALL_EXCEPTIONS}
         border
         subtitle={i18n.ALL_EXCEPTIONS_DESCRIPTION}
         subtitle2={timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="importExceptionsButton"
-              iconType="importAction"
-              isDisabled={!userHasPermissions(canUserCRUD) || loading}
-              onClick={() => {
-                setShowExceptionsImportModal(true);
-              }}
-            >
-              {i18n.IMPORT_EXCEPTIONS}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </DetectionEngineHeaderPage>
+      />
 
       <div data-test-subj="allExceptionListsPanel">
         {loadingTableInfo && (
