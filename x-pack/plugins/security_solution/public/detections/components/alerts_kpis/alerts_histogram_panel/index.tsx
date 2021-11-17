@@ -32,6 +32,7 @@ import {
   formatAlertsData,
   getAlertsHistogramQuery,
   showInitialLoadingSpinner,
+  EMPTY_VALUE_LABEL,
 } from './helpers';
 import { AlertsHistogram } from './alerts_histogram';
 import * as i18n from './translations';
@@ -166,7 +167,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               ),
               field: selectedStackByOption,
               timelineId,
-              value: bucket.key,
+              value: isEmpty(bucket.key) ? EMPTY_VALUE_LABEL : bucket.key,
             }))
           : NO_LEGEND_DATA,
       [

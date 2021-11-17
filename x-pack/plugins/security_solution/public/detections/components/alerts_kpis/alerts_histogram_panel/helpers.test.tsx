@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { showInitialLoadingSpinner } from './helpers';
+import { showInitialLoadingSpinner, formatAlertsData, EMPTY_VALUE_LABEL } from './helpers';
 
 describe('helpers', () => {
   describe('showInitialLoadingSpinner', () => {
@@ -33,4 +33,50 @@ describe('helpers', () => {
       );
     });
   });
+
+  describe('formatAlertsData', () => {
+    test('it should add an empty value label in case the value for a field is empty', () => {
+      const formattedAlertData = formatAlertsData(alertsDataWithoutValue);
+      expect(formattedAlertData[0].g).toBe(EMPTY_VALUE_LABEL);
+    });
+  });
 });
+
+const alertsDataWithoutValue = {
+  took: 1,
+  timeout: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    total: {
+      value: 1000,
+      relation: '',
+    },
+    hits: [],
+  },
+  aggregations: {
+    alertsByGrouping: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '',
+          doc_count: 52,
+          alerts: {
+            buckets: [
+              {
+                key_as_string: '2021-11-15T12:00:40.782Z',
+                key: 1636977640782,
+                doc_count: 34,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+};

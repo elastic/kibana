@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 import { isEmpty } from 'lodash/fp';
@@ -13,12 +14,19 @@ import type { AlertSearchResponse } from '../../../containers/detection_engine/a
 import type { AlertsStackByField } from '../common/types';
 
 const EMPTY_ALERTS_DATA: HistogramData[] = [];
+export const EMPTY_VALUE_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsHistogram.emptyValueLabel',
+  {
+    defaultMessage: 'empty value',
+  }
+);
 
 export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggregation> | null) => {
   const groupBuckets: AlertsGroupBucket[] =
     alertsData?.aggregations?.alertsByGrouping?.buckets ?? [];
   return groupBuckets.reduce<HistogramData[]>((acc, { key: group, alerts }) => {
     const alertsBucket: AlertsBucket[] = alerts.buckets ?? [];
+    const formattedGroup = isEmpty(group) ? EMPTY_VALUE_LABEL : group;
 
     return [
       ...acc,
@@ -26,7 +34,7 @@ export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggre
       ...alertsBucket.map(({ key, doc_count }: AlertsBucket) => ({
         x: key,
         y: doc_count,
-        g: group,
+        g: formattedGroup,
       })),
     ];
   }, EMPTY_ALERTS_DATA);
