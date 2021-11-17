@@ -2011,6 +2011,18 @@ describe('successful migrations', () => {
       const alert = getMockData({}, true);
       expect(migration800(alert, migrationContext)).toEqual(alert);
     });
+
+    test('add threatIndicatorPath default value to threat match rules', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData({ params: { type: 'threat_match' } }, true);
+      expect(migration800(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          params: { ...alert.attributes.params, threatIndicatorPath: 'threatintel.indicator' },
+        },
+      });
+    });
   });
 });
 
