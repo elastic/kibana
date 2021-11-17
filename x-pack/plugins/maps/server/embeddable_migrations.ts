@@ -42,4 +42,7 @@ export const embeddableMigrations = {
       return state;
     }
   },
+  '8.1.0': (state: SerializableRecord) => {
+    return state;
+  },
 };
