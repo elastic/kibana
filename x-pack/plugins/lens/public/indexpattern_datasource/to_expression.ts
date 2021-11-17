@@ -24,7 +24,8 @@ import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
-import { isColumnOfType } from './operations/definitions/helpers';
+import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
+import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 
 type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -148,32 +149,29 @@ function getExpressionForLayer(
         },
       };
     }, {} as Record<string, OriginalColumn>);
-
     const columnsWithFormatters = columnEntries.filter(
       ([, col]) =>
-        isColumnOfType<RangeIndexPatternColumn>('range', col) &&
-        (col.params?.format || col.params?.parentFormat)
-    ) as Array<[string, RangeIndexPatternColumn]>;
-    const formatterOverrides: ExpressionAstFunction[] = columnsWithFormatters.map(
-      ([id, col]: [string, RangeIndexPatternColumn]) => {
-        // TODO: improve the type handling here
-        const parentFormat = 'parentFormat' in col.params ? col.params!.parentFormat! : undefined;
-        const format = col.params!.format;
+        (isColumnOfType<RangeIndexPatternColumn>('range', col) && col.params?.parentFormat) ||
+        (isColumnFormatted(col) && col.params?.format)
+    ) as Array<[string, RangeIndexPatternColumn | FormattedIndexPatternColumn]>;
+    const formatterOverrides: ExpressionAstFunction[] = columnsWithFormatters.map(([id, col]) => {
+      // TODO: improve the type handling here
+      const parentFormat = 'parentFormat' in col.params! ? col.params!.parentFormat! : undefined;
+      const format = col.params!.format;
 
-        const base: ExpressionAstFunction = {
-          type: 'function',
-          function: 'lens_format_column',
-          arguments: {
-            format: format ? [format.id] : [''],
-            columnId: [id],
-            decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
-            parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
-          },
-        };
+      const base: ExpressionAstFunction = {
+        type: 'function',
+        function: 'lens_format_column',
+        arguments: {
+          format: format ? [format.id] : [''],
+          columnId: [id],
+          decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
+          parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
+        },
+      };
 
-        return base;
-      }
-    );
+      return base;
+    });
 
     const firstDateHistogramColumn = columnEntries.find(
       ([, col]) => col.operationType === 'date_histogram'
