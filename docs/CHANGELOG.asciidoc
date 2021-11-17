@@ -1012,7 +1012,7 @@ Use the <<xpack-fleet-agents-elasticsearch-hosts,`xpack.fleet.agents.elasticsear
 The `kibana.autocompleteTerminateAfter` and `kibana.autocompleteTimeout` settings are deprecated. For more information, refer to {kibana-pull}100586[#100586].
 
 *Impact* +
-Use the `data.autocomplete.terminateAfter` and `data.autocomplete.timeout` settings.
+Use the `data.autocomplete.valueSuggestions.terminateAfter` and `data.autocomplete.valueSuggestions.timeout` settings.
 ====
 
 [discrete]
