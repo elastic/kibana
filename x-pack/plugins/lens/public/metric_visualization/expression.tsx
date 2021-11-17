@@ -126,7 +126,7 @@ export function MetricChart({
 
   // NOTE: Cardinality and Sum never receives "null" as value, but always 0, even for empty dataset.
   // Mind falsy values here as 0!
-  if (typeof rawValue !== 'number') {
+  if (!['number', 'string'].includes(typeof rawValue)) {
     return getEmptyState();
   }
 

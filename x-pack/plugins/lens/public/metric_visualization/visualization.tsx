@@ -17,7 +17,7 @@ import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
 import type { MetricConfig, MetricState } from '../../common/expressions';
 import { layerTypes } from '../../common';
-import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
+import { CUSTOM_PALETTE, getStopsForFixedMode, shiftPalette } from '../shared_components';
 import { MetricDimensionEditor } from './dimension_editor';
 
 const toExpression = (
@@ -129,13 +129,27 @@ export const getMetricVisualization = ({
   },
 
   getConfiguration(props) {
+    const hasColoring = props.state.palette != null;
+    const stops = props.state.palette?.params?.stops || [];
     return {
       groups: [
         {
           groupId: 'metric',
           groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
           layerId: props.state.layerId,
-          accessors: props.state.accessor ? [{ columnId: props.state.accessor }] : [],
+          accessors: props.state.accessor
+            ? [
+                {
+                  columnId: props.state.accessor,
+                  triggerIcon: hasColoring ? 'colorBy' : undefined,
+                  palette: hasColoring
+                    ? props.state.palette?.params?.name === CUSTOM_PALETTE
+                      ? getStopsForFixedMode(stops, props.state.palette?.params.colorStops)
+                      : stops.map(({ color }) => color)
+                    : undefined,
+                },
+              ]
+            : [],
           supportsMoreColumns: !props.state.accessor,
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
           enableDimensionEditor: true,

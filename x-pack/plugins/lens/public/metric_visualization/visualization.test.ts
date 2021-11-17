@@ -116,6 +116,54 @@ describe('metric_visualization', () => {
         ],
       });
     });
+
+    it('should show the palette when metric has coloring enabled', () => {
+      expect(
+        metricVisualization.getConfiguration({
+          state: {
+            accessor: 'a',
+            layerId: 'l1',
+            layerType: layerTypes.DATA,
+            palette: {
+              type: 'palette',
+              name: 'status',
+            },
+          },
+          layerId: 'l1',
+          frame: mockFrame(),
+        })
+      ).toEqual({
+        groups: [
+          expect.objectContaining({
+            accessors: expect.arrayContaining([
+              { columnId: 'a', triggerIcon: 'colorBy', palette: [] },
+            ]),
+          }),
+        ],
+      });
+    });
+
+    it('should not show the palette when not enabled', () => {
+      expect(
+        metricVisualization.getConfiguration({
+          state: {
+            accessor: 'a',
+            layerId: 'l1',
+            layerType: layerTypes.DATA,
+          },
+          layerId: 'l1',
+          frame: mockFrame(),
+        })
+      ).toEqual({
+        groups: [
+          expect.objectContaining({
+            accessors: expect.arrayContaining([
+              { columnId: 'a', triggerIcon: undefined, palette: undefined },
+            ]),
+          }),
+        ],
+      });
+    });
   });
 
   describe('#setDimension', () => {
