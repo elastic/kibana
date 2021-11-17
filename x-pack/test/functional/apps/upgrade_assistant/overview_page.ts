@@ -15,7 +15,6 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
   const retry = getService('retry');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const es = getService('es');
 
   describe('Overview Page', function () {
     this.tags('skipFirefox');
