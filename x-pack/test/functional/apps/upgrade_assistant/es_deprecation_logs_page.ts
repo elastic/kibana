@@ -12,7 +12,6 @@ export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
   getPageObjects,
 }: FtrProviderContext) {
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
-  const retry = getService('retry');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
