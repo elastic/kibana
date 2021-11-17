@@ -19,7 +19,6 @@ import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
 import { UsersGridPage } from './users_grid_page';
 
-// .euiBasicTable-loading
 describe('UsersGridPage', () => {
   let history: ScopedHistory;
   let coreStart: CoreStart;
