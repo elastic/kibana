@@ -347,6 +347,7 @@ export class DocLinksService {
         maps: {
           guide: `${KIBANA_DOCS}maps.html`,
           importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
+          gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
         },
         monitoring: {
           alertsKibana: `${KIBANA_DOCS}kibana-alerts.html`,
@@ -428,7 +429,7 @@ export class DocLinksService {
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
         },
         snapshotRestore: {
-          guide: `${KIBANA_DOCS}snapshot-repositories.html`,
+          guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
           changeIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
@@ -735,7 +736,11 @@ export interface DocLinksStart {
       uptimeDurationAnomaly: string;
     }>;
     readonly alerting: Record<string, string>;
-    readonly maps: Record<string, string>;
+    readonly maps: Readonly<{
+      guide: string;
+      importGeospatialPrivileges: string;
+      gdalTutorial: string;
+    }>;
     readonly monitoring: Record<string, string>;
     readonly security: Readonly<{
       apiKeyServiceSettings: string;
