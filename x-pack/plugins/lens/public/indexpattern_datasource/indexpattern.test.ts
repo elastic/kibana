@@ -1345,8 +1345,11 @@ describe('IndexPattern Data Source', () => {
   });
 
   describe('#getWarningMessages', () => {
-    it('should return mismatched time shifts', () => {
-      const state: IndexPatternPrivateState = {
+    let state: IndexPatternPrivateState;
+    let framePublicAPI: FramePublicAPI;
+
+    beforeEach(() => {
+      state = {
         indexPatternRefs: [],
         existingFields: {},
         isFirstExistenceFetch: false,
@@ -1410,7 +1413,8 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      const warnings = indexPatternDatasource.getWarningMessages!(state, {
+
+      framePublicAPI = {
         activeData: {
           first: {
             type: 'datatable',
@@ -1433,20 +1437,39 @@ describe('IndexPattern Data Source', () => {
             ],
           },
         },
-      } as unknown as FramePublicAPI);
-      expect(warnings!.length).toBe(2);
-      expect((warnings![0] as React.ReactElement).props.id).toEqual(
-        'xpack.lens.indexPattern.timeShiftSmallWarning'
-      );
-      expect((warnings![1] as React.ReactElement).props.id).toEqual(
-        'xpack.lens.indexPattern.timeShiftMultipleWarning'
-      );
+      } as unknown as FramePublicAPI;
+    });
+
+    it('should return mismatched time shifts', () => {
+      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI);
+
+      expect(warnings!.map((item) => (item as React.ReactElement).props.id)).toMatchInlineSnapshot(`
+        Array [
+          "xpack.lens.indexPattern.timeShiftSmallWarning",
+          "xpack.lens.indexPattern.timeShiftMultipleWarning",
+        ]
+      `);
+    });
+
+    it('should show different types of warning messages', () => {
+      framePublicAPI.activeData!.first.columns[0].meta.sourceParams!.hasPrecisionError = true;
+
+      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI);
+
+      expect(warnings!.map((item) => (item as React.ReactElement).props.id)).toMatchInlineSnapshot(`
+        Array [
+          "xpack.lens.indexPattern.timeShiftSmallWarning",
+          "xpack.lens.indexPattern.timeShiftMultipleWarning",
+          "xpack.lens.indexPattern.precisionErrorWarning",
+        ]
+      `);
     });
 
     it('should prepend each error with its layer number on multi-layer chart', () => {
       (getErrorMessages as jest.Mock).mockClear();
       (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
-      const state: IndexPatternPrivateState = {
+
+      state = {
         indexPatternRefs: [],
         existingFields: {},
         isFirstExistenceFetch: false,
@@ -1465,6 +1488,7 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
+
       expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
         { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
         { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
@@ -1696,7 +1720,7 @@ describe('IndexPattern Data Source', () => {
                 isBucketed: false,
                 label: 'Static value: 0',
                 operationType: 'static_value',
-                params: { value: 0 },
+                params: { value: '0' },
                 references: [],
                 scale: 'ratio',
               },
