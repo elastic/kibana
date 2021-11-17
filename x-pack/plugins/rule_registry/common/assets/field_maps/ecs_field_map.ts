@@ -2745,41 +2745,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'threat.enrichments.indicator.file.pe.architecture': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.pe.company': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.pe.description': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.pe.file_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.pe.imphash': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.pe.original_file_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.file.pe.product': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'threat.enrichments.indicator.file.size': {
     type: 'long',
     array: false,
@@ -3241,41 +3206,6 @@ export const ecsFieldMap = {
     required: false,
   },
   'threat.indicator.file.path': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.pe.architecture': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.pe.company': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.pe.description': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.pe.file_version': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.pe.imphash': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.pe.original_file_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.file.pe.product': {
     type: 'keyword',
     array: false,
     required: false,
