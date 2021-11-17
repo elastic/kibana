@@ -164,6 +164,9 @@ describe('crawlerDataServerToClient', () => {
           began_at: null,
           completed_at: null,
           type: CrawlType.Full,
+          crawl_config: {
+            domain_allowlist: ['https://www.elastic.co'],
+          },
         },
       ],
       most_recent_crawl_request: {
@@ -214,6 +217,9 @@ describe('crawlerDataServerToClient', () => {
         beganAt: null,
         completedAt: null,
         type: 'full',
+        crawlConfig: {
+          domainAllowlist: ['https://www.elastic.co'],
+        },
       },
     ]);
     expect(output.mostRecentCrawlRequest).toEqual({

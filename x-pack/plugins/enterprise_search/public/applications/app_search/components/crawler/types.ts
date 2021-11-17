@@ -201,6 +201,13 @@ export interface CrawlRequest {
 
 export type CrawlEventStage = 'crawl' | 'process';
 
+export interface CrawlConfig {
+  domainAllowlist: string[];
+}
+
+export interface CrawlConfigFromServer {
+  domain_allowlist: string[];
+}
 export interface CrawlEventFromServer {
   id: string;
   stage: CrawlEventStage;
@@ -209,6 +216,7 @@ export interface CrawlEventFromServer {
   began_at: string | null;
   completed_at: string | null;
   type: CrawlType;
+  crawl_config: CrawlConfigFromServer;
 }
 
 export interface CrawlEvent {
@@ -219,6 +227,7 @@ export interface CrawlEvent {
   beganAt: string | null;
   completedAt: string | null;
   type: CrawlType;
+  crawlConfig: CrawlConfig;
 }
 
 export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
