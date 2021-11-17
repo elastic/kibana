@@ -132,7 +132,6 @@ describe('setupRequest', () => {
             },
           },
           ignore_unavailable: true,
-          ignore_throttled: true,
           preference: 'any',
         },
         {
@@ -251,7 +250,7 @@ describe('without a bool filter', () => {
 });
 
 describe('with includeFrozen=false', () => {
-  it('sets `ignore_throttled=true`', async () => {
+  it('should NOT send "ignore_throttled:true" in the request', async () => {
     const mockResources = getMockResources();
 
     // mock includeFrozen to return false
@@ -268,7 +267,7 @@ describe('with includeFrozen=false', () => {
     const params =
       mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
         .calls[0][0];
-    expect(params.ignore_throttled).toBe(true);
+    expect(params.ignore_throttled).toBe(undefined);
   });
 });
 
