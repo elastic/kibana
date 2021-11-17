@@ -12,10 +12,5 @@ generated for the transport and HTTP layers.
 * A password is generated for the `elastic` user.
 * An enrollment token is generated for {kib}.
 
-You can then start {kib} and enter the enrollment token, which is valid for 30
-minutes. This token automatically applies the security settings from your {es} 
-cluster, authenticates to {es} with the built-in `kibana` service account, and
-writes the security configuration to `kibana.yml`.
-
-To generate a new enrollment token for {kib}, run the
-{ref}/create-enrollment-token.html[`elasticsearch-create-enrollment-token`] tool.
+You can then start {kib} and enter the enrollment token to securely connect 
+{kib} with {es}. The enrollment token is valid for 30 minutes.
