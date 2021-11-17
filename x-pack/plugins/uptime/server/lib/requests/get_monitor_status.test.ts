@@ -510,7 +510,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,heartbeat-7.16.*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
