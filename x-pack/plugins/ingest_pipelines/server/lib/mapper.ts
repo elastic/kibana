@@ -76,18 +76,14 @@ function parseAndValidate(file: string) {
     return [...acc, header];
   }, []);
 
-  if (missingHeaders.length === 1) {
+  if (missingHeaders.length > 0) {
     throw new Error(
-      i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.missingSingleHeader', {
-        defaultMessage: 'Missing required headers: Include {missing} header in the CSV file.',
-        values: { missing: missingHeaders[0] },
-      })
-    );
-  } else if (missingHeaders.length > 1) {
-    throw new Error(
-      i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.missingHeaders', {
-        defaultMessage: 'Missing required headers: Include {missing} headers in the CSV file.',
-        values: { missing: missingHeaders.join(', ') },
+        i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.missingHeaders', {
+        defaultMessage: 'Missing required headers: Include {missingHeaders} {missingHeadersCount, plural, one {header} other {headers}} in the CSV file.',
+        values: {
+          missingHeaders: missingHeaders.join(', '),
+          missingHeadersCount: missingHeaders.length,
+        },
       })
     );
   }
