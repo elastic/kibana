@@ -204,6 +204,8 @@ function ObservabilityActions({
     setEventsDeleted,
     onUpdateSuccess: onAlertStatusUpdated,
     onUpdateFailure: onAlertStatusUpdated,
+    // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
+    hideBulkActions: true,
   });
 
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;

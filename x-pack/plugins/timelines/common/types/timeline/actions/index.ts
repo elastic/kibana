@@ -62,6 +62,7 @@ export interface StatusBulkActionsProps {
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
   timelineId?: string;
+  hideBulkActions?: boolean;
 }
 export interface HeaderActionProps {
   width: number;
