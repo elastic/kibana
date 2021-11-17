@@ -21,9 +21,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/maps'),
       require.resolve('./apps/reporting'),
+      require.resolve('./apps/alerting'),
     ],
 
     pageObjects,
+
+    apps: {
+      ...functionalConfig.get('apps'),
+      rules: {
+        pathname: '/app/management/insightsAndAlerting/triggersActions/rules',
+      },
+    },
 
     services: {
       ...apiConfig.get('services'),
