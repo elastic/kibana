@@ -8,7 +8,7 @@
 jest.mock('./login_page');
 
 import type { AppMount } from 'src/core/public';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 
 import { loginApp } from './login_app';
 
@@ -54,6 +54,7 @@ describe('loginApp', () => {
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
+      theme$: themeServiceMock.createTheme$(),
     });
 
     const mockRenderApp = jest.requireMock('./login_page').renderLoginPage;
