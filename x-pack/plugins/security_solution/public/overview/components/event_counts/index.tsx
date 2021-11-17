@@ -17,7 +17,7 @@ import { filterHostData } from '../../../hosts/pages/navigation/alerts_query_tab
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { filterNetworkData } from '../../../network/pages/navigation/alerts_query_tab_body';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common/es_query/get_es_query_config';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 

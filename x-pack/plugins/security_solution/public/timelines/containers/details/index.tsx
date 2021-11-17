@@ -20,10 +20,7 @@ import {
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import {
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common/search/utils';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 import { EntityType } from '../../../../../timelines/common';

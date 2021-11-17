@@ -39,7 +39,7 @@ import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common/es_query/get_es_query_config';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import {

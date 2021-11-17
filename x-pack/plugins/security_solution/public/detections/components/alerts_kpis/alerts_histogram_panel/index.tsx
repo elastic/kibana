@@ -20,7 +20,7 @@ import type { UpdateDateRange } from '../../../../common/components/charts/commo
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common/es_query/get_es_query_config';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { defaultLegendColors } from '../../../../common/components/matrix_histogram/utils';

@@ -7,7 +7,7 @@
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common/es_query/get_es_query_config';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { MatrixHistogramType } from '../../../../common/search_strategy';
 import { EVENT_DATASET } from '../../../../common/cti/constants';
 import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';

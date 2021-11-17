@@ -23,7 +23,7 @@ import { convertToBuildEsQuery } from '../../../../common/lib/keury';
 import { inputsSelectors } from '../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { OverviewEmpty } from '../../../../overview/components/overview_empty';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common/es_query/get_es_query_config';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useNetworkDetails } from '../../../../network/containers/details';
 import { networkModel } from '../../../../network/store';

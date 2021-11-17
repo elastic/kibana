@@ -13,10 +13,7 @@ import { Subscription } from 'rxjs';
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESQuery } from '../../../common/typed_json';
-import {
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../src/plugins/data/common/search/utils';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/common';
 
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { inputsModel } from '../../common/store';

@@ -45,7 +45,7 @@ import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
 import { TlsQueryTable } from './tls_query_table';
 import { UsersQueryTable } from './users_query_table';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common/es_query/get_es_query_config';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../app/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
