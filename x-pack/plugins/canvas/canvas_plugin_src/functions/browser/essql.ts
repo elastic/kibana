@@ -13,6 +13,8 @@ import { searchService } from '../../../public/services';
 import { ESSQL_SEARCH_STRATEGY } from '../../../common/lib/constants';
 import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
+import { buildEsQuery, Filter } from '@kbn/es-query';
+import { calculateBounds } from '../../../../../../src/plugins/data/common';
 
 interface Arguments {
   query: string;
@@ -33,7 +35,7 @@ export function essql(): ExpressionFunctionDefinition<
     name: 'essql',
     type: 'datatable',
     context: {
-      types: ['filter'],
+      types: ['filter', 'kibana_context'],
     },
     help,
     args: {
@@ -59,6 +61,10 @@ export function essql(): ExpressionFunctionDefinition<
         default: 'UTC',
         help: argHelp.timezone,
       },
+      timefield: {
+        types: ['string'],
+        help: '',
+      },
     },
     fn: (input, args, handlers) => {
       const search = searchService.getService().search;
@@ -66,7 +72,29 @@ export function essql(): ExpressionFunctionDefinition<
       const req = {
         ...restOfArgs,
         params: parameter,
-        filter: input.and,
+        filter:
+          input.type === 'kibana_context'
+            ? [
+                {
+                  filterType: 'direct',
+                  query: {
+                    bool: {
+                      filter: [
+                        {
+                          range: {
+                            [args.timefield]: {
+                              gte: input.timeRange.from,
+                              lte: input.timeRange.to,
+                            },
+                          },
+                        },
+                        buildEsQuery(undefined, input.query, input.filters, {})
+                      ],
+                    },
+                  },
+                },
+              ]
+            : input.and,
       };
 
       return search

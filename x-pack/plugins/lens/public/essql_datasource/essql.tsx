@@ -23,13 +23,14 @@ import {
   DataType,
 } from '../types';
 import { toExpression } from './to_expression';
-import { EsDSLDataPanel, EsDSLHorizontalDataPanel } from './datapanel';
+import { EsSQLDataPanel, EsSQLHorizontalDataPanel } from './datapanel';
 
 import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
-import { EsDSLLayer, EsDSLPrivateState, EsDSLPersistedState } from './types';
+import { EsSQLLayer, EsSQLPrivateState, EsSQLPersistedState } from './types';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { Datasource } from '../types';
 import { esRawResponse } from '../../../../../src/plugins/data/common';
+import { ExpressionsStart } from 'src/plugins/expressions/public';
 
 async function loadIndexPatternRefs(
   indexPatternsService: DataViewsService
@@ -47,18 +48,20 @@ async function loadIndexPatternRefs(
     });
 }
 
-export function getEsDSLDatasource({
+export function getEsSQLDatasource({
   core,
   storage,
   data,
+  expressions,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
 }) {
   // Not stateful. State is persisted to the frame
-  const esdslDatasource: Datasource<EsDSLPrivateState, EsDSLPersistedState> = {
-    id: 'esdsl',
+  const essqlDatasource: Datasource<EsSQLPrivateState, EsSQLPersistedState> = {
+    id: 'essql',
 
     checkIntegrity: () => {
       return [];
@@ -66,7 +69,7 @@ export function getEsDSLDatasource({
     getErrorMessages: () => {
       return [];
     },
-    async initialize(state?: EsDSLPersistedState) {
+    async initialize(state?: EsSQLPersistedState) {
       const initState = state || { layers: {} };
       const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(data.dataViews);
       const responses = await Promise.all(
@@ -101,13 +104,13 @@ export function getEsDSLDatasource({
       };
     },
 
-    getPersistableState({ layers }: EsDSLPrivateState) {
+    getPersistableState({ layers }: EsSQLPrivateState) {
       return { state: { layers }, savedObjectReferences: [] };
     },
     isValidColumn() {
       return true;
     },
-    insertLayer(state: EsDSLPrivateState, newLayerId: string) {
+    insertLayer(state: EsSQLPrivateState, newLayerId: string) {
       const removedLayer = state.removedLayers[0];
       const newRemovedList = removedLayer ? state.removedLayers.slice(1) : state.removedLayers;
       return {
@@ -131,7 +134,7 @@ export function getEsDSLDatasource({
       };
     },
 
-    removeLayer(state: EsDSLPrivateState, layerId: string) {
+    removeLayer(state: EsSQLPrivateState, layerId: string) {
       const deletedLayer = state.layers[layerId];
       const newLayers = { ...state.layers };
       delete newLayers[layerId];
@@ -153,7 +156,7 @@ export function getEsDSLDatasource({
       };
     },
 
-    clearLayer(state: EsDSLPrivateState, layerId: string) {
+    clearLayer(state: EsSQLPrivateState, layerId: string) {
       return {
         ...state,
         layers: {
@@ -163,7 +166,7 @@ export function getEsDSLDatasource({
       };
     },
 
-    getLayers(state: EsDSLPrivateState) {
+    getLayers(state: EsSQLPrivateState) {
       return Object.keys(state.layers);
     },
 
@@ -182,16 +185,16 @@ export function getEsDSLDatasource({
 
     toExpression,
 
-    getMetaData(state: EsDSLPrivateState) {
+    getMetaData(state: EsSQLPrivateState) {
       return {
         filterableIndexPatterns: [],
       };
     },
 
-    renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<EsDSLPrivateState>) {
+    renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<EsSQLPrivateState>) {
       render(
         <I18nProvider>
-          <EsDSLDataPanel data={data} {...props} />
+          <EsSQLDataPanel data={data} expressions={expressions} {...props} />
         </I18nProvider>,
         domElement
       );
@@ -199,11 +202,11 @@ export function getEsDSLDatasource({
 
     renderHorizontalDataPanel(
       domElement: Element,
-      props: DatasourceDataPanelProps<EsDSLPrivateState>
+      props: DatasourceDataPanelProps<EsSQLPrivateState>
     ) {
       render(
         <I18nProvider>
-          <EsDSLHorizontalDataPanel data={data} {...props} />
+          <EsSQLHorizontalDataPanel data={data} expressions={expressions} {...props} />
         </I18nProvider>,
         domElement
       );
@@ -211,7 +214,7 @@ export function getEsDSLDatasource({
 
     renderDimensionTrigger: (
       domElement: Element,
-      props: DatasourceDimensionTriggerProps<EsDSLPrivateState>
+      props: DatasourceDimensionTriggerProps<EsSQLPrivateState>
     ) => {
       const selectedField = props.state.layers[props.layerId].columns.find(
         (column) => column.columnId === props.columnId
@@ -221,7 +224,7 @@ export function getEsDSLDatasource({
 
     renderDimensionEditor: (
       domElement: Element,
-      props: DatasourceDimensionEditorProps<EsDSLPrivateState>
+      props: DatasourceDimensionEditorProps<EsSQLPrivateState>
     ) => {
       const fields = props.state.cachedFieldList[props.layerId].fields;
       const selectedField = props.state.layers[props.layerId].columns.find(
@@ -273,7 +276,7 @@ export function getEsDSLDatasource({
 
     renderLayerPanel: (
       domElement: Element,
-      props: DatasourceLayerPanelProps<EsDSLPrivateState>
+      props: DatasourceLayerPanelProps<EsSQLPrivateState>
     ) => {
       render(
         <span>
@@ -289,7 +292,7 @@ export function getEsDSLDatasource({
 
     canHandleDrop: () => false,
     onDrop: () => false,
-    uniqueLabels(state: EsDSLPrivateState) {
+    uniqueLabels(state: EsSQLPrivateState) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
 
@@ -307,9 +310,9 @@ export function getEsDSLDatasource({
 
     getDropProps: () => undefined,
 
-    getPublicAPI({ state, layerId }: PublicAPIProps<EsDSLPrivateState>) {
+    getPublicAPI({ state, layerId }: PublicAPIProps<EsSQLPrivateState>) {
       return {
-        datasourceId: 'esdsl',
+        datasourceId: 'essql',
 
         getTableSpec: () => {
           return (
@@ -340,7 +343,7 @@ export function getEsDSLDatasource({
     },
     getDatasourceSuggestionsFromCurrentState: (state) => {
       return Object.entries(state.layers).map(([id, layer]) => {
-        const reducedState: EsDSLPrivateState = {
+        const reducedState: EsSQLPrivateState = {
           ...state,
           cachedFieldList: {
             [id]: state.cachedFieldList[id],
@@ -376,7 +379,7 @@ export function getEsDSLDatasource({
     },
   };
 
-  return esdslDatasource;
+  return essqlDatasource;
 }
 
 function blankLayer(index: string) {

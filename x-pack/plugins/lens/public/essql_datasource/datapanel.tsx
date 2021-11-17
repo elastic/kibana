@@ -33,18 +33,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
+import { ExpressionsStart } from 'src/plugins/expressions/public';
+import { buildExpressionFunction } from '../../../../../src/plugins/expressions/public';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
-import { IndexPattern, EsDSLPrivateState, IndexPatternField, IndexPatternRef } from './types';
+import { IndexPattern, EsSQLPrivateState, IndexPatternField, IndexPatternRef } from './types';
 import { esRawResponse } from '../../../../../src/plugins/data/common';
 import { ChangeIndexPattern } from './change_indexpattern';
 
-export type Props = DatasourceDataPanelProps<EsDSLPrivateState> & {
+export type Props = DatasourceDataPanelProps<EsSQLPrivateState> & {
   data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
 };
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { flatten } from './flatten';
 
-export function EsDSLDataPanel({
+export function EsSQLDataPanel({
   setState,
   state,
   dragDropContext,
@@ -53,6 +56,7 @@ export function EsDSLDataPanel({
   query,
   filters,
   dateRange,
+  expressions,
 }: Props) {
   const [localState, setLocalState] = useState(state);
 
@@ -71,29 +75,54 @@ export function EsDSLDataPanel({
     >
       <EuiSpacer size="xxl" />
       <EuiFlexGroup direction="column">
-        {Object.entries(layers).map(([id, layer]) => (
-          <EuiFlexItem key={id}>
-            <EuiPanel>
-              {localState.cachedFieldList[id]?.fields.length > 0 &&
-                localState.cachedFieldList[id].fields.map((field) => (
-                  <div key={field.name}>
-                    <small
-                      style={{
-                        display: 'block',
-                        wordBreak: 'break-all',
-                        whiteSpace: 'pre-wrap',
-                      }}
-                    >
-                      {field.name} ({field.type}){' '}
-                    </small>
-                    <EuiSelect
-                      value={layer.overwrittenFieldTypes?.[field.name] || field?.meta?.type}
-                      options={[
-                        { value: 'number', text: 'number' },
-                        { value: 'boolean', text: 'boolean' },
-                        { value: 'string', text: 'string' },
-                        { value: 'date', text: 'date' },
-                      ]}
+        {Object.entries(layers).map(([id, layer]) => {
+          const ref = state.indexPatternRefs.find((r) => r.id === layer.index);
+          return (
+            <EuiFlexItem key={id}>
+              <EuiPanel>
+                {localState.cachedFieldList[id]?.fields.length > 0 &&
+                  localState.cachedFieldList[id].fields.map((field) => (
+                    <div key={field.name}>
+                      <small
+                        style={{
+                          display: 'block',
+                          wordBreak: 'break-all',
+                          whiteSpace: 'pre-wrap',
+                        }}
+                      >
+                        {field.name} ({field.type}){' '}
+                      </small>
+                      <EuiSelect
+                        value={layer.overwrittenFieldTypes?.[field.name] || field?.meta?.type}
+                        options={[
+                          { value: 'number', text: 'number' },
+                          { value: 'boolean', text: 'boolean' },
+                          { value: 'string', text: 'string' },
+                          { value: 'date', text: 'date' },
+                        ]}
+                        onChange={(e) => {
+                          setLocalState({
+                            ...state,
+                            layers: {
+                              ...state.layers,
+                              [id]: {
+                                ...layer,
+                                overwrittenFieldTypes: {
+                                  ...(layer.overwrittenFieldTypes || {}),
+                                  [field.name]: e.target.value,
+                                },
+                              },
+                            },
+                          });
+                        }}
+                      />
+                    </div>
+                  ))}
+                <EuiAccordion id={id + 'settings'} buttonContent="Advanced settings">
+                  <div>
+                    <EuiFieldText
+                      value={layer.timeField}
+                      placeholder="Timefield (bound to filter)"
                       onChange={(e) => {
                         setLocalState({
                           ...state,
@@ -101,38 +130,45 @@ export function EsDSLDataPanel({
                             ...state.layers,
                             [id]: {
                               ...layer,
-                              overwrittenFieldTypes: {
-                                ...(layer.overwrittenFieldTypes || {}),
-                                [field.name]: e.target.value,
-                              },
+                              timeField: e.target.value,
                             },
                           },
                         });
                       }}
                     />
+                    <EuiFlexItem key={id}>
+                      <EuiPanel>
+                        <ChangeIndexPattern
+                          data-test-subj="indexPattern-switcher"
+                          trigger={{
+                            label: ref?.title,
+                            title: ref?.title,
+                            'data-test-subj': 'indexPattern-switch-link',
+                            fontWeight: 'bold',
+                          }}
+                          indexPatternId={layer.index}
+                          indexPatternRefs={state.indexPatternRefs}
+                          onChangeIndexPattern={(newId: string) => {
+                            setState({
+                              ...state,
+                              layers: {
+                                ...state.layers,
+                                [id]: {
+                                  ...layer,
+                                  index: newId,
+                                },
+                              },
+                            });
+                          }}
+                        />
+                      </EuiPanel>
+                    </EuiFlexItem>
                   </div>
-                ))}
-              <EuiAccordion id={id + 'settings'} buttonContent="Advanced settings">
-                <EuiFieldText
-                  value={layer.timeField}
-                  placeholder="Timefield (bound to filter)"
-                  onChange={(e) => {
-                    setLocalState({
-                      ...state,
-                      layers: {
-                        ...state.layers,
-                        [id]: {
-                          ...layer,
-                          timeField: e.target.value,
-                        },
-                      },
-                    });
-                  }}
-                />
-              </EuiAccordion>
-            </EuiPanel>
-          </EuiFlexItem>
-        ))}
+                </EuiAccordion>
+              </EuiPanel>
+            </EuiFlexItem>
+          );
+        })}
         {state !== localState && (
           <EuiFlexItem>
             <EuiButton
@@ -140,15 +176,15 @@ export function EsDSLDataPanel({
                 try {
                   const responses = await Promise.all(
                     Object.entries(localState.layers).map(([id, layer]) => {
-                      return data.search
-                        .search({
-                          params: {
-                            size: 0,
-                            index: layer.index,
-                            body: JSON.parse(layer.query),
-                          },
-                        })
-                        .toPromise();
+                      const ast = {
+                        type: 'expression',
+                        chain: [
+                          buildExpressionFunction<any>('essql', {
+                            query: layer.query,
+                          }).toAst(),
+                        ],
+                      };
+                      return expressions.run(ast, null).toPromise();
                     })
                   );
                   const cachedFieldList: Record<
@@ -158,9 +194,7 @@ export function EsDSLDataPanel({
                   responses.forEach((response, index) => {
                     const layerId = Object.keys(localState.layers)[index];
                     // @ts-expect-error this is hacky, should probably run expression instead
-                    const { rows, columns } = esRawResponse.to!.datatable({
-                      body: response.rawResponse,
-                    });
+                    const { rows, columns } = response.result;
                     // todo hack some logic in for dates
                     cachedFieldList[layerId] = { fields: columns, singleRow: rows.length === 1 };
                   });
@@ -185,7 +219,7 @@ export function EsDSLDataPanel({
   );
 }
 
-export function EsDSLHorizontalDataPanel({
+export function EsSQLHorizontalDataPanel({
   setState,
   state,
   dragDropContext,
@@ -194,6 +228,7 @@ export function EsDSLHorizontalDataPanel({
   query,
   filters,
   dateRange,
+  expressions,
 }: Props) {
   const [localState, setLocalState] = useState(state);
 
@@ -217,31 +252,8 @@ export function EsDSLHorizontalDataPanel({
           return (
             <EuiFlexItem key={id}>
               <EuiPanel>
-                <ChangeIndexPattern
-                  data-test-subj="indexPattern-switcher"
-                  trigger={{
-                    label: ref?.title,
-                    title: ref?.title,
-                    'data-test-subj': 'indexPattern-switch-link',
-                    fontWeight: 'bold',
-                  }}
-                  indexPatternId={layer.index}
-                  indexPatternRefs={state.indexPatternRefs}
-                  onChangeIndexPattern={(newId: string) => {
-                    setState({
-                      ...state,
-                      layers: {
-                        ...state.layers,
-                        [id]: {
-                          ...layer,
-                          index: newId,
-                        },
-                      },
-                    });
-                  }}
-                />
                 <EuiCodeEditor
-                  mode="json"
+                  mode="sql"
                   theme="github"
                   value={layer.query}
                   width="100%"
@@ -286,17 +298,15 @@ export function EsDSLHorizontalDataPanel({
                 try {
                   const responses = await Promise.all(
                     Object.entries(localState.layers).map(([id, layer]) => {
-                      return data.search
-                        .search({
-                          params: {
-                            size: 0,
-                            index: [
-                              state.indexPatternRefs.find((r) => r.id === layer.index)!.title,
-                            ],
-                            body: JSON.parse(layer.query),
-                          },
-                        })
-                        .toPromise();
+                      const ast = {
+                        type: 'expression',
+                        chain: [
+                          buildExpressionFunction<any>('essql', {
+                            query: layer.query,
+                          }).toAst(),
+                        ],
+                      };
+                      return expressions.run(ast, null).toPromise();
                     })
                   );
                   const cachedFieldList: Record<
@@ -306,20 +316,7 @@ export function EsDSLHorizontalDataPanel({
                   responses.forEach((response, index) => {
                     const layerId = Object.keys(localState.layers)[index];
                     // @ts-expect-error this is hacky, should probably run expression instead
-                    const { rows, columns } = esRawResponse.to!.datatable({
-                      body: response.rawResponse,
-                    });
-                    columns.forEach((col) => {
-                      const testVal = rows[0][col.id];
-                      if (typeof testVal === 'number' && Math.log10(testVal) > 11) {
-                        // col.meta.type = 'date';
-                        // col.meta.params = { id: 'date' };
-                        localState.layers[layerId].overwrittenFieldTypes = {
-                          ...(localState.layers[layerId].overwrittenFieldTypes || {}),
-                          [col.id]: 'date',
-                        };
-                      }
-                    });
+                    const { rows, columns } = response.result;
                     // todo hack some logic in for dates
                     cachedFieldList[layerId] = { fields: columns, singleRow: rows.length === 1 };
                   });

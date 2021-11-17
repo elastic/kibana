@@ -103,6 +103,42 @@ export class CanvasPlugin
       }));
     }
 
+    const load = async () => {
+      setupExpressions({ coreSetup, setupPlugins });
+      const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin');
+      const srcPlugin = new CanvasSrcPlugin();
+
+      srcPlugin.setup(coreSetup, { canvas: canvasApi });
+
+      // Get start services
+      const [coreStart, startPlugins] = await coreSetup.getStartServices();
+
+      srcPlugin.start(coreStart, startPlugins);
+
+      const { pluginServices } = await import('./services');
+      pluginServices.setRegistry(
+        pluginServiceRegistry.start({
+          coreStart,
+          startPlugins,
+          appUpdater: this.appUpdater,
+          initContext: this.initContext,
+        })
+      );
+
+      // Load application bundle
+      const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
+
+      const canvasStore = await initializeCanvas(
+        coreSetup,
+        coreStart,
+        setupPlugins,
+        startPlugins,
+        registries,
+        this.appUpdater
+      );
+    };
+    load();
+
     coreSetup.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,
       id: CANVAS_APP,
@@ -115,7 +151,6 @@ export class CanvasPlugin
         const srcPlugin = new CanvasSrcPlugin();
 
         srcPlugin.setup(coreSetup, { canvas: canvasApi });
-        setupExpressions({ coreSetup, setupPlugins });
 
         // Get start services
         const [coreStart, startPlugins] = await coreSetup.getStartServices();

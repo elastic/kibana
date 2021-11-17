@@ -72,4 +72,5 @@ export const filters: Record<string, any> = {
   exactly,
   time,
   luceneQueryString,
+  direct: (filter: any) => filter.query,
 };
