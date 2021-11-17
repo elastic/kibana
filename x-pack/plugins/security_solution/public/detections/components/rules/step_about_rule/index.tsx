@@ -6,6 +6,7 @@
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -80,9 +81,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   const initialState = useMemo(
     () =>
-      defaultValues ?? isThreatMatchRuleValue
-        ? { ...stepAboutDefaultValue, threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH }
-        : stepAboutDefaultValue,
+      isEmpty(defaultValues)
+        ? isThreatMatchRuleValue
+          ? { ...stepAboutDefaultValue, threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH }
+          : stepAboutDefaultValue
+        : (defaultValues as AboutStepRule),
     [defaultValues, isThreatMatchRuleValue]
   );
 
