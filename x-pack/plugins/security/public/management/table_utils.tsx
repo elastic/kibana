@@ -11,6 +11,14 @@ import React from 'react';
 interface ActionsEuiTableFormattingProps {
   children: ReactNode;
 }
+
+/*
+ * Notes to future engineer:
+ * We created this component because as this time EUI actions table where not allowing to pass
+ * props href on an action. In our case, we want our actions to work with href
+ * and onClick. Then the problem is that the design did not match with EUI example, therefore
+ * we are doing some css magic to only have icon showing up when user is hovering a row
+ */
 export const ActionsEuiTableFormatting = React.memo<ActionsEuiTableFormattingProps>(
   ({ children }) => (
     <div
