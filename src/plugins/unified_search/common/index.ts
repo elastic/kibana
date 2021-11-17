@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PluginInitializerContext } from 'kibana/public';
-import { UnifiedSearchPlugin } from './plugin';
 
-export const plugin = (context: PluginInitializerContext) => {
-  return new UnifiedSearchPlugin(context);
-};
+export const BASE_PATH = '/app/unified_search';
+export const APP_ID = 'unified_search';
