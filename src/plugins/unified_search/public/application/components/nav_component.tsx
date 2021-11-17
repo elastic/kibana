@@ -18,9 +18,15 @@ interface UnifiedSearchTopNavProps {
   currentAppState?: UnifiedSearchAppState;
   isChromeVisible?: boolean;
   onAppLeave: AppMountParameters['onAppLeave'];
+  setAppState: any;
 }
 
-const TopNav = ({ currentAppState, isChromeVisible, onAppLeave }: UnifiedSearchTopNavProps) => {
+const TopNav = ({
+  currentAppState,
+  isChromeVisible,
+  onAppLeave,
+  setAppState,
+}: UnifiedSearchTopNavProps) => {
   const { services } = useKibana<UnifiedSearchServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu } = services;
@@ -30,13 +36,19 @@ const TopNav = ({ currentAppState, isChromeVisible, onAppLeave }: UnifiedSearchT
     services.data.search.session.start();
   }, [services.data.search.session]);
 
-  const handleRefresh = useCallback(
-    (_payload: any, isUpdate?: boolean) => {
-      if (isUpdate === false) {
+  const onQuerySubmit = useCallback(
+    (payload) => {
+      const { dateRange, query } = payload;
+      setAppState({ query });
+      const currentRange = services.data.query.timefilter.timefilter.getTime();
+      if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
+        services.data.query.timefilter.timefilter.setTime(dateRange);
+        setAppState({ timeRange: dateRange });
+      } else {
         doReload();
       }
     },
-    [doReload]
+    [doReload, services.data.query.timefilter.timefilter, setAppState]
   );
 
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
@@ -79,12 +91,13 @@ const TopNav = ({ currentAppState, isChromeVisible, onAppLeave }: UnifiedSearchT
       autoRefreshFetchSub.unsubscribe();
     };
   }, [services.data.query.timefilter.timefilter, doReload]);
+  // console.log('TopNav');
 
   return isChromeVisible ? (
     <TopNavMenu
       appName={APP_ID}
       setMenuMountPoint={setHeaderActionMenu}
-      onQuerySubmit={handleRefresh}
+      onQuerySubmit={onQuerySubmit}
       savedQueryId={currentAppState?.savedQuery}
       indexPatterns={indexPatterns}
       screenTitle="Unified search experience"

@@ -9,16 +9,19 @@
 import React from 'react';
 import { useKibana } from '../../../../kibana_react/public';
 import { UnifiedSearchTopNav } from './nav_component';
-import type { UnifiedSearchServices, UnifiedSearchAppState } from '../types';
+import type { UnifiedSearchServices } from '../types';
 import type { UnifiedSearchAppProps } from '../app';
 import { useChromeVisibility } from '../utils/use_chrome_visibility';
-
-const STATE_STORAGE_KEY = '_a';
+import { useContextAppState } from '../utils/use_app_state';
 
 export const UnifiedSearchWrapper = ({ onAppLeave }: UnifiedSearchAppProps) => {
   const { services } = useKibana<UnifiedSearchServices>();
-  const appState =
-    services.kbnUrlStateStorage.get<UnifiedSearchAppState>(STATE_STORAGE_KEY) ?? undefined;
+  const { appState, setAppState } = useContextAppState({ services });
+  setAppState({
+    query: services.data.query.queryString.getQuery(),
+    timeRange: services.data.query.timefilter.timefilter.getTime(),
+  });
+
   const isChromeVisible = useChromeVisibility(services.chrome);
 
   return (
@@ -26,6 +29,7 @@ export const UnifiedSearchWrapper = ({ onAppLeave }: UnifiedSearchAppProps) => {
       <UnifiedSearchTopNav
         isChromeVisible={isChromeVisible}
         currentAppState={appState}
+        setAppState={setAppState}
         onAppLeave={onAppLeave}
       />
       <div>Hello world!</div>

@@ -32,7 +32,8 @@ import type { UsageCollectionStart } from '../../../usage_collection/public';
 
 export interface UnifiedSearchAppState {
   filters: Filter[];
-  query: Query;
+  query?: Query;
+  timeRange?: TimeRange;
   savedQuery?: string;
 }
 
