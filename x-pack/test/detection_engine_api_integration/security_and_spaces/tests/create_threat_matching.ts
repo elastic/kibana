@@ -101,6 +101,27 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock());
       });
 
+      it('should always have threatIndicatorPath populated', async () => {
+        const ruleResponse = await createRule(supertest, log, {
+          ...getCreateThreatMatchRulesSchemaMock(),
+          threat_indicator_path: undefined,
+        });
+        const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
+        expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock());
+      });
+
+      it('should respect custom threatIndicatorPath value', async () => {
+        const ruleResponse = await createRule(supertest, log, {
+          ...getCreateThreatMatchRulesSchemaMock(),
+          threat_indicator_path: 'custom.path',
+        });
+        const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
+        expect(bodyToCompare).to.eql({
+          ...getThreatMatchingSchemaPartialMock(),
+          threat_indicator_path: 'custom.path',
+        });
+      });
+
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
         const ruleResponse = await createRule(
           supertest,

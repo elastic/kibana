@@ -13,7 +13,11 @@ import {
 } from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { SanitizedAlert } from '../../../../../alerting/common';
-import { NOTIFICATION_THROTTLE_NO_ACTIONS, SERVER_APP_ID } from '../../../../common/constants';
+import {
+  DEFAULT_INDICATOR_SOURCE_PATH,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+  SERVER_APP_ID,
+} from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { PartialFilter, RuleTypeParams } from '../types';
@@ -115,7 +119,10 @@ export const createRules = async ({
          */
         threatFilters: threatFilters as PartialFilter[] | undefined,
         threatIndex,
-        threatIndicatorPath,
+        threatIndicatorPath:
+          threatIndicatorPath ?? type === 'threat_match'
+            ? DEFAULT_INDICATOR_SOURCE_PATH
+            : undefined,
         threatQuery,
         concurrentSearches,
         itemsPerSearch,
