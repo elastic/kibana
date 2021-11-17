@@ -65,7 +65,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewId, setDataViewId] = useState<string | null>(selectedDataViewId);
-  console.log('dataViewId', dataViewId);
+
   const {
     isModified,
     onChangeCombo,
@@ -82,28 +82,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     selectedPatterns,
     signalIndexName,
   });
-  if (selectedDataViewId == null) {
-    console.log({
-      res: {
-        isModified,
-        onChangeCombo,
-        renderOption,
-        selectableOptions,
-        selectedOptions,
-        setIndexPatternsByDataView,
-      },
-      args: {
-        dataViewId,
-        defaultDataViewId: defaultDataView.id,
-        isOnlyDetectionAlerts,
-        kibanaDataViews,
-        scopeId,
-        selectedDataViewId,
-        selectedPatterns,
-        signalIndexName,
-      },
-    });
-  }
+
   const onCheckboxChanged = useCallback(
     (e) => {
       setIsOnlyDetectionAlertsChecked(e.target.checked);

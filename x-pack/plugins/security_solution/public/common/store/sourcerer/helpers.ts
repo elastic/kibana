@@ -81,7 +81,6 @@ export const validateSelectedPatterns = (
   // currently UI will take the undefined dataView and default to defaultDataView anyways
   // this is a "strategically merged" bug ;)
   // https://github.com/elastic/security-team/issues/1921
-  console.log('validateSelectedPatterns', { payload, dataView });
 
   return {
     [id]: {

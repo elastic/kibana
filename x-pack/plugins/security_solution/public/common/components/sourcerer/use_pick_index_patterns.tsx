@@ -133,40 +133,39 @@ export const usePickIndexPatterns = ({
     dataViewId == null ? 'deprecated' : ''
   );
   const onSetIsModified = useCallback(
-    (patterns?: string[], id: string | null) => {
+    (patterns: string[], id: string | null) => {
       if (id == null) {
         return setIsModified('deprecated');
       }
       if (isOnlyDetectionAlerts) {
         return setIsModified('alerts');
       }
-      const modifiedPatterns = patterns != null ? patterns : selectedPatterns;
       const isPatternsModified =
-        defaultSelectedPatternsAsOptions.length !== modifiedPatterns.length ||
+        defaultSelectedPatternsAsOptions.length !== patterns.length ||
         !defaultSelectedPatternsAsOptions.every((option) =>
-          modifiedPatterns.find((pattern) => option.value === pattern)
+          patterns.find((pattern) => option.value === pattern)
         );
-
-      console.log('defaultSelectedPatternsAsOptions', defaultSelectedPatternsAsOptions);
-      console.log('setIsModified', isPatternsModified ? 'modified' : '');
       return setIsModified(isPatternsModified ? 'modified' : '');
-      //    return setIsModified((prevValue) =>
-      //         prevValue === 'deprecated' ? 'deprecated' : isPatternsModified ? 'modified' : ''
-      //       );
     },
-    [defaultSelectedPatternsAsOptions, isOnlyDetectionAlerts, selectedPatterns]
+    [defaultSelectedPatternsAsOptions, isOnlyDetectionAlerts]
   );
 
-  // when scope updates, check modified to set/remove alerts label
   useEffect(() => {
     setSelectedOptions(
       scopeId === SourcererScopeName.detections
         ? alertsOptions
         : patternListToOptions(selectedPatterns)
     );
-    onSetIsModified(selectedPatterns, dataViewId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewId, scopeId, selectedPatterns]);
+  }, [selectedPatterns, scopeId]);
+  // when scope updates, check modified to set/remove alerts label
+  useEffect(() => {
+    onSetIsModified(
+      selectedOptions.map(({ label }) => label),
+      dataViewId
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewId, scopeId, selectedOptions]);
 
   const onChangeCombo = useCallback((newSelectedOptions) => {
     setSelectedOptions(newSelectedOptions);
