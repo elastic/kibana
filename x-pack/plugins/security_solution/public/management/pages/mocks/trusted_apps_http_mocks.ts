@@ -30,14 +30,14 @@ interface FindExceptionListItemSchemaQueryParams
   per_page?: number;
 }
 
-export type PolicyDetailsGetTrustedAppsListHttpMocksInterface = ResponseProvidersInterface<{
+export type TrustedAppsGetListHttpMocksInterface = ResponseProvidersInterface<{
   trustedAppsList: (options: HttpFetchOptionsWithPath) => FoundExceptionListItemSchema;
 }>;
 /**
  * HTTP mock for retrieving list of Trusted Apps
  */
 export const trustedAppsGetListHttpMocks =
-  httpHandlerMockFactory<PolicyDetailsGetTrustedAppsListHttpMocksInterface>([
+  httpHandlerMockFactory<TrustedAppsGetListHttpMocksInterface>([
     {
       id: 'trustedAppsList',
       path: `${EXCEPTION_LIST_ITEM_URL}/_find`,
@@ -46,7 +46,9 @@ export const trustedAppsGetListHttpMocks =
         const apiQueryParams = query as unknown as FindExceptionListItemSchemaQueryParams;
         const generator = new ExceptionsListItemGenerator('seed');
         const perPage = apiQueryParams.per_page ?? 10;
-        const data = Array.from({ length: Math.min(perPage, 50) }, () => generator.generate());
+        const data = Array.from({ length: Math.min(perPage, 50) }, () =>
+          generator.generate({ list_id: ENDPOINT_TRUSTED_APPS_LIST_ID })
+        );
 
         // Change the 3rd entry (index 2) to be policy specific
         data[2].tags = [
