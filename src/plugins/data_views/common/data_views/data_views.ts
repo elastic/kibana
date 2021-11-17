@@ -31,7 +31,7 @@ import {
   TypeMeta,
 } from '../types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '../../../field_formats/common/';
-import { META_FIELDS, SavedObject } from '../../common';
+import { META_FIELDS, DataViewCommonSavedObject } from '../../common';
 import { SavedObjectNotFound } from '../../../kibana_utils/common';
 import { DataViewMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
@@ -72,7 +72,7 @@ interface IndexPatternsServiceDeps {
 export class DataViewsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;
-  private savedObjectsCache?: Array<SavedObject<IndexPatternSavedObjectAttrs>> | null;
+  private savedObjectsCache?: Array<DataViewCommonSavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IDataViewsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
@@ -371,7 +371,9 @@ export class DataViewsService {
    * @returns IndexPatternSpec
    */
 
-  savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {
+  savedObjectToSpec = (
+    savedObject: DataViewCommonSavedObject<DataViewAttributes>
+  ): DataViewSpec => {
     const {
       id,
       version,
@@ -430,7 +432,7 @@ export class DataViewsService {
   };
 
   private initFromSavedObject = async (
-    savedObject: SavedObject<DataViewAttributes>
+    savedObject: DataViewCommonSavedObject<DataViewAttributes>
   ): Promise<DataView> => {
     const spec = this.savedObjectToSpec(savedObject);
     const { title, type, typeMeta, runtimeFieldMap } = spec;
@@ -567,18 +569,17 @@ export class DataViewsService {
     }
 
     const body = indexPattern.getAsSavedObjectBody();
-    const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
-      DATA_VIEW_SAVED_OBJECT_TYPE,
-      body,
-      {
+    const response: DataViewCommonSavedObject<DataViewAttributes> =
+      (await this.savedObjectsClient.create(DATA_VIEW_SAVED_OBJECT_TYPE, body, {
         id: indexPattern.id,
-      }
-    )) as SavedObject<DataViewAttributes>;
+      })) as DataViewCommonSavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response);
     this.dataViewCache.set(createdIndexPattern.id!, Promise.resolve(createdIndexPattern));
     if (this.savedObjectsCache) {
-      this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
+      this.savedObjectsCache.push(
+        response as DataViewCommonSavedObject<IndexPatternListSavedObjectAttrs>
+      );
     }
     return createdIndexPattern;
   }

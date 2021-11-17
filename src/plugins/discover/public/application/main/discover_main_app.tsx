@@ -12,7 +12,7 @@ import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './utils/use_discover_state';
 import { useUrl } from './utils/use_url';
-import { IndexPatternAttributes, SavedObject } from '../../../../data/common';
+import { IndexPatternAttributes, DataViewCommonSavedObject } from '../../../../data/common';
 import { DiscoverServices } from '../../build_services';
 import { SavedSearch } from '../../services/saved_searches';
 
@@ -26,7 +26,7 @@ export interface DiscoverMainProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: Array<DataViewCommonSavedObject<IndexPatternAttributes>>;
   /**
    * Kibana core services used by discover
    */
