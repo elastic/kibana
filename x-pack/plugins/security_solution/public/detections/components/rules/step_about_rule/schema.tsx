@@ -313,7 +313,7 @@ export const threatIndicatorPathRequiredSchemaValue = {
         i18n.translate(
           'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.threatIndicatorPathFieldEmptyError',
           {
-            defaultMessage: 'Threat indicator path must not be empty',
+            defaultMessage: 'Indicator prefix override must not be empty',
           }
         )
       ),
