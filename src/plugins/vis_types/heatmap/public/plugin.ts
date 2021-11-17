@@ -28,7 +28,7 @@ export interface VisTypeHeatmapPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
-export class VisTypePiePlugin {
+export class VisTypeHeatmapPlugin {
   setup(
     core: CoreSetup<VisTypeHeatmapPluginStartDependencies>,
     { visualizations, charts, usageCollection }: VisTypeHeatmapSetupDependencies

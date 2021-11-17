@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { VisTypePiePlugin } from './plugin';
+import { VisTypeHeatmapPlugin } from './plugin';
 
 export { heatmapVisType } from './vis_type';
 
-export const plugin = () => new VisTypePiePlugin();
+export const plugin = () => new VisTypeHeatmapPlugin();
