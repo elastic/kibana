@@ -75,6 +75,11 @@ export interface ILayer {
    */
   getMbLayerIds(): string[];
 
+  /*
+   * ILayer.getMbLayerIds returns mapbox source id assoicated with this layer.
+   */
+  getMbSourceId(): string;
+
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
@@ -295,7 +300,7 @@ export class AbstractLayer implements ILayer {
     return this._source.getMinZoom();
   }
 
-  _getMbSourceId() {
+  getMbSourceId() {
     return this.getId();
   }
 

@@ -36,7 +36,7 @@ import { ESSearchSource } from '../../../sources/es_search_source';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
 import { LayerIcon } from '../../layer';
 
-const ES_MVT_META_LAYER_NAME = 'meta';
+export const ES_MVT_META_LAYER_NAME = 'meta';
 const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
 const ES_MVT_HITS_TOTAL_VALUE = 'hits.total.value';
 const MAX_RESULT_WINDOW_DATA_REQUEST_ID = 'maxResultWindow';
@@ -256,7 +256,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   _syncSourceBindingWithMb(mbMap: MbMap) {
-    const mbSource = mbMap.getSource(this._getMbSourceId());
+    const mbSource = mbMap.getSource(this.getMbSourceId());
     if (mbSource) {
       return;
     }
@@ -274,7 +274,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       return;
     }
 
-    const mbSourceId = this._getMbSourceId();
+    const mbSourceId = this.getMbSourceId();
     mbMap.addSource(mbSourceId, {
       type: 'vector',
       tiles: [sourceMeta.urlTemplate],
@@ -288,7 +288,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   ownsMbSourceId(mbSourceId: string): boolean {
-    return this._getMbSourceId() === mbSourceId;
+    return this.getMbSourceId() === mbSourceId;
   }
 
   _getMbTooManyFeaturesLayerId() {
@@ -297,7 +297,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
   _syncStylePropertiesWithMb(mbMap: MbMap) {
     // @ts-ignore
-    const mbSource = mbMap.getSource(this._getMbSourceId());
+    const mbSource = mbMap.getSource(this.getMbSourceId());
     if (!mbSource) {
       return;
     }
@@ -359,66 +359,8 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
-  queryTileMetaFeatures(mbMap: MbMap): TileMetaFeature[] | null {
-    if (!this.getSource().isESSource()) {
-      return null;
-    }
-
-    // @ts-ignore
-    const mbSource = mbMap.getSource(this._getMbSourceId());
-    if (!mbSource) {
-      return null;
-    }
-
-    const sourceDataRequest = this.getSourceDataRequest();
-    if (!sourceDataRequest) {
-      return null;
-    }
-    const sourceMeta: MVTSingleLayerVectorSourceConfig =
-      sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-    if (sourceMeta.layerName === '') {
-      return null;
-    }
-
-    // querySourceFeatures can return duplicated features when features cross tile boundaries.
-    // Tile meta will never have duplicated features since by there nature, tile meta is a feature contained within a single tile
-    const mbFeatures = mbMap.querySourceFeatures(this._getMbSourceId(), {
-      sourceLayer: ES_MVT_META_LAYER_NAME,
-    });
-
-    const metaFeatures: Array<TileMetaFeature | null> = (
-      mbFeatures as unknown as TileMetaFeature[]
-    ).map((mbFeature: TileMetaFeature | null) => {
-      const parsedProperties: Record<string, unknown> = {};
-      for (const key in mbFeature?.properties) {
-        if (mbFeature?.properties.hasOwnProperty(key)) {
-          parsedProperties[key] =
-            typeof mbFeature.properties[key] === 'string' ||
-            typeof mbFeature.properties[key] === 'number' ||
-            typeof mbFeature.properties[key] === 'boolean'
-              ? mbFeature.properties[key]
-              : JSON.parse(mbFeature.properties[key]); // mvt properties cannot be nested geojson
-        }
-      }
-
-      try {
-        return {
-          type: 'Feature',
-          id: mbFeature?.id,
-          geometry: mbFeature?.geometry, // this getter might throw with non-conforming geometries
-          properties: parsedProperties,
-        } as TileMetaFeature;
-      } catch (e) {
-        return null;
-      }
-    });
-
-    const filtered = metaFeatures.filter((f) => f !== null);
-    return filtered as TileMetaFeature[];
-  }
-
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
-    const mbSource = mbMap.getSource(this._getMbSourceId()) as MbVectorSource | MbGeoJSONSource;
+    const mbSource = mbMap.getSource(this.getMbSourceId()) as MbVectorSource | MbGeoJSONSource;
     if (!mbSource) {
       return false;
     }

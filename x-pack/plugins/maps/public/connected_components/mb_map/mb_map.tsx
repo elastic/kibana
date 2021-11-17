@@ -24,6 +24,7 @@ import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearc
 import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
+import { IVectorSource } from '../../classes/sources/vector_source';
 import { MapSettings } from '../../reducers/map';
 import {
   Goto,
@@ -31,17 +32,13 @@ import {
   TileMetaFeature,
   Timeslice,
 } from '../../../common/descriptor_types';
-import {
-  DECIMAL_DEGREES_PRECISION,
-  LAYER_TYPE,
-  RawValue,
-  ZOOM_PRECISION,
-} from '../../../common/constants';
+import { DECIMAL_DEGREES_PRECISION, RawValue, ZOOM_PRECISION } from '../../../common/constants';
 import { getGlyphUrl, isRetina } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 
 import {
   addSpriteSheetToMapFromImageData,
+  getTileMetaFeatures,
   loadSpriteSheetImageData,
   removeOrphanedSourcesAndLayers,
 } from './utils';
@@ -49,7 +46,6 @@ import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
-import { MvtVectorLayer } from '../../classes/layers/vector_layer';
 import type { MapExtentState } from '../../reducers/map/types';
 
 export interface Props {
@@ -125,10 +121,17 @@ export class MbMap extends Component<Props, State> {
 
   // This keeps track of the latest update calls, per layerId
   _queryForMeta = (layer: ILayer) => {
-    if (this.state.mbMap && layer.isVisible() && layer.getType() === LAYER_TYPE.TILED_VECTOR) {
-      const mbFeatures = (layer as MvtVectorLayer).queryTileMetaFeatures(this.state.mbMap);
-      if (mbFeatures !== null) {
-        this.props.updateMetaFromTiles(layer.getId(), mbFeatures);
+    const source = layer.getSource();
+    if (
+      this.state.mbMap &&
+      layer.isVisible() &&
+      source.isESSource() &&
+      typeof (source as IVectorSource).isMvt === 'function' &&
+      (source as IVectorSource).isMvt()
+    ) {
+      const features = getTileMetaFeatures(this.state.mbMap, layer.getMbSourceId());
+      if (features !== null) {
+        this.props.updateMetaFromTiles(layer.getId(), features);
       }
     }
   };

@@ -117,7 +117,7 @@ export class HeatmapLayer extends AbstractLayer {
   }
 
   syncLayerWithMB(mbMap: MbMap) {
-    addGeoJsonMbSource(this._getMbSourceId(), this.getMbLayerIds(), mbMap);
+    addGeoJsonMbSource(this.getMbSourceId(), this.getMbLayerIds(), mbMap);
 
     const heatmapLayerId = this._getHeatmapLayerId();
     if (!mbMap.getLayer(heatmapLayerId)) {
@@ -143,7 +143,7 @@ export class HeatmapLayer extends AbstractLayer {
     const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
       mbGeoJSONSource.setData(featureCollection);
-      
+
       let max = 1; // max will be at least one, since counts or sums will be at least one.
       for (let i = 0; i < featureCollection.features.length; i++) {
         max = Math.max(featureCollection.features[i].properties?.[propertyKey], max);

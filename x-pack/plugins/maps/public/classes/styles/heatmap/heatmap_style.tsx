@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { IStyle } from '../style';
 import { HeatmapStyleEditor } from './components/heatmap_style_editor';
@@ -95,7 +94,7 @@ export class HeatmapStyle implements IStyle {
       0,
       0,
       max,
-      1
+      1,
     ]);
 
     const colorStops = getOrdinalMbColorRampStops(
