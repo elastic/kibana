@@ -144,8 +144,7 @@ You might be managing tens, hundreds, or even thousands of dashboards, visualiza
 [[organize-in-spaces]]
 ==== Collect related items in a space
 
-{kib}
-<<xpack-spaces, Spaces>> is built for organizing your visualizations, dashboards, {data-sources}, and more.
+{kib} provides <<xpack-spaces, spaces>> for organizing your visualizations, dashboards, {data-sources}, and more.
 Think of a space as its own mini {kib} installation&mdash;it’s isolated from all other spaces,
 so you can tailor it to your specific needs without impacting others.
 
@@ -155,7 +154,7 @@ image::images/select-your-space.png[Space selector view]
 [float]
 ==== Organize your content with tags
 
-Tags are keywords or labels that you assign to {kib} saved objects,
+Tags are keywords or labels that you assign to saved objects,
 such as dashboards and visualizations, so you can classify them in a way that is meaningful to you.
 For example, if you tag objects with “design”, you can search and
 filter on the tag to see all related objects.
@@ -216,7 +215,7 @@ users’ behavior. For more information, see <<xpack-security-audit-logging,{kib
 [[kibana-navigation-search]]
 === Find apps and objects
 
-To quickly find {kib} apps and the objects you create, use the search field in the global header.
+To quickly find apps and the objects you create, use the search field in the global header.
 Search suggestions include deep links into applications,
 allowing you to directly navigate to the views you need most.
 
@@ -259,7 +258,7 @@ image::images/tags-search.png[Example of searching for tags]
 [float]
 === View all {kib} has to offer
 
-To view the full list of {kib} apps and features, go to https://www.elastic.co/kibana/features[{kib} features].
+To view the full list of apps and features, go to https://www.elastic.co/kibana/features[{kib} features].
 
 [float]
 [[try-kibana]]
