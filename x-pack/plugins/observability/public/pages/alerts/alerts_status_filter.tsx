@@ -18,7 +18,7 @@ export interface AlertStatusFilterProps {
 export const allAlerts: AlertStatusFilter = {
   status: AlertStatus.All,
   query: '',
-  label: i18n.translate('xpack.observability.alerts.workflowStatusFilter.openButtonLabel', {
+  label: i18n.translate('xpack.observability.alerts.alertStatusFilter.showAll', {
     defaultMessage: 'Show all',
   }),
 };
@@ -26,7 +26,7 @@ export const allAlerts: AlertStatusFilter = {
 export const activeAlerts: AlertStatusFilter = {
   status: AlertStatus.Active,
   query: `kibana.alert.status : "active"`,
-  label: i18n.translate('xpack.observability.alerts.workflowStatusFilter.acknowledgedButtonLabel', {
+  label: i18n.translate('xpack.observability.alerts.alertStatusFilter.active', {
     defaultMessage: 'Active',
   }),
 };
@@ -34,7 +34,7 @@ export const activeAlerts: AlertStatusFilter = {
 export const recoveredAlerts: AlertStatusFilter = {
   status: AlertStatus.Recovered,
   query: `kibana.alert.status : "recovered"`,
-  label: i18n.translate('xpack.observability.alerts.workflowStatusFilter.closedButtonLabel', {
+  label: i18n.translate('xpack.observability.alerts.alertStatusFilter.recovered', {
     defaultMessage: 'Recovered',
   }),
 };
@@ -44,19 +44,19 @@ const options: EuiButtonGroupOptionProps[] = [
     id: allAlerts.status,
     label: allAlerts.label,
     value: allAlerts.query,
-    'data-test-subj': 'workflow-status-filter-open-button',
+    'data-test-subj': 'alert-status-filter-show-all-button',
   },
   {
     id: activeAlerts.status,
     label: activeAlerts.label,
     value: activeAlerts.query,
-    'data-test-subj': 'workflow-status-filter-acknowledged-button',
+    'data-test-subj': 'alert-status-filter-active-button',
   },
   {
     id: recoveredAlerts.status,
     label: recoveredAlerts.label,
     value: recoveredAlerts.query,
-    'data-test-subj': 'workflow-status-filter-closed-button',
+    'data-test-subj': 'alert-status-filter-recovered-button',
   },
 ];
 
