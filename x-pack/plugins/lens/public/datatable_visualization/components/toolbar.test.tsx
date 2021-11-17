@@ -12,6 +12,7 @@ import { DatatableVisualizationState } from '../visualization';
 import { FramePublicAPI, VisualizationToolbarProps } from '../../types';
 import { ToolbarButton } from 'src/plugins/kibana_react/public';
 import { ReactWrapper } from 'enzyme';
+import { PagingState } from '../../../common/expressions';
 
 class Harness {
   wrapper: ReactWrapper;
@@ -42,6 +43,11 @@ class Harness {
 }
 
 describe('datatable toolbar', () => {
+  const defaultPagingState: PagingState = {
+    size: 10,
+    enabled: true,
+  };
+
   let harness: Harness;
   let defaultProps: VisualizationToolbarProps<DatatableVisualizationState>;
 
@@ -51,7 +57,6 @@ describe('datatable toolbar', () => {
       frame: {} as FramePublicAPI,
       state: {
         fitRowToContent: false,
-        enablePagination: false,
       } as DatatableVisualizationState,
     };
 
@@ -64,7 +69,12 @@ describe('datatable toolbar', () => {
     expect(harness.fitRowToContentSwitch.prop('checked')).toBe(false);
     expect(harness.paginationSwitch.prop('checked')).toBe(false);
 
-    harness.wrapper.setProps({ state: { fitRowToContent: true, enablePagination: true } });
+    harness.wrapper.setProps({
+      state: {
+        fitRowToContent: true,
+        paging: defaultPagingState,
+      },
+    });
 
     expect(harness.fitRowToContentSwitch.prop('checked')).toBe(true);
     expect(harness.paginationSwitch.prop('checked')).toBe(true);
@@ -78,16 +88,14 @@ describe('datatable toolbar', () => {
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(1, {
       fitRowToContent: true,
-      enablePagination: false,
     });
 
-    harness.wrapper.setProps({ state: { fitRowToContent: true, enablePagination: false } }); // update state manually
+    harness.wrapper.setProps({ state: { fitRowToContent: true } }); // update state manually
     harness.toggleFitRowToContent(); // turn it off
 
     expect(defaultProps.setState).toHaveBeenCalledTimes(2);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(2, {
       fitRowToContent: false,
-      enablePagination: false,
     });
   });
 
@@ -98,17 +106,20 @@ describe('datatable toolbar', () => {
 
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(1, {
-      enablePagination: true,
+      paging: defaultPagingState,
       fitRowToContent: false,
     });
 
-    harness.wrapper.setProps({ state: { fitRowToContent: false, enablePagination: true } }); // update state manually
-    harness.togglePagination(); // turn it off
+    // update state manually
+    harness.wrapper.setProps({
+      state: { fitRowToContent: false, paging: defaultPagingState },
+    });
+    harness.togglePagination(); // turn it off. this should disable pagination but preserve the default page size
 
     expect(defaultProps.setState).toHaveBeenCalledTimes(2);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(2, {
       fitRowToContent: false,
-      enablePagination: false,
+      paging: { ...defaultPagingState, enabled: false },
     });
   });
 });

@@ -22,7 +22,7 @@ import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { getStopsForFixedMode } from '../shared_components';
 import { LayerType, layerTypes } from '../../common';
-import { getDefaultSummaryLabel } from '../../common/expressions';
+import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 export interface DatatableVisualizationState {
@@ -30,8 +30,8 @@ export interface DatatableVisualizationState {
   layerId: string;
   layerType: LayerType;
   sorting?: SortingState;
-  enablePagination?: boolean;
   fitRowToContent?: boolean;
+  paging?: PagingState;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -392,7 +392,7 @@ export const getDatatableVisualization = ({
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
             fitRowToContent: [state.fitRowToContent ?? false],
-            enablePagination: [state.enablePagination ?? false],
+            pageSize: state.paging?.enabled ? [state.paging.size] : [],
           },
         },
       ],

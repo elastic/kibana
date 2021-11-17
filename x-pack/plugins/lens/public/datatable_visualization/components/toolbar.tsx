@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { ToolbarPopover } from '../../shared_components';
 import type { VisualizationToolbarProps } from '../../types';
 import type { DatatableVisualizationState } from '../visualization';
+import { DEFAULT_PAGE_SIZE } from './table_basic';
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
@@ -24,9 +25,11 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
   }, [setState, state]);
 
   const onTogglePagination = useCallback(() => {
+    const current = state.paging ?? { size: DEFAULT_PAGE_SIZE, enabled: false };
+
     setState({
       ...state,
-      enablePagination: !state.enablePagination,
+      paging: { ...current, enabled: !current.enabled },
     });
   }, [setState, state]);
 
@@ -66,7 +69,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             data-test-subj="lens-table-pagination-switch"
             label=""
             showLabel={false}
-            checked={Boolean(state.enablePagination)}
+            checked={Boolean(state.paging?.enabled)}
             onChange={onTogglePagination}
           />
         </EuiFormRow>

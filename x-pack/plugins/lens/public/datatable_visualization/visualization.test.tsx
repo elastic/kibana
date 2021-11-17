@@ -538,19 +538,21 @@ describe('Datatable Visualization', () => {
     });
 
     it('sets pagination based on state', () => {
-      expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState }).enablePagination
-      ).toEqual([false]);
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).pageSize).toEqual([]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, enablePagination: false })
-          .enablePagination
-      ).toEqual([false]);
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          paging: { size: 20, enabled: false },
+        }).pageSize
+      ).toEqual([]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, enablePagination: true })
-          .enablePagination
-      ).toEqual([true]);
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          paging: { size: 20, enabled: true },
+        }).pageSize
+      ).toEqual([20]);
     });
 
     it('sets fitRowToContent based on state', () => {

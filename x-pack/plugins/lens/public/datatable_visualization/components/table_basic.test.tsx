@@ -668,7 +668,7 @@ describe('DatatableComponent', () => {
     it('enables pagination', async () => {
       const { data, args } = sampleArgs();
 
-      args.enablePagination = true;
+      args.pageSize = 10;
 
       const wrapper = mount(
         <DatatableComponent
@@ -683,12 +683,10 @@ describe('DatatableComponent', () => {
         />
       );
 
-      const DEFAULT_PAGE_SIZE = 10;
-
       const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
       expect(paginationConfig).toBeTruthy();
       expect(paginationConfig?.pageIndex).toBe(0); // should start at 0
-      expect(paginationConfig?.pageSize).toBe(DEFAULT_PAGE_SIZE);
+      expect(paginationConfig?.pageSize).toBe(args.pageSize);
 
       // trigger new page
       const newIndex = 3;
@@ -698,13 +696,13 @@ describe('DatatableComponent', () => {
       const updatedConfig = wrapper.find(EuiDataGrid).prop('pagination');
       expect(updatedConfig).toBeTruthy();
       expect(updatedConfig?.pageIndex).toBe(newIndex);
-      expect(updatedConfig?.pageSize).toBe(DEFAULT_PAGE_SIZE);
+      expect(updatedConfig?.pageSize).toBe(args.pageSize);
     });
 
     it('disables pagination by default', async () => {
       const { data, args } = sampleArgs();
 
-      delete args.enablePagination;
+      delete args.pageSize;
 
       const wrapper = mount(
         <DatatableComponent
@@ -727,10 +725,10 @@ describe('DatatableComponent', () => {
       const { data, args } = sampleArgs();
 
       const argsWithPagination = copyData(args);
-      argsWithPagination.enablePagination = true;
+      argsWithPagination.pageSize = 20;
 
       const argsWithoutPagination = copyData(args);
-      argsWithoutPagination.enablePagination = false;
+      delete argsWithoutPagination.pageSize;
 
       const defaultProps = {
         data,
