@@ -21,11 +21,10 @@ export default function ({ getService }: FtrProviderContext) {
   const { min, max } = DATES['7.0.0'].hosts;
 
   describe('API /metrics/overview/top', () => {
-    // Do I need another archive with the mappings changed? This one has defaults
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
-    it('WIP works', async () => {
+    it('works', async () => {
       const response = await supertest
         .post('/api/metrics/overview/top')
         .set({
