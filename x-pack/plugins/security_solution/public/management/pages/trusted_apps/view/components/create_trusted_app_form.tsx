@@ -42,13 +42,13 @@ import {
 import { defaultConditionEntry } from '../../store/builders';
 import { OS_TITLES } from '../translations';
 import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useLicense } from '../../../../../common/hooks/use_license';
 import {
   EffectedPolicySelect,
   EffectedPolicySelection,
   EffectedPolicySelectProps,
-} from './effected_policy_select';
-import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
-import { useLicense } from '../../../../../common/hooks/use_license';
+} from '../../../../components/effected_policy_select';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
