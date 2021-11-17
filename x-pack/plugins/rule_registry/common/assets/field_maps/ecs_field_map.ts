@@ -2770,61 +2770,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'threat.enrichments.indicator.geo.city_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.geo.continent_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.geo.continent_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.geo.country_iso_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.geo.country_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.geo.location': {
-    type: 'geo_point',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.geo.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.geo.postal_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.geo.region_iso_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.geo.region_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.enrichments.indicator.geo.timezone': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   'threat.enrichments.indicator.ip': {
     type: 'ip',
     array: false,
@@ -3232,61 +3177,6 @@ export const ecsFieldMap = {
   },
   'threat.indicator.first_seen': {
     type: 'date',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.geo.city_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.geo.continent_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.geo.continent_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.geo.country_iso_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.geo.country_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.geo.location': {
-    type: 'geo_point',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.geo.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.geo.postal_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.geo.region_iso_code': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.geo.region_name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'threat.indicator.geo.timezone': {
-    type: 'keyword',
     array: false,
     required: false,
   },
