@@ -29,6 +29,7 @@ import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
+import { updateDataView } from '../../store/timeline/actions';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -64,9 +65,16 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { graphEventId, savedObjectId, timelineType, description } = useDeepEqualSelector((state) =>
+  const {
+    dataViewId: dataViewIdCurrent,
+    indexNames: selectedPatternsCurrent,
+    graphEventId,
+    savedObjectId,
+    timelineType,
+    description,
+  } = useDeepEqualSelector((state) =>
     pick(
-      ['graphEventId', 'savedObjectId', 'timelineType', 'description'],
+      ['indexNames', 'dataViewId', 'graphEventId', 'savedObjectId', 'timelineType', 'description'],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
@@ -87,6 +95,36 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const onDataViewChange = useCallback(() => {
+    if (
+      dataViewIdCurrent === '' ||
+      (dataViewIdCurrent === dataViewId &&
+        selectedPatternsCurrent.sort().join() === selectedPatterns.sort().join())
+    ) {
+      return;
+    }
+
+    dispatch(
+      timelineActions.updateDataView({
+        id: timelineId,
+        dataViewId,
+        indexNames: selectedPatterns,
+      })
+    );
+  }, [
+    dataViewId,
+    dataViewIdCurrent,
+    dispatch,
+    selectedPatterns,
+    selectedPatternsCurrent,
+    timelineId,
+  ]);
+
+  useEffect(() => {
+    onDataViewChange();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewId, selectedPatterns]);
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(
