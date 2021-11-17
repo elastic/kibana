@@ -47,7 +47,7 @@ const search = {
 };
 
 const title = i18n.translate('indexPatternManagement.dataViewTable.title', {
-  defaultMessage: 'Data views',
+  defaultMessage: 'Data Views',
 });
 
 const securityDataView = i18n.translate(

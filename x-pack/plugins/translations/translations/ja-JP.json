@@ -19338,8 +19338,6 @@
     "xpack.rollupJobs.licenseCheckErrorMessage": "ライセンス確認失敗",
     "xpack.rollupJobs.listBreadcrumbTitle": "ロールアップジョブ",
     "xpack.rollupJobs.refreshAction.errorTitle": "ロールアップジョブの更新中にエラーが発生",
-    "xpack.rollupJobs.rollupIndexPatternsDescription": "ロールアップインデックスを捕捉するインデックスパターンの作成を有効にします。\n              それによりロールアップデータに基づくビジュアライゼーションが可能になります。",
-    "xpack.rollupJobs.rollupIndexPatternsTitle": "ロールアップインデックスパターンを有効にする",
     "xpack.rollupJobs.rollupJobsDocsLinkText": "ロールアップジョブドキュメント",
     "xpack.rollupJobs.startJobsAction.errorTitle": "ロールアップジョブの開始中にエラーが発生",
     "xpack.rollupJobs.stopJobsAction.errorTitle": "ロールアップジョブの停止中にエラーが発生",
