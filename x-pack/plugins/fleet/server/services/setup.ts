@@ -118,8 +118,8 @@ async function createSetupSideEffects(
   await ensureManagedPackageVersions(soClient, esClient);
 
   if (nonFatalErrors.length > 0) {
-    logger.info(`Encountered ${nonFatalErrors.length} non fatal errors during Fleet setup`);
-    formatNonFatalErrors(nonFatalErrors).forEach((error) => logger.info(JSON.stringify(error)));
+    logger.warn(`Encountered ${nonFatalErrors.length} non fatal errors during Fleet setup`);
+    formatNonFatalErrors(nonFatalErrors).forEach((error) => logger.warn(JSON.stringify(error)));
   }
 
   logger.info('Fleet setup completed');

@@ -7,27 +7,53 @@
 
 import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
 
-/**
-
-1. Install a  "fake" newer version of `system`
-2. Start up Kibana
-3. Assert that the newer version of `system` is removed and the latest available version is installed instead
-
- */
+let kibanaRoot: ReturnType<typeof kbnTestServer.createRoot>;
+let esServer: kbnTestServer.TestElasticsearchUtils;
 
 describe('managed package rollbacks', () => {
-  let root: ReturnType<typeof kbnTestServer.createRoot>;
+  const startServers = async () => {
+    const { startES } = kbnTestServer.createTestServers({
+      adjustTimeout: (t) => jest.setTimeout(t),
+      settings: {
+        es: {
+          license: 'trial',
+        },
+      },
+    });
+
+    kibanaRoot = kbnTestServer.createRoot(
+      {
+        migrations: {
+          skip: true,
+        },
+      },
+      { oss: false }
+    );
+
+    esServer = await startES();
+
+    await kibanaRoot.preboot();
+    await kibanaRoot.setup();
+    await kibanaRoot.start();
+  };
+
+  const stopServers = async () => {
+    if (kibanaRoot) {
+      await kibanaRoot.shutdown();
+    }
+    if (esServer) {
+      await esServer.stop();
+    }
+
+    await new Promise((res) => setTimeout(res, 10000));
+  };
 
   beforeAll(async () => {
-    root = kbnTestServer.createRoot();
-
-    await root.preboot();
-    await root.setup();
-    await root.start();
-  }, 30000);
+    await startServers();
+  });
 
   afterAll(async () => {
-    await root.shutdown();
+    await stopServers();
   });
 
   describe('when newer version of managed package is installed', () => {

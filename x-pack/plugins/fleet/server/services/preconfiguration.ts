@@ -378,7 +378,11 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           }
     ),
     packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
-    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies, ...packagePolicyUpgradeResults],
+    nonFatalErrors: [
+      ...rejectedPackages,
+      ...rejectedPolicies,
+      ...packagePolicyUpgradeResults.filter((x) => x.errors.length > 0),
+    ],
   };
 }
 
