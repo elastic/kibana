@@ -29,19 +29,16 @@ export function getSwitchIndexPatternAppState(
     : currentColumns;
   const columns = nextColumns.length ? nextColumns : [];
 
-  // remove prev time field sort
-  let nextSort = getSortArray(currentSort, nextIndexPattern).filter(
-    (value) => value[0] !== currentIndexPattern.timeFieldName
-  );
-
-  // append default sorting if indexPattern has time field
-  if (nextIndexPattern.timeFieldName) {
-    nextSort = [[nextIndexPattern.timeFieldName, sortDirection], ...nextSort];
+  let nextSort = getSortArray(currentSort, nextIndexPattern);
+  const [first, ...restSorting] = nextSort;
+  // replace primary timeFieldName if it was sorted
+  if (nextIndexPattern.timeFieldName && first && first[0] === currentIndexPattern.timeFieldName) {
+    nextSort = [[nextIndexPattern.timeFieldName, sortDirection], ...restSorting];
   }
 
   return {
     index: nextIndexPattern.id,
     columns,
-    sort: nextSort,
+    sort: !nextSort.length ? [[nextIndexPattern.timeFieldName, sortDirection]] : nextSort,
   };
 }
