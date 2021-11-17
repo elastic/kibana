@@ -411,8 +411,8 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
-    "@babel/eslint-parser": "^7.16.3",
     "@babel/core": "^7.16.0",
+    "@babel/eslint-parser": "^7.16.3",
     "@babel/eslint-plugin": "^7.14.5",
     "@babel/generator": "^7.16.0",
     "@babel/parser": "^7.16.3",
