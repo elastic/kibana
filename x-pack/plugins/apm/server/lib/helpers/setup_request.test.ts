@@ -26,7 +26,7 @@ jest.mock('../../routes/settings/apm_indices/get_apm_indices', () => ({
     } as PromiseReturnType<typeof getApmIndices>),
 }));
 
-jest.mock('../data_view/get_dynamic_data_view', () => ({
+jest.mock('../../routes/data_view/get_dynamic_data_view', () => ({
   getDynamicDataView: async () => {
     return;
   },
