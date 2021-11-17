@@ -33,15 +33,22 @@ export const getScopePatternListSelection = (
   }
 };
 
+const ensurePatternFormat = (patternList: string[]): string[] =>
+  [
+    ...new Set(
+      patternList.reduce((acc: string[], pattern: string) => [...pattern.split(','), ...acc], [])
+    ),
+  ].sort();
+
 export const validateSelectedPatterns = (
   state: SourcererModel,
   payload: SelectedDataViewPayload
 ): Partial<SourcererScopeById> => {
   const { id, ...rest } = payload;
-  let dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
+  const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
   // dedupe because these could come from a silly url or pre 8.0 timeline
-  const dedupePatterns = [...new Set(rest.selectedPatterns)];
-  let selectedPatterns =
+  const dedupePatterns = ensurePatternFormat(rest.selectedPatterns);
+  const selectedPatterns =
     dataView != null
       ? dedupePatterns.filter(
           (pattern) =>
@@ -58,21 +65,23 @@ export const validateSelectedPatterns = (
   if (selectedPatterns.length > 0 && dataView == null) {
     // we have index patterns, but not a data view id
     // find out if we have these index patterns in the defaultDataView
-    const areAllPatternsInDefault = selectedPatterns.every(
-      (pattern) => state.defaultDataView.title.indexOf(pattern) > -1
-    );
-    if (areAllPatternsInDefault) {
-      dataView = state.defaultDataView;
-      selectedPatterns = selectedPatterns.filter(
-        (pattern) => dataView != null && dataView.patternList.includes(pattern)
-      );
-    }
+    // debugger;
+    // const areAllPatternsInDefault = selectedPatterns.every(
+    //   (pattern) => state.defaultDataView.title.indexOf(pattern) > -1
+    // );
+    // if (areAllPatternsInDefault) {
+    //   dataView = state.defaultDataView;
+    //   selectedPatterns = selectedPatterns.filter(
+    //     (pattern) => dataView != null && dataView.patternList.includes(pattern)
+    //   );
+    // }
   }
   // TO DO: Steph/sourcerer If dataView is still undefined here, create temporary dataView
   // and prompt user to go create this dataView
   // currently UI will take the undefined dataView and default to defaultDataView anyways
   // this is a "strategically merged" bug ;)
   // https://github.com/elastic/security-team/issues/1921
+  console.log('validateSelectedPatterns', { payload, dataView });
 
   return {
     [id]: {

@@ -11,6 +11,13 @@ export const CALL_OUT_TITLE = i18n.translate('xpack.securitySolution.indexPatter
   defaultMessage: 'Data view cannot be modified on this page',
 });
 
+export const CALL_OUT_DEPRECATED_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.callOutDeprecxatedTitle',
+  {
+    defaultMessage: 'This timeline uses a legacy data view selector',
+  }
+);
+
 export const CALL_OUT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.callOutTimelineTitle',
   {
@@ -32,6 +39,13 @@ export const ALERTS_BADGE_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.alertsBadgeTitle',
   {
     defaultMessage: 'Alerts',
+  }
+);
+
+export const DEPRECATED_BADGE_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.updateAvailableBadgeTitle',
+  {
+    defaultMessage: 'Update available',
   }
 );
 
@@ -97,10 +111,21 @@ export const DISABLED_INDEX_PATTERNS = i18n.translate(
   }
 );
 
+export const UPDATE_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.update', {
+  defaultMessage: 'Update and recreate data view',
+});
+
 export const INDEX_PATTERNS_RESET = i18n.translate(
   'xpack.securitySolution.indexPatterns.resetButton',
   {
     defaultMessage: 'Reset',
+  }
+);
+
+export const INDEX_PATTERNS_CLOSE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.closeButton',
+  {
+    defaultMessage: 'Close',
   }
 );
 

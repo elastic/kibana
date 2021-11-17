@@ -13,7 +13,7 @@ import { getPatternListWithoutSignals } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 interface UsePickIndexPatternsProps {
-  dataViewId: string;
+  dataViewId: string | null;
   defaultDataViewId: string;
   isOnlyDetectionAlerts: boolean;
   kibanaDataViews: sourcererModel.SourcererModel['kibanaDataViews'];
@@ -22,7 +22,7 @@ interface UsePickIndexPatternsProps {
   signalIndexName: string | null;
 }
 
-export type ModifiedTypes = 'modified' | 'alerts' | '';
+export type ModifiedTypes = 'modified' | 'alerts' | 'deprecated' | '';
 
 interface UsePickIndexPatterns {
   isModified: ModifiedTypes;
@@ -62,29 +62,43 @@ export const usePickIndexPatterns = ({
       };
     }
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
-    return theDataView != null
-      ? scopeId === sourcererModel.SourcererScopeName.default
-        ? {
-            patternList: getPatternListWithoutSignals(
-              theDataView.title
-                .split(',')
-                // remove duplicates patterns from selector
-                .filter((pattern, i, self) => self.indexOf(pattern) === i),
-              signalIndexName
-            ),
-            selectablePatterns: getPatternListWithoutSignals(
-              theDataView.patternList,
-              signalIndexName
-            ),
-          }
-        : {
-            patternList: theDataView.title
+    if (theDataView == null) {
+      // let patterns = [];
+      // const defaultDataView = kibanaDataViews.find((dataView) => dataView.id === defaultDataViewId);
+      // if (defaultDataView != null) {
+      //   const areAllPatternsInDefault = selectedPatterns.every(
+      //     (pattern) => defaultDataView.title.indexOf(pattern) > -1
+      //   );
+      //   if (areAllPatternsInDefault) {
+      //     patterns = selectedPatterns.filter((pattern) =>
+      //       defaultDataView.patternList.includes(pattern)
+      //     );
+      //   }
+      // }
+      // debugger;
+      return { patternList: [], selectablePatterns: [] };
+    }
+    return scopeId === sourcererModel.SourcererScopeName.default
+      ? {
+          patternList: getPatternListWithoutSignals(
+            theDataView.title
               .split(',')
               // remove duplicates patterns from selector
               .filter((pattern, i, self) => self.indexOf(pattern) === i),
-            selectablePatterns: theDataView.patternList,
-          }
-      : { patternList: [], selectablePatterns: [] };
+            signalIndexName
+          ),
+          selectablePatterns: getPatternListWithoutSignals(
+            theDataView.patternList,
+            signalIndexName
+          ),
+        }
+      : {
+          patternList: theDataView.title
+            .split(',')
+            // remove duplicates patterns from selector
+            .filter((pattern, i, self) => self.indexOf(pattern) === i),
+          selectablePatterns: theDataView.patternList,
+        };
   }, [dataViewId, isOnlyDetectionAlerts, kibanaDataViews, scopeId, signalIndexName]);
 
   const selectableOptions = useMemo(
@@ -111,13 +125,18 @@ export const usePickIndexPatterns = ({
   );
 
   const defaultSelectedPatternsAsOptions = useMemo(
-    () => getDefaultSelectedOptionsByDataView(dataViewId),
+    () => (dataViewId != null ? getDefaultSelectedOptionsByDataView(dataViewId) : []),
     [dataViewId, getDefaultSelectedOptionsByDataView]
   );
 
-  const [isModified, setIsModified] = useState<'modified' | 'alerts' | ''>('');
+  const [isModified, setIsModified] = useState<ModifiedTypes>(
+    dataViewId == null ? 'deprecated' : ''
+  );
   const onSetIsModified = useCallback(
-    (patterns?: string[]) => {
+    (patterns?: string[], id: string | null) => {
+      if (id == null) {
+        return setIsModified('deprecated');
+      }
       if (isOnlyDetectionAlerts) {
         return setIsModified('alerts');
       }
@@ -127,7 +146,13 @@ export const usePickIndexPatterns = ({
         !defaultSelectedPatternsAsOptions.every((option) =>
           modifiedPatterns.find((pattern) => option.value === pattern)
         );
+
+      console.log('defaultSelectedPatternsAsOptions', defaultSelectedPatternsAsOptions);
+      console.log('setIsModified', isPatternsModified ? 'modified' : '');
       return setIsModified(isPatternsModified ? 'modified' : '');
+      //    return setIsModified((prevValue) =>
+      //         prevValue === 'deprecated' ? 'deprecated' : isPatternsModified ? 'modified' : ''
+      //       );
     },
     [defaultSelectedPatternsAsOptions, isOnlyDetectionAlerts, selectedPatterns]
   );
@@ -139,9 +164,9 @@ export const usePickIndexPatterns = ({
         ? alertsOptions
         : patternListToOptions(selectedPatterns)
     );
-    onSetIsModified(selectedPatterns);
+    onSetIsModified(selectedPatterns, dataViewId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scopeId, selectedPatterns]);
+  }, [dataViewId, scopeId, selectedPatterns]);
 
   const onChangeCombo = useCallback((newSelectedOptions) => {
     setSelectedOptions(newSelectedOptions);

@@ -6,7 +6,6 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { TimelineEventsType } from '../../../../common/types/timeline';
 
 import { SourcererDataView, SourcererScopeName } from './model';
 import { SecurityDataView } from '../../containers/sourcerer/api';
@@ -41,6 +40,5 @@ export interface SelectedDataViewPayload {
   id: SourcererScopeName;
   selectedDataViewId: string;
   selectedPatterns: string[];
-  eventType?: TimelineEventsType;
 }
 export const setSelectedDataView = actionCreator<SelectedDataViewPayload>('SET_SELECTED_DATA_VIEW');
