@@ -7,18 +7,26 @@
 
 import { useState, useCallback } from 'react';
 import type React from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 
-export function useInput(defaultValue = '', validate?: (value: string) => string[] | undefined) {
+export function useInput(
+  defaultValue = '',
+  validate?: (value: string) => string[] | undefined,
+  disabled: boolean = false
+) {
   const [value, setValue] = useState<string>(defaultValue);
   const [errors, setErrors] = useState<string[] | undefined>();
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const newValue = e.target.value;
-    setValue(newValue);
-    if (errors && validate && validate(newValue) === undefined) {
-      setErrors(undefined);
-    }
-  };
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const newValue = e.target.value;
+      setValue(newValue);
+      if (errors && validate && validate(newValue) === undefined) {
+        setErrors(undefined);
+      }
+    },
+    [errors, validate]
+  );
 
   const isInvalid = errors !== undefined;
 
@@ -29,6 +37,7 @@ export function useInput(defaultValue = '', validate?: (value: string) => string
       onChange,
       value,
       isInvalid,
+      disabled,
     },
     formRowProps: {
       error: errors,
@@ -50,10 +59,31 @@ export function useInput(defaultValue = '', validate?: (value: string) => string
   };
 }
 
+export function useSwitchInput(defaultValue = false, disabled = false) {
+  const [value, setValue] = useState<boolean>(defaultValue);
+
+  const onChange = (e: EuiSwitchEvent) => {
+    const newValue = e.target.checked;
+    setValue(newValue);
+  };
+
+  return {
+    value,
+    props: {
+      onChange,
+      checked: value,
+      disabled,
+    },
+    formRowProps: {},
+    setValue,
+  };
+}
+
 export function useComboInput(
   id: string,
   defaultValue: string[] = [],
-  validate?: (value: string[]) => Array<{ message: string; index?: number }> | undefined
+  validate?: (value: string[]) => Array<{ message: string; index?: number }> | undefined,
+  disabled = false
 ) {
   const [value, setValue] = useState<string[]>(defaultValue);
   const [errors, setErrors] = useState<Array<{ message: string; index?: number }> | undefined>();
@@ -77,6 +107,7 @@ export function useComboInput(
       onChange,
       errors,
       isInvalid,
+      disabled,
     },
     value,
     clear: () => {

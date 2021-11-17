@@ -19,14 +19,14 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { HostsInput } from '../hosts_input';
 import { useStartServices } from '../../../../hooks';
+import { FLYOUT_MAX_WIDTH } from '../../constants';
 
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
-
-const FLYOUT_MAX_WIDTH = 800;
 
 export interface FleetServerHostsFlyoutProps {
   onClose: () => void;
@@ -74,6 +74,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             }}
           />
         </EuiText>
+        <EuiSpacer size="m" />
         <HostsInput {...form.fleetServerHostsInput.props} id="fleet-server-inputs" />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
