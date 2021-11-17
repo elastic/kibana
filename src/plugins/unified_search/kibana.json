@@ -1,0 +1,34 @@
+{
+  "id": "unifiedSearch",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "urlForwarding",
+    "navigation",
+    "savedObjects",
+    "visualizations",
+    "embeddable",
+    "dashboard",
+    "presentationUtil"
+  ],
+  "optionalPlugins": [
+    "home",
+    "share",
+    "savedObjectsTaggingOss",
+    "usageCollection",
+    "spaces"
+  ],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "home",
+    "discover"
+  ],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  },
+  "description": "PoC for the unified search experience."
+}
