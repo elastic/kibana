@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { CreateCaseFlyout } from './create_case_flyout';
@@ -28,23 +28,25 @@ describe('CreateCaseFlyout', () => {
   });
 
   it('renders', async () => {
-    render(
+    const { getByTestId } = render(
       <TestProviders>
         <CreateCaseFlyout {...defaultProps} />
       </TestProviders>
     );
-
-    await waitFor(() => expect(screen.getByText('Create new case')).toBeInTheDocument());
+    await act(async () => {
+      expect(getByTestId('create-case-flyout')).toBeTruthy();
+    });
   });
 
   it('Closing flyout calls onCloseCaseModal', async () => {
-    render(
+    const { getByTestId } = render(
       <TestProviders>
         <CreateCaseFlyout {...defaultProps} />
       </TestProviders>
     );
-
-    userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
-    await waitFor(() => expect(onClose).toBeCalled());
+    await act(async () => {
+      userEvent.click(getByTestId('euiFlyoutCloseButton'));
+    });
+    expect(onClose).toBeCalled();
   });
 });

@@ -157,7 +157,9 @@ describe('Create case', () => {
           </FormContext>
         </TestProviders>
       );
-
+      await act(async () => {
+        wrapper.update();
+      });
       expect(wrapper.find(`[data-test-subj="caseTitle"]`).first().exists()).toBeTruthy();
       expect(wrapper.find(`[data-test-subj="caseDescription"]`).first().exists()).toBeTruthy();
       expect(wrapper.find(`[data-test-subj="caseTags"]`).first().exists()).toBeTruthy();

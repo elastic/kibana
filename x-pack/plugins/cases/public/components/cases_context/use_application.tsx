@@ -8,17 +8,17 @@ import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../common/lib/kibana';
 
 interface UseApplicationReturn {
-  appId: string;
-  appTitle: string;
+  appId: string | undefined;
+  appTitle: string | undefined;
 }
 
 export const useApplication = (): UseApplicationReturn => {
   const { currentAppId$, applications$ } = useKibana().services.application;
   // retrieve the most recent value from the BehaviorSubject
-  const appId = useObservable(currentAppId$) ?? '';
+  const appId = useObservable(currentAppId$);
   const applications = useObservable(applications$);
 
-  const appTitle = applications?.get(appId)?.category?.label ?? '';
+  const appTitle = appId ? applications?.get(appId)?.category?.label : undefined;
 
   return { appId, appTitle };
 };

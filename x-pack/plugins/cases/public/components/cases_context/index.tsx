@@ -36,7 +36,6 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH },
 }) => {
   const { appId, appTitle } = useApplication();
-
   const [value, setValue] = useState<CasesContextStateValue>({
     owner,
     userCanCrud,
