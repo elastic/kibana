@@ -97,7 +97,9 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const onDataViewChange = useCallback(() => {
     if (
-      dataViewIdCurrent === '' ||
+      // initial state will get set on create
+      (dataViewIdCurrent === '' && selectedPatternsCurrent.length === 0) ||
+      // don't update if no change
       (dataViewIdCurrent === dataViewId &&
         selectedPatternsCurrent.sort().join() === selectedPatterns.sort().join())
     ) {
