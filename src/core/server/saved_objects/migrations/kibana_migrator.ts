@@ -170,7 +170,6 @@ export class KibanaMigrator {
             transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
               migrateRawDocsSafely({
                 serializer: this.serializer,
-                knownTypes: new Set(this.typeRegistry.getAllTypes().map((t) => t.name)),
                 migrateDoc: this.documentMigrator.migrateAndConvert,
                 rawDocs,
               }),
