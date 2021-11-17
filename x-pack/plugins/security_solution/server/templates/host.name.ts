@@ -5,42 +5,57 @@
  * 2.0.
  */
 
+import { MATRIX_HISTOGRAM_TEMPLATE_TYPE } from '../../common/constants';
+
 export const hostName = {
   id: 'e25f6260-42f7-11ec-a42d-e31ddad596f0',
-  type: 'security-solution-visualisation-template',
+  type: MATRIX_HISTOGRAM_TEMPLATE_TYPE,
   namespaces: ['default'],
   updated_at: '2021-11-11T14:01:36.394Z',
   version: 1,
   attributes: {
-    title: 'host.name',
+    title: '',
     description: '',
     visualizationType: 'lnsXY',
+    type: 'lens',
+    references: [
+      {
+        type: 'index-pattern',
+        id: '304509a0-46f7-11ec-a51b-5902f0886db7',
+        name: 'indexpattern-datasource-current-indexpattern',
+      },
+      {
+        type: 'index-pattern',
+        id: '304509a0-46f7-11ec-a51b-5902f0886db7',
+        name: 'indexpattern-datasource-layer-f05712e9-7b31-4684-a470-127afd8659de',
+      },
+    ],
     state: {
       visualization: {
-        title: 'Empty XY chart',
+        yRightExtent: {
+          mode: 'full',
+        },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar_stacked',
         legend: {
           isVisible: true,
           position: 'right',
         },
-        valueLabels: 'hide',
-        preferredSeriesType: 'bar_stacked',
         layers: [
           {
-            layerId: '3a296a6e-c934-4a52-8149-e8cc3718b384',
-            accessors: ['03b01787-c48a-4ff2-9051-8c20f0ad9fec'],
-            position: 'top',
-            seriesType: 'area',
-            showGridlines: false,
             layerType: 'data',
-            xAccessor: '38cf8975-5e61-41bb-8965-f8502f450426',
+            xAccessor: 'f43d9f45-54b3-4b87-97a7-e31c5d59fb06',
+            layerId: 'f05712e9-7b31-4684-a470-127afd8659de',
+            accessors: ['e60e4ba2-024a-4785-8931-c85eb4ded81d'],
+            seriesType: 'line',
+            showGridlines: false,
+            position: 'top',
           },
         ],
-        yRightExtent: {
-          mode: 'full',
-        },
         yLeftExtent: {
           mode: 'full',
         },
+        title: 'Empty XY chart',
       },
       query: {
         query: '',
@@ -50,32 +65,32 @@ export const hostName = {
       datasourceStates: {
         indexpattern: {
           layers: {
-            '3a296a6e-c934-4a52-8149-e8cc3718b384': {
+            'f05712e9-7b31-4684-a470-127afd8659de': {
+              columnOrder: [
+                'f43d9f45-54b3-4b87-97a7-e31c5d59fb06',
+                'e60e4ba2-024a-4785-8931-c85eb4ded81d',
+              ],
               columns: {
-                '38cf8975-5e61-41bb-8965-f8502f450426': {
-                  label: '@timestamp',
-                  dataType: 'date',
-                  operationType: 'date_histogram',
+                'e60e4ba2-024a-4785-8931-c85eb4ded81d': {
+                  sourceField: 'host.name',
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  operationType: 'unique_count',
+                  label: 'Unique count of host.name',
+                },
+                'f43d9f45-54b3-4b87-97a7-e31c5d59fb06': {
                   sourceField: '@timestamp',
                   isBucketed: true,
+                  dataType: 'date',
                   scale: 'interval',
+                  operationType: 'date_histogram',
+                  label: '@timestamp',
                   params: {
                     interval: 'auto',
                   },
                 },
-                '03b01787-c48a-4ff2-9051-8c20f0ad9fec': {
-                  label: 'Unique count of host.name',
-                  dataType: 'number',
-                  operationType: 'unique_count',
-                  scale: 'ratio',
-                  sourceField: 'host.name',
-                  isBucketed: false,
-                },
               },
-              columnOrder: [
-                '38cf8975-5e61-41bb-8965-f8502f450426',
-                '03b01787-c48a-4ff2-9051-8c20f0ad9fec',
-              ],
               incompleteColumns: {},
             },
           },
@@ -86,12 +101,12 @@ export const hostName = {
   references: [
     {
       type: 'index-pattern',
-      id: 'ad53fa40-42f7-11ec-a42d-e31ddad596f0',
+      id: '304509a0-46f7-11ec-a51b-5902f0886db7',
       name: 'indexpattern-datasource-current-indexpattern',
     },
     {
       type: 'index-pattern',
-      id: 'ad53fa40-42f7-11ec-a42d-e31ddad596f0',
+      id: '304509a0-46f7-11ec-a51b-5902f0886db7',
       name: 'indexpattern-datasource-layer-3a296a6e-c934-4a52-8149-e8cc3718b384',
     },
   ],

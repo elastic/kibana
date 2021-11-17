@@ -331,7 +331,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): Promise<StartedSubPlugins> {
     const subPlugins = await this.subPlugins();
 
-    console.log('---plugin.tsx', plugins);
     return {
       overview: subPlugins.overview.start(),
       alerts: subPlugins.alerts.start(storage),

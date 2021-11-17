@@ -101,6 +101,7 @@ export interface MatrixHistogramTemplates {
 
 export interface SecuritySolutionTemplate {
   id: string;
+  type: string;
   name: string;
   help: string;
   tags: string[];

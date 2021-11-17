@@ -20,7 +20,6 @@ export async function initializeTemplates(
   client: Pick<SavedObjectsRepository, 'bulkCreate' | 'create' | 'find'>
 ) {
   const existingTemplates = await client.find({ type: MATRIX_HISTOGRAM_TEMPLATE_TYPE, perPage: 1 });
-  console.log('existingTemplates', existingTemplates);
   if (existingTemplates.total === 0) {
     // Some devs were seeing timeouts that would cause an unhandled promise rejection
     // likely because the pitch template is so huge.
@@ -28,9 +27,7 @@ export async function initializeTemplates(
     // creates and catch and throw-away any errors that happen.
     // Once packages are ready, we should probably move that pitch that is so large to a package
     for (const template of loadTemplates()) {
-      console.log('template', JSON.stringify(template));
       client.create(MATRIX_HISTOGRAM_TEMPLATE_TYPE, template, { id: template.id }).catch((err) => {
-        console.log(err);
         return undefined;
       });
     }

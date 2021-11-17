@@ -96,7 +96,7 @@ export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserAc
       setComment,
       editor: editorRef.current,
     }));
-
+    console.log('content----', content);
     return isEditable ? (
       <Form form={form} data-test-subj="user-action-markdown-form">
         <UseField

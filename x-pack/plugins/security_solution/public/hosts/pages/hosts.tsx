@@ -54,7 +54,7 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
-import { WorkpadTemplates } from '../../common/components/matrix_histogram/templates';
+import { MatrixHistogramTemplates } from '../../common/components/matrix_histogram/templates';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -192,6 +192,8 @@ const HostsComponent = ({ plugins }) => {
                 skip={isInitializing || !filterQuery}
                 narrowDateRange={narrowDateRange}
               />
+              <EuiSpacer />
+              <MatrixHistogramTemplates plugins={plugins} />
 
               <EuiSpacer />
 
@@ -201,8 +203,6 @@ const HostsComponent = ({ plugins }) => {
 
               <EuiSpacer />
             </Display>
-
-            <WorkpadTemplates plugins={plugins} />
 
             <HostsTabs
               deleteQuery={deleteQuery}
