@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
 
-      it('Index settings deprecation flyout', async () => {
+      it.skip('Index settings deprecation flyout', async () => {
         await PageObjects.upgradeAssistant.clickEsDeprecation(
           'indexSettings' // An index setting deprecation was added in the before() hook so should be guaranteed
         );
