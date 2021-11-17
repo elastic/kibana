@@ -52,7 +52,7 @@ import { switchFn } from './switch';
 import { caseFn } from './case';
 
 export const functions = [
-  all,
+  //all,
   alterColumn,
   any,
   asFn,

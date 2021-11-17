@@ -1,0 +1,27 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+  },
+  "include": [
+    "../../../typings/**/*",
+    "__fixtures__/**/*",
+    "canvas_plugin_src/**/*",
+    "common/**/*",
+    "i18n/**/*",
+    "public/**/*",
+    "server/**/*",
+    "shareable_runtime/**/*",
+    "storybook/**/*",
+    "tasks/mocks/*",
+    "types/**/*"
+  ],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../canvas/tsconfig.json" },
+    { "path": "../../../src/plugins/expressions/tsconfig.json" },
+  ]
+}
