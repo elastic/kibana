@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common';
 import { convertToBuildEsQuery } from '../../../../common/lib/keury';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common/es_query/get_es_query_config';
 import { useKibana } from '../../../../common/lib/kibana';
 import { QUERY_PREVIEW_ERROR } from './translations';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';

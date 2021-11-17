@@ -11,11 +11,11 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
-import { FilterStateStore, Filter } from '@kbn/es-query';
+import { FilterStateStore, Filter, Query } from '@kbn/es-query';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+
 import type {
-  Query,
   FilterManager,
   SavedQuery,
   SavedQueryTimeFilter,

@@ -8,11 +8,13 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+
 import {
-  DataPublicPluginStart,
   isCompleteResponse,
   isErrorResponse,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../../../src/plugins/data/common/search/utils';
+
 import {
   HostsQueries,
   HostsRiskScoreRequestOptions,
