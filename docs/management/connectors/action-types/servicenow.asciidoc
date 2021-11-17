@@ -10,7 +10,7 @@ The ServiceNow connector uses the https://docs.servicenow.com/bundle/orlando-app
 [float]
 [[servicenow-connector-prerequisites]]
 ==== Prerequisites
-Create a {sn} integration user and assign it the following roles:
+Create a ServiceNow integration user and assign it the following roles:
 
 * `incident_manager`: Allows the user read, create, and update access to the Incident table.
 * `personalize_choices`: Allows the user to retrieve Choice element options, such as Severity.
