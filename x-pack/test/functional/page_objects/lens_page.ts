@@ -944,6 +944,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
     },
 
+    async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
+      await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
+    },
+
+    async getMetricStyle() {
+      const el = await testSubjects.find('lns_metric_value');
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
+    },
+
     async assertMissingValues(option: string) {
       await this.assertExactText('[data-test-subj="lnsMissingValuesSelect"]', option);
     },

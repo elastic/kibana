@@ -13,6 +13,8 @@ import { createMockExecutionContext } from '../../../../../src/plugins/expressio
 import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
 import { layerTypes } from '../../common';
 import type { LensMultiTable } from '../../common';
+import { IUiSettingsClient } from 'kibana/public';
+import { ColorMode } from 'src/plugins/charts/common';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -43,6 +45,8 @@ function sampleArgs() {
     description: 'Fancy chart description',
     metricTitle: 'My fanci metric chart',
     mode: 'full',
+    colorMode: ColorMode.None,
+    palette: { type: 'palette', name: 'status' },
   };
 
   const noAttributesArgs: MetricConfig = {
@@ -53,6 +57,8 @@ function sampleArgs() {
     description: '',
     metricTitle: 'My fanci metric chart',
     mode: 'full',
+    colorMode: ColorMode.None,
+    palette: { type: 'palette', name: 'status' },
   };
 
   return { data, args, noAttributesArgs };
@@ -82,6 +88,7 @@ describe('metric_expression', () => {
             data={data}
             args={args}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -92,23 +99,15 @@ describe('metric_expression', () => {
             key="3"
           >
             <div
+              className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={
-                Object {
-                  "fontSize": "60pt",
-                  "fontWeight": 600,
-                }
-              }
+              style={Object {}}
             >
               3
             </div>
             <div
+              className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={
-                Object {
-                  "fontSize": "24pt",
-                }
-              }
             >
               My fanci metric chart
             </div>
@@ -127,6 +126,7 @@ describe('metric_expression', () => {
             data={data}
             args={args}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -137,23 +137,15 @@ describe('metric_expression', () => {
             key="last"
           >
             <div
+              className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={
-                Object {
-                  "fontSize": "60pt",
-                  "fontWeight": 600,
-                }
-              }
+              style={Object {}}
             >
               last
             </div>
             <div
+              className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={
-                Object {
-                  "fontSize": "24pt",
-                }
-              }
             >
               My fanci metric chart
             </div>
@@ -171,6 +163,7 @@ describe('metric_expression', () => {
             data={data}
             args={noAttributesArgs}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -181,23 +174,15 @@ describe('metric_expression', () => {
             key="3"
           >
             <div
+              className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={
-                Object {
-                  "fontSize": "60pt",
-                  "fontWeight": 600,
-                }
-              }
+              style={Object {}}
             >
               3
             </div>
             <div
+              className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={
-                Object {
-                  "fontSize": "24pt",
-                }
-              }
             >
               My fanci metric chart
             </div>
@@ -215,6 +200,7 @@ describe('metric_expression', () => {
             data={data}
             args={{ ...noAttributesArgs, mode: 'reduced' }}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -225,13 +211,9 @@ describe('metric_expression', () => {
             key="3"
           >
             <div
+              className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={
-                Object {
-                  "fontSize": "60pt",
-                  "fontWeight": 600,
-                }
-              }
+              style={Object {}}
             >
               3
             </div>
@@ -249,6 +231,7 @@ describe('metric_expression', () => {
             data={{ ...data, tables: {} }}
             args={noAttributesArgs}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -273,6 +256,7 @@ describe('metric_expression', () => {
             data={data}
             args={noAttributesArgs}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -297,6 +281,7 @@ describe('metric_expression', () => {
             data={data}
             args={noAttributesArgs}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -307,23 +292,15 @@ describe('metric_expression', () => {
             key="0"
           >
             <div
+              className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={
-                Object {
-                  "fontSize": "60pt",
-                  "fontWeight": 600,
-                }
-              }
+              style={Object {}}
             >
               0
             </div>
             <div
+              className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={
-                Object {
-                  "fontSize": "24pt",
-                }
-              }
             >
               My fanci metric chart
             </div>
@@ -336,8 +313,237 @@ describe('metric_expression', () => {
       const { data, args } = sampleArgs();
       const factory = jest.fn(() => ({ convert: (x) => x } as IFieldFormat));
 
-      shallow(<MetricChart data={data} args={args} formatFactory={factory} />);
+      shallow(
+        <MetricChart
+          data={data}
+          args={args}
+          formatFactory={factory}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        />
+      );
       expect(factory).toHaveBeenCalledWith({ id: 'percent', params: { format: '0.000%' } });
+    });
+
+    test('it renders the correct color styling for numeric value if coloring config is passed', () => {
+      const { data, args } = sampleArgs();
+
+      args.colorMode = ColorMode.Labels;
+      args.palette.params = {
+        rangeMin: 0,
+        rangeMax: 400,
+        stops: [100, 200, 400],
+        gradient: false,
+        range: 'number',
+        colors: ['red', 'yellow', 'green'],
+      };
+
+      const instance = shallow(
+        <MetricChart
+          data={data}
+          args={args}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        />
+      );
+
+      expect(instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')).toEqual(
+        expect.objectContaining({
+          color: 'red',
+        })
+      );
+    });
+
+    test('it renders no color styling for numeric value if value is lower then rangeMin and continuity is "above"', () => {
+      const { data, args } = sampleArgs();
+
+      data.tables.l1.rows[0].c = -1;
+      args.colorMode = ColorMode.Labels;
+      args.palette.params = {
+        rangeMin: 0,
+        rangeMax: 400,
+        stops: [100, 200, 400],
+        gradient: false,
+        range: 'number',
+        colors: ['red', 'yellow', 'green'],
+        continuity: 'above',
+      };
+
+      const instance = shallow(
+        <MetricChart
+          data={data}
+          args={args}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        />
+      );
+
+      expect(
+        instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')
+      ).not.toEqual(
+        expect.objectContaining({
+          color: expect.any(String),
+        })
+      );
+    });
+    test('it renders no color styling for numeric value if value is higher than rangeMax and continuity is "below"', () => {
+      const { data, args } = sampleArgs();
+
+      data.tables.l1.rows[0].c = 500;
+      args.colorMode = ColorMode.Labels;
+      args.palette.params = {
+        rangeMin: 0,
+        rangeMax: 400,
+        stops: [100, 200, 400],
+        gradient: false,
+        range: 'number',
+        colors: ['red', 'yellow', 'green'],
+        continuity: 'below',
+      };
+
+      const instance = shallow(
+        <MetricChart
+          data={data}
+          args={args}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        />
+      );
+
+      expect(
+        instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')
+      ).not.toEqual(
+        expect.objectContaining({
+          color: expect.any(String),
+        })
+      );
+    });
+
+    test('it renders no color styling for numeric value if value is higher than rangeMax and continuity is "none"', () => {
+      const { data, args } = sampleArgs();
+
+      data.tables.l1.rows[0].c = 500;
+      args.colorMode = ColorMode.Labels;
+      args.palette.params = {
+        rangeMin: 0,
+        rangeMax: 400,
+        stops: [100, 200, 400],
+        gradient: false,
+        range: 'number',
+        colors: ['red', 'yellow', 'green'],
+        continuity: 'none',
+      };
+
+      const instance = shallow(
+        <MetricChart
+          data={data}
+          args={args}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        />
+      );
+
+      expect(
+        instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')
+      ).not.toEqual(
+        expect.objectContaining({
+          color: expect.any(String),
+        })
+      );
+    });
+
+    test('it renders no color styling for numeric value if value is lower than rangeMin and continuity is "none"', () => {
+      const { data, args } = sampleArgs();
+
+      data.tables.l1.rows[0].c = -1;
+      args.colorMode = ColorMode.Labels;
+      args.palette.params = {
+        rangeMin: 0,
+        rangeMax: 400,
+        stops: [100, 200, 400],
+        gradient: false,
+        range: 'number',
+        colors: ['red', 'yellow', 'green'],
+        continuity: 'none',
+      };
+
+      const instance = shallow(
+        <MetricChart
+          data={data}
+          args={args}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        />
+      );
+
+      expect(
+        instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')
+      ).not.toEqual(
+        expect.objectContaining({
+          color: expect.any(String),
+        })
+      );
+    });
+
+    test('it renders the color styling for numeric value if value is higher than rangeMax and continuity is "all"', () => {
+      const { data, args } = sampleArgs();
+
+      data.tables.l1.rows[0].c = 500;
+      args.colorMode = ColorMode.Labels;
+      args.palette.params = {
+        rangeMin: 0,
+        rangeMax: 400,
+        stops: [100, 200, 400],
+        gradient: false,
+        range: 'number',
+        colors: ['red', 'yellow', 'green'],
+        continuity: 'all',
+      };
+
+      const instance = shallow(
+        <MetricChart
+          data={data}
+          args={args}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        />
+      );
+
+      expect(instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')).toEqual(
+        expect.objectContaining({
+          color: 'green',
+        })
+      );
+    });
+
+    test('it renders the color styling for numeric value if value is lower than rangeMin and continuity is "all"', () => {
+      const { data, args } = sampleArgs();
+
+      data.tables.l1.rows[0].c = -1;
+      args.colorMode = ColorMode.Labels;
+      args.palette.params = {
+        rangeMin: 0,
+        rangeMax: 400,
+        stops: [100, 200, 400],
+        gradient: false,
+        range: 'number',
+        colors: ['red', 'yellow', 'green'],
+        continuity: 'all',
+      };
+
+      const instance = shallow(
+        <MetricChart
+          data={data}
+          args={args}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        />
+      );
+
+      expect(instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')).toEqual(
+        expect.objectContaining({
+          color: 'red',
+        })
+      );
     });
   });
 });

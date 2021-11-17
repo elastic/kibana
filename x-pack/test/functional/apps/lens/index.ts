@@ -57,6 +57,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./geo_field'));
       loadTestFile(require.resolve('./formula'));
       loadTestFile(require.resolve('./heatmap'));
+      loadTestFile(require.resolve('./metrics'));
       loadTestFile(require.resolve('./reference_lines'));
       loadTestFile(require.resolve('./inspector'));
       loadTestFile(require.resolve('./error_handling'));
