@@ -50,9 +50,7 @@ describe.each([
   });
 
   it('populates a threatIndicatorPath value for threat_match rule if empty', async () => {
-    const ruleOptions = {
-      ...getCreateThreatMatchRulesOptionsMock(isRuleRegistryEnabled),
-    };
+    const ruleOptions = getCreateThreatMatchRulesOptionsMock(isRuleRegistryEnabled);
     delete ruleOptions.threatIndicatorPath;
     await createRules(ruleOptions);
     expect(ruleOptions.rulesClient.create).toHaveBeenCalledWith(
@@ -67,9 +65,7 @@ describe.each([
   });
 
   it('does not populate a threatIndicatorPath value for other rules if empty', async () => {
-    const ruleOptions = {
-      ...getCreateMlRulesOptionsMock(isRuleRegistryEnabled),
-    };
+    const ruleOptions = getCreateMlRulesOptionsMock(isRuleRegistryEnabled);
     delete ruleOptions.threatIndicatorPath;
     await createRules(ruleOptions);
     expect(ruleOptions.rulesClient.create).not.toHaveBeenCalledWith(
