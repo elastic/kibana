@@ -8,10 +8,10 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { OperationDefinition } from './index';
-import { ReferenceBasedIndexPatternColumn } from './column_types';
+import { ReferenceBasedIndexPatternColumn, GenericIndexPatternColumn } from './column_types';
 import type { IndexPattern } from '../../types';
 import { useDebouncedValue } from '../../../shared_components';
-import { getFormatFromPreviousColumn, isColumnOfType, isValidNumber } from './helpers';
+import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDefault', {
   defaultMessage: 'Static value',
@@ -44,6 +44,12 @@ export interface StaticValueIndexPatternColumn extends ReferenceBasedIndexPatter
       };
     };
   };
+}
+
+function isStaticValueColumnLike(
+  col: GenericIndexPatternColumn
+): col is StaticValueIndexPatternColumn {
+  return Boolean('params' in col && col.params && 'value' in col.params);
 }
 
 export const staticValueOperation: OperationDefinition<
@@ -103,7 +109,7 @@ export const staticValueOperation: OperationDefinition<
   buildColumn({ previousColumn, layer, indexPattern }, columnParams, operationDefinitionMap) {
     const existingStaticValue =
       previousColumn &&
-      isColumnOfType<StaticValueIndexPatternColumn>('static_value', previousColumn) &&
+      isStaticValueColumnLike(previousColumn) &&
       isValidNumber(previousColumn.params.value)
         ? previousColumn.params.value
         : undefined;
