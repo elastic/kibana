@@ -22,6 +22,11 @@ const testTable: Datatable = {
       meta: { type: 'string' },
     },
     {
+      id: 'title_id',
+      name: 'title',
+      meta: { type: 'string' },
+    },
+    {
       id: 'time',
       name: 'time',
       meta: { type: 'date' },
