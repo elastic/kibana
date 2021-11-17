@@ -16,7 +16,7 @@ export type QueryStringFilter = Filter & {
   query?: {
     query_string?: {
       query: string;
-      fields: string[];
+      fields?: string[];
     };
   };
 };
