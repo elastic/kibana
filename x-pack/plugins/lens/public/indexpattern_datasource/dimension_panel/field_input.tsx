@@ -86,7 +86,7 @@ export function FieldInput({
   );
 }
 
-function getErrorMessage(
+export function getErrorMessage(
   selectedColumn: IndexPatternColumn | undefined,
   incompleteOperation: boolean,
   input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,

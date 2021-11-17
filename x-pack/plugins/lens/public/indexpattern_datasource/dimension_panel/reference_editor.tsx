@@ -305,7 +305,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
           <EuiFormRow
             data-test-subj="indexPattern-reference-field-selection-row"
             label={i18n.translate('xpack.lens.indexPattern.chooseField', {
-              defaultMessage: 'Select a field',
+              defaultMessage: 'Field',
             })}
             fullWidth
             isInvalid={showFieldInvalid || showFieldMissingInvalid}

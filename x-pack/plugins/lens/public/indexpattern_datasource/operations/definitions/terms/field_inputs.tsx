@@ -112,7 +112,6 @@ export function FieldInputs({
       </>
     );
   }
-  // TODO: better handle the case with pending new field & remove of initiale value
   const disableActions = localValues.length === 2 && localValues.some(({ isNew }) => isNew);
   const localValuesFilled = localValues.filter(({ isNew }) => !isNew);
   return (
