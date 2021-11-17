@@ -80,14 +80,23 @@ const rules = {
       },
     },
     t_test: {
+      a: {
+        field: '{field}',
+        filter: { __scope_link: 'GLOBAL.filter' },
+      },
+      b: {
+        field: '{field}',
+        filter: { __scope_link: 'GLOBAL.filter' },
+      },
+      type: { __one_of: ['paired', 'homoscedastic', 'heteroscedastic'] },
       __template: {
         a: {
-          field: 0,
+          field: '',
         },
         b: {
-          field: 0,
+          field: '',
         },
-        type: { __one_of: ['paired', 'homoscedastic', 'heteroscedastic'] },
+        type: '',
       },
     },
     adjacency_matrix: {
