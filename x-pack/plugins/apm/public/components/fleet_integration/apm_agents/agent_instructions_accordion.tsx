@@ -12,6 +12,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiCodeBlock,
+  EuiTabbedContent,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -25,6 +27,7 @@ import { AgentIcon } from '../../shared/agent_icon';
 import { NewPackagePolicy } from '../apm_policy_form/typings';
 import { getCommands } from '../../../tutorial/config_agent/commands/get_commands';
 import { replaceTemplateStrings } from './replace_template_strings';
+import { RuntimeAttachment } from './runtime_attachment';
 
 function AccordionButtonContent({
   agentName,
@@ -116,6 +119,63 @@ export function AgentInstructionsAccordion({
   const apmServerUrl = vars?.url.value;
   const secretToken = vars?.secret_token.value;
   const steps = createAgentInstructions(apmServerUrl, secretToken);
+  const stepsElements = steps.map(
+    (
+      { title: stepTitle, textPre, textPost, customComponentName, commands },
+      index
+    ) => {
+      const commandBlock = replaceTemplateStrings(
+        Array.isArray(commands) ? commands.join('\n') : commands || '',
+        docLinks
+      );
+      return (
+        <section key={index}>
+          <EuiText>
+            <h4>{stepTitle}</h4>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="s">
+            {textPre && (
+              <InstructionsContent
+                markdown={replaceTemplateStrings(textPre, docLinks)}
+              />
+            )}
+            {commandBlock && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCodeBlock isCopyable language="bash">
+                  {commandBlock}
+                </EuiCodeBlock>
+              </>
+            )}
+            {customComponentName === 'TutorialConfigAgent' && (
+              <TutorialConfigAgent
+                variantId={variantId}
+                apmServerUrl={apmServerUrl}
+                secretToken={secretToken}
+              />
+            )}
+            {customComponentName === 'TutorialConfigAgentRumScript' && (
+              <TutorialConfigAgent
+                variantId="js_script"
+                apmServerUrl={apmServerUrl}
+                secretToken={secretToken}
+              />
+            )}
+            {textPost && (
+              <>
+                <EuiSpacer />
+                <InstructionsContent
+                  markdown={replaceTemplateStrings(textPost, docLinks)}
+                />
+              </>
+            )}
+          </EuiText>
+          <EuiSpacer />
+        </section>
+      );
+    }
+  );
   return (
     <EuiAccordion
       id={agentName}
@@ -124,69 +184,41 @@ export function AgentInstructionsAccordion({
       }
     >
       <EuiSpacer />
-      {steps.map(
-        (
+      <EuiTabbedContent
+        tabs={[
           {
-            title: stepTitle,
-            textPre,
-            textPost,
-            customComponentName,
-            commands,
+            id: 'manual-instrumentation',
+            name: 'Manual instrumentation',
+            content: (
+              <>
+                <EuiSpacer />
+                {stepsElements}
+              </>
+            ),
           },
-          index
-        ) => {
-          const commandBlock = replaceTemplateStrings(
-            Array.isArray(commands) ? commands.join('\n') : commands || '',
-            docLinks
-          );
-          return (
-            <section key={index}>
-              <EuiText>
-                <h4>{stepTitle}</h4>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiText color="subdued" size="s">
-                {textPre && (
-                  <InstructionsContent
-                    markdown={replaceTemplateStrings(textPre, docLinks)}
-                  />
-                )}
-                {commandBlock && (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiCodeBlock isCopyable language="bash">
-                      {commandBlock}
-                    </EuiCodeBlock>
-                  </>
-                )}
-                {customComponentName === 'TutorialConfigAgent' && (
-                  <TutorialConfigAgent
-                    variantId={variantId}
-                    apmServerUrl={apmServerUrl}
-                    secretToken={secretToken}
-                  />
-                )}
-                {customComponentName === 'TutorialConfigAgentRumScript' && (
-                  <TutorialConfigAgent
-                    variantId="js_script"
-                    apmServerUrl={apmServerUrl}
-                    secretToken={secretToken}
-                  />
-                )}
-                {textPost && (
-                  <>
-                    <EuiSpacer />
-                    <InstructionsContent
-                      markdown={replaceTemplateStrings(textPost, docLinks)}
-                    />
-                  </>
-                )}
-              </EuiText>
-              <EuiSpacer />
-            </section>
-          );
-        }
-      )}
+          {
+            id: 'auto-attachment',
+            name: (
+              <EuiFlexGroup
+                justifyContent="flexStart"
+                alignItems="baseline"
+                gutterSize="s"
+              >
+                <EuiFlexItem grow={false}>Auto-Attachment</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge label="Experimental" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            content: (
+              <>
+                <EuiSpacer />
+                <RuntimeAttachment />
+              </>
+            ),
+          },
+        ]}
+      />
     </EuiAccordion>
   );
 }
