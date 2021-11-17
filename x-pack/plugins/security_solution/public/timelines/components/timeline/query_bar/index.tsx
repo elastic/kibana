@@ -11,12 +11,11 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
+import { FilterStateStore, Filter } from '@kbn/es-query';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import {
+import type {
   Query,
-  Filter,
-  esFilters,
   FilterManager,
   SavedQuery,
   SavedQueryTimeFilter,
@@ -300,7 +299,7 @@ export const getDataProviderFilter = (dataProviderDsl: string): Filter => {
       value: dataProviderDsl,
     },
     $state: {
-      store: esFilters.FilterStateStore.APP_STATE,
+      store: FilterStateStore.APP_STATE,
     },
   };
 };

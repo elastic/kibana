@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Filter, FilterManager, Query, SavedQueryService } from 'src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
+import type { FilterManager, Query, SavedQueryService } from 'src/plugins/data/public';
 import { DataViewBase } from '@kbn/es-query';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';

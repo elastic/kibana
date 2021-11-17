@@ -9,7 +9,8 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
@@ -113,7 +114,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     (customFilters: Filter[]) => {
       if (browserFields != null && indexPatterns != null) {
         return combineQueries({
-          config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+          config: getEsQueryConfig(kibana.services.uiSettings),
           dataProviders: [],
           indexPattern: indexPatterns,
           browserFields,

@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 
 import { mount } from 'enzyme';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import * as esQuery from '@kbn/es-query';
 
 import { TestProviders } from '../../../../common/mock';
 

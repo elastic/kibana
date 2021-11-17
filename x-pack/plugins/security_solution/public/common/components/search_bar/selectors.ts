@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 import { InputsRange } from '../../store/inputs/model';
-import { Query, SavedQuery } from '../../../../../../../src/plugins/data/public';
+import type { Query, SavedQuery } from '../../../../../../../src/plugins/data/public';
 
 export {
   endSelector,

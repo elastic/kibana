@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
 
-import { esQuery, Filter } from '../../../../../../../../src/plugins/data/public';
+import * as esQuery from '@kbn/es-query';
 import { TestProviders } from '../../../../common/mock';
 import { SecurityPageName } from '../../../../app/types';
 
@@ -192,7 +192,7 @@ describe('AlertsHistogramPanel', () => {
   describe('Filters', () => {
     it('filters props is valid, alerts query include filter', async () => {
       const mockGetAlertsHistogramQuery = jest.spyOn(helpers, 'getAlertsHistogramQuery');
-      const statusFilter: Filter = {
+      const statusFilter: esQuery.Filter = {
         meta: {
           alias: null,
           disabled: false,

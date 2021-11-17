@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { Filter } from '@kbn/es-query';
 import { HostItem, LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
@@ -33,7 +34,7 @@ import { inputsSelectors } from '../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/public';
 
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { HostDetailsTabs } from './details_tabs';
@@ -106,7 +107,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     skip: selectedPatterns.length === 0,
   });
   const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    config: getEsQueryConfig(kibana.services.uiSettings),
     indexPattern,
     queries: [query],
     filters: getFilters(),

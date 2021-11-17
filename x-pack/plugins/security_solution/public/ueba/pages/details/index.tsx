@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import type { Filter } from '@kbn/es-query';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -25,7 +26,7 @@ import { inputsSelectors } from '../../../common/store';
 import { setUebaDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/public';
 
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { UebaDetailsTabs } from './details_tabs';
@@ -74,7 +75,7 @@ const UebaDetailsComponent: React.FC<UebaDetailsProps> = ({ detailName, uebaDeta
   );
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    config: getEsQueryConfig(kibana.services.uiSettings),
     indexPattern,
     queries: [query],
     filters: getFilters(),

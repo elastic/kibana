@@ -33,7 +33,7 @@ import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { esQuery } from '../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../src/plugins/data/public';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
@@ -115,7 +115,7 @@ const HostsComponent = () => {
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters,
@@ -125,7 +125,7 @@ const HostsComponent = () => {
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters: tabsFilters,

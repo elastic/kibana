@@ -11,11 +11,11 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import {
-  esFilters,
   FilterManager,
   UI_SETTINGS,
+  FilterLabel,
 } from '../../../../../../../../src/plugins/data/public';
-import { DataViewBase } from '@kbn/es-query';
+import { DataViewBase, FilterStateStore } from '@kbn/es-query';
 import { SeverityBadge } from '../severity_badge';
 
 import * as i18n from './translations';
@@ -49,7 +49,7 @@ const mockQueryBar = {
   filters: [
     {
       $state: {
-        store: esFilters.FilterStateStore.GLOBAL_STATE,
+        store: FilterStateStore.GLOBAL_STATE,
       },
       meta: {
         alias: null,
@@ -149,7 +149,7 @@ describe('helpers', () => {
         } as unknown as DataViewBase,
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
-      const filterLabelComponent = wrapper.find(esFilters.FilterLabel).at(0);
+      const filterLabelComponent = wrapper.find(FilterLabel).at(0);
 
       expect(result[0].title).toEqual(<>{i18n.FILTERS_LABEL} </>);
       expect(filterLabelComponent.prop('valueLabel')).toEqual('file');

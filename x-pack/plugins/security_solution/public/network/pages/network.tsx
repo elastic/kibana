@@ -13,7 +13,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isTab } from '../../../../timelines/public';
-import { esQuery } from '../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../src/plugins/data/public';
 import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
@@ -136,13 +136,13 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     );
 
     const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters,
     });
     const [tabsFilterQuery] = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters: tabsFilters,

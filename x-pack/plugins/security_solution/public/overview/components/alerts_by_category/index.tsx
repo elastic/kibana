@@ -15,7 +15,7 @@ import { SHOWING, UNIT } from '../../../common/components/alerts_viewer/translat
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/public';
 import { HostsTableType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
@@ -101,7 +101,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters,
