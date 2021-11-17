@@ -28,6 +28,7 @@ export const TimelineContext = createContext<{
   timelineId: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   expanded?: any | undefined;
+  isDarkMode?: boolean;
   selectedAlertIndex?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setExpanded?: (expanded: any | undefined) => void;

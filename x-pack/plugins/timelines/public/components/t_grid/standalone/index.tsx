@@ -376,6 +376,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   const timelineContext = {
     timelineId: STANDALONE_ID,
+    isDarkMode: uiSettings.get('theme:darkMode'),
     expanded,
     selectedAlertIndex,
     setExpanded,
