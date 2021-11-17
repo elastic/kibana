@@ -9,17 +9,12 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import {
-  EuiBasicTable,
-  EuiEmptyPrompt,
-  EuiIconTip,
-  EuiTableFieldDataColumnType,
-} from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiEmptyPrompt, EuiTableFieldDataColumnType } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { CrawlerLogic } from '../crawler_logic';
-import { CrawlEvent, readableCrawlerStatuses } from '../types';
+import { CrawlEvent, CrawlType, readableCrawlerStatuses, readableCrawlTypes } from '../types';
 
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
@@ -46,6 +41,16 @@ const columns: Array<EuiTableFieldDataColumnType<CrawlEvent>> = [
     ),
   },
   {
+    field: 'type',
+    name: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.crawlType',
+      {
+        defaultMessage: 'Crawl Type',
+      }
+    ),
+    render: (_, event: CrawlEvent) => <CrawlEventTypeBadge event={event} />,
+  },
+  {
     field: 'status',
     name: i18n.translate(
       'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.status',
@@ -53,24 +58,31 @@ const columns: Array<EuiTableFieldDataColumnType<CrawlEvent>> = [
         defaultMessage: 'Status',
       }
     ),
-    align: 'right',
-    render: (status: CrawlEvent['status'], event: CrawlEvent) => (
-      <>
-        {event.stage === 'process' && (
-          <EuiIconTip
-            aria-label="Process crawl"
-            size="m"
-            type="iInCircle"
-            color="primary"
-            position="top"
-            content="Re-applied crawl rules"
-          />
-        )}
-        {readableCrawlerStatuses[status]}
-      </>
-    ),
+    render: (status: CrawlEvent['status']) => readableCrawlerStatuses[status],
   },
 ];
+
+export const CrawlEventTypeBadge: React.FC<{ event: CrawlEvent }> = ({ event }) => {
+  if (event.stage === 'process') {
+    return (
+      <EuiBadge color="hollow">
+        {i18n.translate(
+          'xpack.enterpriseSearch.appSearch.crawler.crawlTypeOptions.reAppliedCrawlRules',
+          {
+            defaultMessage: 'Re-applied crawl rules',
+          }
+        )}
+      </EuiBadge>
+    );
+  }
+  if (event.type === CrawlType.Full) {
+    return <EuiBadge>{readableCrawlTypes[CrawlType.Full]}</EuiBadge>;
+  }
+  if (event.type === CrawlType.Partial) {
+    return <EuiBadge color="hollow">{readableCrawlTypes[CrawlType.Partial]}</EuiBadge>;
+  }
+  return null;
+};
 
 export const CrawlRequestsTable: React.FC = () => {
   const { events } = useValues(CrawlerLogic);
