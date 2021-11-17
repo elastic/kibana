@@ -13,12 +13,22 @@ import {
   CERTIFICATES_ROUTE,
   MAPPING_ERROR_ROUTE,
   MONITOR_ROUTE,
+  MONITOR_ADD_ROUTE,
+  MONITOR_EDIT_ROUTE,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
   SYNTHETIC_CHECK_STEPS_ROUTE,
 } from '../common/constants';
-import { MappingErrorPage, MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
+import {
+  MappingErrorPage,
+  MonitorPage,
+  AddMonitorPage,
+  EditMonitorPage,
+  StepDetailPage,
+  NotFoundPage,
+  SettingsPage,
+} from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
 import { OverviewPageComponent } from './pages/overview';
@@ -163,6 +173,42 @@ const Routes: RouteProps[] = [
         </div>
       ),
       rightSideItems: [],
+    },
+  },
+  {
+    title: i18n.translate('xpack.uptime.monitorRoute.title', {
+      defaultMessage: 'Add Monitor | {baseTitle}',
+      values: { baseTitle },
+    }),
+    path: MONITOR_ADD_ROUTE,
+    component: AddMonitorPage,
+    dataTestSubj: 'uptimeMonitorAddPage',
+    telemetryId: UptimePage.MonitorAdd,
+    pageHeader: {
+      pageTitle: (
+        <FormattedMessage
+          id="xpack.uptime.addMonitor.pageHeader.title"
+          defaultMessage="Add Monitor"
+        />
+      ),
+    },
+  },
+  {
+    title: i18n.translate('xpack.uptime.monitorRoute.title', {
+      defaultMessage: 'Edit Monitor | {baseTitle}',
+      values: { baseTitle },
+    }),
+    path: MONITOR_EDIT_ROUTE,
+    component: EditMonitorPage,
+    dataTestSubj: 'uptimeMonitorEditPage',
+    telemetryId: UptimePage.MonitorEdit,
+    pageHeader: {
+      pageTitle: (
+        <FormattedMessage
+          id="xpack.uptime.addMonitor.pageHeader.title"
+          defaultMessage="Add Monitor"
+        />
+      ),
     },
   },
 ];
