@@ -31,6 +31,19 @@ import { useAppUrl } from '../../../common/lib/kibana/hooks';
 
 const NOOP = () => {};
 const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = { bordered: true, showIcons: false };
+const EFFECTED_POLICIES_SEARCH_PROPS = { className: 'effected-policies-search' };
+
+const StyledEuiSelectable = styled.div`
+  .effected-policies-search {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .euiSelectableList {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top-width: 0;
+  }
+`;
 
 const EffectivePolicyFormContainer = styled.div`
   .policy-name .euiSelectableListItem__text {
@@ -209,16 +222,19 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         <EuiSpacer />
         {!isGlobal && (
           <EuiFormRow fullWidth>
-            <EuiSelectable<OptionPolicyData>
-              {...otherSelectableProps}
-              options={selectableOptions}
-              listProps={listProps || DEFAULT_LIST_PROPS}
-              onChange={handleOnPolicySelectChange}
-              searchable={true}
-              data-test-subj={getTestId('policiesSelectable')}
-            >
-              {listBuilderCallback}
-            </EuiSelectable>
+            <StyledEuiSelectable>
+              <EuiSelectable<OptionPolicyData>
+                {...otherSelectableProps}
+                options={selectableOptions}
+                listProps={listProps || DEFAULT_LIST_PROPS}
+                onChange={handleOnPolicySelectChange}
+                searchProps={EFFECTED_POLICIES_SEARCH_PROPS}
+                searchable={true}
+                data-test-subj={getTestId('policiesSelectable')}
+              >
+                {listBuilderCallback}
+              </EuiSelectable>
+            </StyledEuiSelectable>
           </EuiFormRow>
         )}
       </EffectivePolicyFormContainer>
