@@ -32,7 +32,7 @@ export function getJavaMetricsCharts({
   start: number;
   end: number;
 }) {
-  return withApmSpan('get_java_system_metric_charts', async () => {
+  return withApmSpan('get_java_system_metric_charts', () => {
     const options = {
       environment,
       kuery,
@@ -43,7 +43,7 @@ export function getJavaMetricsCharts({
       end,
     };
 
-    const charts = await Promise.all([
+    return Promise.all([
       getCPUChartData(options),
       getMemoryChartData(options),
       getHeapMemoryChart(options),
@@ -52,7 +52,5 @@ export function getJavaMetricsCharts({
       getGcRateChart(options),
       getGcTimeChart(options),
     ]);
-
-    return { charts };
   });
 }
