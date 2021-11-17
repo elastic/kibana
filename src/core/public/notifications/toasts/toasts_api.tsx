@@ -67,11 +67,6 @@ export interface ErrorToastOptions extends ToastOptions {
    * message will still be shown in the detailed error modal.
    */
   toastMessage?: string;
-
-  actions?: {
-    onCancel: () => void;
-    onSave: () => void;
-  };
 }
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
@@ -236,7 +231,6 @@ export class ToastsApi implements IToasts {
           title={options.title}
           toastMessage={message}
           i18nContext={() => this.i18n!.Context}
-          actions={options.actions}
         />
       ),
       ...options,
