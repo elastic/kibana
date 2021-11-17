@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ScreenshotClip } from 'puppeteer';
 import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ElementsPositionAndAttribute, Screenshot } from './';
@@ -27,7 +28,14 @@ export const getScreenshots = async (
     const endTrace = startTrace('get_screenshots', 'read');
     const item = elementsPositionAndAttributes[i];
 
-    const data = await browser.screenshot(item.position);
+    const { boundingClientRect, scroll } = item.position;
+    const clip: ScreenshotClip = {
+      x: boundingClientRect.left + scroll.x,
+      y: boundingClientRect.top + scroll.y,
+      height: boundingClientRect.height,
+      width: boundingClientRect.width,
+    };
+    const data = await browser.screenshot(clip);
 
     if (!data?.byteLength) {
       throw new Error(`Failure in getScreenshots! Screenshot data is void`);

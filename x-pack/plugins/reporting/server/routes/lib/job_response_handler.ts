@@ -100,7 +100,7 @@ export async function deleteJobResponseHandler(
     });
   } catch (error) {
     return res.customError({
-      statusCode: error.statusCode,
+      statusCode: error.statusCode || 500,
       body: error.message,
     });
   }

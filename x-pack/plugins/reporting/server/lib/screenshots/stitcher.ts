@@ -6,30 +6,41 @@
  */
 
 import * as Rx from 'rxjs';
-import { ElementPosition } from './observable';
+import { ScreenshotClip } from 'puppeteer';
 
 interface ScreenshotStitcherConstructorOpts {
-  outputClip: ElementPosition;
+  outputClip: ScreenshotClip;
   zoom: number;
 }
 
 export class ScreenshotStitcher {
-  private elementPosition: ElementPosition;
+  private clip: ScreenshotClip;
 
   constructor(opts: ScreenshotStitcherConstructorOpts) {
-    this.elementPosition = opts.outputClip;
+    this.clip = opts.outputClip;
   }
 
-  public getClips$(): Rx.Observable<ElementPosition> {
-    // We have to divide the max by the zoom because we want to be limiting the resolution
-    // of the output screenshots, which is implicitly multiplied by the zoom, but we don't
-    // want the zoom to affect the clipping rects that we use
-    const position = this.elementPosition;
+  public getClips$(): Rx.Observable<ScreenshotClip> {
+    const clip = this.clip;
 
+    // Divide the output dimensions proportionally
     return Rx.from(
-      (function* (): Generator<ElementPosition> {
-        // do magic here and chunk up the elementPosition
-        yield position;
+      (function* (): Generator<ScreenshotClip> {
+        const { x, y, width, height } = clip;
+        // AB
+        // CD
+
+        // A
+        yield { x, y, width: width / 2, height: height / 2 };
+
+        // B
+        yield { x: x + width / 2, y, width: width / 2, height: height / 2 };
+
+        // C
+        yield { x, y: y + height / 2, width: width / 2, height: height / 2 };
+
+        // D
+        yield { x: x + width / 2, y: y + height / 2, width: width / 2, height: height / 2 };
       })()
     );
   }

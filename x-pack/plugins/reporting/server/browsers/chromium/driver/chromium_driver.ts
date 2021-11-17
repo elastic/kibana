@@ -18,7 +18,6 @@ import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/scr
 import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
-import { ElementPosition } from '../../../lib/screenshots';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 
 export interface ChromiumDriverOptions {
@@ -160,16 +159,8 @@ export class HeadlessChromiumDriver {
   /*
    * Call Page.screenshot and return a base64-encoded string of the image
    */
-  public async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
-    const { boundingClientRect, scroll } = elementPosition;
-    const screenshot = await this.page.screenshot({
-      clip: {
-        x: boundingClientRect.left + scroll.x,
-        y: boundingClientRect.top + scroll.y,
-        height: boundingClientRect.height,
-        width: boundingClientRect.width,
-      },
-    });
+  public async screenshot(clip: puppeteer.ScreenshotClip): Promise<Buffer | undefined> {
+    const screenshot = await this.page.screenshot({ clip });
 
     if (Buffer.isBuffer(screenshot)) {
       return screenshot;

@@ -182,13 +182,20 @@ export class ScreenshotObservableHandler {
             getDefaultElementPosition(this.layout.getViewport(1));
           const { title, description } = element.attributes;
           const { timeRange, error: setupError } = page;
+          const { boundingClientRect, scroll } = element.position;
 
           this.logger.info(`streaming screenshots`);
 
           const stitcher = new ScreenshotStitcher({
-            outputClip: element.position,
-            zoom: 2,
+            outputClip: {
+              x: boundingClientRect.left + scroll.x,
+              y: boundingClientRect.top + scroll.y,
+              height: boundingClientRect.height,
+              width: boundingClientRect.width,
+            },
+            zoom: 2, // FIXME: use config
           });
+
           const endTrace = startTrace('get_screenshots', 'read');
 
           let byteLength = 0;
@@ -208,7 +215,9 @@ export class ScreenshotObservableHandler {
                   throw new Error(`Unable to capture screenshot: ${err}`);
                 }
 
+                this.logger.info(`Writing screenshot clip of ${data.byteLength} bytes.`); // FIXME: log progress count
                 stream.write(data);
+
                 byteLength += data.byteLength;
                 screenshotCount += 1;
               })
