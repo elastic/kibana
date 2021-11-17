@@ -5,21 +5,25 @@
  * 2.0.
  */
 
+import { SemVer } from 'semver';
 import {
   POLICY_ELASTIC_AGENT_ON_CLOUD,
   SUPPORTED_APM_PACKAGE_VERSION,
 } from '../../../common/fleet';
+import { fetchFindLatestPackage } from '../../../../fleet/server/services/epm/registry';
 import { APMPluginSetupDependencies } from '../../types';
 import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 
 interface GetApmPackagePolicyDefinitionOptions {
   apmServerSchema: Record<string, any>;
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
+  kibanaVersion: string;
 }
-export function getApmPackagePolicyDefinition(
+export async function getApmPackagePolicyDefinition(
   options: GetApmPackagePolicyDefinitionOptions
 ) {
-  const { apmServerSchema, cloudPluginSetup } = options;
+  const { apmServerSchema, cloudPluginSetup, kibanaVersion } = options;
+
   return {
     name: 'Elastic APM',
     namespace: 'default',
@@ -34,15 +38,29 @@ export function getApmPackagePolicyDefinition(
         vars: getApmPackageInputVars({
           cloudPluginSetup,
           apmServerSchema: preprocessLegacyFields({ apmServerSchema }),
+          kibanaVersion,
         }),
       },
     ],
     package: {
       name: APM_PACKAGE_NAME,
-      version: SUPPORTED_APM_PACKAGE_VERSION,
+      version: await getApmPackageVersion(kibanaVersion),
       title: 'Elastic APM',
     },
   };
+}
+
+async function getApmPackageVersion(kibanaVersion: string) {
+  const isPrerelease = new SemVer(kibanaVersion).prerelease.length > 0;
+  if (isPrerelease) {
+    try {
+      const latestApmPackage = await fetchFindLatestPackage('apm');
+      return latestApmPackage.version;
+    } catch (error) {
+      return SUPPORTED_APM_PACKAGE_VERSION;
+    }
+  }
+  return SUPPORTED_APM_PACKAGE_VERSION;
 }
 
 export function preprocessLegacyFields({

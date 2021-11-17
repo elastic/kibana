@@ -176,6 +176,7 @@ export class APMPlugin
       ruleDataClient,
       plugins: resourcePlugins,
       telemetryUsageCounter,
+      kibanaVersion: this.initContext.env.packageInfo.version,
     });
 
     if (plugins.alerting) {

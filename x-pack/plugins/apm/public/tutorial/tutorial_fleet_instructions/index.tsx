@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useState } from 'react';
+import { SemVer } from 'semver';
 import styled from 'styled-components';
 import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../common/fleet';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
@@ -26,6 +27,7 @@ interface Props {
   http: HttpStart;
   basePath: string;
   isDarkTheme: boolean;
+  kibanaVersion: string;
 }
 
 const CentralizedContainer = styled.div`
@@ -36,9 +38,15 @@ const CentralizedContainer = styled.div`
 
 type APIResponseType = APIReturnType<'GET /internal/apm/fleet/has_data'>;
 
-function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
+function TutorialFleetInstructions({
+  http,
+  basePath,
+  isDarkTheme,
+  kibanaVersion,
+}: Props) {
   const [data, setData] = useState<APIResponseType | undefined>();
   const [isLoading, setIsLoading] = useState(false);
+  const isPrerelease = new SemVer(kibanaVersion).prerelease.length > 0;
 
   useEffect(() => {
     async function fetchData() {
@@ -99,7 +107,11 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
                 <EuiButton
                   iconType="analyzeEvent"
                   color="secondary"
-                  href={`${basePath}/app/integrations#/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`}
+                  href={
+                    isPrerelease
+                      ? `${basePath}/app/integrations#/detail/apm/overview`
+                      : `${basePath}/app/integrations#/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`
+                  }
                 >
                   {i18n.translate(
                     'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',

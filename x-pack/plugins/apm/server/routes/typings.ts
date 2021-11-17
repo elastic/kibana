@@ -69,4 +69,5 @@ export interface APMRouteHandlerResources {
   };
   ruleDataClient: IRuleDataClient;
   telemetryUsageCounter?: TelemetryUsageCounter;
+  kibanaVersion: string;
 }
