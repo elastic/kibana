@@ -22,7 +22,6 @@ import {
   useWaffleOptionsContext,
   WaffleLegendOptions,
 } from '../hooks/use_waffle_options';
-import { useSourceContext } from '../../../../containers/metrics_source';
 import { InfraFormatterType, InfraWaffleMapBounds } from '../../../../lib/lib';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Toolbar } from './toolbars/toolbar';

@@ -86,7 +86,3 @@ const BottomActionTopBar = euiStyled(EuiFlexGroup).attrs({
 const ShowHideButton = euiStyled(EuiButtonEmpty).attrs({ size: 's' })`
   width: 140px;
 `;
-
-const RightSideSpacer = euiStyled(EuiSpacer).attrs({ size: 'xs' })`
-  width: 140px;
-`;
