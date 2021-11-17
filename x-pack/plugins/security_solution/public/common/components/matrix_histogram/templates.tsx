@@ -30,14 +30,33 @@ export const MatrixHistogramTemplates = ({ plugins }) => {
   useEffect(() => {
     const mount = async () => {
       const response = await findTemplates();
-      setTemplates(response?.templates || []);
+      const templatesWithIndexPattern =
+        response.templates.length > 0
+          ? response.templates.map((template) => {
+              console.log(template.attributes.references);
+
+              return {
+                ...template,
+                attributes: {
+                  ...template.attributes,
+                  references: template.attributes.references.map((ref) => ({
+                    ...ref,
+                    id: defaultIndexPattern.id ?? null,
+                  })),
+                },
+              };
+            })
+          : [];
+      console.log(templatesWithIndexPattern, defaultIndexPattern);
+      setTemplates(templatesWithIndexPattern || []);
     };
     mount();
-  }, [findTemplates]);
+  }, [defaultIndexPattern, findTemplates]);
 
   useEffect(() => {
     const fetchIndexPattern = async () => {
       const fetchedDefaultIndexPattern = await plugins.data.indexPatterns.getDefault();
+
       setDefaultIndexPattern(fetchedDefaultIndexPattern);
     };
     fetchIndexPattern();
@@ -45,30 +64,31 @@ export const MatrixHistogramTemplates = ({ plugins }) => {
 
   // const onCreateWorkpad = useCreateFromTemplate();
 
-  return templates && defaultIndexPattern?.isTimeBased() ? (
-    <LensComponent
-      id=""
-      withActions
-      style={{ height: 280 }}
-      timeRange={time}
-      attributes={templates[0].attributes}
-      // onLoad={(val) => {
-      //   setIsLoading(val);
-      // }}
-      onBrushEnd={({ range }) => {
-        setTime({
-          from: new Date(range[0]).toISOString(),
-          to: new Date(range[1]).toISOString(),
-        });
-      }}
-      onFilter={(_data) => {
-        // call back event for on filter event
-      }}
-      onTableRowClick={(_data) => {
-        // call back event for on table row click event
-      }}
-    />
-  ) : (
-    'Embeddable place holder'
-  );
+  return templates && defaultIndexPattern?.isTimeBased()
+    ? templates.map((t) => (
+        <LensComponent
+          id={t.id}
+          key={t.id}
+          withActions
+          style={{ height: 280 }}
+          timeRange={time}
+          attributes={t.attributes}
+          // onLoad={(val) => {
+          //   setIsLoading(val);
+          // }}
+          onBrushEnd={({ range }) => {
+            setTime({
+              from: new Date(range[0]).toISOString(),
+              to: new Date(range[1]).toISOString(),
+            });
+          }}
+          onFilter={(_data) => {
+            // call back event for on filter event
+          }}
+          onTableRowClick={(_data) => {
+            // call back event for on table row click event
+          }}
+        />
+      ))
+    : 'Embeddable place holder';
 };

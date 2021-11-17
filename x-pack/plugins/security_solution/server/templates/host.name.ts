@@ -21,12 +21,12 @@ export const hostName = {
     references: [
       {
         type: 'index-pattern',
-        id: '304509a0-46f7-11ec-a51b-5902f0886db7',
+        id: '{{indexPatternId}}',
         name: 'indexpattern-datasource-current-indexpattern',
       },
       {
         type: 'index-pattern',
-        id: '304509a0-46f7-11ec-a51b-5902f0886db7',
+        id: '{{indexPatternId}}',
         name: 'indexpattern-datasource-layer-f05712e9-7b31-4684-a470-127afd8659de',
       },
     ],
@@ -98,18 +98,6 @@ export const hostName = {
       },
     },
   },
-  references: [
-    {
-      type: 'index-pattern',
-      id: '304509a0-46f7-11ec-a51b-5902f0886db7',
-      name: 'indexpattern-datasource-current-indexpattern',
-    },
-    {
-      type: 'index-pattern',
-      id: '304509a0-46f7-11ec-a51b-5902f0886db7',
-      name: 'indexpattern-datasource-layer-3a296a6e-c934-4a52-8149-e8cc3718b384',
-    },
-  ],
   migrationVersion: {
     lens: '8.0.0',
   },
