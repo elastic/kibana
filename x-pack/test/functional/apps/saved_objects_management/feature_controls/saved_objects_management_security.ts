@@ -16,7 +16,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   let version: string = '';
   const find = getService('find');
 
-  describe('feature controls saved objects management', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/118272
+  describe.skip('feature controls saved objects management', () => {
     before(async () => {
       version = await kibanaServer.version.get();
       await kibanaServer.importExport.load(
@@ -58,6 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_all_role'),
@@ -176,6 +178,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_som_read_role'),
@@ -311,6 +314,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_visualize_all_role'),

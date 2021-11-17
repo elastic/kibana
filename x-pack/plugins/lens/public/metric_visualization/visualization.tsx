@@ -54,9 +54,9 @@ export const metricVisualization: Visualization<MetricState> = {
         defaultMessage: 'Metric',
       }),
       groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
-        defaultMessage: 'Tabular and single value',
+        defaultMessage: 'Single value',
       }),
-      sortPriority: 1,
+      sortPriority: 3,
     },
   ],
 
@@ -106,6 +106,7 @@ export const metricVisualization: Visualization<MetricState> = {
           accessors: props.state.accessor ? [{ columnId: props.state.accessor }] : [],
           supportsMoreColumns: !props.state.accessor,
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
+          required: true,
         },
       ],
     };
