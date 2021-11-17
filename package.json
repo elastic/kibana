@@ -38,7 +38,7 @@
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "scripts": {
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
-    "bazel": "bazel",
+    "bazel": "node scripts/bazelisk",
     "build": "node scripts/build --all-platforms",
     "build:apidocs": "node scripts/build_api_docs",
     "build:types": "rm -rf ./target/types && tsc --p tsconfig.types.json",

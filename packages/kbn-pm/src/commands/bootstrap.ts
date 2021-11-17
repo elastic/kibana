@@ -17,12 +17,7 @@ import { ICommand } from './';
 import { readYarnLock } from '../utils/yarn_lock';
 import { sortPackageJson } from '../utils/sort_package_json';
 import { validateDependencies } from '../utils/validate_dependencies';
-import {
-  ensureYarnIntegrityFileExists,
-  installBazelTools,
-  runBazel,
-  yarnIntegrityFileExists,
-} from '../utils/bazel';
+import { ensureYarnIntegrityFileExists, runBazel, yarnIntegrityFileExists } from '../utils/bazel';
 import { setupRemoteCache } from '../utils/bazel/setup_remote_cache';
 
 export const BootstrapCommand: ICommand = {
@@ -52,9 +47,6 @@ export const BootstrapCommand: ICommand = {
     // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
     // for bazel to know it has to re-install the node_modules after a reset or a clean
     await ensureYarnIntegrityFileExists(resolve(kibanaProjectPath, 'node_modules'));
-
-    // Install bazel machinery tools if needed
-    await installBazelTools(rootPath);
 
     // Setup remote cache settings in .bazelrc.cache if needed
     await setupRemoteCache(rootPath);

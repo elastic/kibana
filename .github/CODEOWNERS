@@ -231,7 +231,6 @@
 /.github/workflows/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
 /.bazelignore @elastic/kibana-operations
-/.bazeliskversion @elastic/kibana-operations
 /.bazelrc @elastic/kibana-operations
 /.bazelrc.common @elastic/kibana-operations
 /.bazelversion @elastic/kibana-operations

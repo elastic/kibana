@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import path from 'path';
 import chalk from 'chalk';
 import execa from 'execa';
 import * as Rx from 'rxjs';
@@ -33,7 +34,8 @@ async function runBazelCommandWithRunner(
     bazelArgs = [...bazelArgs, '--config=offline'];
   }
 
-  const bazelProc = spawn(bazelCommandRunner, bazelArgs, bazelOpts);
+  const bazeliskPath = path.resolve(__dirname, '../../..', 'scripts/bazelisk');
+  const bazelProc = spawn('node', [bazeliskPath, ...bazelArgs], bazelOpts);
 
   const bazelLogs$ = new Rx.Subject<string>();
 

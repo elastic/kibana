@@ -61,9 +61,10 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
-  // Bazel default files
+  // Bazel
   '**/WORKSPACE.bazel',
   '**/BUILD.bazel',
+  'vendor/bazelisk/*',
 
   // Buildkite
   '.buildkite/**/*',
