@@ -185,6 +185,16 @@ export function ProcessTreeNode({
     );
   };
 
+  const renderRootEscalation = () => {
+    const { user, parent } = processDetails.process;
+
+    if (user.name === 'root' && user.id !== parent.user.id) {
+      return <EuiButton css={styles.getButtonStyle(styles.ButtonType.userChanged)}>
+        <FormattedMessage id="kbn.sessionView.execUserChange" defaultMessage="Root escalation" />
+      </EuiButton>
+    }
+  }
+
   const onProcessClicked = (e: MouseEvent) => {
     e.stopPropagation();
 
@@ -206,6 +216,7 @@ export function ProcessTreeNode({
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div css={styles.wrapper} onClick={onProcessClicked}>
           {isSessionLeader ? renderSessionLeader() : renderProcess()}
+          {renderRootEscalation()}
           {renderButtons()}
         </div>
       </div>

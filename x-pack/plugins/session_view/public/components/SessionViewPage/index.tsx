@@ -57,7 +57,7 @@ export const SessionViewPage = (props: RouteComponentProps) => {
     <EuiPage>
       <EuiPageContent>
         <EuiPageHeader
-          pageTitle="Process Tree"
+          pageTitle="Session View Demo"
           iconType="logoKibana"
           description="Session view showing the most recent interactive session."
         />

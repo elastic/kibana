@@ -107,7 +107,7 @@ export const ProcessTree = ({
         const isVisible = eTop >= cTop && eBottom <= cBottom;
 
         if (!isVisible) {
-          processEl.scrollIntoView();
+          // processEl.scrollIntoView();
         }
       }
     }

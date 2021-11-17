@@ -26,6 +26,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       children = 'children',
       alerts = 'alerts',
       output = 'output',
+      userChanged = 'user'
     }
 
     const darkText: CSSObject = {
@@ -65,6 +66,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       borderRadius: border.radius.medium,
       color: colors.text,
       marginLeft: size.s,
+      minWidth: 0,
     };
 
     const buttonArrow: CSSObject = {
@@ -80,6 +82,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
           background = 'rgba(189, 39, 30, 0.04)';
           borderStyle = '1px solid rgba(189, 39, 30, 0.48)';
           break;
+        case ButtonType.userChanged:
         case ButtonType.output:
           background = 'rgba(0, 119, 204, 0.04)';
           borderStyle = '1px solid rgba(0, 119, 204, 0.48)';
@@ -176,7 +179,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       getButtonStyle,
       alertDetails,
     };
-  }, [depth, euiTheme]);
+  }, [depth, euiTheme, hasAlerts]);
 
   return cached;
 };

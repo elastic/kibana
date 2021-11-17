@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../src/core/server';
 import { PROCESS_EVENTS_ROUTE, PROCESS_EVENTS_PER_PAGE } from '../../common/constants';
-import { expandDottedObject } from '../../common/utils/expand_dotted_object'
+import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
 export const registerProcessEventsRoute = (router: IRouter) => {
   router.get(
@@ -26,13 +26,15 @@ export const registerProcessEventsRoute = (router: IRouter) => {
 
       const search = await client.search({
         index: ['cmd'],
-        query: {
-          match: {
-            'process.entry.entity_id': sessionEntityId,
+        body: {
+          query: {
+            match: {
+              'process.entry.entity_id': sessionEntityId,
+            },
           },
-        },
-        size: PROCESS_EVENTS_PER_PAGE,
-        sort: '@timestamp',
+          size: PROCESS_EVENTS_PER_PAGE,
+          sort: [{ '@timestamp': 'asc' }],
+        }
       });
 
       // temporary approach. ideally we'd pull from both these indexes above, but unfortunately
@@ -41,15 +43,17 @@ export const registerProcessEventsRoute = (router: IRouter) => {
       // for demo purpose we just load all alerts, and stich it together on the frontend.
       const alerts = await client.search({
         index: ['.siem-signals-default'],
-        size: PROCESS_EVENTS_PER_PAGE,
-        sort: '@timestamp',
+        body: {
+          size: PROCESS_EVENTS_PER_PAGE,
+          sort: [{ '@timestamp': 'asc' }],
+        }
       });
 
       alerts.body.hits.hits = alerts.body.hits.hits.map((hit: any) => {
         hit._source = expandDottedObject(hit._source);
 
         return hit;
-      })
+      });
 
       return response.ok({
         body: {

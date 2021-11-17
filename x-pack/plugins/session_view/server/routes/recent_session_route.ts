@@ -25,12 +25,17 @@ export const registerRecentSessionRoute = (router: IRouter) => {
 
       const search = await client.search({
         index: indexes,
-        query: {
-          match: {
-            'process.entry.interactive': true,
+        body: {
+          query: {
+            match: {
+              'process.entry.interactive': true,
+            },
           },
+          size: 1,
+          sort: [
+            {'@timestamp' :'desc'}
+          ],
         },
-        size: 1,
       });
 
       return response.ok({ body: search.body.hits });
