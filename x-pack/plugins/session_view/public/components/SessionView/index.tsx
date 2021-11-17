@@ -5,65 +5,55 @@
  * 2.0.
  */
 import React, { useState, useEffect } from 'react';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { CoreStart } from '../../../../../../src/core/public';
-import { useQuery, useMutation } from 'react-query';
+import { useQuery } from 'react-query';
 import {
   EuiSearchBar,
   EuiSearchBarOnChangeArgs,
+  EuiEmptyPrompt,
   EuiButton,
   EuiDescriptionList,
-  EuiPage,
-  EuiPageContent,
-  EuiPageHeader,
   EuiSpacer,
   EuiSplitPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt,
   EuiTitle,
 } from '@elastic/eui';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '../../../../../../src/core/public';
 import { ProcessTree } from '../ProcessTree';
-import { getStart, getEnd, getEvent } from '../../../common/test/mock_data';
 import { Process, ProcessEvent } from '../../hooks/use_process_tree';
 import { useStyles } from './styles';
-
-import {
-  INTERNAL_TEST_ROUTE,
-} from '../../../common/constants';
+import { PROCESS_EVENTS_ROUTE } from '../../../common/constants';
 
 interface SessionViewDeps {
-  sessionId: string;
+  // the root node of the process tree to render. e.g process.entry.entity_id or process.session.entity_id
+  sessionEntityId: string;
+  height?: number;
 }
 
-interface MockESReturnData {
-  hits: any[]
-  length: number
+interface ProcessEventResults {
+  hits: any[];
+  length: number;
 }
 
 /**
  * The main wrapper component for the session view.
- * Currently has mock data and only renders the process_tree component
  * TODO:
- * - React query, fetching and paging events by sessionId
  * - Details panel
  * - Fullscreen toggle
  * - Search results navigation
  * - Settings menu (needs design)
  */
-export const SessionView = ({ sessionId }: SessionViewDeps) => {
+export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [data, setData] = useState<any[]>([]);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
   const [isDetailMounted, setIsDetailMounted] = useState<boolean>(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
-  const styles = useStyles();
 
   const { http } = useKibana<CoreStart>().services;
 
-  const processTreeCSS = `
-    height: 300px;
-  `;
+  const styles = useStyles({ height });
 
   const onProcessSelected = (process: Process) => {
     if (selectedProcess !== process) {
@@ -79,53 +69,16 @@ export const SessionView = ({ sessionId }: SessionViewDeps) => {
     }
   };
 
-  const {
-    mutate
-  } = useMutation((insertData) => {
-    return http.put(INTERNAL_TEST_ROUTE, { 
-      body: JSON.stringify({ 
-        index: 'process_tree',
-        data: JSON.stringify(insertData)
+  const { data: getData } = useQuery<ProcessEventResults, Error>(
+    ['process-tree', 'process_tree'],
+    () =>
+      http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
+        query: {
+          indexes: ['cmd*', '.siem-signals-*'],
+          sessionEntityId
+        },
       })
-    });
-  });
-
-  const {
-    data: getData
-  } = useQuery<MockESReturnData, Error>(['process-tree', 'process_tree'], () =>
-    http.get<MockESReturnData>(INTERNAL_TEST_ROUTE, {
-      query: {
-        index: 'process_tree',
-      },
-    })
   );
-
-  const {
-    mutate: deleteMutate
-  } = useMutation((insertData) => {
-    return http.delete(INTERNAL_TEST_ROUTE, { 
-      body: JSON.stringify({ 
-        index: 'process_tree'
-      })
-    });
-  });
-  
-  const handleMutate = (insertData: any) => {
-    mutate(insertData, {
-      onSuccess: () => {
-        setData([...data, ...insertData])
-      }
-    });
-  }
-
-  const handleDelete = () => {
-    deleteMutate(undefined, {
-      onSuccess: () => {
-        setData([]);
-        setSelectedProcess(null);
-      }
-    })
-  }
 
   useEffect(() => {
     if (!getData) {
@@ -136,23 +89,17 @@ export const SessionView = ({ sessionId }: SessionViewDeps) => {
       return;
     }
 
-    setData(getData.hits.map((event: any) => event._source));
+    setData(getData.hits.map((event: any) => event._source as ProcessEvent));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getData]);
 
   const renderNoData = () => {
-    if (data.length) {
-      return null;
-    }
     return (
-      <EuiEmptyPrompt 
+      <EuiEmptyPrompt
         title={<h2>No data to render</h2>}
-        body={
-          <p>
-            Please start by adding some data using the bottons below
-          </p>
-        }
+        body={<p>No process events found for this query.</p>}
       />
-    )
+    );
   };
 
   const toggleDetailPanel = () => {
@@ -160,126 +107,84 @@ export const SessionView = ({ sessionId }: SessionViewDeps) => {
     if (!isDetailOpen) setIsDetailOpen(true);
   };
 
-  const renderInsertButtons = () => {
-    return (
-      <EuiFlexGroup justifyContent="spaceAround">
+  if (!data.length) {
+    return renderNoData();
+  }
+console.log(selectedProcess)
+  return (
+    <>
+      <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiButton onClick={() => handleMutate(getStart())}>
-            Insert Session Start
-          </EuiButton>
+          <EuiSearchBar query={searchQuery} onChange={onSearch} />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton onClick={() => handleMutate(getEvent())}>
-            Insert Command
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton onClick={() => handleMutate(getEnd())}>
-            Insert End
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton onClick={handleDelete}>
-            Delete Data
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={toggleDetailPanel} iconType="list" fill>
+            Detail Panel
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    )
-  }
-
-  return (
-    <EuiPage>
-      <EuiPageContent>
-        <EuiPageHeader
-          pageTitle="Process Tree"
-          iconType="logoKibana"
-          description={
-            `Below is an example of the process tree, demonstrating data fetching patterns and data rendering.
-            Please start by adding some mock data
-            `
-          }
-        />
-        <EuiSpacer />
-        {renderNoData()}
-        {!!data.length &&
-          <>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiSearchBar query={searchQuery} onChange={onSearch} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={toggleDetailPanel} iconType="list" fill>
-                  Detail Panel
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSplitPanel.Outer direction="row" color="transparent" borderRadius="none" css={styles.outerPanel}>
-              <EuiSplitPanel.Inner paddingSize="none" css={styles.treePanel}>
-                <div css={processTreeCSS}>
-                  <ProcessTree
-                    sessionId={sessionId}
-                    forward={data}
-                    searchQuery={searchQuery}
-                    selectedProcess={selectedProcess}
-                    onProcessSelected={onProcessSelected}
-                  />
-                </div>
-              </EuiSplitPanel.Inner>
-              {isDetailOpen && (
-                <EuiSplitPanel.Inner
-                  paddingSize="s"
-                  color="plain"
-                  css={isDetailMounted ? styles.detailPanelIn : styles.detailPanelOut}
-                  onAnimationEnd={() => {
-                    if (!isDetailMounted) setIsDetailOpen(false);
-                  }}
-                >
-                  {selectedProcess && (
-                    <>
-                      <EuiTitle size="xs"><span>Command Detail</span></EuiTitle>
-                      <EuiSpacer />
-                      {selectedProcess.events.map((event) => {
-                        return (<EuiDescriptionList
-                          type="column"
-                          compressed
-                          listItems={Object.keys(event).map((title) => ({
-                            title,
-                            description: JSON.stringify(event[title as keyof ProcessEvent], null, 4),
-                          }))}
-                        />)
-                      })}
-                      <EuiSpacer size="xxl"/>
-                    </>
-                  )}
-
-                  <EuiTitle size="xs"><span>Session Detail</span></EuiTitle>
-                  <EuiSpacer />
-                  <EuiDescriptionList
+      <EuiSplitPanel.Outer direction="row" color="transparent" borderRadius="none" css={styles.outerPanel}>
+        <EuiSplitPanel.Inner paddingSize="none" css={styles.treePanel}>
+          <div css={styles.processTree}>
+            <ProcessTree
+              sessionEntityId={sessionEntityId}
+              forward={data}
+              searchQuery={searchQuery}
+              selectedProcess={selectedProcess}
+              onProcessSelected={onProcessSelected}
+            />
+          </div>
+        </EuiSplitPanel.Inner>
+        {isDetailOpen && (
+          <EuiSplitPanel.Inner
+            paddingSize="s"
+            color="plain"
+            css={isDetailMounted ? styles.detailPanelIn : styles.detailPanelOut}
+            onAnimationEnd={() => {
+              if (!isDetailMounted) setIsDetailOpen(false);
+            }}
+          >
+            {selectedProcess && (
+              <>
+                <EuiTitle size="xs"><span>Command Detail</span></EuiTitle>
+                <EuiSpacer />
+                {selectedProcess.events.map((event) => {
+                  return (<EuiDescriptionList
                     type="column"
                     compressed
-                    listItems={Object.keys(data?.[0].process.session).map((title) => ({
+                    listItems={Object.keys(event).map((title) => ({
                       title,
-                      description: JSON.stringify(data?.[0].process.session[title], null, 4),
+                      description: JSON.stringify(event[title as keyof ProcessEvent], null, 4),
                     }))}
-                  />
+                  />)
+                })}
+                <EuiSpacer size="xxl"/>
+              </>
+            )}
 
-                  <EuiSpacer size="xxl"/>
+            <EuiTitle size="xs"><span>Session Detail</span></EuiTitle>
+            <EuiSpacer />
+            <EuiDescriptionList
+              type="column"
+              compressed
+              listItems={Object.keys(data?.[0].process.session).map((title) => ({
+                title,
+                description: JSON.stringify(data?.[0].process.session[title], null, 4),
+              }))}
+            />
 
-                  <EuiTitle size="xs"><span>Server Detail</span></EuiTitle>
-                  {/* Add server detail */}
+            <EuiSpacer size="xxl"/>
 
-                  <EuiSpacer size="xxl"/>
-                  
-                  <EuiTitle size="xs"><span>Alert Detail</span></EuiTitle>
-                  {/* Add alert detail conditionally */}
-                </EuiSplitPanel.Inner>
-              )}
-            </EuiSplitPanel.Outer>
-          </>
-        }
-        <EuiSpacer />
-        {renderInsertButtons()}
-      </EuiPageContent>
-    </EuiPage>
+            <EuiTitle size="xs"><span>Server Detail</span></EuiTitle>
+            {/* Add server detail */}
+
+            <EuiSpacer size="xxl"/>
+            
+            <EuiTitle size="xs"><span>Alert Detail</span></EuiTitle>
+            {/* Add alert detail conditionally */}
+          </EuiSplitPanel.Inner>
+        )}
+      </EuiSplitPanel.Outer>
+    </>
   );
 };

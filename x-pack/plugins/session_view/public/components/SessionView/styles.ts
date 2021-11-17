@@ -9,11 +9,20 @@ import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { keyframes, CSSObject } from '@emotion/react';
 
-export const useStyles = () => {
+interface StylesDeps {
+  height: number | undefined;
+}
+
+export const useStyles = ({ height = 500 }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
+    // const { colors, border, font, size } = euiTheme;
     const padding = euiTheme.size.s;
+
+    const processTree: CSSObject = {
+      height: `${height}px`,
+    };
 
     const outerPanel: CSSObject = {
       fontFamily: euiTheme.font.familyCode,
@@ -43,7 +52,7 @@ export const useStyles = () => {
     
     const detailPanel: CSSObject = {
       width: '424px',
-      height: '300px',
+      height: `${height}px`,
       overflowY: 'auto',
       position: 'absolute',
       top: '8px',
@@ -67,6 +76,7 @@ export const useStyles = () => {
     ];
 
     return {
+      processTree,
       outerPanel,
       treePanel,
       detailPanelIn,
