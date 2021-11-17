@@ -46,11 +46,6 @@ const testTable: Datatable = {
       name: 'in_stock',
       meta: { type: 'boolean' },
     },
-    {
-      id: 'title_id',
-      name: 'title',
-      meta: { type: 'string' },
-    },
   ],
   rows: [
     {
