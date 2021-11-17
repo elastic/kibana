@@ -15,6 +15,7 @@ export type {
   GenericIndexPatternColumn,
   OperationType,
   IncompleteColumn,
+  FieldBasedIndexPatternColumn,
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,

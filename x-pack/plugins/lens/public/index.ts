@@ -33,6 +33,8 @@ export type {
   PersistedIndexPatternLayer,
   OperationType,
   IncompleteColumn,
+  GenericIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
