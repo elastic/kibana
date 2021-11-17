@@ -45,10 +45,6 @@ export const exportExceptionList = () => {
   cy.get(EXCEPTIONS_TABLE_EXPORT_BTN).first().click();
 };
 
-export const importExceptions = () => {
-  cy.get(EXEPTIONS_IMPORT_BUTTON).first().click();
-};
-
 export const clearSearchSelection = () => {
   cy.get(EXCEPTIONS_TABLE_SEARCH_CLEAR).first().click();
 };

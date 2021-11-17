@@ -36,10 +36,6 @@ export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
 
 export const BUILDER_MODAL_BODY = '[data-test-subj="exceptionsBuilderWrapper"]';
 
-export const EXEPTIONS_IMPORT_BUTTON = '[data-test-subj="importExceptionsButton"]';
-
-export const EXEPTIONS_IMPORT_FILE_PICKER = '[data-test-subj="importFilePicker"]';
-
 export const EXCEPTIONS_TABLE = '[data-test-subj="exceptions-table"]';
 
 export const EXCEPTIONS_TABLE_SEARCH = '[data-test-subj="exceptionsHeaderSearchInput"]';
