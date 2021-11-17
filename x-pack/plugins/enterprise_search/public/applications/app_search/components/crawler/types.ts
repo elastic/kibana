@@ -179,6 +179,10 @@ export enum CrawlerStatus {
   Skipped = 'skipped',
 }
 
+export enum CrawlType {
+  Full = 'full',
+  Partial = 'partial',
+}
 export interface CrawlRequestFromServer {
   id: string;
   status: CrawlerStatus;
@@ -204,6 +208,7 @@ export interface CrawlEventFromServer {
   created_at: string;
   began_at: string | null;
   completed_at: string | null;
+  type: CrawlType;
 }
 
 export interface CrawlEvent {
@@ -213,6 +218,7 @@ export interface CrawlEvent {
   createdAt: string;
   beganAt: string | null;
   completedAt: string | null;
+  type: CrawlType;
 }
 
 export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
@@ -255,6 +261,17 @@ export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
   [CrawlerStatus.Skipped]: i18n.translate(
     'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.skipped',
     { defaultMessage: 'Skipped' }
+  ),
+};
+
+export const readableCrawlTypes: { [key in CrawlType]: string } = {
+  [CrawlType.Full]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlTypeOptions.full',
+    { defaultMessage: 'Full' }
+  ),
+  [CrawlType.Partial]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlTypeOptions.partial',
+    { defaultMessage: 'Partial' }
   ),
 };
 

@@ -88,6 +88,7 @@ export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEv
     created_at: createdAt,
     began_at: beganAt,
     completed_at: completedAt,
+    type,
   } = event;
 
   return {
@@ -97,6 +98,7 @@ export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEv
     createdAt,
     beganAt,
     completedAt,
+    type,
   };
 }
 
