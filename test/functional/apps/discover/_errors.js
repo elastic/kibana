@@ -24,7 +24,8 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  describe('errors', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/86602
+  describe.skip('errors', function describeIndexTests() {
     before(async function () {
       await esArchiver.load('invalid_scripted_field');
       await PageObjects.common.navigateToApp('discover');
