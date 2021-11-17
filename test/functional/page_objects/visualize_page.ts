@@ -293,10 +293,16 @@ export class VisualizePageObject extends FtrService {
   public async ensureSavePanelOpen() {
     this.log.debug('ensureSavePanelOpen');
     await this.header.waitUntilLoadingHasFinished();
-    const isOpen = await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
-    if (!isOpen) {
+
+    await this.retry.waitForWithTimeout('', 5000, async () => {
+      const isOpen = await this.testSubjects.exists('savedObjectSaveModal', { timeout: 10 });
+      if (isOpen) {
+        return true;
+      }
+
       await this.testSubjects.click('visualizeSaveButton');
-    }
+      return await this.testSubjects.exists('savedObjectSaveModal', { timeout: 2500 });
+    });
   }
 
   public async clickLoadSavedVisButton() {

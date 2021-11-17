@@ -65,7 +65,7 @@ export class HeaderPageObject extends FtrService {
 
   public async isGlobalLoadingIndicatorVisible() {
     this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
+    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 250 });
   }
 
   public async awaitGlobalLoadingIndicatorHidden() {
