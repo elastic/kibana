@@ -105,8 +105,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'trial', archives: ['8.0.0'] },
     () => {
       // putting this into a single `it` because the responses depend on each other
-      // FLAKY: https://github.com/elastic/kibana/issues/118023
-      it.skip('runs queries and returns results', async () => {
+      it('runs queries and returns results', async () => {
         const overallDistributionResponse = await apmApiClient.readUser({
           endpoint: 'POST /internal/apm/latency/overall_distribution',
           params: {
@@ -210,7 +209,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         // Fetched 95th percentile value of 1309695.875 based on 1244 documents.
         expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
         expect(finalRawResponse?.overallHistogram?.length).to.be(101);
-        expect(finalRawResponse?.fieldStats?.length).to.be(12);
+        expect(finalRawResponse?.fieldStats?.length).to.be(fieldsToSample.size);
 
         // Identified 13 significant correlations out of 379 field/value pairs.
         expect(finalRawResponse?.latencyCorrelations?.length).to.eql(
