@@ -21,10 +21,13 @@ const convertToVisDimension = (columns: DatatableColumn[], accessor: string) => 
   const column = columns.find((c) => c.id === accessor);
   if (!column) return;
   return {
-    accessor: column.id,
-    format: column.meta.params,
+    accessor: Number(column.id),
+    format: {
+      id: column.meta.params?.id,
+      params: { ...column.meta.params?.params },
+    },
     type: 'vis_dimension',
-  } as unknown as ExpressionValueVisDimension;
+  } as ExpressionValueVisDimension;
 };
 
 const prepareHeatmapLogTable = (

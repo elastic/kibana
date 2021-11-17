@@ -81,7 +81,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary }: LabelsPanelProps) {
         setValue={setRotateLabels}
         tooltip={i18n.translate('visTypeHeatmap.editors.heatmap.rotateLabelNotAvailable', {
           defaultMessage:
-            'Rotate label is not supported with the new charts library. Please enable the heatmap legacy charts library advanced setting .',
+            'Rotate label is not supported with the new charts library. Please enable the heatmap legacy charts library advanced setting.',
         })}
       />
 

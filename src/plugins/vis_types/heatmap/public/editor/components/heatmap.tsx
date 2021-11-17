@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -131,18 +131,31 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
           setValue={setValue as SetColorSchemaOptionsValue}
         />
         <EuiSpacer size="s" />
-
-        <SelectOption
-          label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.colorScaleLabel', {
-            defaultMessage: 'Color scale',
-          })}
-          options={scaleTypes}
-          paramName="type"
-          value={valueAxis.scale.type}
-          setValue={setValueAxisScale}
-          disabled={showElasticChartsOptions}
-          data-test-subj="heatmapColorScale"
-        />
+        <EuiToolTip
+          content={
+            showElasticChartsOptions
+              ? i18n.translate('visTypeHeatmap.editors.heatmap.highlightLabelTooltipNotAvailable', {
+                  defaultMessage:
+                    'Color scale is not supported with the new charts library. Please enable the heatmap legacy charts library advanced setting.',
+                })
+              : null
+          }
+          delay="long"
+          position="right"
+        >
+          <SelectOption
+            label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.colorScaleLabel', {
+              defaultMessage: 'Color scale',
+            })}
+            options={scaleTypes}
+            paramName="type"
+            value={valueAxis.scale.type}
+            setValue={setValueAxisScale}
+            disabled={showElasticChartsOptions}
+            data-test-subj="heatmapColorScale"
+          />
+        </EuiToolTip>
+        <EuiSpacer size="s" />
 
         {!showElasticChartsOptions && (
           <SwitchOption

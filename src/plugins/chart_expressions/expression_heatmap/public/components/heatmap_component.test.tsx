@@ -9,6 +9,7 @@
 import React from 'react';
 import { Settings, TooltipType, Heatmap } from '@elastic/charts';
 import { chartPluginMock } from '../../../../charts/public/mocks';
+import { EmptyPlaceholder } from '../../../../charts/public';
 import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
 import type { Datatable } from '../../../../expressions/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
@@ -16,7 +17,6 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import { HeatmapRenderProps, HeatmapArguments } from '../../common';
 import HeatmapComponent from './heatmap_component';
-import { EmptyPlaceholder } from './empty_placeholder';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');

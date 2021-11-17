@@ -23,14 +23,13 @@ import {
 } from '@elastic/charts';
 import type { CustomPaletteState } from '../../../../charts/public';
 import { search } from '../../../../data/public';
-import { LegendToggle } from '../../../../charts/public';
+import { LegendToggle, EmptyPlaceholder } from '../../../../charts/public';
 import type { DatatableColumn } from '../../../../expressions/public';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import { getColorPicker } from '../utils/get_color_picker';
 import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
-import { EmptyPlaceholder } from './empty_placeholder';
 import { HeatmapIcon } from './heatmap_icon';
 
 declare global {
@@ -145,9 +144,7 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const toggleLegend = useCallback(() => {
     setShowLegend((value) => {
       const newValue = !value;
-      if (uiState?.set) {
-        uiState.set('vis.legendOpen', newValue);
-      }
+      uiState?.set?.('vis.legendOpen', newValue);
       return newValue;
     });
   }, [uiState]);
@@ -163,6 +160,7 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
       uiState?.setSilent('vis.colors', null);
       uiState?.set('vis.colors', colors);
       uiState?.emit('reload');
+      uiState?.emit('colorChanged');
     },
     [uiState]
   );
@@ -271,7 +269,7 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   // adds a very small number to the max value to make sure the max value will be included
   const endValue =
     paletteParams && paletteParams.range === 'number' ? paletteParams.rangeMax : max + 0.00000001;
-  const overwriteColors = uiState?.get('vis.colors', {}) ?? {};
+  const overwriteColors = uiState?.get('vis.colors') ?? null;
 
   const bands = ranges.map((start, index, array) => {
     // by default the last range is right-open
@@ -282,7 +280,7 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
       end = index === array.length - 1 ? lastBand : array[index + 1];
     }
     const overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(end)}`;
-    const overwriteColor = overwriteColors[overwriteArrayIdx];
+    const overwriteColor = overwriteColors?.[overwriteArrayIdx];
     return {
       // with the default continuity:above the every range is left-closed
       start,
@@ -296,7 +294,7 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
     const cell = e[0][0];
     const { x, y } = cell.datum;
 
-    const xAxisFieldName = xAxisColumn.meta.field;
+    const xAxisFieldName = xAxisColumn?.meta?.field;
     const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
 
     const points = [
@@ -331,7 +329,7 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const onBrushEnd = (e: HeatmapBrushEvent) => {
     const { x, y } = e;
 
-    const xAxisFieldName = xAxisColumn.meta.field;
+    const xAxisFieldName = xAxisColumn?.meta?.field;
     const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
 
     if (isTimeBasedSwimLane) {
