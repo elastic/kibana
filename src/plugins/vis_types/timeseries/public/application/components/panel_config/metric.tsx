@@ -43,7 +43,7 @@ export class MetricPanelConfig extends Component<
     this.state = { selectedTab: PANEL_CONFIG_TABS.DATA };
   }
 
-  UNSAFE_componentWillMount() {
+  initBackgroundColorRules() {
     const { model } = this.props;
     if (
       !model.background_color_rules ||
@@ -53,6 +53,13 @@ export class MetricPanelConfig extends Component<
         background_color_rules: [{ id: uuid.v1() }],
       });
     }
+  }
+
+  UNSAFE_componentWillMount() {
+    this.initBackgroundColorRules();
+  }
+  componentWillUpdate() {
+    this.initBackgroundColorRules();
   }
 
   switchTab(selectedTab: PANEL_CONFIG_TABS) {
