@@ -187,6 +187,7 @@ export const getColumns = ({
     {
       field: 'tags',
       name: null,
+      align: 'center',
       render: (tags: Rule['tags']) => {
         if (tags.length === 0) {
           return getEmptyTagValue();

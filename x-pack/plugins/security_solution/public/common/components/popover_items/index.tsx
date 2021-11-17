@@ -6,7 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiBadgeGroup, EuiBadge, EuiPopoverTitle } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiBadgeGroup,
+  EuiBadge,
+  EuiPopoverTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import styled from 'styled-components';
 
 export interface PopoverItemsProps<T> {
@@ -23,18 +30,11 @@ interface OverflowListProps<T> {
   readonly items: T[];
 }
 
-const ExceptionOverflowWrapper = styled.div`
+const PopoverItemsWrapper = styled(EuiFlexGroup)`
   width: 100%;
-  overflow: hidden;
 `;
 
-const DisplayOverflowWrapper = styled.div`
-  width: calc(100% - 75px);
-  display: inline-block;
-  vertical-align: middle;
-`;
-
-const ExceptionOverflowPopoverWrapper = styled(EuiBadgeGroup)`
+const PopoverWrapper = styled(EuiBadgeGroup)`
   max-height: 200px;
   max-width: 600px;
   overflow: auto;
@@ -61,17 +61,17 @@ const PopoverItemsComponent = <T extends unknown>({
 
   if (items.length <= numberOfItemsToDisplay) {
     return (
-      <ExceptionOverflowWrapper data-test-subj={dataTestEntity} className="eui-textNoWrap">
+      <PopoverItemsWrapper data-test-subj={dataTestEntity} gutterSize="none">
         <OverflowList items={items} />
-      </ExceptionOverflowWrapper>
+      </PopoverItemsWrapper>
     );
   }
 
   return (
-    <ExceptionOverflowWrapper data-test-subj={dataTestEntity}>
-      <DisplayOverflowWrapper>
+    <PopoverItemsWrapper alignItems="center" gutterSize="s" data-test-subj={dataTestEntity}>
+      <EuiFlexItem grow={1} className="eui-textTruncate">
         <OverflowList items={items.slice(0, numberOfItemsToDisplay)} />
-      </DisplayOverflowWrapper>
+      </EuiFlexItem>
       <EuiPopover
         ownFocus
         data-test-subj={`${dataTestEntity}-display-popover`}
@@ -95,11 +95,11 @@ const PopoverItemsComponent = <T extends unknown>({
             {popoverTitle}
           </EuiPopoverTitle>
         ) : null}
-        <ExceptionOverflowPopoverWrapper>
+        <PopoverWrapper>
           <OverflowList items={items} />
-        </ExceptionOverflowPopoverWrapper>
+        </PopoverWrapper>
       </EuiPopover>
-    </ExceptionOverflowWrapper>
+    </PopoverItemsWrapper>
   );
 };
 

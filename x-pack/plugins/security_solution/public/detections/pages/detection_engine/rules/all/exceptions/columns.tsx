@@ -67,12 +67,11 @@ export const getAllExceptionListsColumns = (
         index: number,
         items: T[]
       ) => (
-        <EuiToolTip content={name} anchorClassName="eui-textTruncate eui-alignMiddle">
+        <EuiToolTip content={name} anchorClassName="eui-textTruncate">
           <>
             <LinkAnchor
               key={id}
-              className=" eui-displayInlineBlock eui-textTruncate eui-alignMiddle"
-              data-test-subj="ruleName"
+              data-test-subj="rule-name"
               onClick={(ev: { preventDefault: () => void }) => {
                 ev.preventDefault();
                 navigateToUrl(createRuleHref(id));
