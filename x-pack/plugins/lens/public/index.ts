@@ -31,8 +31,6 @@ export type { DatatableVisualizationState } from './datatable_visualization/visu
 export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,
-  IndexPatternColumn,
-  FieldBasedIndexPatternColumn,
   OperationType,
   IncompleteColumn,
   FiltersIndexPatternColumn,

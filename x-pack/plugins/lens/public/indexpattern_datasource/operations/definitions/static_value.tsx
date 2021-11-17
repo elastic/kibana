@@ -11,7 +11,7 @@ import { OperationDefinition } from './index';
 import { ReferenceBasedIndexPatternColumn } from './column_types';
 import type { IndexPattern } from '../../types';
 import { useDebouncedValue } from '../../../shared_components';
-import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
+import { getFormatFromPreviousColumn, isColumnOfType, isValidNumber } from './helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDefault', {
   defaultMessage: 'Static value',
@@ -102,8 +102,8 @@ export const staticValueOperation: OperationDefinition<
   },
   buildColumn({ previousColumn, layer, indexPattern }, columnParams, operationDefinitionMap) {
     const existingStaticValue =
-      previousColumn?.params &&
-      'value' in previousColumn.params &&
+      previousColumn &&
+      isColumnOfType<StaticValueIndexPatternColumn>('static_value', previousColumn) &&
       isValidNumber(previousColumn.params.value)
         ? previousColumn.params.value
         : undefined;
