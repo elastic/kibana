@@ -13,10 +13,8 @@ import type {
 } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
-import { parse as parseUrl } from 'url';
-import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
-import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../../../../common/constants';
+import { VectorStyle } from '../../../styles/vector/vector_style';
+import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
   AbstractVectorLayer,
@@ -27,14 +25,11 @@ import { DataRequestContext } from '../../../../actions';
 import {
   StyleMetaDescriptor,
   TileMetaFeature,
-  Timeslice,
   VectorLayerDescriptor,
-  VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
-import { MVTSingleLayerVectorSourceConfig } from '../../../sources/mvt_single_layer_vector_source/types';
 import { ESSearchSource } from '../../../sources/es_search_source';
-import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
 import { LayerIcon } from '../../layer';
+import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
 
 export const ES_MVT_META_LAYER_NAME = 'meta';
 const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
@@ -173,86 +168,25 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     stopLoading(MAX_RESULT_WINDOW_DATA_REQUEST_ID, requestToken, { maxResultWindow });
   }
 
-  async _syncMVTUrlTemplate({
-    startLoading,
-    stopLoading,
-    onLoadError,
-    dataFilters,
-    isForceRefresh,
-  }: DataRequestContext) {
-    const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_REQUEST_ID}`);
-    const requestMeta: VectorSourceRequestMeta = await this._getVectorSourceRequestMeta(
-      isForceRefresh,
-      dataFilters,
-      this.getSource(),
-      this._style as IVectorStyle
-    );
-    const prevDataRequest = this.getSourceDataRequest();
-    if (prevDataRequest) {
-      const data: MVTSingleLayerVectorSourceConfig =
-        prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-      if (data) {
-        const noChangesInSourceState: boolean =
-          data.layerName === this._source.getLayerName() &&
-          data.minSourceZoom === this._source.getMinZoom() &&
-          data.maxSourceZoom === this._source.getMaxZoom();
-        const noChangesInSearchState: boolean = await canSkipSourceUpdate({
-          extentAware: false, // spatial extent knowledge is already fully automated by tile-loading based on pan-zooming
-          source: this.getSource(),
-          prevDataRequest,
-          nextRequestMeta: requestMeta,
-          getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
-            // TODO use meta features to determine if tiles already contain features for timeslice.
-            return true;
-          },
-        });
-        const canSkip = noChangesInSourceState && noChangesInSearchState;
-
-        if (canSkip) {
-          return null;
-        }
-      }
-    }
-
-    startLoading(SOURCE_DATA_REQUEST_ID, requestToken, requestMeta);
-    try {
-      const prevData = prevDataRequest
-        ? (prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig)
-        : undefined;
-      const urlToken =
-        !prevData || (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
-          ? uuid()
-          : prevData.urlToken;
-
-      const newUrlTemplateAndMeta = await this._source.getUrlTemplateWithMeta(requestMeta);
-
-      let urlTemplate;
-      if (newUrlTemplateAndMeta.refreshTokenParamName) {
-        const parsedUrl = parseUrl(newUrlTemplateAndMeta.urlTemplate, true);
-        const separator = !parsedUrl.query || Object.keys(parsedUrl.query).length === 0 ? '?' : '&';
-        urlTemplate = `${newUrlTemplateAndMeta.urlTemplate}${separator}${newUrlTemplateAndMeta.refreshTokenParamName}=${urlToken}`;
-      } else {
-        urlTemplate = newUrlTemplateAndMeta.urlTemplate;
-      }
-
-      const urlTemplateAndMetaWithToken = {
-        ...newUrlTemplateAndMeta,
-        urlToken,
-        urlTemplate,
-      };
-      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, urlTemplateAndMetaWithToken, {});
-    } catch (error) {
-      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
-    }
-  }
-
   async syncData(syncContext: DataRequestContext) {
     if (this.getSource().getType() === SOURCE_TYPES.ES_SEARCH) {
       await this._syncMaxResultWindow(syncContext);
     }
-    await this._syncSourceStyleMeta(syncContext, this._source, this._style as IVectorStyle);
-    await this._syncSourceFormatters(syncContext, this._source, this._style as IVectorStyle);
-    await this._syncMVTUrlTemplate(syncContext);
+    await this._syncSourceStyleMeta(syncContext, this.getSource(), this.getCurrentStyle());
+    await this._syncSourceFormatters(syncContext, this.getSource(), this.getCurrentStyle());
+
+    await syncMvtSourceData({
+      layerId: this.getId(),
+      prevDataRequest: this.getSourceDataRequest(),
+      requestMeta: await this._getVectorSourceRequestMeta(
+        syncContext.isForceRefresh,
+        syncContext.dataFilters,
+        this.getSource(),
+        this.getCurrentStyle()
+      ),
+      source: this.getSource() as ITiledSingleLayerVectorSource,
+      syncContext,
+    });
   }
 
   _syncSourceBindingWithMb(mbMap: MbMap) {
@@ -268,18 +202,17 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       return;
     }
 
-    const sourceMeta: MVTSingleLayerVectorSourceConfig | null =
-      sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-    if (!sourceMeta) {
+    const sourceData = sourceDataRequest.getData() as MvtSourceData | undefined;
+    if (!sourceData) {
       return;
     }
 
     const mbSourceId = this.getMbSourceId();
     mbMap.addSource(mbSourceId, {
       type: 'vector',
-      tiles: [sourceMeta.urlTemplate],
-      minzoom: sourceMeta.minSourceZoom,
-      maxzoom: sourceMeta.maxSourceZoom,
+      tiles: [sourceData.urlTemplate],
+      minzoom: sourceData.minSourceZoom,
+      maxzoom: sourceData.maxSourceZoom,
     });
   }
 
@@ -306,15 +239,14 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     if (!sourceDataRequest) {
       return;
     }
-    const sourceMeta: MVTSingleLayerVectorSourceConfig =
-      sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-    if (sourceMeta.layerName === '') {
+    const sourceData = sourceDataRequest.getData() as MvtSourceData | undefined;
+    if (!sourceData || sourceData.layerName === '') {
       return;
     }
 
-    this._setMbLabelProperties(mbMap, sourceMeta.layerName);
-    this._setMbPointsProperties(mbMap, sourceMeta.layerName);
-    this._setMbLinePolygonProperties(mbMap, sourceMeta.layerName);
+    this._setMbLabelProperties(mbMap, sourceData.layerName);
+    this._setMbPointsProperties(mbMap, sourceData.layerName);
+    this._setMbLinePolygonProperties(mbMap, sourceData.layerName);
     this._syncTooManyFeaturesProperties(mbMap);
   }
 
@@ -370,21 +302,19 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     }
     const mbTileSource = mbSource as MbVectorSource;
 
-    const dataRequest = this.getSourceDataRequest();
-    if (!dataRequest) {
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
       return false;
     }
-    const tiledSourceMeta: MVTSingleLayerVectorSourceConfig | null =
-      dataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-
-    if (!tiledSourceMeta) {
+    const sourceData = sourceDataRequest.getData() as MvtSourceData | undefined;
+    if (!sourceData) {
       return false;
     }
 
     const isSourceDifferent =
-      mbTileSource.tiles?.[0] !== tiledSourceMeta.urlTemplate ||
-      mbTileSource.minzoom !== tiledSourceMeta.minSourceZoom ||
-      mbTileSource.maxzoom !== tiledSourceMeta.maxSourceZoom;
+      mbTileSource.tiles?.[0] !== sourceData.urlTemplate ||
+      mbTileSource.minzoom !== sourceData.minSourceZoom ||
+      mbTileSource.maxzoom !== sourceData.maxSourceZoom;
 
     if (isSourceDifferent) {
       return true;
@@ -398,7 +328,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       if (
         mbLayer &&
         // @ts-expect-error
-        mbLayer.sourceLayer !== tiledSourceMeta.layerName &&
+        mbLayer.sourceLayer !== sourceData.layerName &&
         // @ts-expect-error
         mbLayer.sourceLayer !== ES_MVT_META_LAYER_NAME
       ) {
