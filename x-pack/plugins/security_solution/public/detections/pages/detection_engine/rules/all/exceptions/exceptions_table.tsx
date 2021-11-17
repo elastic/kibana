@@ -380,6 +380,7 @@ export const ExceptionListsTable = React.memo(() => {
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="importExceptionsButton"
               iconType="importAction"
               isDisabled={!userHasPermissions(canUserCRUD) || loading}
               onClick={() => {

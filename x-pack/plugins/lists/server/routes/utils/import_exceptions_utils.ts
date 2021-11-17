@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
 import { Transform } from 'stream';
+
+import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { has } from 'lodash/fp';
-
 import {
   BulkErrorSchema,
   ExportExceptionDetails,
@@ -31,8 +30,8 @@ import {
 } from '@kbn/utils';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-
 import uuid from 'uuid';
+
 import { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
 
 export interface ImportExceptionListsOk {
@@ -439,120 +438,6 @@ export const importExceptionLists = async ({
 };
 
 /**
- * Creates promises of the exceptions to be exported and returns them.
- * @param exceptionsListClient Exception Lists client
- * @param exceptions The exceptions to be exported
- * @returns Promise of export ready exceptions.
- */
-export const createPromises = (
-  exceptionsListClient: ExceptionListClient,
-  itemChunk: ImportExceptionListItemSchemaDecoded,
-  isOverwrite: boolean,
-  resp: ImportItemsResponse[]
-): Promise<ImportItemsResponse[]> =>
-  new Promise(async (resolve, reject) => {
-    try {
-      const {
-        comments,
-        description,
-        entries,
-        item_id: itemId,
-        list_id: listId,
-        meta,
-        name,
-        namespace_type: namespaceType,
-        os_types: osTypes,
-        tags,
-        type,
-      } = itemChunk;
-
-      try {
-        const item = await exceptionsListClient.getExceptionListItem({
-          id: undefined,
-          itemId,
-          namespaceType,
-        });
-
-        if (item == null) {
-          await exceptionsListClient.createExceptionListItem({
-            comments,
-            description,
-            entries,
-            itemId,
-            listId,
-            meta,
-            name,
-            namespaceType,
-            osTypes,
-            tags,
-            type,
-          });
-
-          resolve([
-            ...resp,
-            {
-              item_id: itemId,
-              list_id: listId,
-              status_code: 200,
-            },
-          ]);
-        } else if (item != null && isOverwrite) {
-          // If overwrite is true, the list parent container is deleted first along
-          // with its items, so to get here would mean the user hit a bit of an odd scenario.
-          // Sample scenario would be as follows:
-          // In system we have:
-          // List A ---> with item list_item_id
-          // Import is:
-          // List A ---> with item list_item_id_1
-          // List B ---> with item list_item_id_1
-          // If we just did an update of the item, we would overwrite
-          // list_item_id_1 of List A, which would be weird behavior
-          // What happens:
-          // List A and items are deleted and recreated
-          // List B is created, but list_item_id_1 already exists under List A and user warned
-          resolve([
-            ...resp,
-            {
-              error: {
-                message: `Error trying to update item_id: "${itemId}". The item already exists under list_id: ${item.list_id}`,
-                status_code: 409,
-              },
-              item_id: itemId,
-              list_id: listId,
-            },
-          ]);
-        } else if (item != null) {
-          resolve([
-            ...resp,
-            {
-              error: {
-                message: `item_id: "${itemId}" already exists`,
-                status_code: 409,
-              },
-              item_id: itemId,
-              list_id: listId,
-            },
-          ]);
-        }
-      } catch (err) {
-        resolve([
-          ...resp,
-          {
-            error: {
-              message: err.message,
-              status_code: err.statusCode ?? 400,
-            },
-            item_id: itemId,
-            list_id: listId,
-          },
-        ]);
-      }
-    } catch (error) {
-      reject(error);
-    }
-  });
-
-/**
  * Helper with logic determining when to create or update on exception list items import
  * @param exceptionListsClient - exceptions client
  * @param itemsChunks - exception list items being imported
@@ -570,10 +455,15 @@ export const importExceptionListItems = async ({
 }): Promise<ImportDataResponse> => {
   let importExceptionListItemsResponse: ImportItemsResponse[] = [];
 
+  // Formatted the items import a bit different than the lists on purpose.
+  // Wanted to accomplish sequential evaluation of items to avoid some
+  // side effects seen where if a List A and List B each were importing an item
+  // with the same item_id, it would sometimes create under List A and error on List B
+  // and sometimes create under List B and error on List A
   for await (const itemsChunk of itemsChunks) {
     const b = await itemsChunk.reduce<Promise<ImportItemsResponse[]>>((previousPromise, chunk) => {
       return previousPromise.then((resp) => {
-        return createPromises(exceptionListsClient, chunk, isOverwrite, resp);
+        return createExceptionListPromise(exceptionListsClient, chunk, isOverwrite, resp);
       });
     }, Promise.resolve([]));
 
@@ -597,3 +487,163 @@ export const importExceptionListItems = async ({
     success_count: successes.length,
   };
 };
+
+/**
+ * Creates promises of the exceptions to be exported and returns them.
+ * @param exceptionsListClient Exception Lists client
+ * @param itemChunk The exception item being imported
+ * @param isOverwrite Whether exception list item should be overwritten
+ * @param importResponses Cumulative import responses
+ * @returns Promise of exception item to be imported
+ */
+export const createExceptionListPromise = (
+  exceptionsListClient: ExceptionListClient,
+  itemChunk: ImportExceptionListItemSchemaDecoded,
+  isOverwrite: boolean,
+  importResponses: ImportItemsResponse[]
+): Promise<ImportItemsResponse[]> =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const {
+        comments,
+        description,
+        entries,
+        item_id: itemId,
+        list_id: listId,
+        meta,
+        name,
+        namespace_type: namespaceType,
+        os_types: osTypes,
+        tags,
+        type,
+        _version,
+      } = itemChunk;
+
+      try {
+        const list = await exceptionsListClient.getExceptionList({
+          id: undefined,
+          listId,
+          namespaceType,
+        });
+        const item = await exceptionsListClient.getExceptionListItem({
+          id: undefined,
+          itemId,
+          namespaceType,
+        });
+
+        if (list == null) {
+          resolve([
+            ...importResponses,
+            {
+              error: {
+                message: `Exception list with list_id: "${listId}", not found for exception list item with item_id: "${itemId}"`,
+                status_code: 409,
+              },
+              item_id: itemId,
+              list_id: listId,
+            },
+          ]);
+        } else if (item == null) {
+          await exceptionsListClient.createExceptionListItem({
+            comments,
+            description,
+            entries,
+            itemId,
+            listId,
+            meta,
+            name,
+            namespaceType,
+            osTypes,
+            tags,
+            type,
+          });
+
+          resolve([
+            ...importResponses,
+            {
+              item_id: itemId,
+              list_id: listId,
+              status_code: 200,
+            },
+          ]);
+        } else if (item != null && isOverwrite) {
+          if (item.list_id === listId) {
+            await exceptionsListClient.updateExceptionListItem({
+              _version,
+              comments,
+              description,
+              entries,
+              id: undefined,
+              itemId,
+              meta,
+              name,
+              namespaceType,
+              osTypes,
+              tags,
+              type,
+            });
+
+            resolve([
+              ...importResponses,
+              {
+                item_id: itemId,
+                list_id: listId,
+                status_code: 200,
+              },
+            ]);
+          } else {
+            // If overwrite is true, the list parent container is deleted first along
+            // with its items, so to get here would mean the user hit a bit of an odd scenario.
+            // Sample scenario would be as follows:
+            // In system we have:
+            // List A ---> with item list_item_id
+            // Import is:
+            // List A ---> with item list_item_id_1
+            // List B ---> with item list_item_id_1
+            // If we just did an update of the item, we would overwrite
+            // list_item_id_1 of List A, which would be weird behavior
+            // What happens:
+            // List A and items are deleted and recreated
+            // List B is created, but list_item_id_1 already exists under List A and user warned
+            resolve([
+              ...importResponses,
+              {
+                error: {
+                  message: `Error trying to update item_id: "${itemId}". The item already exists under list_id: ${item.list_id}`,
+                  status_code: 409,
+                },
+                item_id: itemId,
+                list_id: listId,
+              },
+            ]);
+          }
+        } else if (item != null) {
+          resolve([
+            ...importResponses,
+            {
+              error: {
+                message: `item_id: "${itemId}" already exists`,
+                status_code: 409,
+              },
+              item_id: itemId,
+              list_id: listId,
+            },
+          ]);
+        }
+      } catch (err) {
+        resolve([
+          ...importResponses,
+          {
+            error: {
+              message: err.message,
+              status_code: err.statusCode ?? 400,
+            },
+            item_id: itemId,
+            list_id: listId,
+          },
+        ]);
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });

@@ -10,20 +10,21 @@ import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import {
+  getImportExceptionsListItemSchemaDecodedMock,
+  getImportExceptionsListItemSchemaMock,
+  getImportExceptionsListSchemaDecodedMock,
+  getImportExceptionsListSchemaMock,
+} from '../../../common/schemas/request/import_exceptions_schema.mock';
+import { getExceptionListClientMock } from '../../services/exception_lists/exception_list_client.mock';
+import { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
+
+import {
   PromiseStream,
   createRulesStreamFromNdJson,
   getTupleErrorsAndUniqueExceptionListItems,
   getTupleErrorsAndUniqueExceptionLists,
   importExceptionLists,
 } from './import_exceptions_utils';
-import {
-  getImportExceptionsListItemSchemaDecodedMock,
-  getImportExceptionsListItemSchemaMock,
-  getImportExceptionsListSchemaDecodedMock,
-  getImportExceptionsListSchemaMock,
-} from '../../../common/schemas/request/import_exception_list_schema.mock';
-import { getExceptionListClientMock } from '../../services/exception_lists/exception_list_client.mock';
-import { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
 
 describe('import_exceptions_utils', () => {
   describe('createRulesStreamFromNdJson', () => {
@@ -238,20 +239,13 @@ describe('import_exceptions_utils', () => {
           {
             error: {
               message:
-                'More than one exception list with list_id: "detection_list_id" found in imports',
+                'More than one exception list with list_id: "detection_list_id" found in imports. The last list will be used.',
               status_code: 400,
             },
             list_id: 'detection_list_id',
           },
         ],
-        [
-          {
-            description: 'some description',
-            list_id: 'detection_list_id',
-            name: 'Query with a rule id',
-            type: 'detection',
-          },
-        ],
+        [getImportExceptionsListSchemaDecodedMock()],
       ]);
     });
 
@@ -263,18 +257,8 @@ describe('import_exceptions_utils', () => {
       expect(results).toEqual([
         [],
         [
-          {
-            description: 'some description',
-            list_id: '1',
-            name: 'Query with a rule id',
-            type: 'detection',
-          },
-          {
-            description: 'some description',
-            list_id: '2',
-            name: 'Query with a rule id',
-            type: 'detection',
-          },
+          getImportExceptionsListSchemaDecodedMock('1'),
+          getImportExceptionsListSchemaDecodedMock('2'),
         ],
       ]);
     });
@@ -291,41 +275,13 @@ describe('import_exceptions_utils', () => {
           {
             error: {
               message:
-                'More than one exception list item with item_id: "item_id_1 found in imports" found',
+                'More than one exception list item with item_id: "item_id_1" found in imports. The last item will be used.',
               status_code: 400,
             },
             item_id: 'item_id_1',
           },
         ],
-        [
-          {
-            description: 'some description',
-            entries: [
-              {
-                entries: [
-                  {
-                    field: 'nested.field',
-                    operator: 'included',
-                    type: 'match',
-                    value: 'some value',
-                  },
-                ],
-                field: 'some.parentField',
-                type: 'nested',
-              },
-              {
-                field: 'some.not.nested.field',
-                operator: 'included',
-                type: 'match',
-                value: 'some value',
-              },
-            ],
-            item_id: 'item_id_1',
-            list_id: 'detection_list_id',
-            name: 'Query with a rule id',
-            type: 'simple',
-          },
-        ],
+        [getImportExceptionsListItemSchemaDecodedMock()],
       ]);
     });
 
@@ -337,60 +293,8 @@ describe('import_exceptions_utils', () => {
       expect(results).toEqual([
         [],
         [
-          {
-            description: 'some description',
-            entries: [
-              {
-                entries: [
-                  {
-                    field: 'nested.field',
-                    operator: 'included',
-                    type: 'match',
-                    value: 'some value',
-                  },
-                ],
-                field: 'some.parentField',
-                type: 'nested',
-              },
-              {
-                field: 'some.not.nested.field',
-                operator: 'included',
-                type: 'match',
-                value: 'some value',
-              },
-            ],
-            item_id: '1',
-            list_id: 'detection_list_id',
-            name: 'Query with a rule id',
-            type: 'simple',
-          },
-          {
-            description: 'some description',
-            entries: [
-              {
-                entries: [
-                  {
-                    field: 'nested.field',
-                    operator: 'included',
-                    type: 'match',
-                    value: 'some value',
-                  },
-                ],
-                field: 'some.parentField',
-                type: 'nested',
-              },
-              {
-                field: 'some.not.nested.field',
-                operator: 'included',
-                type: 'match',
-                value: 'some value',
-              },
-            ],
-            item_id: '2',
-            list_id: 'detection_list_id',
-            name: 'Query with a rule id',
-            type: 'simple',
-          },
+          getImportExceptionsListItemSchemaDecodedMock('1'),
+          getImportExceptionsListItemSchemaDecodedMock('2'),
         ],
       ]);
     });
@@ -425,10 +329,10 @@ describe('import_exceptions_utils', () => {
       });
     });
 
-    test('it reports errors on update', async () => {
+    test('it reports errors on list overwrite', async () => {
       jest
-        .spyOn(exceptionListsClient, 'updateExceptionList')
-        .mockRejectedValue(() => new Error('error in creation'));
+        .spyOn(exceptionListsClient, 'deleteExceptionList')
+        .mockRejectedValue(() => new Error('error in list deletion'));
       const result = await importExceptionLists({
         exceptionListsClient,
         isOverwrite: true,

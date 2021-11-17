@@ -23,6 +23,7 @@ import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/res
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
 import { HttpStart } from '../../../../../../src/core/public';
+import { getImportExceptionsResponseSchemaMock } from '../../../common/schemas/response/import_exceptions_schema.mock';
 
 jest.mock('@kbn/securitysolution-list-api');
 
@@ -463,6 +464,41 @@ describe('useApi', () => {
         };
 
         expect(spyOnUpdateExceptionListItem).toHaveBeenCalledWith(expected);
+      });
+    });
+  });
+
+  describe('importExceptions', () => {
+    test('it invokes "importExceptions" when "importExceptions" used', async () => {
+      const payload = getImportExceptionsResponseSchemaMock();
+      const spyOnDeleteExceptionListItemById = jest
+        .spyOn(api, 'importExceptions')
+        .mockResolvedValue(payload);
+
+      const fileToImport = new File(['file'], 'exceptions.ndjson', {
+        type: 'text/plain',
+      });
+      const formData = new FormData();
+      formData.append('file', fileToImport, 'exceptions.ndjson');
+
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+          useApi(mockKibanaHttpService)
+        );
+        await waitForNextUpdate();
+
+        await result.current.importExceptions({
+          fileToImport,
+          overwrite: false,
+          signal: new AbortController().signal,
+        });
+
+        expect(spyOnDeleteExceptionListItemById).toHaveBeenCalledWith({
+          fileToImport,
+          http: mockKibanaHttpService,
+          overwrite: false,
+          signal: new AbortController().signal,
+        });
       });
     });
   });

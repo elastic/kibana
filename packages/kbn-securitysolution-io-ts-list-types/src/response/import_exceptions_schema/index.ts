@@ -37,17 +37,13 @@ export type BulkErrorSchema = t.TypeOf<typeof bulkErrorSchema>;
 export const importExceptionsResponseSchema = t.exact(
   t.type({
     errors: t.array(bulkErrorSchema),
-    errors_exception_lists: t.array(bulkErrorSchema),
     success: t.boolean,
     success_count: t.number,
     success_exception_lists: t.boolean,
     success_count_exception_lists: t.number,
-    errors_exception_list_items: t.array(bulkErrorSchema),
     success_exception_list_items: t.boolean,
     success_count_exception_list_items: t.number,
   })
 );
 
 export type ImportExceptionsResponseSchema = t.TypeOf<typeof importExceptionsResponseSchema>;
-
-export type ImportExceptionsResponse = ImportExceptionsResponseSchema | BulkErrorSchema;

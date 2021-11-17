@@ -13,17 +13,16 @@ import {
   exceptionsToNdJsonString,
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
-} from '../../../../plugins/lists/common/schemas/request/import_exception_list_schema.mock';
+} from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllExceptions } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertestWithoutLog = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe.only('import_exceptions', () => {
+  describe('import_exceptions', () => {
     beforeEach(async () => {
       await deleteAllExceptions(supertest, log);
     });
@@ -36,10 +35,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getCreateExceptionListMinimalSchemaMock())
           .expect(200);
 
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([getImportExceptionsListSchemaMock('some-list-id')]),
@@ -49,8 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [
+          errors: [
             {
               error: {
                 message: 'list_id: "some-list-id" already exists',
@@ -59,6 +56,8 @@ export default ({ getService }: FtrProviderContext): void => {
               list_id: 'some-list-id',
             },
           ],
+          success: false,
+          success_count: 0,
           success_count_exception_list_items: 0,
           success_count_exception_lists: 0,
           success_exception_list_items: true,
@@ -67,10 +66,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report duplicate error when importing two exception lists with same "list_id"', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([
@@ -83,17 +81,18 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [
+          errors: [
             {
               error: {
                 message:
-                  'More than one exception list with list_id: "detection_list_id" found in imports',
+                  'More than one exception list with list_id: "detection_list_id" found in imports. The last list will be used.',
                 status_code: 400,
               },
               list_id: 'detection_list_id',
             },
           ],
+          success: false,
+          success_count: 1,
           success_count_exception_list_items: 0,
           success_count_exception_lists: 1,
           success_exception_list_items: true,
@@ -102,10 +101,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report that it imported an exception list successfully', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([getImportExceptionsListSchemaMock()]),
@@ -115,8 +113,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [],
+          success: true,
+          success_count: 1,
           success_count_exception_list_items: 0,
           success_count_exception_lists: 1,
           success_exception_list_items: true,
@@ -125,10 +124,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report that it imported an exception list with one item successfully', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([
@@ -141,8 +139,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [],
+          success: true,
+          success_count: 2,
           success_count_exception_list_items: 1,
           success_count_exception_lists: 1,
           success_exception_list_items: true,
@@ -151,10 +150,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report that it imported an exception list with multiple items successfully', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([
@@ -168,8 +166,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [],
+          success: true,
+          success_count: 3,
           success_count_exception_list_items: 2,
           success_count_exception_lists: 1,
           success_exception_list_items: true,
@@ -178,10 +177,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report that it imported multiple exception lists successfully', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([
@@ -194,8 +192,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [],
+          success: true,
+          success_count: 2,
           success_count_exception_list_items: 0,
           success_count_exception_lists: 2,
           success_exception_list_items: true,
@@ -204,10 +203,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report that it imported multiple exception lists and items successfully', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([
@@ -224,12 +222,46 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [],
+          success: true,
+          success_count: 6,
           success_count_exception_list_items: 4,
           success_count_exception_lists: 2,
           success_exception_list_items: true,
           success_exception_lists: true,
+        });
+      });
+
+      it('should report an error when importing an exception list item for which no matching "list_id" exists', async () => {
+        const { body } = await supertest
+          .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
+          .set('kbn-xsrf', 'true')
+          .attach(
+            'file',
+            exceptionsToNdJsonString([getImportExceptionsListItemSchemaMock('1', 'some-list-id')]),
+            'exceptions.ndjson'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [
+            {
+              error: {
+                message:
+                  'Exception list with list_id: "some-list-id", not found for exception list item with item_id: "1"',
+                status_code: 409,
+              },
+              item_id: '1',
+              list_id: 'some-list-id',
+            },
+          ],
+          success_count_exception_list_items: 0,
+          success_count_exception_lists: 0,
+          success_exception_list_items: false,
+          success_exception_lists: true,
+          success: false,
+          success_count: 0,
         });
       });
     });
@@ -243,10 +275,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getCreateExceptionListMinimalSchemaMock())
           .expect(200);
 
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([getImportExceptionsListSchemaMock('some-list-id')]),
@@ -256,8 +287,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [],
+          success: true,
+          success_count: 1,
           success_count_exception_list_items: 0,
           success_count_exception_lists: 1,
           success_exception_list_items: true,
@@ -265,8 +297,13 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should NOT report duplicate error when importing exception list item matches an existing list item with same "item_id"', async () => {
+      it('should report error when importing exception list item matches an existing list item with same "item_id" but differing "list_id"s', async () => {
         // create an exception list
+        await supertest
+          .post(EXCEPTION_LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ...getCreateExceptionListMinimalSchemaMock(), list_id: 'a_list_id' })
+          .expect(200);
         await supertest
           .post(EXCEPTION_LIST_URL)
           .set('kbn-xsrf', 'true')
@@ -277,13 +314,12 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(EXCEPTION_LIST_ITEM_URL)
           .set('kbn-xsrf', 'true')
-          .send(getCreateExceptionListItemMinimalSchemaMock())
+          .send({ ...getCreateExceptionListItemMinimalSchemaMock(), list_id: 'a_list_id' })
           .expect(200);
 
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([
@@ -295,8 +331,58 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [
+            {
+              error: {
+                message:
+                  'Error trying to update item_id: "some-list-item-id". The item already exists under list_id: a_list_id',
+                status_code: 409,
+              },
+              item_id: 'some-list-item-id',
+              list_id: 'some-list-id',
+            },
+          ],
+          success: false,
+          success_count: 0,
+          success_count_exception_list_items: 0,
+          success_count_exception_lists: 0,
+          success_exception_list_items: false,
+          success_exception_lists: true,
+        });
+      });
+
+      it('should NOT report error when importing exception list item matches an existing list item with same "item_id" and same "list_id"', async () => {
+        // create an exception list
+        await supertest
+          .post(EXCEPTION_LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ...getCreateExceptionListMinimalSchemaMock(), list_id: 'some-list-id' })
+          .expect(200);
+
+        // create an exception list item
+        await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListItemMinimalSchemaMock())
+          .expect(200);
+
+        const { body } = await supertest
+          .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
+          .set('kbn-xsrf', 'true')
+          .attach(
+            'file',
+            exceptionsToNdJsonString([
+              getImportExceptionsListItemSchemaMock('some-list-item-id', 'some-list-id'),
+            ]),
+            'exceptions.ndjson'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [],
+          success: true,
+          success_count: 1,
           success_count_exception_list_items: 1,
           success_count_exception_lists: 0,
           success_exception_list_items: true,
@@ -305,10 +391,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report duplicate error when importing two exception lists with same "list_id"', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([
@@ -321,17 +406,18 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [
+          errors: [
             {
               error: {
                 message:
-                  'More than one exception list with list_id: "detection_list_id" found in imports',
+                  'More than one exception list with list_id: "detection_list_id" found in imports. The last list will be used.',
                 status_code: 400,
               },
               list_id: 'detection_list_id',
             },
           ],
+          success: false,
+          success_count: 1,
           success_count_exception_list_items: 0,
           success_count_exception_lists: 1,
           success_exception_list_items: true,
@@ -340,10 +426,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report that it imported an exception list successfully', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([getImportExceptionsListSchemaMock()]),
@@ -353,8 +438,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [],
+          success: true,
+          success_count: 1,
           success_count_exception_list_items: 0,
           success_count_exception_lists: 1,
           success_exception_list_items: true,
@@ -363,10 +449,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report that it imported an exception list with one item successfully', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([
@@ -379,8 +464,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [],
+          success: true,
+          success_count: 2,
           success_count_exception_list_items: 1,
           success_count_exception_lists: 1,
           success_exception_list_items: true,
@@ -389,10 +475,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report that it imported an exception list with multiple items successfully', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([
@@ -406,8 +491,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [],
+          success: true,
+          success_count: 3,
           success_count_exception_list_items: 2,
           success_count_exception_lists: 1,
           success_exception_list_items: true,
@@ -416,10 +502,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report that it imported multiple exception lists successfully', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([
@@ -432,8 +517,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [],
+          success: true,
+          success_count: 2,
           success_count_exception_list_items: 0,
           success_count_exception_lists: 2,
           success_exception_list_items: true,
@@ -442,10 +528,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report that it imported multiple exception lists and items successfully', async () => {
-        const { body } = await supertestWithoutLog
+        const { body } = await supertest
           .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
-          .auth('elastic', 'changeme')
           .attach(
             'file',
             exceptionsToNdJsonString([
@@ -462,12 +547,46 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).to.eql({
-          errors_exception_list_items: [],
-          errors_exception_lists: [],
+          errors: [],
+          success: true,
+          success_count: 6,
           success_count_exception_list_items: 4,
           success_count_exception_lists: 2,
           success_exception_list_items: true,
           success_exception_lists: true,
+        });
+      });
+
+      it('should report an error when importing an exception list item for which no matching "list_id" exists', async () => {
+        const { body } = await supertest
+          .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
+          .set('kbn-xsrf', 'true')
+          .attach(
+            'file',
+            exceptionsToNdJsonString([getImportExceptionsListItemSchemaMock('1', 'some-list-id')]),
+            'exceptions.ndjson'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [
+            {
+              error: {
+                message:
+                  'Exception list with list_id: "some-list-id", not found for exception list item with item_id: "1"',
+                status_code: 409,
+              },
+              item_id: '1',
+              list_id: 'some-list-id',
+            },
+          ],
+          success_count_exception_list_items: 0,
+          success_count_exception_lists: 0,
+          success_exception_list_items: false,
+          success_exception_lists: true,
+          success: false,
+          success_count: 0,
         });
       });
     });

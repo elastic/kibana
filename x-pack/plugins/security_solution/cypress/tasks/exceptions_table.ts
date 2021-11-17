@@ -13,6 +13,7 @@ import {
   EXCEPTIONS_TABLE_MODAL,
   EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN,
   EXCEPTIONS_TABLE_EXPORT_BTN,
+  EXEPTIONS_IMPORT_BUTTON,
 } from '../screens/exceptions';
 
 export const waitForExceptionsTableToBeLoaded = () => {
@@ -42,6 +43,10 @@ export const deleteExceptionListWithRuleReference = () => {
 
 export const exportExceptionList = () => {
   cy.get(EXCEPTIONS_TABLE_EXPORT_BTN).first().click();
+};
+
+export const importExceptions = () => {
+  cy.get(EXEPTIONS_IMPORT_BUTTON).first().click();
 };
 
 export const clearSearchSelection = () => {

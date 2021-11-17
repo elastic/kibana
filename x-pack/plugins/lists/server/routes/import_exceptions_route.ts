@@ -6,8 +6,8 @@
  */
 
 import { Readable } from 'stream';
-import { chunk } from 'lodash/fp';
 
+import { chunk } from 'lodash/fp';
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { createPromiseFromStreams } from '@kbn/utils';
@@ -22,6 +22,7 @@ import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysoluti
 
 import type { ListsPluginRouter } from '../types';
 import { ConfigType } from '../config';
+
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 import {
   createRulesStreamFromNdJson,
@@ -43,7 +44,7 @@ interface PromiseFromStreams {
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
-export const importExceptionListRoute = (router: ListsPluginRouter, config: ConfigType): void => {
+export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigType): void => {
   router.post(
     {
       options: {
@@ -96,13 +97,11 @@ export const importExceptionListRoute = (router: ListsPluginRouter, config: Conf
         });
 
         const importsSummary = {
-          errors_exception_list_items: [
-            ...importExceptionListItemsResponse.errors,
-            ...exceptionListItemsDuplicateErrors,
-          ],
-          errors_exception_lists: [
+          errors: [
             ...importExceptionListsResponse.errors,
             ...exceptionListDuplicateErrors,
+            ...importExceptionListItemsResponse.errors,
+            ...exceptionListItemsDuplicateErrors,
           ],
           success_count_exception_list_items: importExceptionListItemsResponse.success_count,
           success_count_exception_lists: importExceptionListsResponse.success_count,
@@ -117,10 +116,6 @@ export const importExceptionListRoute = (router: ListsPluginRouter, config: Conf
         const [validated, errors] = validate(
           {
             ...importsSummary,
-            errors: [
-              ...importsSummary.errors_exception_list_items,
-              ...importsSummary.errors_exception_lists,
-            ],
             success:
               importsSummary.success_exception_list_items && importsSummary.success_exception_lists,
             success_count:

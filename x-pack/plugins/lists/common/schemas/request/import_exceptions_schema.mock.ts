@@ -39,6 +39,7 @@ export const getImportExceptionsListSchemaDecodedMock = (
   listId = 'detection_list_id'
 ): ImportExceptionListSchemaDecoded => ({
   ...getImportExceptionsListSchemaMock(listId),
+  immutable: false,
   meta: undefined,
   namespace_type: 'single',
   os_types: [],

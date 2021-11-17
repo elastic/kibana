@@ -146,6 +146,7 @@ export const ImportDataModalComponent = ({
               display={'large'}
               fullWidth={true}
               isLoading={isImporting}
+              data-test-subj="importFilePicker"
             />
             <EuiSpacer size="s" />
             {showCheckBox && (

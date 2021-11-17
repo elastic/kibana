@@ -232,11 +232,11 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
       },
       async importExceptions({
         fileToImport,
-        overwrite,
+        overwrite = false,
         signal,
       }: {
         fileToImport: File;
-        overwrite: boolean;
+        overwrite?: boolean;
         signal: AbortSignal;
       }): Promise<ImportExceptionsResponseSchema> {
         return Api.importExceptions({

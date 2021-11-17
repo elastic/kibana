@@ -95,7 +95,6 @@ export const useExceptionLists = ({
         },
         signal: abortCtrlRef.current.signal,
       });
-      console.log('????');
       setPagination({
         page,
         perPage,
@@ -104,8 +103,6 @@ export const useExceptionLists = ({
       setExceptionLists(data);
       setLoading(false);
     } catch (error) {
-      console.log({ ERROR: JSON.stringify(error) });
-
       if (error.name !== 'AbortError') {
         notifications.toasts.addError(error, {
           title: errorMessage,

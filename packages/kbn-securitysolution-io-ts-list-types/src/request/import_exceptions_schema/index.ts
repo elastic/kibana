@@ -11,7 +11,7 @@ import * as t from 'io-ts';
 import {
   DefaultVersionNumber,
   DefaultVersionNumberDecoded,
-  DefaultStringBooleanFalse,
+  OnlyFalseAllowed,
 } from '@kbn/securitysolution-io-ts-types';
 
 import { exceptionListType } from '../../common/exception_list';
@@ -31,7 +31,6 @@ import { created_at } from '../../common/created_at';
 import { created_by } from '../../common/created_by';
 import { updated_at } from '../../common/updated_at';
 import { updated_by } from '../../common/updated_by';
-import { immutable } from '../../common/immutable';
 import { _version } from '../../common/underscore_version';
 import { tie_breaker_id } from '../../common/tie_breaker_id';
 import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
@@ -63,7 +62,7 @@ export const importExceptionsListSchema = t.intersection([
   t.exact(
     t.partial({
       id, // defaults to undefined if not set during decode
-      immutable,
+      immutable: OnlyFalseAllowed,
       meta, // defaults to undefined if not set during decode
       namespace_type, // defaults to 'single' if not set during decode
       os_types: osTypeArrayOrUndefined, // defaults to empty array if not set during decode
@@ -84,8 +83,9 @@ export type ImportExceptionsListSchema = t.TypeOf<typeof importExceptionsListSch
 // This type is used after a decode since some things are defaults after a decode.
 export type ImportExceptionListSchemaDecoded = Omit<
   ImportExceptionsListSchema,
-  'tags' | 'list_id' | 'namespace_type' | 'os_types'
+  'tags' | 'list_id' | 'namespace_type' | 'os_types' | 'immutable'
 > & {
+  immutable: false;
   tags: Tags;
   list_id: ListId;
   namespace_type: NamespaceType;
@@ -146,24 +146,3 @@ export type ImportExceptionListItemSchemaDecoded = Omit<
   namespace_type: NamespaceType;
   os_types: OsTypeArray;
 };
-
-export const importExceptionsSchema = t.exact(
-  t.partial({
-    overwrite: DefaultStringBooleanFalse,
-  })
-);
-
-export type ImportExceptionsSchema = t.TypeOf<typeof importExceptionsSchema>;
-export type ImportExceptionsSchemaDecoded = Omit<ImportExceptionsSchema, 'overwrite'> & {
-  overwrite: boolean;
-};
-
-export const importExceptionsPayloadSchema = t.exact(
-  t.type({
-    file: t.object,
-  })
-);
-
-export type ImportExceptionsPayloadSchema = t.TypeOf<typeof importExceptionsPayloadSchema>;
-
-export type ImportExceptionsPayloadSchemaDecoded = ImportExceptionsPayloadSchema;

@@ -37,6 +37,7 @@ import {
   searchForExceptionList,
   waitForExceptionsTableToBeLoaded,
   clearSearchSelection,
+  importExceptions,
 } from '../../tasks/exceptions_table';
 import {
   EXCEPTIONS_TABLE_LIST_NAME,
@@ -84,6 +85,26 @@ describe('Exceptions Table', () => {
         .wrap(response?.body)
         .should('eql', expectedExportedExceptionList(this.exceptionListResponse))
     );
+  });
+
+  it('Imports exception lists', function () {
+    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    waitForExceptionsTableToBeLoaded();
+    exportExceptionList();
+
+    cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
+
+    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    waitForExceptionsTableToBeLoaded();
+    exportExceptionList();
+
+    importExceptions();
+
+    // cy.wait('@import').then(({ response }) =>
+    //   cy
+    //     .wrap(response?.body)
+    //     .should('eql', )
+    // );
   });
 
   it('Filters exception lists on search', () => {
