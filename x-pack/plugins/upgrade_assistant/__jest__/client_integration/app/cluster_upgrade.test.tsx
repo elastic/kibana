@@ -38,7 +38,7 @@ describe('Cluster upgrade', () => {
 
   describe('when cluster is in the process of a rolling upgrade', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, {
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, {
         statusCode: 426,
         message: '',
         attributes: {
@@ -62,7 +62,7 @@ describe('Cluster upgrade', () => {
 
   describe('when cluster has been upgraded', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, {
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, {
         statusCode: 426,
         message: '',
         attributes: {

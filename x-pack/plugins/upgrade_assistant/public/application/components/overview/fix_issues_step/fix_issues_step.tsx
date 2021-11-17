@@ -71,7 +71,10 @@ const AccessDeprecationLogsMessage = ({ navigateToEsDeprecationLogs }: CustomPro
             defaultMessage="If you have application code that calls Elasticsearch APIs, review the {esDeprecationLogsLink} to make sure you are not using deprecated APIs."
             values={{
               esDeprecationLogsLink: (
-                <EuiLink onClick={navigateToEsDeprecationLogs}>
+                <EuiLink
+                  onClick={navigateToEsDeprecationLogs}
+                  data-test-subj="viewElasticsearchDeprecationLogs"
+                >
                   {i18n.translate('xpack.upgradeAssistant.overview.esDeprecationLogsLink', {
                     defaultMessage: 'Elasticsearch deprecation logs',
                   })}

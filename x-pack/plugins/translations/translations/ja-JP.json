@@ -25561,7 +25561,6 @@
     "xpack.upgradeAssistant.overview.deprecationLogs.reloadButtonLabel": "再試行",
     "xpack.upgradeAssistant.overview.deprecationLogs.updateErrorMessage": "ログ状態を更新できませんでした。",
     "xpack.upgradeAssistant.overview.documentationLinkText": "ドキュメント",
-    "xpack.upgradeAssistant.overview.identifyStepTitle": "廃止予定APIの使用を特定し、アプリケーションを更新",
     "xpack.upgradeAssistant.overview.loadingLogsLabel": "ログ収集状態を読み込み中...",
     "xpack.upgradeAssistant.overview.observe.discoveryDescription": "廃止予定ログを検索およびフィルターし、必要な変更のタイプを把握します。",
     "xpack.upgradeAssistant.overview.observe.observabilityDescription": "使用中のAPIのうち廃止予定のAPIと、更新が必要なアプリケーションを特定できます。",
