@@ -63,6 +63,7 @@ export const readRulesRoute = (
           isRuleRegistryEnabled,
           rulesClient,
           ruleId,
+          includeLegacyId: true,
         });
         if (rule != null) {
           const legacyRuleActions = await legacyGetRuleActionsSavedObject({

@@ -24,12 +24,13 @@ export const readRules = async ({
   rulesClient,
   id,
   ruleId,
+  includeLegacyId,
 }: ReadRuleOptions): Promise<
   SanitizedAlert<RuleParams> | ResolvedSanitizedRule<RuleParams> | null
 > => {
   if (id != null) {
     try {
-      const rule = await rulesClient.resolve({ id });
+      const rule = await rulesClient.resolve({ id, includeLegacyId });
       if (isAlertType(isRuleRegistryEnabled, rule)) {
         if (rule?.outcome === 'exactMatch') {
           const { outcome, ...restOfRule } = rule;

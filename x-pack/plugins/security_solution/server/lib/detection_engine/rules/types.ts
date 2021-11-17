@@ -331,6 +331,7 @@ export interface ReadRuleOptions {
   rulesClient: RulesClient;
   id: IdOrUndefined;
   ruleId: RuleIdOrUndefined;
+  includeLegacyId?: boolean;
 }
 
 export interface DeleteRuleOptions {

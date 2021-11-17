@@ -47,6 +47,9 @@ export type Outcome = t.TypeOf<typeof outcome>;
 export const alias_target_id = t.string;
 export type AliasTargetId = t.TypeOf<typeof alias_target_id>;
 
+export const legacyId = t.string;
+export type LegacyId = t.TypeOf<typeof legacyId>;
+
 export const enabled = t.boolean;
 export type Enabled = t.TypeOf<typeof enabled>;
 
