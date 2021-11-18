@@ -867,6 +867,20 @@ const decorateAxes = <T extends { labels: { filter?: boolean } }>(
     },
   }));
 
+/**
+ * Decorate axes with default label filter value
+ */
+const addCirclesRadius = <T extends { circlesRadius: number }>(axes: T[]): T[] =>
+  axes.map((axis) => {
+    const hasCircleRadiusAttribute = axis?.circlesRadius;
+    return {
+      ...axis,
+      ...(!hasCircleRadiusAttribute && {
+        circlesRadius: 1,
+      }),
+    };
+  });
+
 // Inlined from vis_type_xy
 const CHART_TYPE_AREA = 'area';
 const CHART_TYPE_LINE = 'line';
@@ -913,6 +927,8 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
               valueAxes:
                 visState.params.valueAxes &&
                 decorateAxes(visState.params.valueAxes, isHorizontalBar),
+              seriesParams:
+                visState.params.seriesParams && addCirclesRadius(visState.params.seriesParams),
               isVislibVis: true,
               detailedTooltip: true,
               ...(isLineOrArea && {

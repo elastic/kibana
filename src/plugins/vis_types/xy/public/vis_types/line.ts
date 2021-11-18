@@ -97,7 +97,7 @@ export const lineVisTypeDefinition = {
           lineWidth: 2,
           interpolate: InterpolationMode.Linear,
           showCircles: true,
-          circlesRadius: 3,
+          circlesRadius: 1,
         },
       ],
       addTooltip: true,
