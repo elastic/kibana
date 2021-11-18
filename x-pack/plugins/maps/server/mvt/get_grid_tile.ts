@@ -7,8 +7,6 @@
 
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-// @ts-ignore not typed
-import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 import { RENDER_AS } from '../../common/constants';
 
 function isAbortError(error: Error) {
