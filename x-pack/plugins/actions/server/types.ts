@@ -173,3 +173,10 @@ export interface ResponseSettings {
 export interface SSLSettings {
   verificationMode?: 'none' | 'certificate' | 'full';
 }
+
+export interface ConnectorToken extends SavedObjectAttributes {
+  connectorId: string;
+  tokenType: string;
+  token: string;
+  expiresIn: string;
+}
