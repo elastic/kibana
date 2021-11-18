@@ -2711,7 +2711,7 @@ export class SavedObjectsSerializer {
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
     getKibanaIndex: () => string;
-    registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
+    registerType: <Attributes extends SavedObjectAttributes = any>(type: SavedObjectsType<Attributes>) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
@@ -2737,7 +2737,7 @@ export interface SavedObjectStatusMeta {
 }
 
 // @public (undocumented)
-export interface SavedObjectsType<Attributes = any> {
+export interface SavedObjectsType<Attributes extends SavedObjectAttributes = any> {
     convertToAliasScript?: string;
     convertToMultiNamespaceTypeVersion?: string;
     excludeOnUpgrade?: SavedObjectTypeExcludeFromUpgradeFilterHook;
@@ -2748,6 +2748,7 @@ export interface SavedObjectsType<Attributes = any> {
     migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
     name: string;
     namespaceType: SavedObjectsNamespaceType;
+    schemas?: SavedObjectsValidationMap<Attributes> | (() => SavedObjectsValidationMap<Attributes>);
 }
 
 // @public
@@ -2829,6 +2830,23 @@ export class SavedObjectsUtils {
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
+
+// @public
+export class SavedObjectsValidationError extends SchemaTypeError {
+    constructor(error: Error | string, path?: string[]);
+}
+
+// @public
+export type SavedObjectsValidationFunction<A extends SavedObjectAttributes = SavedObjectAttributes> = (data: A) => void;
+
+// @public
+export interface SavedObjectsValidationMap<A extends SavedObjectAttributes = SavedObjectAttributes> {
+    // (undocumented)
+    [version: string]: SavedObjectsValidationSpec<A>;
+}
+
+// @public
+export type SavedObjectsValidationSpec<A extends SavedObjectAttributes> = ObjectType | SavedObjectsValidationFunction<A>;
 
 // Warning: (ae-extra-release-tag) The doc comment should not contain more than one release tag
 //
