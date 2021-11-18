@@ -95,6 +95,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       async (ctx, req, res) => {
         await ctx.core.elasticsearch.client.asInternalUser.ping();
 
+        // eslint-disable-next-line no-console
+        console.log('>>> apmAgent.currentTraceIds', apmAgent.isStarted(), apmAgent.currentTraceIds);
         return res.ok({
           body: {
             traceId: apmAgent.currentTraceIds['trace.id'],
