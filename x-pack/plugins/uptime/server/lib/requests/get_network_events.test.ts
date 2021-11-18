@@ -215,7 +215,7 @@ describe('getNetworkEvents', () => {
               "size": 1000,
               "track_total_hits": true,
             },
-            "index": "heartbeat-8*,synthetics-*",
+            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
           },
         ],
       ]

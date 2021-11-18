@@ -197,7 +197,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -311,7 +311,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -510,7 +510,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -629,7 +629,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -754,7 +754,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
     expect(result.length).toBe(3);
