@@ -33,6 +33,8 @@ class DocLinks {
   public appSearchWebCrawlerEventLogs: string;
   public cloudIndexManagement: string;
   public enterpriseSearchConfig: string;
+  public enterpriseSearchMailService: string;
+  public enterpriseSearchUsersAccess: string;
   public licenseManagement: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
@@ -87,6 +89,8 @@ class DocLinks {
     this.appSearchWebCrawlerEventLogs = '';
     this.cloudIndexManagement = '';
     this.enterpriseSearchConfig = '';
+    this.enterpriseSearchMailService = '';
+    this.enterpriseSearchUsersAccess = '';
     this.licenseManagement = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
@@ -142,6 +146,8 @@ class DocLinks {
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
+    this.enterpriseSearchMailService = doclinks.links.enterpriseSearch.mailService;
+    this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;

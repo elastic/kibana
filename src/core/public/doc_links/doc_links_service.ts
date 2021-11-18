@@ -108,6 +108,8 @@ export class DocLinksService {
         enterpriseSearch: {
           configuration: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/configuration.html`,
           licenseManagement: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/license-management.html`,
+          mailService: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/mailer-configuration.html`,
+          usersAccess: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/users-access.html`,
         },
         workplaceSearch: {
           box: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-box-connector.html`,
@@ -666,6 +668,8 @@ export interface DocLinksStart {
     readonly enterpriseSearch: {
       readonly configuration: string;
       readonly licenseManagement: string;
+      readonly mailService: string;
+      readonly usersAccess: string;
     };
     readonly workplaceSearch: {
       readonly box: string;
