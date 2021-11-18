@@ -332,6 +332,13 @@ export const SOURCE_OBJ_TYPES = {
   ),
 };
 
+export const API_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.apiKeyLabel',
+  {
+    defaultMessage: 'API key',
+  }
+);
+
 export const GITHUB_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.applicationLinkTitles.github',
   {
@@ -864,5 +871,16 @@ export const PLATINUM_FEATURE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.platinumFeature',
   {
     defaultMessage: 'Platinum feature',
+  }
+);
+
+export const COPY_TOOLTIP = i18n.translate('xpack.enterpriseSearch.workplaceSearch.copy.tooltip', {
+  defaultMessage: 'Copy to clipboard',
+});
+
+export const COPIED_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.copied.tooltip',
+  {
+    defaultMessage: 'Copied!',
   }
 );
