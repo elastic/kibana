@@ -57,6 +57,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./geo_field'));
       loadTestFile(require.resolve('./formula'));
       loadTestFile(require.resolve('./heatmap'));
+      loadTestFile(require.resolve('./metrics'));
       loadTestFile(require.resolve('./reference_lines'));
       loadTestFile(require.resolve('./inspector'));
       loadTestFile(require.resolve('./error_handling'));
@@ -70,6 +71,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       this.tags(['ciGroup16', 'skipFirefox']);
 
       loadTestFile(require.resolve('./add_to_dashboard'));
+      loadTestFile(require.resolve('./table_dashboard'));
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./runtime_fields'));
       loadTestFile(require.resolve('./dashboard'));
