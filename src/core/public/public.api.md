@@ -506,6 +506,9 @@ export interface DocLinksStart {
         readonly canvas: {
             readonly guide: string;
         };
+        readonly cloud: {
+            readonly indexManagement: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -537,24 +540,62 @@ export interface DocLinksStart {
             readonly install: string;
             readonly start: string;
         };
+        readonly appSearch: {
+            readonly apiRef: string;
+            readonly apiClients: string;
+            readonly apiKeys: string;
+            readonly authentication: string;
+            readonly crawlRules: string;
+            readonly curations: string;
+            readonly duplicateDocuments: string;
+            readonly entryPoints: string;
+            readonly guide: string;
+            readonly indexingDocuments: string;
+            readonly indexingDocumentsSchema: string;
+            readonly logSettings: string;
+            readonly metaEngines: string;
+            readonly nativeAuth: string;
+            readonly precisionTuning: string;
+            readonly relevanceTuning: string;
+            readonly resultSettings: string;
+            readonly searchUI: string;
+            readonly security: string;
+            readonly standardAuth: string;
+            readonly synonyms: string;
+            readonly webCrawler: string;
+            readonly webCrawlerEventLogs: string;
+        };
         readonly enterpriseSearch: {
-            readonly base: string;
-            readonly appSearchBase: string;
-            readonly workplaceSearchBase: string;
-            readonly workplaceSearchPermissions: string;
-            readonly workplaceSearchDocumentPermissions: string;
-            readonly workplaceSearchExternalIdentities: string;
-            readonly workplaceSearchSecurity: string;
-            readonly workplaceSearchBox: string;
-            readonly workplaceSearchConfluenceCloud: string;
-            readonly workplaceSearchConfluenceServer: string;
-            readonly workplaceSearchDropbox: string;
-            readonly workplaceSearchGitHub: string;
-            readonly workplaceSearchGmail: string;
-            readonly workplaceSearchGoogleDrive: string;
-            readonly workplaceSearchJiraCloud: string;
-            readonly workplaceSearchJiraServer: string;
-            readonly workplaceSearchOneDrive: string;
+            readonly configuration: string;
+            readonly licenseManagement: string;
+        };
+        readonly workplaceSearch: {
+            readonly box: string;
+            readonly confluenceCloud: string;
+            readonly confluenceServer: string;
+            readonly customSources: string;
+            readonly customSourcePermissions: string;
+            readonly documentPermissions: string;
+            readonly dropbox: string;
+            readonly externalIdentities: string;
+            readonly gitHub: string;
+            readonly gettingStarted: string;
+            readonly gmail: string;
+            readonly googleDrive: string;
+            readonly indexingSchedule: string;
+            readonly jiraCloud: string;
+            readonly jiraServer: string;
+            readonly nativeAuth: string;
+            readonly oneDrive: string;
+            readonly permissions: string;
+            readonly salesforce: string;
+            readonly security: string;
+            readonly serviceNow: string;
+            readonly sharePoint: string;
+            readonly slack: string;
+            readonly standardAuth: string;
+            readonly synch: string;
+            readonly zendesk: string;
         };
         readonly heartbeat: {
             readonly base: string;
