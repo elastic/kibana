@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import {
+  LOG_ANALYSIS_VALIDATE_DATASETS_PATH,
   validateLogEntryDatasetsRequestPayloadRT,
   validateLogEntryDatasetsResponsePayloadRT,
 } from '../../../../plugins/infra/common/http_api/log_analysis/validation/datasets';
@@ -27,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('works', async () => {
       const response = await supertest
-        .post('/api/infra/log_analysis/validation/log_entry_datasets')
+        .post(LOG_ANALYSIS_VALIDATE_DATASETS_PATH)
         .set({
           'kbn-xsrf': 'some-xsrf-token',
         })
