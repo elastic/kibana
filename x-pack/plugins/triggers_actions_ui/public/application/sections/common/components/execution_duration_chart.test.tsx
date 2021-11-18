@@ -66,46 +66,16 @@ describe('padOrTruncateDurations', () => {
         10
       )
     ).toEqual([
-      [
-        "17 Nov 2021 @ 16:16:17",
-        1,
-      ],
-      [
-        "17 Nov 2021 @ 16:17:17",
-        2,
-      ],
-      [
-        "17 Nov 2021 @ 19:19:17",
-        3,
-      ],
-      [
-        null,
-        null,
-      ],
-      [
-        null,
-        null,
-      ],
-      [
-        null,
-        null,
-      ],
-      [
-        null,
-        null,
-      ],
-      [
-        null,
-        null,
-      ],
-      [
-        null,
-        null,
-      ],
-      [
-        null,
-        null,
-      ],
+      ['17 Nov 2021 @ 16:16:17', 1],
+      ['17 Nov 2021 @ 16:17:17', 2],
+      ['17 Nov 2021 @ 19:19:17', 3],
+      [null, null],
+      [null, null],
+      [null, null],
+      [null, null],
+      [null, null],
+      [null, null],
+      [null, null],
     ]);
   });
 

@@ -71,7 +71,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
       </EuiFlexGroup>
 
       {executionDuration.valuesWithTimestamp &&
-        Object.entries(executionDuration.valuesWithTimestamp).length > 0 ? (
+      Object.entries(executionDuration.valuesWithTimestamp).length > 0 ? (
         <>
           <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
             <Settings
