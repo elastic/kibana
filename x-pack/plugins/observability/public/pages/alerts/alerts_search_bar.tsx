@@ -6,10 +6,12 @@
  */
 
 import { IndexPatternBase } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { translations } from '../../config';
+
+type QueryLanguageType = 'lucene' | 'kuery';
 
 export function AlertsSearchBar({
   dynamicIndexPatterns,
@@ -30,7 +32,7 @@ export function AlertsSearchBar({
   const timeHistory = useMemo(() => {
     return new TimeHistory(new Storage(localStorage));
   }, []);
-  const [queryLanguage, setQueryLanguage] = useState<'lucene' | 'kuery'>('kuery');
+  const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
 
   const compatibleIndexPatterns = useMemo(
     () =>
@@ -45,9 +47,7 @@ export function AlertsSearchBar({
   return (
     <SearchBar
       indexPatterns={compatibleIndexPatterns}
-      placeholder={i18n.translate('xpack.observability.alerts.searchBarPlaceholder', {
-        defaultMessage: 'Search alerts (e.g. kibana.alert.evaluation.threshold > 75)',
-      })}
+      placeholder={translations.alertsSearchBar.placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       timeHistory={timeHistory}
       dateRangeFrom={rangeFrom}
@@ -60,7 +60,7 @@ export function AlertsSearchBar({
           dateRange,
           query: typeof nextQuery?.query === 'string' ? nextQuery.query : '',
         });
-        setQueryLanguage((nextQuery?.language || 'kuery') as 'kuery' | 'lucene');
+        setQueryLanguage((nextQuery?.language ?? 'kuery') as QueryLanguageType);
       }}
       displayStyle="inPage"
     />
