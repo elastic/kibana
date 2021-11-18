@@ -72,17 +72,6 @@ export class UrlGeneratorInternal<Id extends UrlGeneratorId> {
         return this.spec.createUrl!(state);
       },
       isDeprecated: !!this.spec.isDeprecated,
-      migrate: async (state: UrlGeneratorStateMapping[Id]['State']) => {
-        if (!this.spec.isDeprecated) {
-          throw new Error(
-            i18n.translate('share.urlGenerators.error.migrateCalledNotDeprecated', {
-              defaultMessage: 'You cannot call migrate on a non-deprecated generator.',
-            })
-          );
-        }
-
-        return this.spec.migrate!(state);
-      },
     };
   }
 }

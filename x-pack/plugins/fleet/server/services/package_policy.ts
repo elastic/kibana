@@ -42,7 +42,6 @@ import type {
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
-  HostedAgentPolicyRestrictionRelatedError,
   IngestManagerError,
   ingestErrorToResponseOptions,
   PackagePolicyIneligibleForUpgradeError,
@@ -68,8 +67,8 @@ import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
-import type { PackagePolicyUpgradeUsage } from './upgrade_usage';
-import { sendTelemetryEvents } from './upgrade_usage';
+import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
+import { sendTelemetryEvents } from './upgrade_sender';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -99,24 +98,14 @@ class PackagePolicyService {
       skipEnsureInstalled?: boolean;
     }
   ): Promise<PackagePolicy> {
-    // Check that its agent policy does not have a package policy with the same name
-    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
-    if (!parentAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-    if (parentAgentPolicy.is_managed && !options?.force) {
-      throw new HostedAgentPolicyRestrictionRelatedError(
-        `Cannot add integrations to hosted agent policy ${parentAgentPolicy.id}`
-      );
-    }
-    if (
-      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-        (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
-      )
-    ) {
-      throw new IngestManagerError(
-        'There is already a package with the same name on this agent policy'
-      );
+    const existingPoliciesWithName = await this.list(soClient, {
+      perPage: 1,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+    });
+
+    // Check that the name does not exist already
+    if (existingPoliciesWithName.items.length > 0) {
+      throw new IngestManagerError('There is already a package with the same name');
     }
     let elasticsearch: PackagePolicy['elasticsearch'];
     // Add ids to stream
@@ -320,12 +309,12 @@ class PackagePolicyService {
     });
 
     return {
-      items: packagePolicies.saved_objects.map((packagePolicySO) => ({
+      items: packagePolicies?.saved_objects.map((packagePolicySO) => ({
         id: packagePolicySO.id,
         version: packagePolicySO.version,
         ...packagePolicySO.attributes,
       })),
-      total: packagePolicies.total,
+      total: packagePolicies?.total,
       page,
       perPage,
     };
@@ -369,19 +358,15 @@ class PackagePolicyService {
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
     }
+    // Check that the name does not exist already but exclude the current package policy
+    const existingPoliciesWithName = await this.list(soClient, {
+      perPage: 1,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+    });
+    const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
-    // Check that its agent policy does not have a package policy with the same name
-    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
-    if (!parentAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-    if (
-      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-        (siblingPackagePolicy) =>
-          siblingPackagePolicy.id !== id && siblingPackagePolicy.name === packagePolicy.name
-      )
-    ) {
-      throw new Error('There is already a package with the same name on this agent policy');
+    if (filtered.length > 0) {
+      throw new IngestManagerError('There is already a package with the same name');
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -438,12 +423,13 @@ class PackagePolicyService {
       });
 
       if (packagePolicy.package.version !== currentVersion) {
-        const upgradeTelemetry: PackagePolicyUpgradeUsage = {
-          package_name: packagePolicy.package.name,
-          current_version: currentVersion || 'unknown',
-          new_version: packagePolicy.package.version,
+        const upgradeTelemetry: PackageUpdateEvent = {
+          packageName: packagePolicy.package.name,
+          currentVersion: currentVersion || 'unknown',
+          newVersion: packagePolicy.package.version,
           status: 'success',
           dryRun: false,
+          eventType: 'package-policy-upgrade' as UpdateEventType,
         };
         sendTelemetryEvents(
           appContextService.getLogger(),
@@ -635,13 +621,6 @@ class PackagePolicyService {
           success: true,
         });
       } catch (error) {
-        // We only want to specifically handle validation errors for the new package policy. If a more severe or
-        // general error is thrown elsewhere during the upgrade process, we want to surface that directly in
-        // order to preserve any status code mappings, etc that might be included w/ the particular error type
-        if (!(error instanceof PackagePolicyValidationError)) {
-          throw error;
-        }
-
         result.push({
           id,
           success: false,
@@ -690,13 +669,14 @@ class PackagePolicyService {
       const hasErrors = 'errors' in updatedPackagePolicy;
 
       if (packagePolicy.package.version !== packageInfo.version) {
-        const upgradeTelemetry: PackagePolicyUpgradeUsage = {
-          package_name: packageInfo.name,
-          current_version: packagePolicy.package.version,
-          new_version: packageInfo.version,
+        const upgradeTelemetry: PackageUpdateEvent = {
+          packageName: packageInfo.name,
+          currentVersion: packagePolicy.package.version,
+          newVersion: packageInfo.version,
           status: hasErrors ? 'failure' : 'success',
           error: hasErrors ? updatedPackagePolicy.errors : undefined,
           dryRun: true,
+          eventType: 'package-policy-upgrade' as UpdateEventType,
         };
         sendTelemetryEvents(
           appContextService.getLogger(),
@@ -719,10 +699,6 @@ class PackagePolicyService {
         hasErrors,
       };
     } catch (error) {
-      if (!(error instanceof PackagePolicyValidationError)) {
-        throw error;
-      }
-
       return {
         hasErrors: true,
         ...ingestErrorToResponseOptions(error),
@@ -742,7 +718,7 @@ class PackagePolicyService {
           pkgName: pkgInstall.name,
           pkgVersion: pkgInstall.version,
         }),
-        outputService.getDefaultOutputId(soClient),
+        outputService.getDefaultDataOutputId(soClient),
       ]);
       if (packageInfo) {
         if (!defaultOutputId) {
@@ -1218,4 +1194,31 @@ function deepMergeVars(original: any, override: any): any {
   }
 
   return result;
+}
+
+export async function incrementPackageName(
+  soClient: SavedObjectsClientContract,
+  packageName: string
+) {
+  // Fetch all packagePolicies having the package name
+  const packagePolicyData = await packagePolicyService.list(soClient, {
+    perPage: 1,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
+  });
+
+  // Retrieve highest number appended to package policy name and increment it by one
+  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
+
+  const pkgPoliciesWithMatchingNames = packagePolicyData?.items
+    ? packagePolicyData.items
+        .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+        .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
+        .sort()
+    : [];
+
+  return `${packageName}-${
+    pkgPoliciesWithMatchingNames.length
+      ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
+      : 1
+  }`;
 }

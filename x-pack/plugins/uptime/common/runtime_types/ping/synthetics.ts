@@ -27,7 +27,7 @@ export const JourneyStepType = t.intersection([
         lt: t.string,
       }),
     }),
-    observer: t.type({
+    observer: t.partial({
       geo: t.type({
         name: t.string,
       }),

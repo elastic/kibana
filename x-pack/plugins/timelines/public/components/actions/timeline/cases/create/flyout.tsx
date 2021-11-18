@@ -19,7 +19,7 @@ export interface CreateCaseModalProps {
   onCloseFlyout: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
   useInsertTimeline?: Function;
-  appId: string;
+  owner: string;
   disableAlerts?: boolean;
 }
 
@@ -70,7 +70,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   afterCaseCreated,
   onCloseFlyout,
   onSuccess,
-  appId,
+  owner,
   disableAlerts,
 }) => {
   const { cases } = useKibana<TimelinesStartServices>().services;
@@ -80,10 +80,10 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
       onCancel: onCloseFlyout,
       onSuccess,
       withSteps: false,
-      owner: [appId],
+      owner: [owner],
       disableAlerts,
     };
-  }, [afterCaseCreated, onCloseFlyout, onSuccess, appId, disableAlerts]);
+  }, [afterCaseCreated, onCloseFlyout, onSuccess, owner, disableAlerts]);
   return (
     <>
       <GlobalStyle />

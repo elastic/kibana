@@ -6,7 +6,7 @@
  */
 
 import { useFetcher } from './use_fetcher';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
@@ -39,7 +39,7 @@ export function useTransactionTraceSamplesFetcher({
 
   const {
     urlParams: { transactionId, traceId, sampleRangeFrom, sampleRangeTo },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const {
     data = INITIAL_DATA,

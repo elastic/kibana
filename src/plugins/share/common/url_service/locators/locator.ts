@@ -118,11 +118,9 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     });
   }
 
-  /* eslint-disable react-hooks/rules-of-hooks */
   public readonly useUrl = (
     params: P,
     getUrlParams?: LocatorGetUrlParams,
     deps: DependencyList = []
   ): string => useLocatorUrl<P>(this, params, getUrlParams, deps);
-  /* eslint-enable react-hooks/rules-of-hooks */
 }
