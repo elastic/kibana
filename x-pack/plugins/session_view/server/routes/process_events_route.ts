@@ -21,6 +21,12 @@ export const registerProcessEventsRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const client = context.core.elasticsearch.client.asCurrentUser;
+      
+      // TODO: would be good to figure out how to add securitySolution as a dep
+      // and make use of this way of getting the siem-signals index, instead of
+      // hardcoding it.
+      // const siemClient = context.securitySolution.getAppClient();
+      // const alertsIndex = siemClient.getSignalsIndex(),
 
       const { sessionEntityId } = request.query;
 
