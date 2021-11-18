@@ -932,7 +932,7 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
               isVislibVis: true,
               detailedTooltip: true,
               ...(isLineOrArea && {
-                fittingFunction: 'zero',
+                fittingFunction: 'linear',
               }),
             },
           }),
