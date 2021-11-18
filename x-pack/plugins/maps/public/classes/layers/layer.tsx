@@ -29,6 +29,7 @@ import {
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
+  TileMetaFeature,
   Timeslice,
   StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
@@ -479,5 +480,9 @@ export class AbstractLayer implements ILayer {
 
   isBasemap(order: number): boolean {
     return false;
+  }
+
+  _getMetaFromTiles(): TileMetaFeature[] {
+    return this._descriptor.__metaFromTiles || [];
   }
 }

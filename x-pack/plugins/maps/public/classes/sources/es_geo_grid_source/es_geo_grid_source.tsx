@@ -134,6 +134,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   isMvt() {
+    // heatmap uses MVT regardless of resolution because heatmap only supports counting metrics
+    if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
+      return true;
+    }
     return this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE;
   }
 
@@ -433,11 +437,14 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
+    const requestType =
+      this._descriptor.requestType === RENDER_AS.GRID ? RENDER_AS.GRID : RENDER_AS.POINT;
+
     const urlTemplate = `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &requestBody=${risonDsl}\
-&requestType=${this._descriptor.requestType}`;
+&requestType=${requestType}`;
 
     return {
       refreshTokenParamName: MVT_TOKEN_PARAM_NAME,

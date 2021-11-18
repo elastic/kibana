@@ -69,10 +69,6 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       : feature.properties?._key;
   }
 
-  _getMetaFromTiles(): TileMetaFeature[] {
-    return this._descriptor.__metaFromTiles || [];
-  }
-
   getLayerIcon(isTocIcon: boolean): LayerIcon {
     if (!this.getSource().isESSource()) {
       // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources
