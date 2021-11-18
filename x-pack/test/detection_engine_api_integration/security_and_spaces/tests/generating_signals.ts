@@ -56,6 +56,7 @@ import {
   ALERT_GROUP_ID,
   ALERT_THRESHOLD_RESULT,
 } from '../../../../plugins/security_solution/common/field_maps/field_names';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -1155,6 +1156,72 @@ export default ({ getService }: FtrProviderContext) => {
             origin: '/var/log/wtmp',
           }),
         });
+      });
+    });
+
+    describe.skip('Signal deduplication', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      beforeEach(async () => {
+        await deleteSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+      });
+
+      it('should not generate duplicate signals', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          query: `_id:${ID}`,
+        };
+
+        const ruleResponse = await createRule(supertest, log, rule);
+
+        const signals = await getOpenSignals(supertest, log, es, ruleResponse);
+        expect(signals.hits.hits.length).to.eql(1);
+
+        const statusResponse = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [ruleResponse.id] });
+        const initialStatusDate = new Date(
+          statusResponse.body[ruleResponse.id].current_status.status_date
+        );
+
+        const initialSignal = signals.hits.hits[0];
+
+        // Disable the rule then re-enable to trigger another run
+        await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ rule_id: ruleResponse.rule_id, enabled: false })
+          .expect(200);
+
+        await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ rule_id: ruleResponse.rule_id, enabled: true })
+          .expect(200);
+
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          ruleResponse.id,
+          'succeeded',
+          initialStatusDate
+        );
+
+        const newSignals = await getOpenSignals(supertest, log, es, ruleResponse);
+        expect(newSignals.hits.hits.length).to.eql(1);
+        expect(newSignals.hits.hits[0]).to.eql(initialSignal);
       });
     });
   });
