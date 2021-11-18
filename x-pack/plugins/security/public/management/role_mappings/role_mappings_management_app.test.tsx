@@ -8,7 +8,7 @@
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 import type { Unmount } from 'src/plugins/management/public/types';
 
 import { roleMappingsManagementApp } from './role_mappings_management_app';
@@ -46,6 +46,7 @@ async function mountApp(basePath: string, pathname: string) {
         element: container,
         setBreadcrumbs,
         history: scopedHistoryMock.create({ pathname }),
+        theme$: themeServiceMock.createTheme$(),
       });
   });
 
