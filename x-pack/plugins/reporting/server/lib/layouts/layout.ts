@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CustomPageSize, PredefinedPageSize } from 'pdfmake/interfaces';
-import type { PageSizeParams, Size } from '../../../common/types';
+import type { Size } from '../../../common/types';
 
 export interface ViewZoomWidthHeight {
   zoom: number;
@@ -25,10 +24,6 @@ export abstract class Layout {
   constructor(id: string) {
     this.id = id;
   }
-
-  public abstract getPdfPageSize(
-    pageSizeParams: PageSizeParams
-  ): CustomPageSize | PredefinedPageSize;
 
   // Return the dimensions unscaled dimensions (before multiplying the zoom factor)
   // driver.setViewport() Adds a top and left margin to the viewport, and then multiplies by the scaling factor

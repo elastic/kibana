@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { PdfImageSize } from '../../../common/types';
+import type { CustomPageSize, PredefinedPageSize } from 'pdfmake/interfaces';
+import type { PageSizeParams, PdfImageSize } from '../../../common/types';
 import { Layout } from './layout';
 
 export abstract class PdfLayout extends Layout {
   public abstract getPdfImageSize(): PdfImageSize;
 
   public abstract getPdfPageOrientation(): 'portrait' | 'landscape' | undefined;
+
+  public abstract getPdfPageSize(
+    pageSizeParams: PageSizeParams
+  ): CustomPageSize | PredefinedPageSize;
 }

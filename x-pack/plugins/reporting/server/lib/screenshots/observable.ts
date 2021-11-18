@@ -8,7 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
-import { Writable } from 'stream';
+import { ContentStream } from '..';
 import { LAYOUT_TYPES } from '../../../common/constants';
 import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
@@ -46,13 +46,17 @@ const getTimeouts = (captureConfig: CaptureConfig) => ({
 export function getScreenshots$(
   captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory,
-  stream: Writable,
+  stream: ContentStream | null,
   opts: ScreenshotObservableOpts
 ): Rx.Observable<ScreenshotResults[]> {
   const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
   const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
   const { browserTimezone, logger } = opts;
+
   const useStream = opts.layout.id === LAYOUT_TYPES.PNG;
+  if (useStream && !stream) {
+    throw new TypeError('stream must be defined when layout type is PNG');
+  }
 
   return browserDriverFactory.createPage({ browserTimezone }, logger).pipe(
     mergeMap(({ driver, exit$ }) => {
@@ -71,7 +75,7 @@ export function getScreenshots$(
               return Rx.of({ ...defaultSetupResult, error: err }); // allow failover screenshot capture
             }),
             takeUntil(exit$),
-            useStream ? screen.streamScreenshots(stream) : screen.getScreenshots()
+            useStream ? screen.streamScreenshots(stream as ContentStream) : screen.getScreenshots()
           )
         ),
         take(opts.urlsOrUrlLocatorTuples.length),

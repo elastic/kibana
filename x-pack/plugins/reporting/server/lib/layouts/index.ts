@@ -50,4 +50,4 @@ interface LayoutSelectors {
   positionElements?: (browser: HeadlessChromiumDriver, logger: LevelLogger) => Promise<void>;
 }
 
-export type LayoutInstance = Layout & LayoutSelectors & Partial<Size>;
+export type LayoutInstance<L = Layout> = L & LayoutSelectors & Partial<Size>;

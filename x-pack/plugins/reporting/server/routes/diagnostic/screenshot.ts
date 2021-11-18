@@ -63,6 +63,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
+      // FIXME
       return generatePngObservable(logger, hashUrl, 'America/Los_Angeles', headers, layout, null)
         .pipe()
         .toPromise()
