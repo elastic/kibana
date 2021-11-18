@@ -30,13 +30,13 @@ export const FleetServerCloudUnhealthyCallout: React.FunctionComponent<FleetServ
         }
       >
         <FormattedMessage
-          id="xpack.fleet.fleetServerOnPremUnhealthyCallout.calloutDescription"
+          id="xpack.fleet.fleetServerCloudRequiredCallout.calloutDescription"
           defaultMessage="A healthy Fleet server is required to enroll agents with Fleet. Enable Fleet Server in you {cloudDeploymentLink}. For more information see the Fleet and {guideLink}."
           values={{
             cloudDeploymentLink: (
               <EuiLink href={deploymentUrl} target="_blank" external>
                 <FormattedMessage
-                  id="xpack.fleet.fleetServerOnPremUnhealthyCallout.cloudDeploymentLink"
+                  id="xpack.fleet.fleetServerCloudRequiredCallout.cloudDeploymentLink"
                   defaultMessage="cloud deployment"
                 />
               </EuiLink>
@@ -48,7 +48,7 @@ export const FleetServerCloudUnhealthyCallout: React.FunctionComponent<FleetServ
                 external
               >
                 <FormattedMessage
-                  id="xpack.fleet.fleetServerOnPremUnhealthyCallout.guideLink"
+                  id="xpack.fleet.fleetServerCloudRequiredCallout.guideLink"
                   defaultMessage="Fleet and Elastic Agent Guide"
                 />
               </EuiLink>
@@ -58,7 +58,7 @@ export const FleetServerCloudUnhealthyCallout: React.FunctionComponent<FleetServ
         <EuiSpacer size="m" />
         <EuiButton href={deploymentUrl} target="_blank" color="warning" fill>
           <FormattedMessage
-            id="xpack.fleet.fleetServerOnPremUnhealthyCallout.editDeploymentButtonLabel"
+            id="xpack.fleet.fleetServerCloudRequiredCallout.editDeploymentButtonLabel"
             defaultMessage="Edit deployment"
           />
         </EuiButton>
