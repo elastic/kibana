@@ -80,15 +80,7 @@ When you start {kib}, a unique link is output to your terminal.
   when you started {es}.
 
 [float]
-=== Stop Docker containers
-
-To stop your containers, run:
-
-[source,sh]
-----
-docker stop es-node01
-docker stop kib-01
-----
+=== Remove Docker containers
 
 To remove the containers and their network, run:
 
