@@ -21758,8 +21758,6 @@
     "xpack.securitySolution.endpoint.fleetCustomExtension.exceptionItemsSummary.macos": "Mac",
     "xpack.securitySolution.endpoint.fleetCustomExtension.exceptionItemsSummary.total": "合计",
     "xpack.securitySolution.endpoint.fleetCustomExtension.exceptionItemsSummary.windows": "Windows",
-    "xpack.securitySolution.endpoint.fleetCustomExtension.manageEventFiltersLinkLabel": "管理事件筛选",
-    "xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel": "管理受信任的应用程序",
     "xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel": "受信任的应用程序",
     "xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummaryError": "尝试提取受信任应用统计时出错：“{error}”",
     "xpack.securitySolution.endpoint.hostIsolation.cancel": "取消",
