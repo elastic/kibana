@@ -95,7 +95,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     return null;
   }
   const filterArr = usedSearchSource!.getField('filter') as Filter[];
-  // @ts-ignore
+
   return (
     <>
       {hasExpressionErrors ? (
@@ -132,12 +132,14 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         }
         display="block"
         isOpen={showQueryBar}
+        closePopover={() => setShowQueryBar(false)}
       >
         <QueryStringInput
           indexPatterns={[usedSearchSource!.getField('index')!]}
           query={usedSearchSource!.getField('query')!}
           onChange={(query) => {
             usedSearchSource.setField('query', query);
+            setUsedSearchSource(usedSearchSource.createCopy());
           }}
         />
       </EuiPopover>
@@ -163,6 +165,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         }
         display="block"
         isOpen={showFilter}
+        closePopover={() => setShowFilter(false)}
       >
         <FilterBar
           filters={filterArr}
@@ -172,6 +175,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           indexPatterns={[usedSearchSource!.getField('index')!]}
           onFiltersUpdated={(filters) => {
             usedSearchSource.setField('filter', filters);
+            setUsedSearchSource(usedSearchSource.createCopy());
           }}
         />
       </EuiPopover>

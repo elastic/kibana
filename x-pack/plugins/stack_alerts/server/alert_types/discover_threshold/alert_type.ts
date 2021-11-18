@@ -6,15 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger, SavedObjectReference } from 'src/core/server';
+import { Logger } from 'src/core/server';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { ParamsSchema } from './alert_type_params';
 import { ActionContext } from './action_context';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 import {
-  DATA_VIEW_SAVED_OBJECT_TYPE,
   getTime,
   SearchSourceFields,
+  extractReferences,
+  injectReferences,
 } from '../../../../../../src/plugins/data/common';
 import { AlertTypeParams } from '../../../../alerting/common';
 
@@ -43,97 +44,6 @@ export type DiscoverAlertType = AlertType<
   ActionContext,
   typeof ActionGroupId
 >;
-
-/**
- * This needs to be imported from data, but also be moved to common code there
- */
-export const extractReferences = (
-  state: SearchSourceFields
-): [SearchSourceFields & { indexRefName?: string }, SavedObjectReference[]] => {
-  let searchSourceFields: SearchSourceFields & { indexRefName?: string } = { ...state };
-  const references: SavedObjectReference[] = [];
-  if (searchSourceFields.index) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const indexId = searchSourceFields.index.id || (searchSourceFields.index as any as string);
-    const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-    references.push({
-      name: refName,
-      type: DATA_VIEW_SAVED_OBJECT_TYPE,
-      id: indexId,
-    });
-    searchSourceFields = {
-      ...searchSourceFields,
-      indexRefName: refName,
-      index: undefined,
-    };
-  }
-
-  if (Array.isArray(searchSourceFields.filter)) {
-    searchSourceFields = {
-      ...searchSourceFields,
-      filter: searchSourceFields.filter.map((filterRow, i) => {
-        if (!filterRow.meta || !filterRow.meta.index) {
-          return filterRow;
-        }
-        const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
-        references.push({
-          name: refName,
-          type: DATA_VIEW_SAVED_OBJECT_TYPE,
-          id: filterRow.meta.index,
-        });
-        return {
-          ...filterRow,
-          meta: {
-            ...filterRow.meta,
-            indexRefName: refName,
-            index: undefined,
-          },
-        };
-      }),
-    };
-  }
-
-  return [searchSourceFields, references];
-};
-
-/**
- * node stolen from the data plugin, needs to moved to `common there`
- */
-export const injectSearchSourceReferences = (
-  searchSourceFields: SearchSourceFields & { indexRefName: string },
-  references: SavedObjectReference[]
-) => {
-  const searchSourceReturnFields: SearchSourceFields = { ...searchSourceFields };
-  // Inject index id if a reference is saved
-  if (searchSourceFields.indexRefName) {
-    const reference = references.find((ref) => ref.name === searchSourceFields.indexRefName);
-    if (!reference) {
-      throw new Error(`Could not find reference for ${searchSourceFields.indexRefName}`);
-    }
-    // @ts-ignore
-    searchSourceReturnFields.index = reference.id;
-    // @ts-ignore
-    delete searchSourceReturnFields.indexRefName;
-  }
-
-  if (searchSourceReturnFields.filter && Array.isArray(searchSourceReturnFields.filter)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    searchSourceReturnFields.filter.forEach((filterRow: any) => {
-      if (!filterRow.meta || !filterRow.meta.indexRefName) {
-        return;
-      }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const reference = references.find((ref: any) => ref.name === filterRow.meta.indexRefName);
-      if (!reference) {
-        throw new Error(`Could not find reference for ${filterRow.meta.indexRefName}`);
-      }
-      filterRow.meta.index = reference.id;
-      delete filterRow.meta.indexRefName;
-    });
-  }
-
-  return searchSourceReturnFields;
-};
 
 export function getAlertType(logger: Logger): DiscoverAlertType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
@@ -204,7 +114,6 @@ export function getAlertType(logger: Logger): DiscoverAlertType {
     }
   );
 
-  // @ts-ignore
   return {
     id: ID,
     name: alertTypeName,
@@ -225,10 +134,9 @@ export function getAlertType(logger: Logger): DiscoverAlertType {
       params: [
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
-        { name: 'searchSourceJSON', description: 'SearchSourceJSON' },
-        { name: 'searchSourceReferencesJSON', description: 'searchSourceReferencesJSON' },
         { name: 'timeWindowSize', description: 'Time window size' },
         { name: 'timeWindowUnit', description: 'Time window unit' },
+        { name: 'searchSourceFields', description: 'SearchSourceFields' },
       ],
     },
     minimumLicenseRequired: 'basic',
@@ -244,12 +152,11 @@ export function getAlertType(logger: Logger): DiscoverAlertType {
       injectReferences: (params, references) => {
         return {
           ...params,
-          searchSourceFields: injectSearchSourceReferences(params.searchSourceFields, references),
+          searchSourceFields: injectReferences(params.searchSourceFields, references),
         } as DiscoverThresholdParams;
       },
     },
   };
-
   async function executor(
     options: AlertExecutorOptions<
       DiscoverThresholdParams,
