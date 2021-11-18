@@ -50,7 +50,7 @@ const PopoverItemsComponent = <T extends unknown>({
   popoverTitle,
   popoverButtonTitle,
   popoverButtonIcon,
-  numberOfItemsToDisplay = 1,
+  numberOfItemsToDisplay = 0,
   dataTestEntity = 'items',
 }: PopoverItemsProps<T>) => {
   const [isExceptionOverflowPopoverOpen, setIsExceptionOverflowPopoverOpen] = useState(false);

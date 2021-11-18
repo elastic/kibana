@@ -88,6 +88,7 @@ export const getAllExceptionListsColumns = (
       return (
         <PopoverItems
           items={rules}
+          numberOfItemsToDisplay={1}
           popoverTitle={i18n.RULES_ASSIGNED_TO_TITLE}
           popoverButtonTitle={i18n.showMoreRules(rules.length - 1)}
           renderItem={renderItem as PopoverItemsProps<unknown>['renderItem']}
