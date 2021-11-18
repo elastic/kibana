@@ -41,7 +41,7 @@ describe('useGetCases', () => {
         dispatchUpdateCaseProperty: result.current.dispatchUpdateCaseProperty,
         filterOptions: DEFAULT_FILTER_OPTIONS,
         isError: false,
-        loading: [],
+        loading: ['cases'],
         queryParams: DEFAULT_QUERY_PARAMS,
         refetchCases: result.current.refetchCases,
         selectedCases: [],
