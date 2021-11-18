@@ -7,134 +7,95 @@
 
 import expect from '@kbn/expect';
 
-import { IKibanaSearchRequest } from '../../../../../src/plugins/data/common';
-
-import type { LatencyCorrelationsParams } from '../../../../plugins/apm/common/search_strategies/latency_correlations/types';
-import type { RawSearchStrategyClientParams } from '../../../../plugins/apm/common/search_strategies/types';
-import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
-
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { parseBfetchResponse } from '../../common/utils/parse_b_fetch';
+import type { LatencyCorrelationsResponse } from '../../../../plugins/apm/common/correlations/latency_correlations/types';
 
+// These tests go through the full sequence of queries required
+// to get the final results for a latency correlation analysis.
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const apmApiClient = getService('apmApiClient');
   const registry = getService('registry');
-  const retry = getService('retry');
-  const supertest = getService('legacySupertestAsApmReadUser');
 
-  const getRequestBody = () => {
-    const request: IKibanaSearchRequest<LatencyCorrelationsParams & RawSearchStrategyClientParams> =
-      {
-        params: {
-          environment: 'ENVIRONMENT_ALL',
-          start: '2020',
-          end: '2021',
-          kuery: '',
-          percentileThreshold: 95,
-          analyzeCorrelations: true,
-        },
-      };
-
-    return {
-      batch: [
-        {
-          request,
-          options: { strategy: APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS },
-        },
-      ],
-    };
-  };
+  // This matches the parameters used for the other tab's queries in `../correlations/*`.
+  const getOptions = () => ({
+    environment: 'ENVIRONMENT_ALL',
+    start: '2020',
+    end: '2021',
+    kuery: '',
+  });
 
   registry.when(
-    'correlations latency_ml overall without data',
+    'correlations latency overall without data',
     { config: 'trial', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const intialResponse = await supertest
-          .post(`/internal/bsearch`)
-          .set('kbn-xsrf', 'foo')
-          .send(getRequestBody());
+        const overallDistributionResponse = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/latency/overall_distribution',
+          params: {
+            body: {
+              ...getOptions(),
+              percentileThreshold: 95,
+            },
+          },
+        });
 
-        expect(intialResponse.status).to.eql(
+        expect(overallDistributionResponse.status).to.eql(
           200,
-          `Expected status to be '200', got '${intialResponse.status}'`
-        );
-        expect(intialResponse.body).to.eql(
-          {},
-          `Expected response body to be an empty object, actual response is in the text attribute. Got: '${JSON.stringify(
-            intialResponse.body
-          )}'`
+          `Expected status to be '200', got '${overallDistributionResponse.status}'`
         );
 
-        const body = parseBfetchResponse(intialResponse)[0];
+        const fieldCandidatesResponse = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/correlations/field_candidates',
+          params: {
+            query: getOptions(),
+          },
+        });
 
-        expect(typeof body.result).to.be('object');
-        const { result } = body;
-
-        expect(typeof result?.id).to.be('string');
-
-        // pass on id for follow up queries
-        const searchStrategyId = result.id;
-
-        // follow up request body including search strategy ID
-        const reqBody = getRequestBody();
-        reqBody.batch[0].request.id = searchStrategyId;
-
-        let followUpResponse: Record<string, any> = {};
-
-        // continues querying until the search strategy finishes
-        await retry.waitForWithTimeout(
-          'search strategy eventually completes and returns full results',
-          5000,
-          async () => {
-            const response = await supertest
-              .post(`/internal/bsearch`)
-              .set('kbn-xsrf', 'foo')
-              .send(reqBody);
-
-            followUpResponse = parseBfetchResponse(response)[0];
-
-            return (
-              followUpResponse?.result?.isRunning === false || followUpResponse?.error !== undefined
-            );
-          }
+        expect(fieldCandidatesResponse.status).to.eql(
+          200,
+          `Expected status to be '200', got '${fieldCandidatesResponse.status}'`
         );
 
-        expect(followUpResponse?.error).to.eql(
-          undefined,
-          `search strategy should not return an error, got: ${JSON.stringify(
-            followUpResponse?.error
-          )}`
+        const fieldValuePairsResponse = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/correlations/field_value_pairs',
+          params: {
+            body: {
+              ...getOptions(),
+              fieldCandidates: fieldCandidatesResponse.body?.fieldCandidates,
+            },
+          },
+        });
+
+        expect(fieldValuePairsResponse.status).to.eql(
+          200,
+          `Expected status to be '200', got '${fieldValuePairsResponse.status}'`
         );
 
-        const followUpResult = followUpResponse.result;
-        expect(followUpResult?.isRunning).to.eql(false, 'search strategy should not be running');
-        expect(followUpResult?.isPartial).to.eql(
-          false,
-          'search strategy result should not be partial'
-        );
-        expect(followUpResult?.id).to.eql(
-          searchStrategyId,
-          'search strategy id should match original id'
-        );
-        expect(followUpResult?.isRestored).to.eql(
-          true,
-          'search strategy response should be restored'
-        );
-        expect(followUpResult?.loaded).to.eql(100, 'loaded state should be 100');
-        expect(followUpResult?.total).to.eql(100, 'total state should be 100');
+        const significantCorrelationsResponse = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/correlations/significant_correlations',
+          params: {
+            body: {
+              ...getOptions(),
+              fieldValuePairs: fieldValuePairsResponse.body?.fieldValuePairs,
+            },
+          },
+        });
 
-        expect(typeof followUpResult?.rawResponse).to.be('object');
+        expect(significantCorrelationsResponse.status).to.eql(
+          200,
+          `Expected status to be '200', got '${significantCorrelationsResponse.status}'`
+        );
 
-        const { rawResponse: finalRawResponse } = followUpResult;
+        const finalRawResponse: LatencyCorrelationsResponse = {
+          ccsWarning: significantCorrelationsResponse.body?.ccsWarning,
+          percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
+          overallHistogram: overallDistributionResponse.body?.overallHistogram,
+          latencyCorrelations: significantCorrelationsResponse.body?.latencyCorrelations,
+        };
 
-        expect(typeof finalRawResponse?.took).to.be('number');
         expect(finalRawResponse?.percentileThresholdValue).to.be(undefined);
         expect(finalRawResponse?.overallHistogram).to.be(undefined);
-        expect(finalRawResponse?.latencyCorrelations.length).to.be(0);
-        expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
-          'Fetched 95th percentile value of undefined based on 0 documents.',
-          'Abort service since percentileThresholdValue could not be determined.',
-        ]);
+        expect(finalRawResponse?.latencyCorrelations?.length).to.be(0);
       });
     }
   );
@@ -144,120 +105,121 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'trial', archives: ['8.0.0'] },
     () => {
       // putting this into a single `it` because the responses depend on each other
-      it.skip('queries the search strategy and returns results', async () => {
-        const intialResponse = await supertest
-          .post(`/internal/bsearch`)
-          .set('kbn-xsrf', 'foo')
-          .send(getRequestBody());
+      it('runs queries and returns results', async () => {
+        const overallDistributionResponse = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/latency/overall_distribution',
+          params: {
+            body: {
+              ...getOptions(),
+              percentileThreshold: 95,
+            },
+          },
+        });
 
-        expect(intialResponse.status).to.eql(
+        expect(overallDistributionResponse.status).to.eql(
           200,
-          `Expected status to be '200', got '${intialResponse.status}'`
-        );
-        expect(intialResponse.body).to.eql(
-          {},
-          `Expected response body to be an empty object, actual response is in the text attribute. Got: '${JSON.stringify(
-            intialResponse.body
-          )}'`
+          `Expected status to be '200', got '${overallDistributionResponse.status}'`
         );
 
-        const body = parseBfetchResponse(intialResponse)[0];
+        const fieldCandidatesResponse = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/correlations/field_candidates',
+          params: {
+            query: getOptions(),
+          },
+        });
 
-        expect(typeof body?.result).to.be('object');
-        const { result } = body;
-
-        expect(typeof result?.id).to.be('string');
-
-        // pass on id for follow up queries
-        const searchStrategyId = result.id;
-
-        expect(result?.loaded).to.be(0);
-        expect(result?.total).to.be(100);
-        expect(result?.isRunning).to.be(true);
-        expect(result?.isPartial).to.be(true);
-        expect(result?.isRestored).to.eql(
-          false,
-          `Expected response result to be not restored. Got: '${result?.isRestored}'`
-        );
-        expect(typeof result?.rawResponse).to.be('object');
-
-        const { rawResponse } = result;
-
-        expect(typeof rawResponse?.took).to.be('number');
-        expect(rawResponse?.latencyCorrelations).to.eql([]);
-
-        // follow up request body including search strategy ID
-        const reqBody = getRequestBody();
-        reqBody.batch[0].request.id = searchStrategyId;
-
-        let followUpResponse: Record<string, any> = {};
-
-        // continues querying until the search strategy finishes
-        await retry.waitForWithTimeout(
-          'search strategy eventually completes and returns full results',
-          5000,
-          async () => {
-            const response = await supertest
-              .post(`/internal/bsearch`)
-              .set('kbn-xsrf', 'foo')
-              .send(reqBody);
-            followUpResponse = parseBfetchResponse(response)[0];
-
-            return (
-              followUpResponse?.result?.isRunning === false || followUpResponse?.error !== undefined
-            );
-          }
+        expect(fieldCandidatesResponse.status).to.eql(
+          200,
+          `Expected status to be '200', got '${fieldCandidatesResponse.status}'`
         );
 
-        expect(followUpResponse?.error).to.eql(
-          undefined,
-          `Finished search strategy should not return an error, got: ${JSON.stringify(
-            followUpResponse?.error
-          )}`
+        // Identified 69 fieldCandidates.
+        expect(fieldCandidatesResponse.body?.fieldCandidates.length).to.eql(
+          69,
+          `Expected field candidates length to be '69', got '${fieldCandidatesResponse.body?.fieldCandidates.length}'`
         );
 
-        const followUpResult = followUpResponse.result;
-        expect(followUpResult?.isRunning).to.eql(
-          false,
-          `Expected finished result not to be running. Got: ${followUpResult?.isRunning}`
+        const fieldValuePairsResponse = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/correlations/field_value_pairs',
+          params: {
+            body: {
+              ...getOptions(),
+              fieldCandidates: fieldCandidatesResponse.body?.fieldCandidates,
+            },
+          },
+        });
+
+        expect(fieldValuePairsResponse.status).to.eql(
+          200,
+          `Expected status to be '200', got '${fieldValuePairsResponse.status}'`
         );
-        expect(followUpResult?.isPartial).to.eql(
-          false,
-          `Expected finished result not to be partial. Got: ${followUpResult?.isPartial}`
+
+        // Identified 379 fieldValuePairs.
+        expect(fieldValuePairsResponse.body?.fieldValuePairs.length).to.eql(
+          379,
+          `Expected field value pairs length to be '379', got '${fieldValuePairsResponse.body?.fieldValuePairs.length}'`
         );
-        expect(followUpResult?.id).to.be(searchStrategyId);
-        expect(followUpResult?.isRestored).to.be(true);
-        expect(followUpResult?.loaded).to.be(100);
-        expect(followUpResult?.total).to.be(100);
 
-        expect(typeof followUpResult?.rawResponse).to.be('object');
+        const significantCorrelationsResponse = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/correlations/significant_correlations',
+          params: {
+            body: {
+              ...getOptions(),
+              fieldValuePairs: fieldValuePairsResponse.body?.fieldValuePairs,
+            },
+          },
+        });
 
-        const { rawResponse: finalRawResponse } = followUpResult;
+        expect(significantCorrelationsResponse.status).to.eql(
+          200,
+          `Expected status to be '200', got '${significantCorrelationsResponse.status}'`
+        );
 
-        expect(typeof finalRawResponse?.took).to.be('number');
+        // Loaded fractions and totalDocCount of 1244.
+        expect(significantCorrelationsResponse.body?.totalDocCount).to.eql(
+          1244,
+          `Expected 1244 total doc count, got ${significantCorrelationsResponse.body?.totalDocCount}.`
+        );
+
+        const fieldsToSample = new Set<string>();
+        if (significantCorrelationsResponse.body?.latencyCorrelations.length > 0) {
+          significantCorrelationsResponse.body?.latencyCorrelations.forEach((d) => {
+            fieldsToSample.add(d.fieldName);
+          });
+        }
+
+        const failedtransactionsFieldStats = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/correlations/field_stats',
+          params: {
+            body: {
+              ...getOptions(),
+              fieldsToSample: [...fieldsToSample],
+            },
+          },
+        });
+
+        const finalRawResponse: LatencyCorrelationsResponse = {
+          ccsWarning: significantCorrelationsResponse.body?.ccsWarning,
+          percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
+          overallHistogram: overallDistributionResponse.body?.overallHistogram,
+          latencyCorrelations: significantCorrelationsResponse.body?.latencyCorrelations,
+          fieldStats: failedtransactionsFieldStats.body?.stats,
+        };
+
+        // Fetched 95th percentile value of 1309695.875 based on 1244 documents.
         expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
-        expect(finalRawResponse?.overallHistogram.length).to.be(101);
-        expect(finalRawResponse?.fieldStats.length).to.be(12);
+        expect(finalRawResponse?.overallHistogram?.length).to.be(101);
+        expect(finalRawResponse?.fieldStats?.length).to.be(fieldsToSample.size);
 
-        expect(finalRawResponse?.latencyCorrelations.length).to.eql(
+        // Identified 13 significant correlations out of 379 field/value pairs.
+        expect(finalRawResponse?.latencyCorrelations?.length).to.eql(
           13,
-          `Expected 13 identified correlations, got ${finalRawResponse?.latencyCorrelations.length}.`
+          `Expected 13 identified correlations, got ${finalRawResponse?.latencyCorrelations?.length}.`
         );
-        expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
-          'Fetched 95th percentile value of 1309695.875 based on 1244 documents.',
-          'Loaded histogram range steps.',
-          'Loaded overall histogram chart data.',
-          'Loaded percentiles.',
-          'Identified 69 fieldCandidates.',
-          'Identified 379 fieldValuePairs.',
-          'Loaded fractions and totalDocCount of 1244.',
-          'Identified 13 significant correlations out of 379 field/value pairs.',
-          'Identified 12 fields to sample for field statistics.',
-          'Retrieved field statistics for 12 fields out of 12 fields.',
-        ]);
 
-        const correlation = finalRawResponse?.latencyCorrelations[0];
-
+        const correlation = finalRawResponse?.latencyCorrelations?.sort(
+          (a, b) => b.correlation - a.correlation
+        )[0];
         expect(typeof correlation).to.be('object');
         expect(correlation?.fieldName).to.be('transaction.result');
         expect(correlation?.fieldValue).to.be('success');
@@ -265,10 +227,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(correlation?.ksTest).to.be(4.806503252860024e-13);
         expect(correlation?.histogram.length).to.be(101);
 
-        const fieldStats = finalRawResponse?.fieldStats[0];
+        const fieldStats = finalRawResponse?.fieldStats?.[0];
         expect(typeof fieldStats).to.be('object');
-        expect(fieldStats.topValues.length).to.greaterThan(0);
-        expect(fieldStats.topValuesSampleSize).to.greaterThan(0);
+        expect(
+          Array.isArray(fieldStats?.topValues) && fieldStats?.topValues?.length
+        ).to.greaterThan(0);
+        expect(fieldStats?.topValuesSampleSize).to.greaterThan(0);
       });
     }
   );

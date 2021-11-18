@@ -12,11 +12,8 @@ import { get } from 'lodash';
 import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
 
 import { useFieldEditorContext } from '../../field_editor_context';
-import {
-  useFieldPreviewContext,
-  defaultValueFormatter,
-  FieldPreview,
-} from '../field_preview_context';
+import { useFieldPreviewContext, defaultValueFormatter } from '../field_preview_context';
+import type { FieldPreview } from '../types';
 import { PreviewListItem } from './field_list_item';
 
 import './field_list.scss';

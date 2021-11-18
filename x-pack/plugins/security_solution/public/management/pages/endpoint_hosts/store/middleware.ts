@@ -9,7 +9,7 @@ import { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
 
 import { CoreStart, HttpStart } from 'kibana/public';
-import { DataViewBase, Query } from '@kbn/es-query';
+import type { DataViewBase, Query } from '@kbn/es-query';
 import {
   ActivityLog,
   GetHostPolicyResponse,
@@ -59,7 +59,7 @@ import {
   sendGetAgentPolicyList,
   sendGetFleetAgentsWithEndpoint,
 } from '../../policy/store/services/ingest';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, PackageListItem } from '../../../../../../fleet/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import {
   ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
@@ -69,6 +69,7 @@ import {
   METADATA_UNITED_INDEX,
 } from '../../../../../common/endpoint/constants';
 import {
+  asStaleResourceState,
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
@@ -284,9 +285,9 @@ const handleIsolateEndpointHost = async (
 
   dispatch({
     type: 'endpointIsolationRequestStateChange',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-expect-error TS2345
-    payload: createLoadingResourceState(getCurrentIsolationRequestState(state)),
+    payload: createLoadingResourceState(
+      asStaleResourceState(getCurrentIsolationRequestState(state))
+    ),
   });
 
   try {
@@ -320,9 +321,7 @@ async function getEndpointPackageInfo(
 
   dispatch({
     type: 'endpointPackageInfoStateChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-expect-error TS2345
-    payload: createLoadingResourceState<PackageListItem>(endpointPackageInfo(state)),
+    payload: createLoadingResourceState(asStaleResourceState(endpointPackageInfo(state))),
   });
 
   try {
@@ -651,9 +650,7 @@ async function endpointDetailsActivityLogChangedMiddleware({
   const { getState, dispatch } = store;
   dispatch({
     type: 'endpointDetailsActivityLogChanged',
-    // ts error to be fixed when AsyncResourceState is refactored (#830)
-    // @ts-expect-error
-    payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+    payload: createLoadingResourceState(asStaleResourceState(getActivityLogData(getState()))),
   });
 
   try {
@@ -708,9 +705,7 @@ async function endpointDetailsActivityLogPagingMiddleware({
     });
     dispatch({
       type: 'endpointDetailsActivityLogChanged',
-      // ts error to be fixed when AsyncResourceState is refactored (#830)
-      // @ts-expect-error
-      payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+      payload: createLoadingResourceState(asStaleResourceState(getActivityLogData(getState()))),
     });
     const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
       agent_id: selectedAgent(getState()),
@@ -781,9 +776,7 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   dispatch({
     type: 'metadataTransformStatsChanged',
-    // ts error to be fixed when AsyncResourceState is refactored (#830)
-    // @ts-expect-error
-    payload: createLoadingResourceState<TransformStats[]>(getMetadataTransformStats(state)),
+    payload: createLoadingResourceState(asStaleResourceState(getMetadataTransformStats(state))),
   });
 
   try {
