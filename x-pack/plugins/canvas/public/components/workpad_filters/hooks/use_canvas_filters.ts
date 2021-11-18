@@ -33,7 +33,6 @@ export function useCanvasFilters(groups?: string[]) {
   const filters = expression.chain.map((filter, index) =>
     adaptCanvasFilter(filter, filtersByGroups[index].id)
   );
-
   return filters;
 }
 
