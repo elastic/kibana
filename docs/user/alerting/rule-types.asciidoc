@@ -39,7 +39,7 @@ see {subscriptions}[the subscription page].
 [[observability-rules]]
 === Observability rules
 
-Observability rules categorized into APM and User Expereince, Logs, Metrics, Stack Monitoring, and Uptime.
+Observability rules are categorized into APM and User Experience, Logs, Metrics, Stack Monitoring, and Uptime.
 
 [cols="2*<"]
 |===
