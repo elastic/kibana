@@ -11,6 +11,8 @@
  * in future. The pattern in this file is legacy and should be updated to conform to the plugin lifecycle.
  */
 
+import { DocLinksStart } from 'src/core/public';
+
 export let skippingDisconnectedClustersUrl: string;
 export let remoteClustersUrl: string;
 export let transportPortUrl: string;
@@ -22,5 +24,5 @@ export function init(esDocBasePath: string): void {
 }
 
 export const createDocLink = (docPath: string): string => `${_esDocBasePath}${docPath}`;
-export const getNodeAllocationMigrationLink = () =>
-  `${_esDocBasePath}migrate-index-allocation-filters.html`;
+export const getNodeAllocationMigrationLink = ({ links }: DocLinksStart) =>
+  `${links.elasticsearch.migrateIndexAllocationFilters}`;
