@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { showInitialLoadingSpinner, formatAlertsData, EMPTY_VALUE_LABEL } from './helpers';
+import { showInitialLoadingSpinner, formatAlertsData } from './helpers';
+import { EMPTY_VALUE_LABEL } from '../../../../common/components/charts/translation';
 
 describe('helpers', () => {
   describe('showInitialLoadingSpinner', () => {

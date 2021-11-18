@@ -16,6 +16,7 @@ import { UpdateDateRange } from '../charts/common';
 import { Position } from '@elastic/charts';
 import { MatrixHistogramData } from '../../../../common/search_strategy';
 import { BarchartConfigs } from './types';
+import { EMPTY_VALUE_LABEL } from '../charts/translation';
 
 describe('utils', () => {
   describe('getBarchartConfigs', () => {
@@ -125,6 +126,39 @@ describe('utils', () => {
             { x: 1, y: 2, g: 'g1' },
             { x: 2, y: 4, g: 'g1' },
             { x: 3, y: 6, g: 'g1' },
+          ],
+        },
+        {
+          key: 'g2',
+          color: '#2B70F7',
+          value: [
+            { x: 1, y: 1, g: 'g2' },
+            { x: 2, y: 3, g: 'g2' },
+            { x: 3, y: 5, g: 'g2' },
+          ],
+        },
+      ]);
+    });
+
+    test('should add the empty label if necessary', () => {
+      const data = [
+        { x: 1, y: 2, g: '' },
+        { x: 2, y: 4, g: '' },
+        { x: 3, y: 6, g: '' },
+        { x: 1, y: 1, g: 'g2' },
+        { x: 2, y: 3, g: 'g2' },
+        { x: 3, y: 5, g: 'g2' },
+      ];
+      const result = getCustomChartData(data);
+
+      expect(result).toEqual([
+        {
+          key: EMPTY_VALUE_LABEL,
+          color: '#1EA593',
+          value: [
+            { x: 1, y: 2, g: EMPTY_VALUE_LABEL },
+            { x: 2, y: 4, g: EMPTY_VALUE_LABEL },
+            { x: 3, y: 6, g: EMPTY_VALUE_LABEL },
           ],
         },
         {

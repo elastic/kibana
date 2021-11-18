@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 import { isEmpty } from 'lodash/fp';
 import type { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { AlertsStackByField } from '../common/types';
+import { EMPTY_VALUE_LABEL } from '../../../../common/components/charts/translation';
 
 const EMPTY_ALERTS_DATA: HistogramData[] = [];
-export const EMPTY_VALUE_LABEL = i18n.translate(
-  'xpack.securitySolution.alertsHistogram.emptyValueLabel',
-  {
-    defaultMessage: 'empty value',
-  }
-);
 
 export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggregation> | null) => {
   const groupBuckets: AlertsGroupBucket[] =
