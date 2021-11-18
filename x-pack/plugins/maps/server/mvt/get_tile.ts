@@ -22,6 +22,7 @@ export async function getEsTile({
   y,
   z,
   requestBody = {},
+  abortController,
 }: {
   x: number;
   y: number;
@@ -31,6 +32,7 @@ export async function getEsTile({
   context: DataRequestHandlerContext;
   logger: Logger;
   requestBody: any;
+  abortController: AbortController;
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
@@ -45,11 +47,16 @@ export async function getEsTile({
       runtime_mappings: requestBody.runtime_mappings,
       track_total_hits: requestBody.size + 1,
     };
-    const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
-      method: 'GET',
-      path,
-      body,
-    });
+    const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request(
+      {
+        method: 'GET',
+        path,
+        body,
+      },
+      {
+        signal: abortController.signal,
+      }
+    );
     return tile.body as unknown as Buffer;
   } catch (e) {
     if (!isAbortError(e)) {
