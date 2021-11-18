@@ -27,7 +27,6 @@ export const useStatusBulkActionItems = ({
   onUpdateSuccess,
   onUpdateFailure,
   timelineId,
-  hideBulkActions = false,
 }: StatusBulkActionsProps) => {
   const { updateAlertStatus } = useUpdateAlertsStatus(timelineId != null);
   const { addSuccess, addError, addWarning } = useAppToasts();
@@ -123,7 +122,7 @@ export const useStatusBulkActionItems = ({
 
   const items = useMemo(() => {
     const actionItems = [];
-    if (!hideBulkActions && currentStatus !== FILTER_OPEN) {
+    if (currentStatus !== FILTER_OPEN) {
       actionItems.push(
         <EuiContextMenuItem
           key="open"
@@ -134,7 +133,7 @@ export const useStatusBulkActionItems = ({
         </EuiContextMenuItem>
       );
     }
-    if (!hideBulkActions && currentStatus !== FILTER_ACKNOWLEDGED) {
+    if (currentStatus !== FILTER_ACKNOWLEDGED) {
       actionItems.push(
         <EuiContextMenuItem
           key="acknowledge"
@@ -145,7 +144,7 @@ export const useStatusBulkActionItems = ({
         </EuiContextMenuItem>
       );
     }
-    if (!hideBulkActions && currentStatus !== FILTER_CLOSED) {
+    if (currentStatus !== FILTER_CLOSED) {
       actionItems.push(
         <EuiContextMenuItem
           key="close"
@@ -157,7 +156,7 @@ export const useStatusBulkActionItems = ({
       );
     }
     return actionItems;
-  }, [currentStatus, onClickUpdate, hideBulkActions]);
+  }, [currentStatus, onClickUpdate]);
 
   return items;
 };

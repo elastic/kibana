@@ -13,8 +13,6 @@
 import {
   ALERT_DURATION,
   ALERT_REASON,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
   ALERT_STATUS,
   ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
@@ -34,13 +32,9 @@ import {
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { get } from 'lodash';
-import {
-  getAlertsPermissions,
-  useGetUserAlertsPermissions,
-} from '../../hooks/use_alert_permission';
+import { getAlertsPermissions } from '../../hooks/use_alert_permission';
 import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
-import { useStatusBulkActionItems } from '../../../../timelines/public';
+
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type {
@@ -144,21 +138,21 @@ function ObservabilityActions({
   const [openActionsPopoverId, setActionsPopover] = useState(null);
   const {
     timelines,
-    application: { capabilities },
+    application: {},
   } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
     [observabilityRuleTypeRegistry]
   );
-  const alertDataConsumer = useMemo<string>(
-    () => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0],
-    [dataFieldEs]
-  );
-  const alertDataProducer = useMemo<string>(
-    () => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0],
-    [dataFieldEs]
-  );
+  // const alertDataConsumer = useMemo<string>(
+  //   () => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0],
+  //   [dataFieldEs]
+  // );
+  // const alertDataProducer = useMemo<string>(
+  //   () => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0],
+  //   [dataFieldEs]
+  // );
 
   const alert = parseObservabilityAlert(dataFieldEs);
   const { prepend } = core.http.basePath;
@@ -184,29 +178,29 @@ function ObservabilityActions({
     };
   }, [data, eventId, ecsData]);
 
-  const onAlertStatusUpdated = useCallback(() => {
-    setActionsPopover(null);
-    if (refetch) {
-      refetch();
-    }
-  }, [setActionsPopover, refetch]);
+  // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
 
-  const alertPermissions = useGetUserAlertsPermissions(
-    capabilities,
-    alertDataConsumer === 'alerts' ? alertDataProducer : alertDataConsumer
-  );
+  // const onAlertStatusUpdated = useCallback(() => {
+  //   setActionsPopover(null);
+  //   if (refetch) {
+  //     refetch();
+  //   }
+  // }, [setActionsPopover, refetch]);
 
-  const statusActionItems = useStatusBulkActionItems({
-    eventIds: [eventId],
-    currentStatus,
-    indexName: ecsData._index ?? '',
-    setEventsLoading,
-    setEventsDeleted,
-    onUpdateSuccess: onAlertStatusUpdated,
-    onUpdateFailure: onAlertStatusUpdated,
-    // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
-    hideBulkActions: true,
-  });
+  // const alertPermissions = useGetUserAlertsPermissions(
+  //   capabilities,
+  //   alertDataConsumer === 'alerts' ? alertDataProducer : alertDataConsumer
+  // );
+
+  // const statusActionItems = useStatusBulkActionItems({
+  //   eventIds: [eventId],
+  //   currentStatus,
+  //   indexName: ecsData._index ?? '',
+  //   setEventsLoading,
+  //   setEventsDeleted,
+  //   onUpdateSuccess: onAlertStatusUpdated,
+  //   onUpdateFailure: onAlertStatusUpdated,
+  // });
 
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule = ruleId ? prepend(paths.management.ruleDetails(ruleId)) : null;
@@ -231,7 +225,8 @@ function ObservabilityActions({
             }),
           ]
         : []),
-      ...(alertPermissions.crud ? statusActionItems : []),
+      // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
+      // ...(alertPermissions.crud ? statusActionItems : []),
       ...(!!linkToRule
         ? [
             <EuiContextMenuItem
@@ -244,15 +239,7 @@ function ObservabilityActions({
           ]
         : []),
     ];
-  }, [
-    afterCaseSelection,
-    casePermissions,
-    timelines,
-    event,
-    statusActionItems,
-    alertPermissions,
-    linkToRule,
-  ]);
+  }, [afterCaseSelection, casePermissions, timelines, event, linkToRule]);
 
   const actionsToolTip =
     actionsMenuItems.length <= 0
