@@ -21,16 +21,19 @@ import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EuiOverlayMaskProps } from '@elastic/eui';
 import { History as History_2 } from 'history';
 import { Href } from 'history';
-import { IconType } from '@elastic/eui';  
-import { IncomingHttpHeaders } from 'http';
-import { Logger } from '@kbn/logging';    
-import { LogMeta } from '@kbn/logging';   
+import { IconType } from '@elastic/eui';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
+import { Location as Location_2 } from 'history';
+import { LocationDescriptorObject } from 'history';
+import { Logger } from '@kbn/logging';
+import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
-import { Observable } from 'rxjs';        
-import { PackageInfo } from '@kbn/config  ';
-import { Path } from 'history';           
-import { PeerCertificate } from 'tls';    
-import type { PublicMethodsOf } from '@k  bn/utility-types';
+import { ObjectType } from '@kbn/config-schema';
+import { Observable } from 'rxjs';
+import { PackageInfo } from '@kbn/config';
+import { Path } from 'history';
+import { PeerCertificate } from 'tls';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -38,6 +41,7 @@ import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import { TransitionPromptHook } from 'history';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { TransportRequestParams } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
@@ -1625,11 +1629,7 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> {
 export class ScopedHistory<HistoryLocationState = unknown> implements History_2<HistoryLocationState> {
     constructor(parentHistory: History_2, basePath: string);
     get action(): Action;
-<<<<<<< HEAD
     block: (prompt?: string | boolean | TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
-=======
-    block: (prompt?: string | boolean | History_2.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
->>>>>>> upstream/main
     createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
     }) => Href;

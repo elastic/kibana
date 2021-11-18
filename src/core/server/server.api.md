@@ -33,7 +33,6 @@ import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
-import { LogLevelId } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { LogRecord } from '@kbn/logging';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -1048,19 +1047,11 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
 
 // @public
-<<<<<<< HEAD
-export interface Headers {
+interface Headers_2 {
     // (undocumented)
     [header: string]: string | string[] | undefined;
 }
-=======
-type Headers_2 = {
-    [header in KnownHeaders]?: string | string[] | undefined;
-} & {
-    [header: string]: string | string[] | undefined;
-};
 export { Headers_2 as Headers }
->>>>>>> upstream/main
 
 // @public (undocumented)
 export interface HttpAuth {
