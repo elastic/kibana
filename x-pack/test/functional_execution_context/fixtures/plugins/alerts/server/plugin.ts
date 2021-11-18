@@ -107,6 +107,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         return res.ok({
           body: {
             traceId: apmAgent.currentTraceIds['trace.id'],
+            ids: apmAgent.currentTraceIds,
           },
         });
       }

@@ -15,9 +15,15 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Log Correlation', () => {
     it('Emits "trace.id" into the logs', async () => {
       const response1 = await supertest.get('/emit_log_with_trace_id');
+      expect(response1.status).to.be(200);
+      // eslint-disable-next-line no-console
+      console.log('>>> response1.body', response1.body);
       expect(response1.body.traceId).to.be.a('string');
 
       const response2 = await supertest.get('/emit_log_with_trace_id');
+      expect(response2.status).to.be(200);
+      // eslint-disable-next-line no-console
+      console.log('>>> response2.body', response1.body);
       expect(response1.body.traceId).to.be.a('string');
 
       expect(response2.body.traceId).not.to.be(response1.body.traceId);
