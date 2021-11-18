@@ -1159,7 +1159,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Signal deduplication', async () => {
+    describe.skip('Signal deduplication', async () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
