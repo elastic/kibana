@@ -224,8 +224,6 @@ export const combineQueries = ({
  */
 export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';
 
-export const DEFAULT_ICON_BUTTON_WIDTH = 24;
-
 export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
   graphEventId != null && graphEventId !== '';
 

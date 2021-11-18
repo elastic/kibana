@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pickBy, isEmpty, isEqual } from 'lodash/fp';
+import { pickBy, isEmpty } from 'lodash/fp';
 import type {
   FromOrUndefined,
   MachineLearningJobIdOrUndefined,
@@ -64,14 +64,10 @@ import { RulesClient } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleActions } from '../rule_actions/legacy_types';
 import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
-import {
-  transformAlertToRuleAction,
-  transformRuleToAlertAction,
-} from '../../../../common/detection_engine/transform_actions';
+import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from '../rule_actions/legacy_saved_object_mappings';
 import { LegacyMigrateParams } from './types';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -367,36 +363,4 @@ export const legacyMigrate = async ({
     return { id: rule.id, ...migratedRule };
   }
   return rule;
-};
-
-export const updateThrottleNotifyWhen = (
-  transform: typeof transformToAlertThrottle | typeof transformToNotifyWhen,
-  migratedRuleThrottle: string | null | undefined,
-  existingRuleThrottle: string | null | undefined,
-  ruleUpdateThrottle: string | null | undefined
-) => {
-  if (existingRuleThrottle == null && ruleUpdateThrottle == null && migratedRuleThrottle != null) {
-    return migratedRuleThrottle;
-  }
-  return transform(ruleUpdateThrottle);
-};
-
-export const updateActions = (
-  transform: typeof transformRuleToAlertAction,
-  migratedRuleActions: AlertAction[] | null | undefined,
-  existingRuleActions: AlertAction[] | null | undefined,
-  ruleUpdateActions: RuleAlertAction[] | null | undefined
-) => {
-  // if the existing rule actions and the rule update actions are equivalent (aka no change)
-  // but the migrated actions and the ruleUpdateActions (or existing rule actions, associatively)
-  // are not equivalent, we know that the rules' actions were migrated and we need to apply
-  // that change to the update request so it is not overwritten by the rule update payload
-  if (
-    existingRuleActions?.length === 0 &&
-    ruleUpdateActions == null &&
-    !isEqual(existingRuleActions, migratedRuleActions)
-  ) {
-    return migratedRuleActions;
-  }
-  return ruleUpdateActions != null ? ruleUpdateActions.map(transform) : [];
 };

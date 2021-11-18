@@ -154,19 +154,6 @@
             }
           }
         },
-        "throttle_time_number_s": {
-          "properties": {
-            "min": {
-              "type": "long"
-            },
-            "avg": {
-              "type": "float"
-            },
-            "max": {
-              "type": "long"
-            }
-          }
-        },
         "schedule_time": {
           "properties": {
             "min": {
@@ -177,6 +164,19 @@
             },
             "max": {
               "type": "keyword"
+            }
+          }
+        },
+        "throttle_time_number_s": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
             }
           }
         },
