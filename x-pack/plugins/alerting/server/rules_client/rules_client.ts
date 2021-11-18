@@ -450,8 +450,10 @@ export class RulesClient {
 
   public async resolve<Params extends AlertTypeParams = never>({
     id,
+    includeLegacyId,
   }: {
     id: string;
+    includeLegacyId?: boolean;
   }): Promise<ResolvedSanitizedRule<Params>> {
     const { saved_object: result, ...resolveResponse } =
       await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
@@ -483,7 +485,8 @@ export class RulesClient {
       result.id,
       result.attributes.alertTypeId,
       result.attributes,
-      result.references
+      result.references,
+      includeLegacyId
     );
 
     return {
