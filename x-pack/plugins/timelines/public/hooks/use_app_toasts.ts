@@ -11,7 +11,7 @@ import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolu
 import type { AppError } from '@kbn/securitysolution-t-grid';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import {
+import type {
   ErrorToastOptions,
   ToastsStart,
   Toast,

@@ -9,7 +9,7 @@ import { ReactElement } from 'react';
 import type { SensorAPI } from 'react-beautiful-dnd';
 import { Store } from 'redux';
 import { CoreStart } from '../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { CasesUiStart } from '../../cases/public';
 import type {
   LastUpdatedAtProps,

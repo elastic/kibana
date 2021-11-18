@@ -35,7 +35,9 @@ import type {
   RowRenderer,
   AlertStatus,
 } from '../../../../common/types/timeline';
-import { esQuery, DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
@@ -190,7 +192,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
 
   const combinedQueries = buildCombinedQuery({
-    config: esQuery.getEsQueryConfig(uiSettings),
+    config: getEsQueryConfig(uiSettings),
     dataProviders,
     indexPattern,
     browserFields,
@@ -247,7 +249,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const filterQuery = useMemo(
     () =>
       getCombinedFilterQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         browserFields,
         dataProviders,
         filters,

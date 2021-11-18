@@ -7,7 +7,7 @@
 
 import { cloneDeep, merge, unionBy } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   EventHit,
   TimelineEventsQueries,
