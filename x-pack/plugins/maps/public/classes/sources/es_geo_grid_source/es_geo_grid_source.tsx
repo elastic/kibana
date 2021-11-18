@@ -52,6 +52,8 @@ type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType'>;
 
 const ES_MVT_AGGS_LAYER_NAME = 'aggs';
 
+const MAX_GEOTILE_LEVEL = 29;
+
 export const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
   defaultMessage: 'Clusters and grids',
 });
@@ -163,6 +165,16 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   getGeoGridPrecision(zoom: number): number {
+    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+      // The target-precision needs to be determined server side.
+      return NaN;
+    }
+
+    const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
+    return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
+  }
+
+  _getGeoGridPrecisionResolutionDelta() {
     if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
       return 2;
     }
@@ -175,7 +187,18 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       return 4;
     }
 
-    return 8;
+    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+      return 8;
+    }
+
+    throw new Error(
+      i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
+        defaultMessage: `Grid resolution param not recognized: {resolution}`,
+        values: {
+          resolution: this._descriptor.resolution,
+        },
+      })
+    );
   }
 
   async _compositeAggRequest({
@@ -424,7 +447,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     const urlTemplate = `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
-&gridPrecision=${this.getGeoGridPrecision()}\
+&gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
 &requestBody=${risonDsl}\
 &requestType=${requestType}`;
 

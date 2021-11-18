@@ -167,7 +167,7 @@ export class HeatmapLayer extends AbstractLayer {
       mbMap,
       layerId: heatmapLayerId,
       propertyName: metricField.getMbFieldName(),
-      max: 1000,
+      max,
       resolution: this.getSource().getGridResolution(),
     });
 

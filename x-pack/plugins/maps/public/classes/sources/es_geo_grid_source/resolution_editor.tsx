@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { AGG_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
 
-const BASE_OPTIONS = [
+const OPTIONS = [
   {
     value: GRID_RESOLUTION.COARSE,
     text: i18n.translate('xpack.maps.source.esGrid.coarseDropdownOption', {
@@ -31,6 +31,12 @@ const BASE_OPTIONS = [
       defaultMessage: 'finest',
     }),
   },
+  {
+    value: GRID_RESOLUTION.SUPER_FINE,
+    text: i18n.translate('xpack.maps.source.esGrid.superFineDropDownOption', {
+      defaultMessage: 'super fine',
+    })
+  },
 ];
 
 function isUnsupportedVectorTileMetric(metric: AggDescriptor) {
@@ -38,7 +44,6 @@ function isUnsupportedVectorTileMetric(metric: AggDescriptor) {
 }
 
 interface Props {
-  includeSuperFine: boolean;
   resolution: GRID_RESOLUTION;
   onChange: (resolution: GRID_RESOLUTION, metrics: AggDescriptor[]) => void;
   metrics: AggDescriptor[];
@@ -49,24 +54,9 @@ interface State {
 }
 
 export class ResolutionEditor extends Component<Props, State> {
-  private readonly _options = [...BASE_OPTIONS];
-
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {
-      showModal: false,
-    };
-
-    if (props.includeSuperFine) {
-      this._options.push({
-        value: GRID_RESOLUTION.SUPER_FINE,
-        text: i18n.translate('xpack.maps.source.esGrid.superFineDropDownOption', {
-          defaultMessage: 'super fine',
-        }),
-      });
-    }
-  }
+  state: State = {
+    showModal: false,
+  };
 
   _onResolutionChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const resolution = e.target.value as GRID_RESOLUTION;
@@ -149,7 +139,7 @@ export class ResolutionEditor extends Component<Props, State> {
           display="columnCompressed"
         >
           <EuiSelect
-            options={this._options}
+            options={OPTIONS}
             value={this.props.resolution}
             onChange={this._onResolutionChange}
             compressed
