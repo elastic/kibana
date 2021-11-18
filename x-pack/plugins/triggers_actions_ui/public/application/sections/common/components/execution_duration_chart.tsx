@@ -71,7 +71,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
       </EuiFlexGroup>
 
       {executionDuration.valuesWithTimestamp &&
-      Object.entries(executionDuration.valuesWithTimestamp).length > 0 ? (
+        Object.entries(executionDuration.valuesWithTimestamp).length > 0 ? (
         <>
           <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
             <Settings
@@ -95,7 +95,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
               xAccessor={0}
               yAccessors={[1]}
               data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
-                moment(timestamp).format('D MMM YYYY @ HH:mm:ss'),
+                timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
                 val,
               ])}
               minBarHeight={2}
@@ -113,7 +113,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
               xAccessor={0}
               yAccessors={[1]}
               data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
-                moment(timestamp).format('D MMM YYYY @ HH:mm:ss'),
+                timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
                 val ? executionDuration.average : null,
               ])}
               curve={CurveType.CURVE_NATURAL}
@@ -150,7 +150,7 @@ export function padOrTruncateDurations(
   if (values.length === desiredSize) {
     return values;
   } else if (values.length < desiredSize) {
-    return assign(fill(new Array(desiredSize), null), values);
+    return assign(fill(new Array(desiredSize), [null, null]), values);
   } else {
     // oldest durations are at the start of the array, so take the last {desiredSize} values
     return values.slice(-desiredSize);

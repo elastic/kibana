@@ -65,7 +65,48 @@ describe('padOrTruncateDurations', () => {
         { '17 Nov 2021 @ 16:16:17': 1, '17 Nov 2021 @ 16:17:17': 2, '17 Nov 2021 @ 19:19:17': 3 },
         10
       )
-    ).toEqual([1, 2, 3, null, null, null, null, null, null, null]);
+    ).toEqual([
+      [
+        "17 Nov 2021 @ 16:16:17",
+        1,
+      ],
+      [
+        "17 Nov 2021 @ 16:17:17",
+        2,
+      ],
+      [
+        "17 Nov 2021 @ 19:19:17",
+        3,
+      ],
+      [
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+      ],
+    ]);
   });
 
   it('truncates execution duration values when there are more than display desires', () => {
@@ -89,7 +130,6 @@ describe('padOrTruncateDurations', () => {
         10
       )
     ).toEqual([
-      ['17 Nov 2021 @ 19:19:17', 3],
       ['17 Nov 2021 @ 20:19:17', 4],
       ['17 Nov 2021 @ 21:19:17', 5],
       ['17 Nov 2021 @ 22:19:17', 6],

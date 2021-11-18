@@ -33,14 +33,6 @@ const rewriteReq: RewriteRequestCase<GetAlertSummaryParams> = ({
   dateStart,
 });
 
-const transformExecutionDuration: RewriteResponseCase<ExecutionDuration> = ({
-  valuesWithTimestamp,
-  ...rest
-}) => ({
-  values_with_timestamp: valuesWithTimestamp,
-  ...rest,
-});
-
 const rewriteBodyRes: RewriteResponseCase<AlertSummary> = ({
   ruleTypeId,
   muteAll,
@@ -48,7 +40,7 @@ const rewriteBodyRes: RewriteResponseCase<AlertSummary> = ({
   statusEndDate,
   errorMessages,
   lastRun,
-  executionDuration,
+  executionDuration: { valuesWithTimestamp, ...executionDuration },
   ...rest
 }) => ({
   ...rest,
@@ -58,7 +50,10 @@ const rewriteBodyRes: RewriteResponseCase<AlertSummary> = ({
   status_end_date: statusEndDate,
   error_messages: errorMessages,
   last_run: lastRun,
-  execution_duration: transformExecutionDuration(executionDuration),
+  execution_duration: {
+    ...executionDuration,
+    values_with_timestamp: valuesWithTimestamp,
+  },
 });
 
 export const getRuleAlertSummaryRoute = (
