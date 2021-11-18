@@ -2,7 +2,7 @@
 [[rule-types]]
 == Rule types
 
-A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the Elastic Stack and rules registered by one of the {kib} apps.
+A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules that are built into the Elastic Stack and rules that are registered by a {kib} app.
 
 [NOTE]
 ==============================================
@@ -45,7 +45,7 @@ In the rules list in the Management UI, Observability rules are shown under the 
 
 
 | <<apm-alerts, APM and User Experience>>
-| Allows to define rules to detect complex conditions within *APM* data and trigger built-in actions when those conditions are met.
+| Detect complex conditions in *APM* data and trigger built-in actions when the conditions are met.
 
 | {observability-guide}/create-alerts.html[Logs rules]
 | Detect complex conditions in the *Logs* app.
