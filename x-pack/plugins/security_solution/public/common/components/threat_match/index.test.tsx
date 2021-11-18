@@ -16,7 +16,7 @@ import { useKibana } from '../../../common/lib/kibana';
 
 import { ThreatMatchComponent } from './';
 import { ThreatMapEntries } from './types';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({
