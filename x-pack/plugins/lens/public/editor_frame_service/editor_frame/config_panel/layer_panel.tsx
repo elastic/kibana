@@ -394,11 +394,11 @@ export function LayerPanel(
             }
 
             const isMissingError = !group.requiredMinDimensionCount
-              ? i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
-                  defaultMessage: 'Required dimension',
+              ? i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
+                  defaultMessage: 'Requires field',
                 })
-              : i18n.translate('xpack.lens.editorFrame.requiredTwoOrMoreDimensionsWarningLabel', {
-                  defaultMessage: 'Required {requiredMinDimensionCount} dimensions',
+              : i18n.translate('xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel', {
+                  defaultMessage: 'Requires {requiredMinDimensionCount} fields',
                   values: {
                     requiredMinDimensionCount: group.requiredMinDimensionCount,
                   },
