@@ -20,12 +20,9 @@ import './expression.scss';
 import {
   Filter,
   ISearchSource,
-  parseSearchSourceJSON,
+  SearchSourceFields,
 } from '../../../../../../src/plugins/data/common';
-import {
-  injectSearchSourceReferences,
-  QueryStringInput,
-} from '../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../src/plugins/data/public';
 import { FilterBar } from '../../../../../../src/plugins/data/public';
 
 export const DEFAULT_VALUES = {
@@ -43,32 +40,23 @@ const expressionFieldsWithValidation = ['threshold0', 'threshold1', 'timeWindowS
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
   AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
 > = ({ alertParams, setAlertParams, setAlertProperty, errors, data }) => {
-  const {
-    thresholdComparator,
-    threshold,
-    timeWindowSize,
-    timeWindowUnit,
-    searchSourceJSON,
-    searchSourceReferencesJSON,
-  } = alertParams;
+  const { thresholdComparator, threshold, timeWindowSize, timeWindowUnit, searchSourceFields } =
+    alertParams;
   const [usedSearchSource, setUsedSearchSource] = useState<ISearchSource | undefined>();
   const [showQueryBar, setShowQueryBar] = useState<boolean>(false);
   const [showFilter, setShowFilter] = useState<boolean>(false);
 
   useEffect(() => {
     async function getSearchSource() {
-      const parsedSearchSourceJSON = parseSearchSourceJSON(searchSourceJSON);
-      const searchSourceValues = injectSearchSourceReferences(
-        parsedSearchSourceJSON as Parameters<typeof injectSearchSourceReferences>[0],
-        JSON.parse(searchSourceReferencesJSON)
+      const loadedSearchSource = await data.search.searchSource.create(
+        searchSourceFields as SearchSourceFields
       );
-      const loadedSearchSource = await data.search.searchSource.create(searchSourceValues);
       setUsedSearchSource(loadedSearchSource);
     }
-    if (searchSourceJSON) {
+    if (searchSourceFields) {
       getSearchSource();
     }
-  }, [data.search.searchSource, searchSourceJSON, searchSourceReferencesJSON]);
+  }, [data.search.searchSource, searchSourceFields]);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
@@ -90,8 +78,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
       timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
-      searchSourceJSON: searchSourceJSON ?? '{}',
-      searchSourceReferencesJSON: searchSourceReferencesJSON ?? '[]',
+      searchSourceFields: searchSourceFields ?? {},
     });
   };
 
@@ -100,7 +87,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!searchSourceJSON) {
+  if (!searchSourceFields) {
     <EuiCallOut color="danger" size="s" title={`Please go to Discover to create an alert`} />;
   }
 
@@ -150,8 +137,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           indexPatterns={[usedSearchSource!.getField('index')!]}
           query={usedSearchSource!.getField('query')!}
           onChange={(query) => {
-            // eslint-disable-next-line no-console
-            console.log(query);
+            usedSearchSource.setField('query', query);
           }}
         />
       </EuiPopover>
@@ -185,8 +171,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           intl={{} as never}
           indexPatterns={[usedSearchSource!.getField('index')!]}
           onFiltersUpdated={(filters) => {
-            // eslint-disable-next-line no-console
-            console.log(filters);
+            usedSearchSource.setField('filter', filters);
           }}
         />
       </EuiPopover>

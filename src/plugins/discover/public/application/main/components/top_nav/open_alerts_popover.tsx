@@ -48,13 +48,12 @@ export function AlertsPopover(props: OptionsPopoverProps) {
       sort: [],
       useNewFieldsApi: true,
     });
-    const serializedSearchSource = nextSearchSource.serialize();
+    const serializedFields = nextSearchSource.getSerializedFields();
 
     return {
       index,
       timeField,
-      searchSourceJSON: serializedSearchSource.searchSourceJSON,
-      searchSourceReferencesJSON: JSON.stringify(serializedSearchSource.references),
+      searchSourceFields: serializedFields,
     };
   }, [searchSource, index, timeField, services]);
 

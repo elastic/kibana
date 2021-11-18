@@ -8,17 +8,93 @@
 import { i18n } from '@kbn/i18n';
 import { Logger, SavedObjectReference } from 'src/core/server';
 import { AlertType, AlertExecutorOptions } from '../../types';
-import { Params, ParamsSchema } from './alert_type_params';
+import { ParamsSchema } from './alert_type_params';
 import { ActionContext } from './action_context';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
   getTime,
-  parseSearchSourceJSON,
   SearchSourceFields,
 } from '../../../../../../src/plugins/data/common';
+import { AlertTypeParams } from '../../../../alerting/common';
 
 export const ID = '.discover-threshold';
 export const ActionGroupId = 'threshold met';
+
+export interface DiscoverThresholdParams extends AlertTypeParams {
+  thresholdComparator: string;
+  threshold: number[];
+  timeWindowSize: number;
+  timeWindowUnit: string;
+  searchSourceFields: SearchSourceFields;
+}
+export type DiscoverThresholdExtractedParams = Omit<
+  DiscoverThresholdParams,
+  'searchSourceFields'
+> & {
+  searchSourceFields: SearchSourceFields & { indexRefName: string };
+};
+
+export type DiscoverAlertType = AlertType<
+  DiscoverThresholdParams,
+  DiscoverThresholdExtractedParams,
+  {},
+  {},
+  ActionContext,
+  typeof ActionGroupId
+>;
+
+/**
+ * This needs to be imported from data, but also be moved to common code there
+ */
+export const extractReferences = (
+  state: SearchSourceFields
+): [SearchSourceFields & { indexRefName?: string }, SavedObjectReference[]] => {
+  let searchSourceFields: SearchSourceFields & { indexRefName?: string } = { ...state };
+  const references: SavedObjectReference[] = [];
+  if (searchSourceFields.index) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const indexId = searchSourceFields.index.id || (searchSourceFields.index as any as string);
+    const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+    references.push({
+      name: refName,
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+      id: indexId,
+    });
+    searchSourceFields = {
+      ...searchSourceFields,
+      indexRefName: refName,
+      index: undefined,
+    };
+  }
+
+  if (Array.isArray(searchSourceFields.filter)) {
+    searchSourceFields = {
+      ...searchSourceFields,
+      filter: searchSourceFields.filter.map((filterRow, i) => {
+        if (!filterRow.meta || !filterRow.meta.index) {
+          return filterRow;
+        }
+        const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+        references.push({
+          name: refName,
+          type: DATA_VIEW_SAVED_OBJECT_TYPE,
+          id: filterRow.meta.index,
+        });
+        return {
+          ...filterRow,
+          meta: {
+            ...filterRow.meta,
+            indexRefName: refName,
+            index: undefined,
+          },
+        };
+      }),
+    };
+  }
+
+  return [searchSourceFields, references];
+};
 
 /**
  * node stolen from the data plugin, needs to moved to `common there`
@@ -59,9 +135,7 @@ export const injectSearchSourceReferences = (
   return searchSourceReturnFields;
 };
 
-export function getAlertType(
-  logger: Logger
-): AlertType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
+export function getAlertType(logger: Logger): DiscoverAlertType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Discover threshold',
   });
@@ -130,6 +204,7 @@ export function getAlertType(
     }
   );
 
+  // @ts-ignore
   return {
     id: ID,
     name: alertTypeName,
@@ -160,27 +235,31 @@ export function getAlertType(
     isExportable: true,
     executor,
     producer: 'discover',
-    /**
-     * These are the new hooks
-     **/
     useSavedObjectReferences: {
       extractReferences: (params) => {
-        console.log(params);
-        return { params, references: [] };
+        const [searchSourceFields, references] = extractReferences(params.searchSourceFields);
+        const newParams = { ...params, searchSourceFields } as DiscoverThresholdExtractedParams;
+        return { params: newParams, references };
       },
       injectReferences: (params, references) => {
-        console.log(params);
-        return params;
+        return {
+          ...params,
+          searchSourceFields: injectSearchSourceReferences(params.searchSourceFields, references),
+        } as DiscoverThresholdParams;
       },
     },
   };
 
   async function executor(
-    options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
+    options: AlertExecutorOptions<
+      DiscoverThresholdParams,
+      {},
+      {},
+      ActionContext,
+      typeof ActionGroupId
+    >
   ) {
     const { name, services, params } = options;
-
-    const parsedSearchSourceJSON = parseSearchSourceJSON(params.searchSourceJSON);
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -195,12 +274,8 @@ export function getAlertType(
     }
 
     try {
-      const searchSourceValues = injectSearchSourceReferences(
-        parsedSearchSourceJSON as Parameters<typeof injectSearchSourceReferences>[0],
-        JSON.parse(params.searchSourceReferencesJSON)
-      );
       const searchSourceClient = await services.searchSourceClient;
-      const loadedSearchSource = await searchSourceClient.create(searchSourceValues);
+      const loadedSearchSource = await searchSourceClient.create(params.searchSourceFields);
       loadedSearchSource.setField('size', 0);
       const filter = getTime(loadedSearchSource.getField('index'), {
         from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,

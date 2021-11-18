@@ -9,9 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ComparatorFnNames } from '../lib';
 import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
-
-// alert type parameters
-
 export type Params = TypeOf<typeof ParamsSchema>;
 
 export const ParamsSchema = schema.object(
@@ -24,8 +21,7 @@ export const ParamsSchema = schema.object(
     // the values to use as the threshold; `between` and `notBetween` require
     // two values, the others require one.
     threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
-    searchSourceJSON: schema.string({}),
-    searchSourceReferencesJSON: schema.string({}),
+    searchSourceFields: schema.object({}, { unknowns: 'allow' }),
   },
   {
     validate: validateParams,

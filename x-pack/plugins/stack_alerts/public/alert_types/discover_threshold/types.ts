@@ -6,6 +6,7 @@
  */
 
 import { AlertTypeParams } from '../../../../alerting/common';
+import { SearchSourceFields } from '../../../../../../src/plugins/data/common';
 
 export interface Comparator {
   text: string;
@@ -13,25 +14,10 @@ export interface Comparator {
   requiredValues: number;
 }
 
-export interface AggregationType {
-  text: string;
-  fieldRequired: boolean;
-  value: string;
-  validNormalizedTypes: string[];
-}
-
-export interface GroupByType {
-  text: string;
-  sizeRequired: boolean;
-  value: string;
-  validNormalizedTypes: string[];
-}
-
 export interface IndexThresholdAlertParams extends AlertTypeParams {
   thresholdComparator?: string;
   threshold: number[];
   timeWindowSize: number;
   timeWindowUnit: string;
-  searchSourceJSON: string;
-  searchSourceReferencesJSON: string;
+  searchSourceFields: SearchSourceFields;
 }
