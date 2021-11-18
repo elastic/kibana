@@ -84,7 +84,7 @@ export class HeatmapStyle implements IStyle {
     } else if (resolution === GRID_RESOLUTION.MOST_FINE) {
       radius = 32;
     } else {
-      radius = 24;
+      radius = 16;
     }
     mbMap.setPaintProperty(layerId, 'heatmap-radius', radius);
     mbMap.setPaintProperty(layerId, 'heatmap-weight', [

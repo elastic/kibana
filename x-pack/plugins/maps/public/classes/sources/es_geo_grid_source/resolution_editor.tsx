@@ -35,7 +35,7 @@ const OPTIONS = [
     value: GRID_RESOLUTION.SUPER_FINE,
     text: i18n.translate('xpack.maps.source.esGrid.superFineDropDownOption', {
       defaultMessage: 'super fine',
-    })
+    }),
   },
 ];
 

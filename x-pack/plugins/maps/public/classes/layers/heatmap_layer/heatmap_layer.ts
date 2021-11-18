@@ -119,6 +119,8 @@ export class HeatmapLayer extends AbstractLayer {
   }
 
   syncLayerWithMB(mbMap: MbMap) {
+    this._removeStaleMbSourcesAndLayers(mbMap);
+
     const sourceDataRequest = this.getSourceDataRequest();
     const sourceData = sourceDataRequest
       ? (sourceDataRequest.getData() as MvtSourceData)

@@ -48,7 +48,7 @@ import { Adapters } from '../../../../../../../src/plugins/inspector/common/adap
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
-type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType'>;
+type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
 
 const ES_MVT_AGGS_LAYER_NAME = 'aggs';
 
@@ -103,6 +103,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   getSyncMeta(): ESGeoGridSourceSyncMeta {
     return {
       requestType: this._descriptor.requestType,
+      resolution: this._descriptor.resolution,
     };
   }
 

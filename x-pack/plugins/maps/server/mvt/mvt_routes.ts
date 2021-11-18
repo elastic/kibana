@@ -121,7 +121,7 @@ export function initMVTRoutes({
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
-        gridPrecision: parseInt((query.gridPrecision), 10),
+        gridPrecision: parseInt(query.gridPrecision, 10),
       });
 
       return sendResponse(response, tile);
