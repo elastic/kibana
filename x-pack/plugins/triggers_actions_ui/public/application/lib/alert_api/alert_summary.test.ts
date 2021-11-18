@@ -30,7 +30,6 @@ describe('loadAlertSummary', () => {
       throttle: null,
       executionDuration: {
         average: 0,
-        values: [],
         valuesWithTimestamp: {},
       },
     };
@@ -52,7 +51,6 @@ describe('loadAlertSummary', () => {
       throttle: null,
       execution_duration: {
         average: 0,
-        values: [],
         valuesWithTimestamp: {},
       },
     });

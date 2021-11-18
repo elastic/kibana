@@ -10,7 +10,6 @@ export type AlertStatusValues = 'OK' | 'Active';
 
 export interface ExecutionDuration {
   average: number;
-  values: number[];
   valuesWithTimestamp: Record<string, number>;
 }
 

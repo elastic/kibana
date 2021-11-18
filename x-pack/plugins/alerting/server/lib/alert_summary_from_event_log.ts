@@ -39,7 +39,6 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     alerts: {},
     executionDuration: {
       average: 0,
-      values: [],
       valuesWithTimestamp: {},
     },
   };
@@ -130,7 +129,6 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
   if (eventDurations.length > 0) {
     alertSummary.executionDuration = {
       average: Math.round(mean(eventDurations)),
-      values: eventDurations,
       valuesWithTimestamp: eventDurationsWithTimestamp,
     };
   }

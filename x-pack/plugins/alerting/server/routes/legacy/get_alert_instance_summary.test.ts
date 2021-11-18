@@ -45,7 +45,6 @@ describe('getAlertInstanceSummaryRoute', () => {
     alerts: {},
     executionDuration: {
       average: 0,
-      values: [],
       valuesWithTimestamp: {},
     },
   };

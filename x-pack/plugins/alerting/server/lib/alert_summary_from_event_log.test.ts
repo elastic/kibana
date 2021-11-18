@@ -34,7 +34,6 @@ describe('alertSummaryFromEventLog', () => {
         "errorMessages": Array [],
         "executionDuration": Object {
           "average": 0,
-          "values": Array [],
           "valuesWithTimestamp": Object {},
         },
         "id": "rule-123",
@@ -79,7 +78,6 @@ describe('alertSummaryFromEventLog', () => {
         "errorMessages": Array [],
         "executionDuration": Object {
           "average": 0,
-          "values": Array [],
           "valuesWithTimestamp": Object {},
         },
         "id": "rule-456",
@@ -577,13 +575,11 @@ describe('alertSummaryFromEventLog', () => {
     actualDurations: Record<string, number>,
     executionDuration?: {
       average?: number;
-      values?: number[];
       valuesWithTimestamp?: Record<string, number>;
     }
   ) => {
     expect(executionDuration).toEqual({
       average: Math.round(mean(Object.values(actualDurations))),
-      values: Object.values(actualDurations),
       valuesWithTimestamp: actualDurations,
     });
   };
