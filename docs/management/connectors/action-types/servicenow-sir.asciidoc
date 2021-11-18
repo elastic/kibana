@@ -12,7 +12,7 @@ The {sn} SecOps connector uses the https://docs.servicenow.com/bundle/orlando-ap
 ==== Prerequisites
 After upgrading from {stack} version \<=7.15 to version >=7.16, you must complete the following within your {sn} instance before creating a new {sn} SecOps connector or <<servicenow-sir-connector-update, updating an existing one>>:
 
-* Install [Elastic for Security Operations (SecOps)] https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f from the {sn} Store.
+* Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store.
 * Create a {sn} integration user and assign it the appropriate roles.
 * Create a Cross-Origin Resource Sharing (CORS) rule.
 
@@ -62,7 +62,7 @@ To update a deprecated connector:
 . Select the deprecated connector to open the *Edit connector* flyout.
 . In the warning message, click *Update this connector*.
 . Complete the guided steps in the *Edit connector* flyout.
-.. Install [Elastic for Security Operations (SecOps)] https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f from the {sn} Store and complete the <<servicenow-sir-connector-prerequisites, required prerequisites>>.
+.. Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store and complete the <<servicenow-sir-connector-prerequisites, required prerequisites>>.
 .. Enter the URL of your {sn} instance.
 .. Enter the username and password of your {sn} instance.
 . Click *Update*.
