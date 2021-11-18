@@ -141,8 +141,15 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
@@ -270,8 +277,15 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
@@ -436,8 +450,15 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
@@ -595,8 +616,15 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
@@ -729,8 +757,15 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
