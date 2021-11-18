@@ -2,7 +2,8 @@
 [[rule-types]]
 == Rule types
 
-A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules that are built into the Elastic Stack and rules that are registered by a {kib} app.
+A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the Elastic Stack and rules registered by one of the {kib} apps.
+You can create most rules types in <<create-and-manage-rules,Stack Management > Rules and Connectors>>. For information on creating security rules, refer to Create a detection rule.
 
 [NOTE]
 ==============================================
@@ -15,7 +16,7 @@ see {subscriptions}[the subscription page].
 [[stack-rules]]
 === Stack rules
 
-<<create-and-manage-rules, Stack rules>> are built into {kib}. To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information. In the full rules list in the UI, Stack rules are shown under the proper category `STACK RULES`.
+<<create-and-manage-rules, Stack rules>> are built into {kib}. To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
 
 [cols="2*<"]
 |===
@@ -26,7 +27,7 @@ see {subscriptions}[the subscription page].
 | <<rule-type-index-threshold>>
 | Aggregate field values from documents using {es} queries, compare them to threshold values, and schedule actions to run when the thresholds are met.
 
-| {ref}/transform-alerts.html[{transform-cap} rules] beta:[]
+| {ref}/transform-alerts.html[{transform-cap} rules]
 | beta:[] Run scheduled checks on a {ctransform} to check its health. If a {ctransform} meets the conditions, an alert is created and the associated action is triggered.
 
 | <<geo-alerting, Tracking containment>>
@@ -38,7 +39,7 @@ see {subscriptions}[the subscription page].
 [[observability-rules]]
 === Observability rules
 
-In the rules list in the Management UI, Observability rules are shown under the multiple categories `APM AND USER EXPERIENCE`, `LOGS`, `METRICS`, `STACK MONITORING` and `UPTIME`.
+Observability rules categorized into APM and User Expereince, Logs, Metrics, Stack Monitoring, and Uptime.
 
 [cols="2*<"]
 |===
@@ -65,7 +66,7 @@ In the rules list in the Management UI, Observability rules are shown under the 
 [[ml-rules]]
 === Machine learning rules
 
-beta:[] {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] run scheduled checks on an {anomaly-job} to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered. In the rules list in the Management UI, Machine learning rules are shown under the proper category `MACHINE LEARNING`.
+beta:[] {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] run scheduled checks on an {anomaly-job} to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered.
 
 [float]
 [[security-rules]]
