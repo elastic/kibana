@@ -180,6 +180,7 @@ export const staticSourceData = [
         FeatureIds.SyncedItems,
         FeatureIds.GlobalAccessPermissions,
       ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
       platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
       platinumPrivateContext: [
         FeatureIds.Private,
@@ -215,6 +216,7 @@ export const staticSourceData = [
         FeatureIds.SyncedItems,
         FeatureIds.GlobalAccessPermissions,
       ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
       platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
       platinumPrivateContext: [
         FeatureIds.Private,
@@ -256,6 +258,7 @@ export const staticSourceData = [
         FeatureIds.SyncedItems,
         FeatureIds.GlobalAccessPermissions,
       ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
       platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
       platinumPrivateContext: [
         FeatureIds.Private,
