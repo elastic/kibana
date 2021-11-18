@@ -31,7 +31,7 @@ export const getHostsColumns = (): HostsTableColumns => [
     field: 'node.host.name',
     name: i18n.NAME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: true,
     render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
@@ -75,7 +75,7 @@ export const getHostsColumns = (): HostsTableColumns => [
       </EuiToolTip>
     ),
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: true,
     render: (lastSeen: Maybe<string | string[]> | undefined) => {
       if (lastSeen != null && lastSeen.length > 0) {
@@ -92,7 +92,7 @@ export const getHostsColumns = (): HostsTableColumns => [
     field: 'node.host.os.name',
     name: i18n.OS,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (hostOsName) => {
       if (hostOsName != null) {
@@ -109,7 +109,7 @@ export const getHostsColumns = (): HostsTableColumns => [
     field: 'node.host.os.version',
     name: i18n.VERSION,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (hostOsVersion) => {
       if (hostOsVersion != null) {

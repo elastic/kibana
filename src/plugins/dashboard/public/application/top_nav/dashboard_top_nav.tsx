@@ -502,7 +502,7 @@ export function DashboardTopNav({
             {
               'data-test-subj': 'dashboardUnsavedChangesBadge',
               badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
-              color: 'secondary',
+              color: 'success',
             },
           ]
         : undefined;

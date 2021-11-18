@@ -373,7 +373,7 @@ export const Overview: React.FC = () => {
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon size="l" type="checkInCircleFilled" color="secondary" />
+          <EuiIcon size="l" type="checkInCircleFilled" color="success" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText>

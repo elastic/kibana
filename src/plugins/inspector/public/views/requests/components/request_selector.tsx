@@ -114,7 +114,7 @@ export class RequestSelector extends Component<RequestSelectorProps> {
               }
             >
               <EuiBadge
-                color={selectedRequest.status === RequestStatus.OK ? 'secondary' : 'danger'}
+                color={selectedRequest.status === RequestStatus.OK ? 'success' : 'danger'}
                 iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
               >
                 <FormattedMessage

@@ -14,7 +14,7 @@ import {
   EuiInMemoryTable,
   EuiButton,
   EuiLink,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiOverlayMask,
   EuiHealth,
 } from '@elastic/eui';
@@ -273,7 +273,7 @@ export class AutoFollowPatternTable extends PureComponent {
     if (apiStatusDelete === API_STATUS.DELETING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

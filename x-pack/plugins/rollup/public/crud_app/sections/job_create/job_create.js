@@ -16,7 +16,7 @@ import { withKibana } from '../../../../../../../src/plugins/kibana_react/public
 
 import {
   EuiCallOut,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiOverlayMask,
   EuiPageContentBody,
   EuiPageHeader,
@@ -494,7 +494,7 @@ export class JobCreateUi extends Component {
     if (isSaving) {
       savingFeedback = (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

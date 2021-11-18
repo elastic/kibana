@@ -69,7 +69,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
       <EuiPanel color="subdued" hasShadow={false}>
         <EuiEmptyPrompt
           iconType={complete ? 'checkInCircleFilled' : (icon as IconType)}
-          iconColor={complete ? 'secondary' : 'subdued'}
+          iconColor={complete ? 'success' : 'subdued'}
           title={<h2>{title}</h2>}
           body={description}
           actions={complete ? completeButton : incompleteButton}

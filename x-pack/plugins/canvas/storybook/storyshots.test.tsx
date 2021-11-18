@@ -36,9 +36,6 @@ Date.now = jest.fn(() => testTime.getTime());
 // Mock telemetry service
 jest.mock('../public/lib/ui_metric', () => ({ trackCanvasUiMetric: () => {} }));
 
-// Mock EUI generated ids to be consistently predictable for snapshots.
-jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
-
 // Mock react-datepicker dep used by eui to avoid rendering the entire large component
 jest.mock('@elastic/eui/packages/react-datepicker', () => {
   return {

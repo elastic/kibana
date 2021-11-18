@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import 'react-ace';
 import 'brace/theme/textmate';
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';

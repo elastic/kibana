@@ -14,7 +14,7 @@ import {
   EuiButton,
   EuiInMemoryTable,
   EuiLink,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiOverlayMask,
 } from '@elastic/eui';
 
@@ -262,7 +262,7 @@ export class FollowerIndicesTable extends PureComponent {
     if (apiStatusDelete === API_STATUS.DELETING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

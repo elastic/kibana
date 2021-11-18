@@ -79,7 +79,7 @@ export const Navigation = ({
   const saveButton = (
     <EuiFlexItem grow={false}>
       <EuiButton
-        color="secondary"
+        color="success"
         iconType="check"
         onClick={save}
         fill

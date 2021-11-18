@@ -39,7 +39,7 @@ function CallOutComponent({
       <EuiDescriptionList data-test-subj={`calloutMessages-${id}`} listItems={messages} />
       <EuiButton
         data-test-subj={`calloutDismiss-${id}`}
-        color={type === 'success' ? 'secondary' : type}
+        color={type === 'success' ? 'success' : type}
         onClick={handleCallOut}
       >
         {i18n.DISMISS_CALLOUT}

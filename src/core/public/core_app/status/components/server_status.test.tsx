@@ -14,7 +14,7 @@ import { FormattedStatus } from '../lib';
 const getStatus = (parts: Partial<FormattedStatus['state']> = {}): FormattedStatus['state'] => ({
   id: 'available',
   title: 'Green',
-  uiColor: 'secondary',
+  uiColor: 'success',
   message: '',
   ...parts,
 });

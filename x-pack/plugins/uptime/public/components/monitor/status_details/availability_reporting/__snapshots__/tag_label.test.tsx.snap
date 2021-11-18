@@ -36,7 +36,7 @@ exports[`TagLabel component renders correctly against snapshot 1`] = `
 exports[`TagLabel component shallow render correctly against snapshot 1`] = `
 <styled.div>
   <EuiBadge
-    color="secondary"
+    color="success"
   >
     US-East
   </EuiBadge>

@@ -19,7 +19,7 @@ export const RefreshTransformListButton: FC<RefreshTransformListButton> = ({
   isLoading,
 }) => (
   <EuiButton
-    color="secondary"
+    color="success"
     iconType="refresh"
     data-test-subj={`transformRefreshTransformListButton${isLoading ? ' loading' : ' loaded'}`}
     onClick={onClick}

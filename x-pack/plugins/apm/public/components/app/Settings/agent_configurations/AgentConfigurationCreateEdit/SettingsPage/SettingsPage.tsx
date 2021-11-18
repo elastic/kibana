@@ -224,7 +224,7 @@ export function SettingsPage({
                     fill
                     isLoading={isSaving}
                     isDisabled={!isFormValid}
-                    color="secondary"
+                    color="success"
                     iconType="check"
                   >
                     {i18n.translate(

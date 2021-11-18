@@ -32,7 +32,7 @@ const filter: FormattedFilterViewInstance = {
 
 const component: FC<any> = ({ value }) => (
   <EuiText>
-    <EuiTextColor color="secondary">
+    <EuiTextColor color="success">
       <h3>{value}</h3>
     </EuiTextColor>
   </EuiText>

@@ -50,7 +50,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
         aria-label={buttonLabel}
         data-test-subj="docTableExpandToggleColumn"
         onClick={() => setExpanded(isCurrentRowExpanded ? undefined : current)}
-        color={isCurrentRowExpanded ? 'primary' : 'subdued'}
+        color={isCurrentRowExpanded ? 'primary' : 'text'}
         iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
         isSelected={isCurrentRowExpanded}
       />

@@ -330,7 +330,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       aria-label={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
         defaultMessage: 'Delete',
       })}
-      color={deleteDisabled ? 'subdued' : 'danger'}
+      color={deleteDisabled ? 'text' : 'danger'}
       disabled={deleteDisabled}
       onClick={() => deleteJob(index)}
     />

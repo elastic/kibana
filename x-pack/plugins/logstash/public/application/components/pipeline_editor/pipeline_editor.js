@@ -15,10 +15,10 @@ import 'brace/theme/github';
 
 import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../../common/constants/tooltips';
+import { EuiCodeEditor } from '../../../../../../../src/plugins/es_ui_shared/public';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCodeEditor,
   EuiFlexGroup,
   EuiFieldNumber,
   EuiFlexItem,

@@ -17,6 +17,7 @@ import {
   EuiLoadingContent,
   EuiPagination,
   EuiPopover,
+  EuiTableRowCellProps,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { FC, memo, useState, useMemo, useEffect, ComponentType } from 'react';
@@ -126,8 +127,7 @@ type Func<T> = (arg: T) => string | number;
 export interface Columns<T, U = T> {
   align?: string;
   field?: string;
-  hideForMobile?: boolean;
-  isMobileHeader?: boolean;
+  mobileOptions?: EuiTableRowCellProps['mobileOptions'];
   name: string | React.ReactNode;
   render?: (item: T, node: U) => React.ReactNode;
   sortable?: boolean | Func<T>;

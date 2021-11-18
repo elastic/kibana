@@ -229,7 +229,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
           className="euiText euiText--medium"
         >
           <span
-            className="euiTextColor euiTextColor--secondary"
+            className="euiTextColor euiTextColor--success"
             style={Object {}}
           >
             <h3>

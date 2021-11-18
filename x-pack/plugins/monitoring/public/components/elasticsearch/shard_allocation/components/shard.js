@@ -39,7 +39,7 @@ function getColor(classes) {
   }
 
   if (classList.includes('replica')) {
-    return 'secondary';
+    return 'success';
   }
 }
 

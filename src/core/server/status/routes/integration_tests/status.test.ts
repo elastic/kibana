@@ -164,7 +164,7 @@ describe('GET /api/status', () => {
         since: expect.any(String),
         state: 'green',
         title: 'Green',
-        uiColor: 'secondary',
+        uiColor: 'success',
       },
       statuses: [
         {
@@ -173,7 +173,7 @@ describe('GET /api/status', () => {
           message: 'Service is working',
           since: expect.any(String),
           state: 'green',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
         {
           icon: 'success',
@@ -181,7 +181,7 @@ describe('GET /api/status', () => {
           message: 'Service is working',
           since: expect.any(String),
           state: 'green',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
         {
           icon: 'success',
@@ -189,7 +189,7 @@ describe('GET /api/status', () => {
           message: 'a is available',
           since: expect.any(String),
           state: 'green',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
         {
           icon: 'warning',

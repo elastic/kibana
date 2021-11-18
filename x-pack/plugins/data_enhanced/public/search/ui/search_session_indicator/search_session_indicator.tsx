@@ -148,7 +148,7 @@ const searchSessionIndicatorViewStateToProps: {
   [SearchSessionState.None]: null,
   [SearchSessionState.Loading]: {
     button: {
-      color: 'subdued',
+      color: 'text',
       iconType: PartialClock,
       'aria-label': i18n.translate(
         'xpack.data.searchSessionIndicator.loadingResultsIconAriaLabel',
@@ -179,7 +179,7 @@ const searchSessionIndicatorViewStateToProps: {
   },
   [SearchSessionState.Completed]: {
     button: {
-      color: 'subdued',
+      color: 'text',
       iconType: 'check',
       'aria-label': i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedIconAriaLabel', {
         defaultMessage: 'Search session complete',

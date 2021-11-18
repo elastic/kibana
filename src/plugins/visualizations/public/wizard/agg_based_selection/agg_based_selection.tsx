@@ -137,7 +137,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
           description={visType.type.description || ''}
           layout="horizontal"
           isDisabled={isDisabled}
-          icon={<EuiIcon type={visType.type.icon || 'empty'} size="l" color="secondary" />}
+          icon={<EuiIcon type={visType.type.icon || 'empty'} size="l" color="success" />}
           className="aggBasedDialog__card"
         />
       </EuiFlexItem>

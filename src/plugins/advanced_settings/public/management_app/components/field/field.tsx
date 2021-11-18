@@ -8,6 +8,7 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import classNames from 'classnames';
+import 'react-ace';
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
 import 'brace/mode/json';

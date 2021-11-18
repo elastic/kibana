@@ -75,7 +75,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
                 aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
                   defaultMessage: 'Actions',
                 })}
-                color="subdued"
+                color="text"
                 iconType="boxesHorizontal"
                 onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                 data-test-subj="mlExplorerAnomalyPanelMenu"

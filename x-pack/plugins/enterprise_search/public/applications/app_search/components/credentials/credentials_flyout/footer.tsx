@@ -41,7 +41,7 @@ export const CredentialsFlyoutFooter: React.FC = () => {
           <EuiButton
             onClick={onApiTokenChange}
             fill
-            color="secondary"
+            color="success"
             iconType="check"
             data-test-subj="APIKeyActionButton"
           >

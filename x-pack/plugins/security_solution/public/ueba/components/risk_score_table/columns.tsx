@@ -27,7 +27,7 @@ export const getRiskScoreColumns = (): RiskScoreColumns => [
     field: 'node.host_name',
     name: i18n.NAME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: true,
     render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
@@ -63,7 +63,7 @@ export const getRiskScoreColumns = (): RiskScoreColumns => [
     field: 'node.risk_keyword',
     name: i18n.CURRENT_RISK,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (riskKeyword) => {
       if (riskKeyword != null) {

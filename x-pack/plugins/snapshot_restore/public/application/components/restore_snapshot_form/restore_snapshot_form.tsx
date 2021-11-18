@@ -158,7 +158,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                color="secondary"
+                color="success"
                 iconType="check"
                 onClick={() => executeRestore()}
                 isLoading={isSaving}

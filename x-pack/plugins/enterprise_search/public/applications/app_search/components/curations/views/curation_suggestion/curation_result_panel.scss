@@ -10,7 +10,7 @@
 }
 
 .curationResultPanel--suggested {
-  border: $euiBorderWidthThick solid $euiColorSecondary;
+  border: $euiBorderWidthThick solid $euiColorSuccess;
   background-color: tintOrShade($euiColorSuccess, 90%, 70%); // Copied from @elastit/eui/src/global_styling/variables/_panels.scss
 }
 

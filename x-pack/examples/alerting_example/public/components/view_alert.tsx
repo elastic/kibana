@@ -9,7 +9,7 @@ import React, { useState, useEffect, Fragment } from 'react';
 
 import {
   EuiText,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiCallOut,
   EuiTextColor,
   EuiDescriptionList,
@@ -106,6 +106,6 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
       )}
     </Fragment>
   ) : (
-    <EuiLoadingKibana size="xl" />
+    <EuiLoadingLogo logo="logoKibana" size="xl" />
   );
 });

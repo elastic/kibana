@@ -6,13 +6,13 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCodeEditor, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 
-import 'brace/theme/github';
 import { XJsonMode } from '@kbn/ace';
+import 'brace/theme/github';
 
 import './add_message_variables.scss';
-import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
+import { XJson, EuiCodeEditor } from '../../../../../../src/plugins/es_ui_shared/public';
 
 import { AddMessageVariables } from './add_message_variables';
 import { ActionVariable } from '../../../../alerting/common';
