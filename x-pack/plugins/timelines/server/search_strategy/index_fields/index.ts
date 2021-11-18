@@ -24,7 +24,7 @@ import {
   DELETED_SECURITY_SOLUTION_DATA_VIEW,
 } from '../../../common';
 import { StartPlugins } from '../../types';
-import { FieldSpec } from '../../../../../../src/plugins/data_views/common';
+import type { FieldSpec } from '../../../../../../src/plugins/data_views/common';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
