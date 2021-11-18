@@ -17,7 +17,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
   describe('lens app', () => {
     before(async () => {
       log.debug('Starting lens before method');
-      await browser.setWindowSize(1280, 800);
+      await browser.setWindowSize(1280, 1000);
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
