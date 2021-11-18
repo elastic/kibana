@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'alertsDemo';
-export const PLUGIN_NAME = 'alertsDemo';
+export const PLUGIN_ID = 'racExample';
+export const PLUGIN_NAME = 'racExample';

@@ -60,7 +60,7 @@ export const alertType: AlertType<
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
     state,
   }) {
-    const count = (state.count ?? 0) + 1;
+    const count = (state ? state.count ?? 0 : 0) + 1;
 
     range(instances)
       .map(() => uuid.v4())

@@ -11,7 +11,7 @@ import { IRouter } from '../../../../src/core/server';
 export function defineRoutes(router: IRouter) {
   router.get(
     {
-      path: '/api/alerts_demo/example',
+      path: '/api/rac_example/example',
       validate: false,
     },
     async (context, request, response) => {

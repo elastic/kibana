@@ -1,12 +1,12 @@
 {
-  "id": "alertsDemo",
+  "id": "racExample",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
-    "name": "Infra Monitoring UI",
-    "githubTeam": "Infra Monitoring UI"
+    "name": "Actionable Observability",
+    "githubTeam": "Actionable Observability"
   },
-  "description": "Alerts Demo",
+  "description": "RAC Example",
   "server": true,
   "ui": true,
   "requiredPlugins": ["navigation", "observability","kibanaReact", "triggersActionsUi", "alerting", "features", "developerExamples", "ruleRegistry"],

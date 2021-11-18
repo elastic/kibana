@@ -12,7 +12,7 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { AlertType } from '../../../../x-pack/plugins/alerting/server';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
-  ALERTS_DEMO_APP_ID,
+  RAC_EXAMPLE_APP_ID,
   AlwaysFiringParams,
   AlwaysFiringActionGroupIds,
 } from '../../common/constants';
@@ -71,7 +71,6 @@ export const createAlertsDemoExecutor = (libs: BackendLibs) =>
   >(async function ({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
-    state,
   }) {
     const { alertWithLifecycle } = services;
     const alertInstanceFactory: AlertInstanceFactory = (id, reason) =>
@@ -82,14 +81,11 @@ export const createAlertsDemoExecutor = (libs: BackendLibs) =>
         },
       });
 
-    const count = (state.count ?? 0) + 1;
     range(instances)
       .map(() => uuid.v4())
       .forEach((id: string) => {
         const tShirtSize = getTShirtSizeByIdAndThreshold(id, thresholds);
-        alertInstanceFactory(id, tShirtSize)
-          .replaceState({ triggerdOnCycle: count })
-          .scheduleActions(tShirtSize);
+        alertInstanceFactory(id, tShirtSize).scheduleActions(tShirtSize);
       });
   });
 
@@ -110,7 +106,7 @@ export const registerAlwaysFiringRuleType = (
     isExportable: true,
     executor: createAlertsDemoExecutor(libs),
     minimumLicenseRequired: 'basic',
-    producer: ALERTS_DEMO_APP_ID,
+    producer: RAC_EXAMPLE_APP_ID,
   });
 
 export const alertType: AlertType<
@@ -136,7 +132,7 @@ export const alertType: AlertType<
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
     state,
   }) {
-    const count = (state.count ?? 0) + 1;
+    const count = (state ? state.count ?? 0 : 0) + 1;
 
     range(instances)
       .map(() => uuid.v4())
@@ -151,5 +147,5 @@ export const alertType: AlertType<
       count,
     };
   },
-  producer: ALERTS_DEMO_APP_ID,
+  producer: RAC_EXAMPLE_APP_ID,
 };

@@ -17,11 +17,12 @@ import {
   AlertsDemoClientSetupDeps,
   AlertsDemoClientStartDeps,
 } from './types';
-import { ALERTS_DEMO_APP_ID } from '../common/constants';
+import { RAC_EXAMPLE_APP_ID } from '../common/constants';
 import { PLUGIN_NAME } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../src/core/public';
-// import { getAlertType as getAlwaysFiringAlertType } from './alert_types/always_firing';
 import { createAlwaysFiringAlertType } from './alert_types/always_firing';
+import image from './alerts_table.png';
+
 export class AlertsDemoPlugin implements AlertsDemoPluginClass {
   constructor() {}
 
@@ -52,9 +53,11 @@ export class AlertsDemoPlugin implements AlertsDemoPluginClass {
     // console.log(pluginsSetup.observability.observabilityRuleTypeRegistry.list(), '!!list');
     // pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(getAlwaysFiringAlertType());
     pluginsSetup.developerExamples.register({
-      appId: ALERTS_DEMO_APP_ID,
-      title: 'Alerts Demo example',
-      description: 'This alerting example walks you through how to set up a new rule.',
+      appId: RAC_EXAMPLE_APP_ID,
+      title: 'RAC example',
+      description:
+        'This example walks you through how to RAC register an Observability rule type, so that generated alerts get saved in the alerts-as-data indices and show up in the Alerts Observability table. Similar steps could be followed to RAC register rule types of other solutions as well.',
+      image,
       links: [
         {
           label: 'README',
@@ -67,7 +70,7 @@ export class AlertsDemoPlugin implements AlertsDemoPluginClass {
     });
     // Register an application into the side navigation menu
     core.application.register({
-      id: ALERTS_DEMO_APP_ID,
+      id: RAC_EXAMPLE_APP_ID,
       title: PLUGIN_NAME,
       category: DEFAULT_APP_CATEGORIES.observability,
       async mount(params: AppMountParameters) {

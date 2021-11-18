@@ -1,7 +1,7 @@
 {
-  "prefix": "alertsDemo",
+  "prefix": "racExample",
   "paths": {
-    "alertsDemo": "."
+    "racExample": "."
   },
   "translations": ["translations/ja-JP.json"]
 }

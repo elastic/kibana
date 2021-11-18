@@ -20,7 +20,7 @@ import {
   alertType as alwaysFiringAlert,
   registerAlwaysFiringRuleType,
 } from './alert_types/always_firing';
-import { ALERTS_DEMO_APP_ID } from '../common/constants';
+import { RAC_EXAMPLE_APP_ID } from '../common/constants';
 import { DEFAULT_APP_CATEGORIES } from '../../../src/core/utils/default_app_categories';
 import { RulesService } from './services';
 
@@ -31,7 +31,7 @@ export class AlertsDemoPlugin implements Plugin<void, void, AlertsDemoServerSetu
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.rules = new RulesService(ALERTS_DEMO_APP_ID, 'observability.alerts_demo', this.logger);
+    this.rules = new RulesService(RAC_EXAMPLE_APP_ID, 'observability.rac_example', this.logger);
   }
 
   public setup(core: CoreSetup, { alerting, features, ruleRegistry }: AlertsDemoServerSetupDeps) {
@@ -46,7 +46,7 @@ export class AlertsDemoPlugin implements Plugin<void, void, AlertsDemoServerSetu
     registerAlwaysFiringRuleType(alerting, this.libs);
     // alerting.registerType(alwaysFiringAlertType);
     features.registerKibanaFeature({
-      id: ALERTS_DEMO_APP_ID,
+      id: RAC_EXAMPLE_APP_ID,
       name: 'Alerts Demo examples',
       app: [],
       management: {

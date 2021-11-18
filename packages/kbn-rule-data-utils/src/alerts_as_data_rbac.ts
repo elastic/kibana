@@ -22,7 +22,7 @@ export const AlertConsumers = {
   OBSERVABILITY: 'observability',
   SIEM: 'siem',
   UPTIME: 'uptime',
-  ALERTS_DEMO: 'alerts_demo',
+  RAC_EXAMPLE: 'rac_example',
 } as const;
 export type AlertConsumers = typeof AlertConsumers[keyof typeof AlertConsumers];
 export type STATUS_VALUES = 'open' | 'acknowledged' | 'closed' | 'in-progress'; // TODO: remove 'in-progress' after migration to 'acknowledged'

@@ -7,7 +7,7 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
-import { ALERTS_DEMO_APP_ID } from '../../common/constants';
+import { RAC_EXAMPLE_APP_ID } from '../../common/constants';
 import { AlertsDemoClientStartDeps } from '../types';
 export const CreateRule = ({
   triggersActionsUi,
@@ -20,7 +20,7 @@ export const CreateRule = ({
   const CreateRuleFlyout = useMemo(
     () =>
       triggersActionsUi.getAddAlertFlyout({
-        consumer: ALERTS_DEMO_APP_ID,
+        consumer: RAC_EXAMPLE_APP_ID,
         onClose: onCloseRuleFlyout,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
