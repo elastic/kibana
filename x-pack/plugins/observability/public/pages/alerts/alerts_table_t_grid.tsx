@@ -41,6 +41,7 @@ import type {
   ActionProps,
   AlertWorkflowStatus,
   ColumnHeaderOptions,
+  ControlColumnProps,
   RowRenderer,
 } from '../../../../timelines/common';
 
@@ -336,11 +337,12 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     }
   }, []);
 
-  const leadingControlColumns = useMemo(() => {
+  const leadingControlColumns: ControlColumnProps[] = useMemo(() => {
     return [
       {
         id: 'expand',
         width: 120,
+        showCheckboxes: true,
         headerCellRender: () => {
           return <EventsThContent>{translations.alertsTable.actionsTextLabel}</EventsThContent>;
         },
