@@ -96,9 +96,7 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 
 export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
-  const url = new URL(
-    `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
-  );
+  const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
 
   setKibanaVersion(url);
 
