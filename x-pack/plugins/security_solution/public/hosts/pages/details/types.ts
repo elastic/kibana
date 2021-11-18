@@ -6,7 +6,7 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { HostsTableType } from '../../store/model';
 import { HostsQueryProps } from '../types';

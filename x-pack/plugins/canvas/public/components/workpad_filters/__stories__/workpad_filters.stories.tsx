@@ -22,3 +22,4 @@ storiesOf('components/WorkpadFilters/WorkpadFilters', module)
   .addDecorator(reduxDecorator({ elements }))
   .add('redux: default', () => <WorkpadFilters />)
   .add('redux: selected element with group', () => <WorkpadFilters element={elementWithGroup} />);
+

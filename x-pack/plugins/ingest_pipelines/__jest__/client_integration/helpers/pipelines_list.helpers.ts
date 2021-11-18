@@ -96,7 +96,7 @@ export const setup = async (): Promise<PipelineListTestBed> => {
 export type PipelineListTestSubjects =
   | 'appTitle'
   | 'documentationLink'
-  | 'createPipelineButton'
+  | 'createPipelineDropdown'
   | 'pipelinesTable'
   | 'pipelineDetails'
   | 'pipelineDetails.title'
