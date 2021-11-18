@@ -111,7 +111,11 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   getMbSizeExpression() {
     const rangeFieldMeta = this.getRangeFieldMeta();
     if (!this._isSizeDynamicConfigComplete() || !rangeFieldMeta) {
-      return null;
+      // return min of size to avoid flashing
+      // returning minimum allows "growing" of the symbols when the meta comes in
+      // A grow effect us less visually jarring as shrinking.
+      // especially relevant when displaying fine-grained grids using mvt
+      return this._options.minSize;
     }
 
     return this._getMbDataDrivenSize({
