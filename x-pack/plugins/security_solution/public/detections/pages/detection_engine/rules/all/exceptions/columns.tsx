@@ -15,7 +15,6 @@ import { PopoverItems, PopoverItemsProps } from '../../../../../../common/compon
 import { FormattedRelativePreferenceDate } from '../../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SpacedLinkAnchor } from '../../../../../../common/components/links';
-import { Spacer } from '../../../../../../common/components/page';
 
 import * as i18n from './translations';
 import { ExceptionListInfo } from './use_all_exception_lists';
