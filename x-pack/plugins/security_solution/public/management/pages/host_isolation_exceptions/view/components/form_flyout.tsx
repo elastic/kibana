@@ -22,10 +22,16 @@ import {
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { ServerApiError } from '../../../../../common/types';
+import { useMutation, useQueryClient } from 'react-query';
 import { Loader } from '../../../../../common/components/loader';
 import { useHttp, useToasts } from '../../../../../common/lib/kibana';
+import { ServerApiError } from '../../../../../common/types';
+import {
+  createHostIsolationExceptionItem,
+  updateOneHostIsolationExceptionItem,
+} from '../../service';
+import { useGetHostIsolationExceptionFormEntry } from '../hooks';
+import { HostIsolationExceptionsForm } from './form';
 import {
   getCreateErrorMessage,
   getCreationSuccessMessage,
@@ -33,13 +39,6 @@ import {
   getUpdateErrorMessage,
   getUpdateSuccessMessage,
 } from './translations';
-import { createEmptyHostIsolationException } from '../../utils';
-import { HostIsolationExceptionsForm } from './form';
-import {
-  createHostIsolationExceptionItem,
-  getOneHostIsolationExceptionItem,
-  updateOneHostIsolationExceptionItem,
-} from '../../service';
 
 export const HostIsolationExceptionsFormFlyout = memo(
   ({ onCancel, id }: { onCancel: () => void; id?: string }) => {
@@ -52,28 +51,17 @@ export const HostIsolationExceptionsFormFlyout = memo(
       CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
     >(undefined);
 
-    useQuery<UpdateExceptionListItemSchema | CreateExceptionListItemSchema, ServerApiError>(
-      ['hostIsolationExceptions', 'form', id],
-      async () => {
-        // for editing, fetch from the API
-        if (id !== undefined) {
-          return getOneHostIsolationExceptionItem(http, id);
-        }
-        // for adding, return a new empty object
-        return createEmptyHostIsolationException();
+    // Load the entry to create or edit
+    // NOTE: This form doesn't use the hook data directly
+    // because that data object will be mutated
+    useGetHostIsolationExceptionFormEntry({
+      id,
+      onSuccess: (data) => setException(data),
+      onError: (error) => {
+        toasts.addWarning(getLoadErrorMessage(error));
+        onCancel();
       },
-      {
-        refetchIntervalInBackground: false,
-        refetchOnWindowFocus: false,
-        onSuccess: (data) => {
-          setException(data);
-        },
-        onError: (error) => {
-          toasts.addWarning(getLoadErrorMessage(error));
-          onCancel();
-        },
-      }
-    );
+    });
 
     const mutation = useMutation(
       () => {
