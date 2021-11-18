@@ -67,3 +67,39 @@ export function addMessages(
 
   return { ...baseContext, title, message };
 }
+
+export function addRecoveryMessages(
+  alertInfo: AlertInfo,
+  baseContext: BaseActionContext,
+  params: Params
+): ActionContext {
+  const title = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.alertTypeRecoveryContextSubjectTitle',
+    {
+      defaultMessage: 'alert {name} group {group} recovered',
+      values: {
+        name: alertInfo.name,
+        group: baseContext.group,
+      },
+    }
+  );
+
+  const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
+  const message = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.alertTypeRecoveryContextMessageDescription',
+    {
+      defaultMessage: `alert '{name}' is recovered for group '{group}':
+- Conditions Met: {conditions} over {window}
+- Timestamp: {date}`,
+      values: {
+        name: alertInfo.name,
+        group: baseContext.group,
+        conditions: baseContext.conditions,
+        window,
+        date: baseContext.date,
+      },
+    }
+  );
+
+  return { ...baseContext, title, message };
+}

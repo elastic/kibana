@@ -33,7 +33,12 @@ export type PublicAlertInstance<
   ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
   AlertInstance<State, Context, ActionGroupIds>,
-  'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
+  | 'getState'
+  | 'replaceState'
+  | 'scheduleActions'
+  | 'scheduleActionsWithSubGroup'
+  | 'getContext'
+  | 'setContext'
 >;
 
 export class AlertInstance<
@@ -44,10 +49,12 @@ export class AlertInstance<
   private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
   private meta: AlertInstanceMeta;
   private state: State;
+  private context: Context;
 
   constructor({ state, meta = {} }: RawAlertInstance = {}) {
     this.state = (state || {}) as State;
     this.meta = meta;
+    this.context = {} as Context;
   }
 
   hasScheduledActions() {
@@ -134,8 +141,13 @@ export class AlertInstance<
     return this.state;
   }
 
+  getContext() {
+    return this.context;
+  }
+
   scheduleActions(actionGroup: ActionGroupIds, context: Context = {} as Context) {
     this.ensureHasNoScheduledActions();
+    this.setContext(context);
     this.scheduledExecutionOptions = {
       actionGroup,
       context,
@@ -150,6 +162,7 @@ export class AlertInstance<
     context: Context = {} as Context
   ) {
     this.ensureHasNoScheduledActions();
+    this.setContext(context);
     this.scheduledExecutionOptions = {
       actionGroup,
       subgroup,
@@ -167,6 +180,11 @@ export class AlertInstance<
 
   replaceState(state: State) {
     this.state = state;
+    return this;
+  }
+
+  setContext(context: Context) {
+    this.context = context;
     return this;
   }
 

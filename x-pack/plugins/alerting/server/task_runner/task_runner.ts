@@ -320,6 +320,26 @@ export class TaskRunner<
               InstanceContext,
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >(alertInstances),
+            recoveryUtils: {
+              getRecoveredAlertIds: (): string[] =>
+                getRecoveredAlertIds(alertInstances, originalAlertInstanceIds),
+
+              setRecoveryContext: (id: string, context: InstanceContext) => {
+                const recoveryAlertIds = getRecoveredAlertIds(
+                  alertInstances,
+                  originalAlertInstanceIds
+                );
+
+                // check that specified ID is actually a recovered alert
+                if (recoveryAlertIds.includes(id) && alertInstances[id]) {
+                  alertInstances[id].setContext(context);
+                } else {
+                  this.logger.debug(
+                    `Unable to set recovery context for ${id} because it is not considered a recovered alert.`
+                  );
+                }
+              },
+            },
           },
           params,
           state: alertTypeState as State,
@@ -373,11 +393,7 @@ export class TaskRunner<
       (alertInstance: AlertInstance<InstanceState, InstanceContext>) =>
         alertInstance.hasScheduledActions()
     );
-    const recoveredAlertInstances = pickBy(
-      alertInstances,
-      (alertInstance: AlertInstance<InstanceState, InstanceContext>, id) =>
-        !alertInstance.hasScheduledActions() && originalAlertInstanceIds.has(id)
-    );
+    const recoveredAlertInstances = getRecoveredAlerts(alertInstances, originalAlertInstanceIds);
 
     logActiveAndRecoveredInstances({
       logger: this.logger,
@@ -996,7 +1012,7 @@ function scheduleActionsForRecoveredInstances<
       instance.unscheduleActions();
       executionHandler({
         actionGroup: recoveryActionGroup.id,
-        context: {},
+        context: instance.getContext(),
         state: {},
         alertInstanceId: id,
       });
@@ -1052,6 +1068,31 @@ function logActiveAndRecoveredInstances<
       } recovered alert instances: ${JSON.stringify(recoveredInstanceIds)}`
     );
   }
+}
+
+function getRecoveredAlerts<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+>(
+  alerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>,
+  originalAlertIds: Set<string>
+): Dictionary<AlertInstance<InstanceState, InstanceContext>> {
+  const recoveredAlertInstances = pickBy(
+    alerts,
+    (alert: AlertInstance<InstanceState, InstanceContext>, id) =>
+      !alert.hasScheduledActions() && originalAlertIds.has(id)
+  );
+  return recoveredAlertInstances;
+}
+
+function getRecoveredAlertIds<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+>(
+  alerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>,
+  originalAlertIds: Set<string>
+): string[] {
+  return Object.keys(getRecoveredAlerts(alerts, originalAlertIds));
 }
 
 /**

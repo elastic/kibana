@@ -75,6 +75,10 @@ export interface AlertServices<
   alertInstanceFactory: (
     id: string
   ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+  recoveryUtils: {
+    getRecoveredAlertIds: () => string[];
+    setRecoveryContext: (id: string, context: InstanceContext) => void;
+  };
 }
 
 export interface AlertExecutorOptions<
