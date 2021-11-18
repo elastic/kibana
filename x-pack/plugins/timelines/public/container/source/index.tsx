@@ -21,11 +21,9 @@ import {
 } from '../../../common';
 import * as i18n from './translations';
 
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../src/plugins/data/public';
+import type { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/common';
+
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
