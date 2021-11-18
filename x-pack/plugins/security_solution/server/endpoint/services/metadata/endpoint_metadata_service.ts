@@ -12,12 +12,14 @@ import {
   SavedObjectsServiceStart,
 } from 'kibana/server';
 
+import { TypeOf } from '@kbn/config-schema';
 import { TransportResult } from '@elastic/elasticsearch';
 import { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   HostInfo,
   HostMetadata,
   MaybeImmutable,
+  MetadataListResponse,
   PolicyData,
   UnitedAgentMetadata,
 } from '../../../../common/endpoint/types';
@@ -52,10 +54,10 @@ import {
 } from '../../utils';
 import { EndpointError } from '../../errors';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
-import { GetHostMetadataListQuery } from '../../types';
 import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
 import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
+import { GetMetadataListRequestSchemaV2 } from '../../routes/metadata';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -401,8 +403,8 @@ export class EndpointMetadataService {
    */
   async getHostMetadataList(
     esClient: ElasticsearchClient,
-    queryOptions: GetHostMetadataListQuery = {}
-  ): Promise<{ data: HostInfo[]; total: number; page: number; pageSize: number }> {
+    queryOptions: TypeOf<typeof GetMetadataListRequestSchemaV2.query>
+  ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
     const endpointPolicies = await getAllEndpointPackagePolicies(
       this.packagePolicyService,
       this.DANGEROUS_INTERNAL_SO_CLIENT
@@ -474,8 +476,6 @@ export class EndpointMetadataService {
 
     return {
       data: hosts,
-      pageSize: unitedIndexQuery.size,
-      page: unitedIndexQuery.from + 1,
       total: (docsCount as unknown as SearchTotalHits).value,
     };
   }
