@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export class CustomBadRequestError extends Error {
-  readonly statusCode: number = 400;
-  constructor(message: string) {
+export class CustomRequestError extends Error {
+  constructor({ message, name }: { message: string; name: string; readonly statusCode: number }) {
     super(message);
-    this.name = 'CustomBadRequestError';
+    this.name = name;
     this.message = message;
   }
 }

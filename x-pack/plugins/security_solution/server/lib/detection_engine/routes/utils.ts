@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { has, snakeCase } from 'lodash/fp';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { SanitizedAlert } from '../../../../../alerting/common';
@@ -19,7 +18,7 @@ import { RulesClient } from '../../../../../alerting/server';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
 import { RuleParams } from '../schemas/rule_schemas';
-import { CustomBadRequestError } from '../../../utils/custom_bad_request_error';
+import { CustomRequestError } from '../../../utils/custom_request_error';
 
 export interface OutputError {
   message: string;
@@ -105,10 +104,10 @@ export const transformBulkError = (
   ruleId: string,
   err: Error & { statusCode?: number }
 ): BulkError => {
-  if (err instanceof CustomBadRequestError) {
+  if (err instanceof CustomRequestError) {
     return createBulkErrorObject({
       ruleId,
-      statusCode: err.statusCode,
+      statusCode: err.statusCode ?? 400,
       message: err.message,
     });
   } else if (err instanceof BadRequestError) {
@@ -255,7 +254,7 @@ export const getFailingRules = async (
         };
       }, {});
   } catch (exc) {
-    if (Boom.isBoom(exc)) {
+    if (exc instanceof CustomRequestError) {
       throw exc;
     }
     throw new Error(`Failed to get executionStatus with RulesClient: ${(exc as Error).message}`);

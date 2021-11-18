@@ -18,7 +18,7 @@ import { SetupPlugins } from '../../../../../plugin';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { CustomBadRequestError } from '../../../../../utils/custom_bad_request_error';
+import { CustomRequestError } from '../../../../../utils/custom_request_error';
 import { buildFrameworkRequest, escapeHatch, throwErrors } from '../../../utils/common';
 import { getAllTimeline } from '../../../saved_object/timelines';
 import { getTimelinesQuerySchema } from '../../../schemas/timelines';
@@ -39,12 +39,13 @@ export const getTimelinesRoute = (
       },
     },
     async (context, request, response) => {
-      const customBadRequestError = (message: string) => new CustomBadRequestError(message);
+      const customRequestError = (message: string) =>
+        new CustomRequestError({ message, name: 'Bad Request', statusCode: 400 });
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const queryParams = pipe(
           getTimelinesQuerySchema.decode(request.query),
-          fold(throwErrors(customBadRequestError), identity)
+          fold(throwErrors(customRequestError), identity)
         );
         const onlyUserFavorite = queryParams?.only_user_favorite === 'true' ? true : false;
         const pageSize = queryParams?.page_size ? parseInt(queryParams.page_size, 10) : null;
