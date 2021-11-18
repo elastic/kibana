@@ -6,7 +6,6 @@
  */
 
 import { getLastSuccessfulStepParams } from './get_last_successful_check';
-import { REMOVE_NON_SUMMARY_BROWSER_CHECKS } from '../helper/filter_heartbeat_summary';
 
 describe('getLastSuccessfulStep', () => {
   describe('getLastSuccessfulStepParams', () => {
