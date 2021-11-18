@@ -201,7 +201,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
       expect(finalRawResponse?.errorHistogram?.length).to.be(101);
       expect(finalRawResponse?.overallHistogram?.length).to.be(101);
-      expect(finalRawResponse?.fieldStats?.length).to.be(26);
+      expect(finalRawResponse?.fieldStats?.length).to.be(fieldsToSample.size);
 
       expect(finalRawResponse?.failedTransactionsCorrelations?.length).to.eql(
         30,

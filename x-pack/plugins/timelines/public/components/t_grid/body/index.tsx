@@ -32,7 +32,11 @@ import React, {
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
-import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
+} from '@kbn/rule-data-utils/technical_field_names';
+import { Filter } from '@kbn/es-query';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -74,7 +78,6 @@ import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/com
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { useDataGridHeightHack } from './height_hack';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 import { REMOVE_COLUMN } from './column_headers/translations';
 
 const StatefulAlertStatusBulkActions = lazy(
