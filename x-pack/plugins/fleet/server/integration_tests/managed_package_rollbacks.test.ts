@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import Path from 'path';
+
 import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
 
 let kibanaRoot: ReturnType<typeof kbnTestServer.createRoot>;
 let esServer: kbnTestServer.TestElasticsearchUtils;
+
+const logFilePath = Path.join(__dirname, 'logs.log');
 
 describe('managed package rollbacks', () => {
   const startServers = async () => {
@@ -21,10 +25,27 @@ describe('managed package rollbacks', () => {
       },
     });
 
-    kibanaRoot = kbnTestServer.createRoot(
+    kibanaRoot = kbnTestServer.createRootWithCorePlugins(
       {
         migrations: {
-          skip: true,
+          skip: false,
+        },
+        logging: {
+          appenders: {
+            file: {
+              type: 'file',
+              fileName: logFilePath,
+              layout: {
+                type: 'json',
+              },
+            },
+          },
+          loggers: [
+            {
+              name: 'root',
+              appenders: ['file'],
+            },
+          ],
         },
       },
       { oss: false }
