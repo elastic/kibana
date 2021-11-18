@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   EuiBasicTable,
   EuiButton,
@@ -48,7 +49,10 @@ import {
   AgentHealth,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
+  FleetServerCloudUnhealthyCallout,
+  FleetServerOnPremUnhealthyCallout,
 } from '../components';
+import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/bulk_actions';
@@ -145,13 +149,15 @@ function safeMetadata(val: any) {
 }
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
-  const { notifications } = useStartServices();
+  const { notifications, cloud } = useStartServices();
   useBreadcrumbs('agent_list');
-  const { getHref } = useLink();
+  const { getHref, getPath } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
   const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();
+
+  const history = useHistory();
 
   // Agent data states
   const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
@@ -369,6 +375,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     );
   }, [agentToUnenroll, agentPoliciesIndexedById]);
 
+  // Fleet server unhealthy status
+  const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
+  const onClickAddFleetServer = useCallback(() => {
+    const defaultPolicy = agentPolicies.find((policy) => policy.is_default_fleet_server);
+    if (defaultPolicy) {
+      history.push(
+        getPath('policy_details', { policyId: defaultPolicy.id }) + '?openEnrollmentFlyout=true'
+      );
+    }
+  }, [history, agentPolicies, getPath]);
+
   const columns = [
     {
       field: 'local_metadata.host.hostname',
@@ -547,6 +564,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             version={kibanaVersion}
           />
         </EuiPortal>
+      )}
+
+      {isFleetServerUnhealthy && (
+        <>
+          {cloud?.deploymentUrl ? (
+            <FleetServerCloudUnhealthyCallout deploymentUrl={cloud.deploymentUrl} />
+          ) : (
+            <FleetServerOnPremUnhealthyCallout onClickAddFleetServer={onClickAddFleetServer} />
+          )}
+          <EuiSpacer size="l" />
+        </>
       )}
 
       {/* Search and filter bar */}
