@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
 
-import { esQuery, Filter } from '../../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 import { TestProviders } from '../../../../common/mock';
 import { SecurityPageName } from '../../../../app/types';
 
@@ -133,10 +133,11 @@ describe('AlertsHistogramPanel', () => {
   describe('Query', () => {
     it('it render with a illegal KQL', async () => {
       await act(async () => {
-        const spyOnBuildEsQuery = jest.spyOn(esQuery, 'buildEsQuery');
-        spyOnBuildEsQuery.mockImplementation(() => {
-          throw new Error('Something went wrong');
-        });
+        jest.mock('@kbn/es-query', () => ({
+          buildEsQuery: jest.fn().mockImplementation(() => {
+            throw new Error('Something went wrong');
+          }),
+        }));
         const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
         const wrapper = mount(
           <TestProviders>
