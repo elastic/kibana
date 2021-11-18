@@ -10,6 +10,7 @@ import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
+
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
@@ -27,6 +28,7 @@ import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import { useCreateFieldButton } from '../../../timelines/components/create_field_button';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -164,6 +166,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, [id, timelineQuery, globalQuery]);
   const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
 
+  const createFieldComponent = useCreateFieldButton(scopeId, id);
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -206,6 +210,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             trailingControlColumns,
             type: 'embedded',
             unit,
+            createFieldComponent,
           })}
         </InspectButtonContainer>
       </FullScreenContainer>

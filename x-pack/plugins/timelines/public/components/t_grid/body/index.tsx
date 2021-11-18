@@ -50,6 +50,7 @@ import {
   TimelineTabs,
   SetEventsLoading,
   SetEventsDeleted,
+  CreateFieldComponentType,
 } from '../../../../common/types/timeline';
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
@@ -88,6 +89,7 @@ interface OwnProps {
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
+  createFieldComponent?: CreateFieldComponentType;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
   filters?: Filter[];
@@ -156,6 +158,7 @@ const hasCellActions = (columnId?: string) =>
 const transformControlColumns = ({
   columnHeaders,
   controlColumns,
+  createFieldComponent,
   data,
   isEventViewer = false,
   loadingEventIds,
@@ -177,6 +180,7 @@ const transformControlColumns = ({
 }: {
   columnHeaders: ColumnHeaderOptions[];
   controlColumns: ControlColumnProps[];
+  createFieldComponent?: CreateFieldComponentType;
   data: TimelineItem[];
   isEventViewer?: boolean;
   loadingEventIds: string[];
@@ -222,6 +226,7 @@ const transformControlColumns = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
+                createFieldComponent={createFieldComponent}
               />
             )}
           </>
@@ -303,6 +308,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     bulkActions = true,
     clearSelected,
     columnHeaders,
+    createFieldComponent,
     data,
     defaultCellActions,
     filterQuery,
@@ -486,6 +492,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 <StatefulFieldsBrowser
                   data-test-subj="field-browser"
                   browserFields={browserFields}
+                  createFieldComponent={createFieldComponent}
                   timelineId={id}
                   columnHeaders={columnHeaders}
                 />
@@ -522,6 +529,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         additionalControls,
         browserFields,
         columnHeaders,
+        createFieldComponent,
       ]
     );
 
@@ -611,6 +619,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         transformControlColumns({
           columnHeaders,
           controlColumns,
+          createFieldComponent,
           data,
           isEventViewer,
           loadingEventIds,
@@ -636,6 +645,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       leadingControlColumns,
       trailingControlColumns,
       columnHeaders,
+      createFieldComponent,
       data,
       isEventViewer,
       id,
