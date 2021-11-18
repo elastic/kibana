@@ -10,7 +10,7 @@ import { EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { useDispatch } from 'react-redux';
-import { IndexPattern, IndexPatternField } from '../../../../../../../src/plugins/data/public';
+import { DataView, DataViewField } from '../../../../../../../src/plugins/data/common';
 import { useKibana } from '../../../common/lib/kibana';
 
 import * as i18n from './translations';
@@ -34,7 +34,7 @@ const StyledButton = styled(EuiButton)`
 
 export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
   ({ selectedDataViewId, onClick: onClickParam, timelineId }) => {
-    const [dataView, setDataView] = useState<IndexPattern | null>(null);
+    const [dataView, setDataView] = useState<DataView | null>(null);
     const dispatch = useDispatch();
 
     const { indexFieldsSearch } = useDataView();
@@ -53,7 +53,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       if (dataView) {
         indexPatternFieldEditor?.openEditor({
           ctx: { indexPattern: dataView },
-          onSave: (field: IndexPatternField) => {
+          onSave: (field: DataViewField) => {
             // Fetch the updated list of fields
             indexFieldsSearch(selectedDataViewId);
 
