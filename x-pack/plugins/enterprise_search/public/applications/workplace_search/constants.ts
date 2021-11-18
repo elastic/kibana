@@ -42,6 +42,9 @@ export const NAV = {
   ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
     defaultMessage: 'Users and roles',
   }),
+  API_KEYS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.apiKeys', {
+    defaultMessage: 'Api keys',
+  }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
   }),
