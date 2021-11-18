@@ -258,9 +258,9 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
               value="true"
               checked={!!form.values.caCert}
               onChange={() => {
-                const intermediateCa = certificateChain[Math.min(1, certificateChain.length - 1)];
+                const rootCa = certificateChain[certificateChain.length - 1];
                 form.setTouched('caCert');
-                form.setValue('caCert', form.values.caCert ? '' : intermediateCa.raw);
+                form.setValue('caCert', form.values.caCert ? '' : rootCa.raw);
               }}
             >
               <CertificateChain certificateChain={certificateChain} />
