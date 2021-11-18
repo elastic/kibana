@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
+import * as reactTestingLibrary from '@testing-library/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { I18nProvider } from '@kbn/i18n/react';
-import { FleetEventFiltersCard } from './fleet_event_filters_card';
-import * as reactTestingLibrary from '@testing-library/react';
-import { EventFiltersHttpService } from '../../../../../event_filters/service';
-import { useToasts } from '../../../../../../../common/lib/kibana';
-import { getMockTheme } from '../../../../../../../../public/common/lib/kibana/kibana_react.mock';
 import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
+import { getMockTheme } from '../../../../../../../../public/common/lib/kibana/kibana_react.mock';
+import { useToasts } from '../../../../../../../common/lib/kibana';
+import { getHostIsolationExceptionSummary } from '../../../../../host_isolation_exceptions/service';
+import { FleetHostIsolationExceptionsCard } from './fleet_host_isolation_exceptions_card';
 
 jest.mock('./exception_items_summary');
-jest.mock('../../../../../event_filters/service');
+jest.mock('../../../../../host_isolation_exceptions/service');
 
 jest.mock('../../../../../../../../../../../src/plugins/kibana_react/public', () => {
   const originalModule = jest.requireActual(
@@ -47,7 +47,7 @@ const mockTheme = getMockTheme({
   },
 });
 
-const EventFiltersHttpServiceMock = EventFiltersHttpService as jest.Mock;
+const getHostIsolationExceptionSummaryMock = getHostIsolationExceptionSummary as jest.Mock;
 const useToastsMock = useToasts as jest.Mock;
 
 const summary: GetExceptionSummaryResponse = {
@@ -57,7 +57,7 @@ const summary: GetExceptionSummaryResponse = {
   total: 7,
 };
 
-describe('Fleet event filters card', () => {
+describe('Fleet host isolation exceptions card filters card', () => {
   let promise: Promise<GetExceptionSummaryResponse>;
   let addDanger: jest.Mock = jest.fn();
   const renderComponent: () => Promise<reactTestingLibrary.RenderResult> = async () => {
@@ -67,7 +67,9 @@ describe('Fleet event filters card', () => {
       </I18nProvider>
     );
     // @ts-expect-error TS2739
-    const component = reactTestingLibrary.render(<FleetEventFiltersCard />, { wrapper: Wrapper });
+    const component = reactTestingLibrary.render(<FleetHostIsolationExceptionsCard />, {
+      wrapper: Wrapper,
+    });
     try {
       // @ts-expect-error TS2769
       await reactTestingLibrary.act(() => promise);
@@ -88,28 +90,20 @@ describe('Fleet event filters card', () => {
     addDanger = jest.fn();
   });
   afterEach(() => {
-    EventFiltersHttpServiceMock.mockReset();
+    getHostIsolationExceptionSummaryMock.mockReset();
   });
   it('should render correctly', async () => {
-    EventFiltersHttpServiceMock.mockImplementationOnce(() => {
-      return {
-        getSummary: () => jest.fn(() => promise),
-      };
-    });
+    getHostIsolationExceptionSummaryMock.mockReturnValueOnce(promise);
     const component = await renderComponent();
-    expect(component.getByText('Event filters')).not.toBeNull();
+    expect(component.getByText('Host isolation exceptions')).not.toBeNull();
     expect(component.getByText('Manage')).not.toBeNull();
   });
   it('should render an error toast when api call fails', async () => {
     expect(addDanger).toBeCalledTimes(0);
     promise = Promise.reject(new Error('error test'));
-    EventFiltersHttpServiceMock.mockImplementationOnce(() => {
-      return {
-        getSummary: () => promise,
-      };
-    });
+    getHostIsolationExceptionSummaryMock.mockReturnValueOnce(promise);
     const component = await renderComponent();
-    expect(component.getByText('Event filters')).not.toBeNull();
+    expect(component.getByText('Host isolation exceptions')).not.toBeNull();
     expect(component.getByText('Manage')).not.toBeNull();
     await reactTestingLibrary.waitFor(() => expect(addDanger).toBeCalledTimes(1));
   });
