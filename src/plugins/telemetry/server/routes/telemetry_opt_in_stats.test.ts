@@ -40,7 +40,7 @@ describe('sendTelemetryOptInStatus', () => {
     expect(fetch).toBeCalledTimes(1);
     expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "https://telemetry.elastic.co/v3/send/kibana-opt_in_status",
+        "https://telemetry.elastic.co/opt_in_status/v2/send",
         Object {
           "body": "mock_opt_in_hashed_value",
           "headers": Object {
@@ -71,7 +71,7 @@ describe('sendTelemetryOptInStatus', () => {
     expect(fetch).toBeCalledTimes(1);
     expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "https://telemetry-staging.elastic.co/v3/send/kibana-opt_in_status",
+        "https://telemetry-staging.elastic.co/opt_in_status/v2/send",
         Object {
           "body": "mock_opt_in_hashed_value",
           "headers": Object {
