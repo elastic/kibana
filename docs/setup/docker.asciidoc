@@ -106,7 +106,7 @@ environment variables to define settings.
 ==== Bind-mounted configuration
 
 One way to configure Kibana on Docker is to provide `kibana.yml` via bind-mounting.
-With +docker-compose+, the bind-mount can be specified like this:
+With `docker-compose`, the bind-mount can be specified like this:
 
 ["source","yaml",subs="attributes"]
 --------------------------------------------
