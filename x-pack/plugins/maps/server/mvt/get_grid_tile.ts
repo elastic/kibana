@@ -23,6 +23,7 @@ export async function getEsGridTile({
   z,
   requestBody = {},
   requestType = RENDER_AS.POINT,
+  gridPrecision,
 }: {
   x: number;
   y: number;
@@ -33,12 +34,13 @@ export async function getEsGridTile({
   logger: Logger;
   requestBody: any;
   requestType: RENDER_AS.GRID | RENDER_AS.POINT;
+  gridPrecision: number;
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
     const body = {
       size: 0, // no hits
-      grid_precision: 8,
+      grid_precision: gridPrecision,
       exact_bounds: false,
       extent: 4096, // full resolution,
       query: requestBody.query,

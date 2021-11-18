@@ -52,8 +52,6 @@ type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType'>;
 
 const ES_MVT_AGGS_LAYER_NAME = 'aggs';
 
-export const MAX_GEOTILE_LEVEL = 29;
-
 export const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
   defaultMessage: 'Clusters and grids',
 });
@@ -146,7 +144,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   isGeoGridPrecisionAware(): boolean {
-    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+    if (this.isMvt()) {
       // MVT gridded data should not bootstrap each time the precision changes
       // mapbox-gl needs to handle this
       return false;
@@ -165,16 +163,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   getGeoGridPrecision(zoom: number): number {
-    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
-      // The target-precision needs to be determined server side.
-      return NaN;
-    }
-
-    const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
-    return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
-  }
-
-  _getGeoGridPrecisionResolutionDelta() {
     if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
       return 2;
     }
@@ -187,14 +175,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       return 4;
     }
 
-    throw new Error(
-      i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
-        defaultMessage: `Grid resolution param not recognized: {resolution}`,
-        values: {
-          resolution: this._descriptor.resolution,
-        },
-      })
-    );
+    return 8;
   }
 
   async _compositeAggRequest({
@@ -443,6 +424,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     const urlTemplate = `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
+&gridPrecision=${this.getGeoGridPrecision()}\
 &requestBody=${risonDsl}\
 &requestType=${requestType}`;
 
@@ -456,7 +438,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   isFilterByMapBounds(): boolean {
-    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+    if (this.isMvt()) {
       // MVT gridded data. Should exclude bounds-filter from ES-DSL
       return false;
     } else {
