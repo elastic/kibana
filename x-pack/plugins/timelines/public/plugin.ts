@@ -48,8 +48,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
           } else {
             if (props.onStateChange) {
               this._storeUnsubscribe = this._store.subscribe(
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                throttle(() => props.onStateChange!(getState()), 500)
+                throttle(() => props.onStateChange(getState()), 500)
               );
             }
           }
