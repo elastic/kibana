@@ -29,7 +29,7 @@ import {
   isEsIndices,
   isPostTransformsPreviewResponseSchema,
 } from '../../../../../../common/api_schemas/type_guards';
-import { TransformId, TransformPivotConfig } from '../../../../../../common/types/transform';
+import { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -158,7 +158,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             ),
           });
         } else {
-          setTransformIds(resp.transforms.map((transform: TransformPivotConfig) => transform.id));
+          setTransformIds(resp.transforms.map((transform) => transform.id));
         }
 
         const indices = await api.getEsIndices();
@@ -292,6 +292,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         touched: true,
         valid,
         indexPatternTimeField,
+        _meta: defaults._meta,
       });
       // custom comparison
       /* eslint-disable react-hooks/exhaustive-deps */

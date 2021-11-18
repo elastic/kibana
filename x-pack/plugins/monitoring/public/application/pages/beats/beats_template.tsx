@@ -10,26 +10,38 @@ import { PageTemplate } from '../page_template';
 import { TabMenuItem, PageTemplateProps } from '../page_template';
 
 interface BeatsTemplateProps extends PageTemplateProps {
-  cluster: any;
+  instance?: any;
 }
 
-export const BeatsTemplate: React.FC<BeatsTemplateProps> = ({ cluster, ...props }) => {
-  const tabs: TabMenuItem[] = [
-    {
+export const BeatsTemplate: React.FC<BeatsTemplateProps> = ({ instance, ...props }) => {
+  const tabs: TabMenuItem[] = [];
+
+  if (!instance) {
+    tabs.push({
       id: 'overview',
       label: i18n.translate('xpack.monitoring.beatsNavigation.overviewLinkText', {
         defaultMessage: 'Overview',
       }),
       route: '/beats',
-    },
-    {
+      testSubj: 'beatsOverviewPage',
+    });
+    tabs.push({
       id: 'instances',
       label: i18n.translate('xpack.monitoring.beatsNavigation.instancesLinkText', {
         defaultMessage: 'Instances',
       }),
       route: '/beats/beats',
-    },
-  ];
+      testSubj: 'beatsListingPage',
+    });
+  } else {
+    tabs.push({
+      id: 'overview',
+      label: i18n.translate('xpack.monitoring.beatsNavigation.instance.overviewLinkText', {
+        defaultMessage: 'Overview',
+      }),
+      route: `/beats/beat/${instance}`,
+    });
+  }
 
   return <PageTemplate {...props} tabs={tabs} product="beats" />;
 };

@@ -38,7 +38,7 @@ it('produces the right watch and ignore list', () => {
   expect(ignorePaths).toMatchInlineSnapshot(`
     Array [
       /\\[\\\\\\\\\\\\/\\]\\(\\\\\\.\\.\\*\\|node_modules\\|bower_components\\|target\\|public\\|__\\[a-z0-9_\\]\\+__\\|coverage\\)\\(\\[\\\\\\\\\\\\/\\]\\|\\$\\)/,
-      /\\\\\\.test\\\\\\.\\(js\\|tsx\\?\\)\\$/,
+      /\\\\\\.\\(test\\|spec\\)\\\\\\.\\(js\\|ts\\|tsx\\)\\$/,
       /\\\\\\.\\(md\\|sh\\|txt\\)\\$/,
       /debug\\\\\\.log\\$/,
       <absolute path>/src/plugins/*/test/**,
@@ -75,6 +75,7 @@ it('produces the right watch and ignore list', () => {
       <absolute path>/x-pack/plugins/security_solution/scripts,
       <absolute path>/x-pack/plugins/security_solution/server/lib/detection_engine/scripts,
       <absolute path>/x-pack/plugins/metrics_entities/server/scripts,
+      <absolute path>/x-pack/plugins/uptime/e2e,
     ]
   `);
 });

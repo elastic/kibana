@@ -33,6 +33,7 @@ export type MetricThresholdAlertTypeParams = Record<string, any>;
 export type MetricThresholdAlertTypeState = AlertTypeState & {
   groups: string[];
   groupBy?: string | string[];
+  filterQuery?: string;
 };
 export type MetricThresholdAlertInstanceState = AlertInstanceState; // no specific instace state used
 export type MetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instace state used
@@ -74,10 +75,18 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         },
       });
 
-    const { sourceId, alertOnNoData } = params as {
+    const {
+      sourceId,
+      alertOnNoData,
+      alertOnGroupDisappear: _alertOnGroupDisappear,
+    } = params as {
       sourceId?: string;
       alertOnNoData: boolean;
+      alertOnGroupDisappear: boolean | undefined;
     };
+
+    // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
+    const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
 
     const source = await libs.sources.getSourceConfiguration(
       savedObjectsClient,
@@ -86,12 +95,16 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const config = source.configuration;
 
     const previousGroupBy = state.groupBy;
-    const prevGroups = isEqual(previousGroupBy, params.groupBy)
-      ? // Filter out the * key from the previous groups, only include it if it's one of
-        // the current groups. In case of a groupBy alert that starts out with no data and no
-        // groups, we don't want to persist the existence of the * alert instance
-        state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
-      : [];
+    const previousFilterQuery = state.filterQuery;
+    const prevGroups =
+      alertOnGroupDisappear &&
+      isEqual(previousGroupBy, params.groupBy) &&
+      isEqual(previousFilterQuery, params.filterQuery)
+        ? // Filter out the * key from the previous groups, only include it if it's one of
+          // the current groups. In case of a groupBy alert that starts out with no data and no
+          // groups, we don't want to persist the existence of the * alert instance
+          state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
+        : [];
 
     const alertResults = await evaluateAlert(
       services.scopedClusterClient.asCurrentUser,
@@ -105,6 +118,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     // Merge the list of currently fetched groups and previous groups, and uniquify them. This is necessary for reporting
     // no data results on groups that get removed
     const groups = [...new Set([...prevGroups, ...resultGroups])];
+
+    const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
 
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
@@ -132,9 +147,10 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
         reason = alertResults
           .map((result) =>
-            buildFiredAlertReason(
-              formatAlertResult(result[group], nextState === AlertStates.WARNING)
-            )
+            buildFiredAlertReason({
+              ...formatAlertResult(result[group], nextState === AlertStates.WARNING),
+              group,
+            })
           )
           .join('\n');
         /*
@@ -147,11 +163,30 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         //   .map((result) => buildRecoveredAlertReason(formatAlertResult(result[group])))
         //   .join('\n');
       }
-      if (alertOnNoData) {
+
+      /* NO DATA STATE HANDLING
+       *
+       * - `alertOnNoData` does not indicate IF the alert's next state is No Data, but whether or not the user WANTS TO BE ALERTED
+       *   if the state were No Data.
+       * - `alertOnGroupDisappear`, on the other hand, determines whether or not it's possible to return a No Data state
+       *   when a group disappears.
+       *
+       * This means we need to handle the possibility that `alertOnNoData` is false, but `alertOnGroupDisappear` is true
+       *
+       * nextState === NO_DATA would be true on both { '*': No Data } or, e.g. { 'a': No Data, 'b': OK, 'c': OK }, but if the user
+       * has for some reason disabled `alertOnNoData` and left `alertOnGroupDisappear` enabled, they would only care about the latter
+       * possibility. In this case, use hasGroups to determine whether to alert on a potential No Data state
+       *
+       * If `alertOnNoData` is true but `alertOnGroupDisappear` is false, we don't need to worry about the {a, b, c} possibility.
+       * At this point in the function, a false `alertOnGroupDisappear` would already have prevented group 'a' from being evaluated at all.
+       */
+      if (alertOnNoData || (alertOnGroupDisappear && hasGroups)) {
+        // In the previous line we've determined if the user is interested in No Data states, so only now do we actually
+        // check to see if a No Data state has occurred
         if (nextState === AlertStates.NO_DATA) {
           reason = alertResults
             .filter((result) => result[group].isNoData)
-            .map((result) => buildNoDataAlertReason(result[group]))
+            .map((result) => buildNoDataAlertReason({ ...result[group], group }))
             .join('\n');
         } else if (nextState === AlertStates.ERROR) {
           reason = alertResults
@@ -160,6 +195,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             .join('\n');
         }
       }
+
       if (reason) {
         const firstResult = first(alertResults);
         const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
@@ -188,7 +224,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
     }
 
-    return { groups, groupBy: params.groupBy };
+    return { groups, groupBy: params.groupBy, filterQuery: params.filterQuery };
   });
 
 export const FIRED_ACTIONS = {

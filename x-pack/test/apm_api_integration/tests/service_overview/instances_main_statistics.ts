@@ -8,16 +8,20 @@
 import expect from '@kbn/expect';
 import { pick, sortBy } from 'lodash';
 import moment from 'moment';
+import { service, timerange } from '@elastic/apm-synthtrace';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
-import { registry } from '../../common/registry';
 
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
+import { ENVIRONMENT_ALL } from '../../../../plugins/apm/common/environment_filter_values';
+import { SERVICE_NODE_NAME_MISSING } from '../../../../plugins/apm/common/service_nodes';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -29,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
           const response = await apmApiClient.readUser({
-            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
+            endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
               query: {
@@ -58,12 +62,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('fetching java data', () => {
         let response: {
-          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
+          body: APIReturnType<`GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
         };
 
         beforeEach(async () => {
           response = await apmApiClient.readUser({
-            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
+            endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
               query: {
@@ -118,10 +122,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(values).toMatchInline(`
             Object {
               "cpuUsage": 0.002,
-              "errorRate": 0.0252659574468085,
-              "latency": 411589.785714286,
+              "errorRate": 0.092511013215859,
+              "latency": 430318.696035242,
               "memoryUsage": 0.786029688517253,
-              "throughput": 25.0666666666667,
+              "throughput": 7.56666666666667,
             }
           `);
         });
@@ -129,12 +133,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('fetching non-java data', () => {
         let response: {
-          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
+          body: APIReturnType<`GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
         };
 
         beforeEach(async () => {
           response = await apmApiClient.readUser({
-            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
+            endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-ruby' },
               query: {
@@ -179,9 +183,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(values).toMatchInline(`
             Object {
               "cpuUsage": 0.001,
-              "errorRate": 0.000907441016333938,
-              "latency": 40989.5802047782,
-              "throughput": 36.7333333333333,
+              "errorRate": 0.00343642611683849,
+              "latency": 21520.4776632302,
+              "throughput": 9.7,
             }
           `);
 
@@ -197,12 +201,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('fetching java data', () => {
         let response: {
-          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
+          body: APIReturnType<`GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`>;
         };
 
         beforeEach(async () => {
           response = await apmApiClient.readUser({
-            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
+            endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
               query: {
@@ -268,12 +272,153 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(values).toMatchInline(`
             Object {
               "cpuUsage": 0.00223333333333333,
-              "errorRate": 0.0268292682926829,
-              "latency": 739013.634146341,
+              "errorRate": 0.0852713178294574,
+              "latency": 706173.046511628,
               "memoryUsage": 0.783296203613281,
-              "throughput": 27.3333333333333,
+              "throughput": 8.6,
             }
           `);
+        });
+      });
+    }
+  );
+
+  registry.when(
+    'Service overview instances main statistics when data is generated',
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    () => {
+      describe('for two go instances and one java instance', () => {
+        const GO_A_INSTANCE_RATE_SUCCESS = 10;
+        const GO_A_INSTANCE_RATE_FAILURE = 5;
+        const GO_B_INSTANCE_RATE_SUCCESS = 15;
+
+        const JAVA_INSTANCE_RATE = 20;
+
+        const rangeStart = new Date('2021-01-01T12:00:00.000Z').getTime();
+        const rangeEnd = new Date('2021-01-01T12:15:00.000Z').getTime() - 1;
+
+        before(async () => {
+          const goService = service('opbeans-go', 'production', 'go');
+          const javaService = service('opbeans-java', 'production', 'java');
+
+          const goInstanceA = goService.instance('go-instance-a');
+          const goInstanceB = goService.instance('go-instance-b');
+          const javaInstance = javaService.instance('java-instance');
+
+          const interval = timerange(rangeStart, rangeEnd).interval('1m');
+
+          // include exit spans to generate span_destination metrics
+          // that should not be included
+          function withSpans(timestamp: number) {
+            return new Array(3).fill(undefined).map(() =>
+              goInstanceA
+                .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .timestamp(timestamp + 100)
+                .duration(300)
+                .destination('elasticsearch')
+                .success()
+            );
+          }
+
+          return synthtraceEsClient.index([
+            ...interval.rate(GO_A_INSTANCE_RATE_SUCCESS).flatMap((timestamp) =>
+              goInstanceA
+                .transaction('GET /api/product/list')
+                .success()
+                .duration(500)
+                .timestamp(timestamp)
+                .children(...withSpans(timestamp))
+                .serialize()
+            ),
+            ...interval.rate(GO_A_INSTANCE_RATE_FAILURE).flatMap((timestamp) =>
+              goInstanceA
+                .transaction('GET /api/product/list')
+                .failure()
+                .duration(500)
+                .timestamp(timestamp)
+                .children(...withSpans(timestamp))
+                .serialize()
+            ),
+            ...interval.rate(GO_B_INSTANCE_RATE_SUCCESS).flatMap((timestamp) =>
+              goInstanceB
+                .transaction('GET /api/product/list')
+                .success()
+                .duration(500)
+                .timestamp(timestamp)
+                .children(...withSpans(timestamp))
+                .serialize()
+            ),
+            ...interval.rate(JAVA_INSTANCE_RATE).flatMap((timestamp) =>
+              javaInstance
+                .transaction('GET /api/product/list')
+                .success()
+                .duration(500)
+                .timestamp(timestamp)
+                .children(...withSpans(timestamp))
+                .serialize()
+            ),
+          ]);
+        });
+
+        after(async () => {
+          return synthtraceEsClient.clean();
+        });
+
+        describe('for the go service', () => {
+          let body: APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+
+          before(async () => {
+            body = (
+              await apmApiClient.readUser({
+                endpoint:
+                  'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
+                params: {
+                  path: {
+                    serviceName: 'opbeans-go',
+                  },
+                  query: {
+                    start: new Date(rangeStart).toISOString(),
+                    end: new Date(rangeEnd + 1).toISOString(),
+                    environment: ENVIRONMENT_ALL.value,
+                    kuery: '',
+                    latencyAggregationType: LatencyAggregationType.avg,
+                    transactionType: 'request',
+                  },
+                },
+              })
+            ).body;
+          });
+
+          it('returns statistics for the go instances', () => {
+            const goAStats = body.currentPeriod.find(
+              (stat) => stat.serviceNodeName === 'go-instance-a'
+            );
+            const goBStats = body.currentPeriod.find(
+              (stat) => stat.serviceNodeName === 'go-instance-b'
+            );
+
+            expect(goAStats?.throughput).to.eql(
+              GO_A_INSTANCE_RATE_SUCCESS + GO_A_INSTANCE_RATE_FAILURE
+            );
+
+            expect(goBStats?.throughput).to.eql(GO_B_INSTANCE_RATE_SUCCESS);
+          });
+
+          it('does not return data for the java service', () => {
+            const javaStats = body.currentPeriod.find(
+              (stat) => stat.serviceNodeName === 'java-instance'
+            );
+
+            expect(javaStats).to.be(undefined);
+          });
+
+          it('does not return data for missing service node name', () => {
+            const missingNameStats = body.currentPeriod.find(
+              (stat) => stat.serviceNodeName === SERVICE_NODE_NAME_MISSING
+            );
+
+            expect(missingNameStats).to.be(undefined);
+          });
         });
       });
     }

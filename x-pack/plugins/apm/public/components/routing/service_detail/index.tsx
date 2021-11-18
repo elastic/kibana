@@ -8,6 +8,8 @@ import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Outlet } from '@kbn/typed-react-router-config';
+import { toBooleanRt } from '@kbn/io-ts-utils/to_boolean_rt';
+import { comparisonTypeRt } from '../../../../common/runtime_types/comparison_type_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { ServiceOverview } from '../../app/service_overview';
@@ -79,18 +81,18 @@ export const serviceDetail = {
           kuery: t.string,
         }),
         t.partial({
-          comparisonEnabled: t.string,
-          comparisonType: t.string,
+          comparisonEnabled: toBooleanRt,
+          comparisonType: comparisonTypeRt,
           latencyAggregationType: t.string,
           transactionType: t.string,
+          refreshPaused: t.union([t.literal('true'), t.literal('false')]),
+          refreshInterval: t.string,
         }),
       ]),
     }),
   ]),
   defaults: {
     query: {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
       kuery: '',
       environment: ENVIRONMENT_ALL.value,
     },
@@ -133,6 +135,8 @@ export const serviceDetail = {
               t.partial({
                 traceId: t.string,
                 transactionId: t.string,
+                comparisonEnabled: toBooleanRt,
+                comparisonType: comparisonTypeRt,
               }),
             ]),
           }),
@@ -162,6 +166,9 @@ export const serviceDetail = {
           defaultMessage: 'Errors',
         }),
         element: <Outlet />,
+        searchBarOptions: {
+          showTimeComparison: true,
+        },
       }),
       params: t.partial({
         query: t.partial({

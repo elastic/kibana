@@ -7,7 +7,7 @@
 
 import { ApiResponse, estypes } from '@elastic/elasticsearch';
 
-type ResponseFailures = Array<Pick<estypes.BulkDeleteResponseItem, '_id' | 'status' | 'result'>>;
+type ResponseFailures = Array<Pick<estypes.BulkResponseItem, '_id' | 'status' | 'result'>>;
 
 export function extractBulkResponseDeleteFailures(
   response: ApiResponse<estypes.BulkResponse, unknown>

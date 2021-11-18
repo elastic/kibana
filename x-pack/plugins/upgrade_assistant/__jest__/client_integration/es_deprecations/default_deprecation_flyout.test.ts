@@ -35,7 +35,7 @@ describe('Default deprecation flyout', () => {
     testBed.component.update();
   });
 
-  it('renders a flyout with deprecation details', async () => {
+  test('renders a flyout with deprecation details', async () => {
     const multiFieldsDeprecation = esDeprecationsMockResponse.deprecations[2];
     const { actions, find, exists } = testBed;
 
@@ -44,6 +44,9 @@ describe('Default deprecation flyout', () => {
     expect(exists('defaultDeprecationDetails')).toBe(true);
     expect(find('defaultDeprecationDetails.flyoutTitle').text()).toContain(
       multiFieldsDeprecation.message
+    );
+    expect(find('defaultDeprecationDetails.documentationLink').props().href).toBe(
+      multiFieldsDeprecation.url
     );
     expect(find('defaultDeprecationDetails.flyoutDescription').text()).toContain(
       multiFieldsDeprecation.index

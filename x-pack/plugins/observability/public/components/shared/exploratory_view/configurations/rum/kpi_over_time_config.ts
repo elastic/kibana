@@ -6,7 +6,16 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
+import {
+  FieldLabels,
+  LABEL_FIELDS_BREAKDOWN,
+  LABEL_FIELDS_FILTER,
+  OPERATION_COLUMN,
+  RECORDS_FIELD,
+  REPORT_METRIC_FIELD,
+  PERCENTILE,
+  ReportTypes,
+} from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -43,7 +52,7 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
   return {
     defaultSeriesType: 'bar_stacked',
     seriesTypes: [],
-    reportType: 'kpi-over-time',
+    reportType: ReportTypes.KPI,
     xAxisColumn: {
       sourceField: '@timestamp',
     },
@@ -55,10 +64,7 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
     ],
     hasOperationType: false,
     filterFields: [
-      {
-        field: TRANSACTION_URL,
-        isNegated: false,
-      },
+      TRANSACTION_URL,
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
       USER_AGENT_DEVICE,
@@ -66,8 +72,16 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
         field: USER_AGENT_NAME,
         nested: USER_AGENT_VERSION,
       },
+      LABEL_FIELDS_FILTER,
     ],
-    breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
+    breakdownFields: [
+      USER_AGENT_NAME,
+      USER_AGENT_OS,
+      CLIENT_GEO_COUNTRY_NAME,
+      USER_AGENT_DEVICE,
+      PERCENTILE,
+      LABEL_FIELDS_BREAKDOWN,
+    ],
     baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),

@@ -123,11 +123,13 @@
     "GetJobAuditMessages",
     "GetAllJobAuditMessages",
     "ClearJobAuditMessages",
+    
     "JobValidation",
     "EstimateBucketSpan",
     "CalculateModelMemoryLimit",
     "ValidateCardinality",
     "ValidateJob",
+    "ValidateDataFeedPreview",
 
     "DatafeedService",
     "CreateDatafeed",
@@ -149,6 +151,7 @@
     "SavedObjectsStatus",
     "SyncJobSavedObjects",
     "InitializeJobSavedObjects",
+    "SyncCheck",
     "UpdateJobsSpaces",
     "RemoveJobsFromCurrentSpace",
     "JobsSpaces",

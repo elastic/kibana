@@ -11,15 +11,6 @@
         "count_total": {
           "type": "long"
         },
-        "count_active_total": {
-          "type": "long"
-        },
-        "count_active_alert_history_connectors": {
-          "type": "long",
-          "_meta": {
-            "description": "The total number of preconfigured alert history connectors used by rules."
-          }
-        },
         "count_by_type": {
           "properties": {
             "DYNAMIC_KEY": {
@@ -58,6 +49,15 @@
             "__teams": {
               "type": "long"
             }
+          }
+        },
+        "count_active_total": {
+          "type": "long"
+        },
+        "count_active_alert_history_connectors": {
+          "type": "long",
+          "_meta": {
+            "description": "The total number of preconfigured alert history connectors used by rules."
           }
         },
         "count_active_by_type": {
@@ -99,6 +99,34 @@
               "type": "long"
             }
           }
+        },
+        "count_active_email_connectors_by_service_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "exchange_server": {
+              "type": "long"
+            },
+            "gmail": {
+              "type": "long"
+            },
+            "outlook365": {
+              "type": "long"
+            },
+            "elastic_cloud": {
+              "type": "long"
+            },
+            "other": {
+              "type": "long"
+            },
+            "ses": {
+              "type": "long"
+            }
+          }
+        },
+        "count_actions_namespaces": {
+          "type": "long"
         }
       }
     },
@@ -139,6 +167,32 @@
             }
           }
         },
+        "throttle_time_number_s": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
+            }
+          }
+        },
+        "schedule_time_number_s": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
+            }
+          }
+        },
         "connectors_per_alert": {
           "properties": {
             "min": {
@@ -163,6 +217,9 @@
             "__es-query": {
               "type": "long"
             },
+            "transform_health": {
+              "type": "long"
+            },
             "apm__error_rate": {
               "type": "long"
             },
@@ -226,10 +283,10 @@
             "__geo-containment": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_alert": {
+            "xpack__ml__anomaly_detection_alert": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_jobs_health": {
+            "xpack__ml__anomaly_detection_jobs_health": {
               "type": "long"
             }
           }
@@ -245,6 +302,9 @@
             "__es-query": {
               "type": "long"
             },
+            "transform_health": {
+              "type": "long"
+            },
             "apm__error_rate": {
               "type": "long"
             },
@@ -308,13 +368,16 @@
             "__geo-containment": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_alert": {
+            "xpack__ml__anomaly_detection_alert": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_jobs_health": {
+            "xpack__ml__anomaly_detection_jobs_health": {
               "type": "long"
             }
           }
+        },
+        "count_rules_namespaces": {
+          "type": "long"
         }
       }
     },
@@ -7306,6 +7369,9 @@
           "items": {
             "type": "keyword"
           }
+        },
+        "failed_tasks": {
+          "type": "long"
         }
       }
     },

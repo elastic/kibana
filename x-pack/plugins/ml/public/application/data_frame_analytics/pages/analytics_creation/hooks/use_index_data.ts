@@ -11,7 +11,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
@@ -52,13 +52,14 @@ function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
   });
 }
 
-function getIndexPatternColumns(indexPattern: IndexPattern, fieldsFilter: string[]) {
+function getIndexPatternColumns(indexPattern: DataView, fieldsFilter: string[]) {
   const { fields } = newJobCapsServiceAnalytics;
 
   return fields
     .filter((field) => fieldsFilter.includes(field.name))
     .map((field) => {
       const schema =
+        // @ts-expect-error field is not DataViewField
         getDataGridSchemaFromESFieldType(field.type) || getDataGridSchemaFromKibanaFieldType(field);
 
       return {
@@ -71,7 +72,7 @@ function getIndexPatternColumns(indexPattern: IndexPattern, fieldsFilter: string
 }
 
 export const useIndexData = (
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   query: Record<string, any> | undefined,
   toastNotifications: CoreSetup['notifications']['toasts'],
   runtimeMappings?: RuntimeMappings

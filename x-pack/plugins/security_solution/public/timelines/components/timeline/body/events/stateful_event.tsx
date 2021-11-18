@@ -187,6 +187,7 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     const eventId = event._id;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const indexName = event._index!;
 
     const updatedExpandedDetail: TimelineExpandedDetailType = {

@@ -17,7 +17,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_BREAKDOWN_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
@@ -31,15 +31,19 @@ export async function getTransactionBreakdown({
   serviceName,
   transactionName,
   transactionType,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   transactionName?: string;
   transactionType: string;
+  start: number;
+  end: number;
 }) {
-  const { apmEventClient, start, end, config } = setup;
+  const { apmEventClient, config } = setup;
 
   const subAggs = {
     sum_all_self_times: {
@@ -120,7 +124,7 @@ export async function getTransactionBreakdown({
           date_histogram: getMetricsDateHistogramParams({
             start,
             end,
-            metricsInterval: config['xpack.apm.metricsInterval'],
+            metricsInterval: config.metricsInterval,
           }),
           aggs: subAggs,
         },

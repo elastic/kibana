@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
@@ -320,7 +318,7 @@ describe('StatefulOpenTimeline', () => {
       await waitFor(() => {
         expect(
           wrapper.find(`.${OPEN_TIMELINE_CLASS_NAME} input`).first().getDOMNode().id ===
-            document.activeElement!.id
+            document.activeElement?.id
         ).toBe(true);
       });
     });

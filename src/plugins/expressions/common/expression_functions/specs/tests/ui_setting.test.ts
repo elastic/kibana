@@ -10,13 +10,15 @@ jest.mock('../../../../common');
 
 import { IUiSettingsClient } from 'src/core/public';
 import { getUiSettingFn } from '../ui_setting';
+import { functionWrapper } from './utils';
 
 describe('uiSetting', () => {
   describe('fn', () => {
     let getStartDependencies: jest.MockedFunction<
       Parameters<typeof getUiSettingFn>[0]['getStartDependencies']
     >;
-    let uiSetting: ReturnType<typeof getUiSettingFn>;
+    const uiSettingWrapper = () => functionWrapper(getUiSettingFn({ getStartDependencies }));
+    let uiSetting: ReturnType<typeof uiSettingWrapper>;
     let uiSettings: jest.Mocked<IUiSettingsClient>;
 
     beforeEach(() => {
@@ -27,13 +29,13 @@ describe('uiSetting', () => {
         uiSettings,
       })) as unknown as typeof getStartDependencies;
 
-      uiSetting = getUiSettingFn({ getStartDependencies });
+      uiSetting = uiSettingWrapper();
     });
 
     it('should return a value', () => {
       uiSettings.get.mockReturnValueOnce('value');
 
-      expect(uiSetting.fn(null, { parameter: 'something' }, {} as any)).resolves.toEqual({
+      expect(uiSetting(null, { parameter: 'something' })).resolves.toEqual({
         type: 'ui_setting',
         key: 'something',
         value: 'value',
@@ -41,7 +43,7 @@ describe('uiSetting', () => {
     });
 
     it('should pass a default value', async () => {
-      await uiSetting.fn(null, { parameter: 'something', default: 'default' }, {} as any);
+      await uiSetting(null, { parameter: 'something', default: 'default' });
 
       expect(uiSettings.get).toHaveBeenCalledWith('something', 'default');
     });
@@ -51,16 +53,16 @@ describe('uiSetting', () => {
         throw new Error();
       });
 
-      expect(uiSetting.fn(null, { parameter: 'something' }, {} as any)).rejects.toEqual(
+      expect(uiSetting(null, { parameter: 'something' })).rejects.toEqual(
         new Error('Invalid parameter "something".')
       );
     });
 
     it('should get a request instance on the server-side', async () => {
       const request = {};
-      await uiSetting.fn(null, { parameter: 'something' }, {
+      await uiSetting(null, { parameter: 'something' }, {
         getKibanaRequest: () => request,
-      } as any);
+      } as Parameters<typeof uiSetting>[2]);
 
       const [[getKibanaRequest]] = getStartDependencies.mock.calls;
 
@@ -68,7 +70,7 @@ describe('uiSetting', () => {
     });
 
     it('should throw an error if request is not provided on the server-side', async () => {
-      await uiSetting.fn(null, { parameter: 'something' }, {} as any);
+      await uiSetting(null, { parameter: 'something' });
 
       const [[getKibanaRequest]] = getStartDependencies.mock.calls;
 

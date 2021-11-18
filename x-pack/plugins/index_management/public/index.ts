@@ -6,14 +6,15 @@
  */
 
 import './index.scss';
+import { PluginInitializerContext } from 'src/core/public';
 import { IndexMgmtUIPlugin } from './plugin';
 
 /** @public */
-export const plugin = () => {
-  return new IndexMgmtUIPlugin();
+export const plugin = (ctx: PluginInitializerContext) => {
+  return new IndexMgmtUIPlugin(ctx);
 };
 
-export { IndexManagementPluginSetup } from './types';
+export type { IndexManagementPluginSetup } from './types';
 
 export { getIndexListUri, getTemplateDetailsLink } from './application/services/routing';
 

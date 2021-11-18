@@ -32,10 +32,10 @@ const indexLifecycleDataEnricher = async (
     index: '*',
   });
 
+  // @ts-expect-error Property 'phase_definition' is missing in type 'IlmExplainLifecycleLifecycleExplainPhaseExecution'
   return indicesList.map((index: IndexWithoutIlm) => {
     return {
       ...index,
-      // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/531
       ilm: { ...(ilmIndicesData[index.name] || {}) },
     };
   });

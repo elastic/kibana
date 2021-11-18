@@ -6,11 +6,11 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
 import { Overview } from '../../../public/application/components/overview';
 import { WithAppDependencies } from '../helpers';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`/overview`],
     componentRoutePath: '/overview',
@@ -57,10 +57,32 @@ const createActions = (testBed: TestBed) => {
     component.update();
   };
 
+  const clickViewSystemIndicesState = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('viewSystemIndicesStateButton').simulate('click');
+    });
+
+    component.update();
+  };
+
+  const clickRetrySystemIndicesButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('systemIndicesStatusRetryButton').simulate('click');
+    });
+
+    component.update();
+  };
+
   return {
     clickDeprecationToggle,
     clickRetryButton,
     clickResetButton,
+    clickViewSystemIndicesState,
+    clickRetrySystemIndicesButton,
   };
 };
 

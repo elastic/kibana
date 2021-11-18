@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
+import {
+  POLICY_ELASTIC_AGENT_ON_CLOUD,
+  SUPPORTED_APM_PACKAGE_VERSION,
+} from '../../../common/fleet';
 import { APMPluginSetupDependencies } from '../../types';
 import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 
@@ -36,13 +39,13 @@ export function getApmPackagePolicyDefinition(
     ],
     package: {
       name: APM_PACKAGE_NAME,
-      version: '0.4.0',
+      version: SUPPORTED_APM_PACKAGE_VERSION,
       title: 'Elastic APM',
     },
   };
 }
 
-function preprocessLegacyFields({
+export function preprocessLegacyFields({
   apmServerSchema,
 }: {
   apmServerSchema: Record<string, any>;
@@ -60,6 +63,14 @@ function preprocessLegacyFields({
     {
       key: 'apm-server.auth.anonymous.allow_service',
       legacyKey: 'apm-server.rum.allow_service_names',
+    },
+    {
+      key: 'apm-server.auth.secret_token',
+      legacyKey: 'apm-server.secret_token',
+    },
+    {
+      key: 'apm-server.auth.api_key.enabled',
+      legacyKey: 'apm-server.api_key.enabled',
     },
   ].forEach(({ key, legacyKey }) => {
     if (!copyOfApmServerSchema[key]) {

@@ -16,11 +16,11 @@
 import type { SavedObjectsStart, SavedObject } from '../../../../plugins/saved_objects/public';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
-import { extractReferences, injectReferences } from './saved_visualization_references';
-import { createSavedSearchesLoader } from '../../../discover/public';
+import { __LEGACY } from '../../../discover/public';
+import { extractReferences, injectReferences } from '../utils/saved_visualization_references';
 import type { SavedObjectsClientContract } from '../../../../core/public';
 import type { IndexPatternsContract } from '../../../../plugins/data/public';
-import type { ISavedVis, SerializedVis } from '../types';
+import type { ISavedVis } from '../types';
 
 export interface SavedVisServices {
   savedObjectsClient: SavedObjectsClientContract;
@@ -28,45 +28,9 @@ export interface SavedVisServices {
   indexPatterns: IndexPatternsContract;
 }
 
-export const convertToSerializedVis = (savedVis: ISavedVis): SerializedVis => {
-  const { id, title, description, visState, uiStateJSON, searchSourceFields } = savedVis;
-
-  const aggs = searchSourceFields && searchSourceFields.index ? visState.aggs || [] : visState.aggs;
-
-  return {
-    id,
-    title,
-    type: visState.type,
-    description,
-    params: visState.params,
-    uiState: JSON.parse(uiStateJSON || '{}'),
-    data: {
-      aggs,
-      searchSource: searchSourceFields!,
-      savedSearchId: savedVis.savedSearchId,
-    },
-  };
-};
-
-export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
-  return {
-    id: vis.id,
-    title: vis.title,
-    description: vis.description,
-    visState: {
-      title: vis.title,
-      type: vis.type,
-      aggs: vis.data.aggs,
-      params: vis.params,
-    },
-    uiStateJSON: JSON.stringify(vis.uiState),
-    searchSourceFields: vis.data.searchSource,
-    savedSearchId: vis.data.savedSearchId,
-  };
-};
-
+/** @deprecated **/
 export function createSavedVisClass(services: SavedVisServices) {
-  const savedSearch = createSavedSearchesLoader(services);
+  const savedSearch = __LEGACY.createSavedSearchesLoader(services);
 
   class SavedVis extends services.savedObjects.SavedObjectClass {
     public static type: string = 'visualization';

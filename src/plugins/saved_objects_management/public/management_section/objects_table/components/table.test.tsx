@@ -36,6 +36,9 @@ const defaultProps: TableProps = {
       },
     },
   ],
+  allowedTypes: [
+    { name: 'index-pattern', displayName: 'index-pattern', hidden: false, namespaceType: 'single' },
+  ],
   selectionConfig: {
     onSelectionChange: () => {},
   },

@@ -38,10 +38,8 @@ describe('Search service', () => {
   let mockCoreStart: MockedKeys<CoreStart>;
 
   beforeEach(() => {
-    const mockLogger: any = {
-      debug: () => {},
-    };
     const context = coreMock.createPluginInitializerContext({});
+    const mockLogger = context.logger.get();
     context.config.create = jest.fn().mockImplementation(() => {
       return of({
         search: {

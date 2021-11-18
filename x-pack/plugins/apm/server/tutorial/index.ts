@@ -22,7 +22,7 @@ import apmIndexPattern from './index_pattern.json';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
-    'Collect in-depth performance metrics and errors from inside your applications.',
+    'Collect performance metrics from your applications with Elastic APM.',
 });
 const moduleName = 'apm';
 
@@ -67,7 +67,7 @@ export const tutorialProvider =
       ],
     };
 
-    if (apmConfig['xpack.apm.ui.enabled']) {
+    if (apmConfig.ui.enabled) {
       // @ts-expect-error artifacts.application is readonly
       artifacts.application = {
         path: '/app/apm',
@@ -103,6 +103,7 @@ It allows you to monitor the performance of thousands of applications in real ti
         }
       ),
       euiIconType: 'apmApp',
+      integrationBrowserCategories: ['web'],
       artifacts,
       customStatusCheckName: 'apm_fleet_server_status_check',
       onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),

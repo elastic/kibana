@@ -7,6 +7,7 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type {
   ExecutionContextSearch,
@@ -41,11 +42,7 @@ import {
   ReferenceOrValueEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
 import { Document, injectFilterReferences } from '../persistence';
-import {
-  ExpressionWrapper,
-  ExpressionWrapperProps,
-  savedObjectConflictError,
-} from './expression_wrapper';
+import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import {
   isLensBrushEvent,
@@ -63,6 +60,7 @@ import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps } from '../types';
+import type { SpacesPluginStart } from '../../../spaces/public';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 export interface ResolvedLensSavedObjectAttributes extends LensSavedObjectAttributes {
@@ -108,6 +106,7 @@ export interface LensEmbeddableDeps {
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
   usageCollection?: UsageCollectionSetup;
+  spaces?: SpacesPluginStart;
 }
 
 export class Embeddable
@@ -281,8 +280,18 @@ export class Embeddable
     };
     const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
     this.errors = errors;
-    if (sharingSavedObjectProps?.outcome === 'conflict') {
-      const conflictError = savedObjectConflictError(sharingSavedObjectProps.errorJSON!);
+    if (sharingSavedObjectProps?.outcome === 'conflict' && this.deps.spaces) {
+      const conflictError = {
+        shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
+          defaultMessage: `You've encountered a URL conflict`,
+        }),
+        longMessage: (
+          <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
+            targetType={DOC_TYPE}
+            sourceId={sharingSavedObjectProps.sourceId!}
+          />
+        ),
+      };
       this.errors = this.errors ? [...this.errors, conflictError] : [conflictError];
     }
     this.expression = ast ? toExpression(ast) : null;

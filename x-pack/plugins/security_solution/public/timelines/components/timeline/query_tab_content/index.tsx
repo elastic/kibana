@@ -59,7 +59,8 @@ import { useTimelineFullScreen } from '../../../../common/containers/use_full_sc
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
-import { defaultControlColumn } from '../body/control_columns';
+import { HeaderActions } from '../body/actions/header_actions';
+import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 const TimelineHeaderContainer = styled.div`
@@ -156,6 +157,8 @@ const EMPTY_EVENTS: TimelineItem[] = [];
 
 export type Props = OwnProps & PropsFromRedux;
 
+const trailingControlColumns: ControlColumnProps[] = []; // stable reference
+
 export const QueryTabContentComponent: React.FC<Props> = ({
   activeTab,
   columns,
@@ -194,6 +197,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   } = useSourcererScope(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
+  const ACTION_BUTTON_COUNT = 5;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
@@ -313,8 +317,14 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return (combinedQueries && combinedQueries.kqlError != null) || false;
   }, [combinedQueries]);
 
-  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
-  const trailingControlColumns: ControlColumnProps[] = [];
+  const leadingControlColumns = useMemo(
+    () =>
+      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+        ...x,
+        headerCellRender: HeaderActions,
+      })),
+    []
+  );
 
   return (
     <>
@@ -463,7 +473,7 @@ const makeMapStateToProps = () => {
       status,
       timelineType,
     } = timeline;
-    const kqlQueryTimeline = getKqlQueryTimeline(state, timelineId)!;
+    const kqlQueryTimeline = getKqlQueryTimeline(state, timelineId);
     const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
 
     // return events on empty search

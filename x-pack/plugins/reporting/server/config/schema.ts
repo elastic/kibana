@@ -74,10 +74,6 @@ const CaptureSchema = schema.object({
     }),
   }),
   zoom: schema.number({ defaultValue: 2 }),
-  viewport: schema.object({
-    width: schema.number({ defaultValue: 1950 }),
-    height: schema.number({ defaultValue: 1200 }),
-  }),
   loadDelay: schema.oneOf([schema.number(), schema.duration()], {
     defaultValue: moment.duration({ seconds: 3 }),
   }),

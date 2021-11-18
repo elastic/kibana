@@ -7,10 +7,11 @@
 
 import { SavedObjectsType } from 'src/core/server';
 
-import { UPGRADE_ASSISTANT_TYPE } from '../../common/types';
+import { UPGRADE_ASSISTANT_TELEMETRY } from '../../common/constants';
+import { telemetrySavedObjectMigrations } from './migrations';
 
 export const telemetrySavedObjectType: SavedObjectsType = {
-  name: UPGRADE_ASSISTANT_TYPE,
+  name: UPGRADE_ASSISTANT_TELEMETRY,
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {
@@ -29,4 +30,5 @@ export const telemetrySavedObjectType: SavedObjectsType = {
       },
     },
   },
+  migrations: telemetrySavedObjectMigrations,
 };

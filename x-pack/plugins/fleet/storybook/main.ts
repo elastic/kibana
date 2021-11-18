@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import type { Configuration } from 'webpack';
-import { defaultConfig, WebpackConfig } from '@kbn/storybook';
+import { defaultConfigWebFinal } from '@kbn/storybook';
 
 module.exports = {
-  ...defaultConfig,
+  ...defaultConfigWebFinal,
   addons: ['@storybook/addon-essentials'],
   babel: () => ({
     presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
   }),
-  webpackFinal: (config: Configuration) => {
-    return WebpackConfig({ config });
-  },
 };

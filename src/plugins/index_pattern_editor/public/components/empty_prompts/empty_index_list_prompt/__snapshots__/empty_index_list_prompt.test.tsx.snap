@@ -120,10 +120,12 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
       <div
         className="inpEmptyState__footer"
       >
-        <EuiFlexGroup>
+        <EuiFlexGroup
+          justifyContent="center"
+        >
           <EuiFlexItem
             className="inpEmptyState__footerFlexItem"
-            grow={1}
+            grow={false}
           >
             <EuiDescriptionList
               listItems={
@@ -152,7 +154,7 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
           </EuiFlexItem>
           <EuiFlexItem
             className="inpEmptyState__footerFlexItem"
-            grow={2}
+            grow={false}
           >
             <EuiDescriptionList
               listItems={
@@ -191,8 +193,8 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
           textAlign="center"
         >
           <FormattedMessage
-            defaultMessage="Some indices may be hidden. Try to {link} anyway."
-            id="indexPatternEditor.createIndexPattern.emptyState.createAnyway"
+            defaultMessage="You can also {link}"
+            id="indexPatternEditor.createIndexPattern.emptyState.createAnywayTxt"
             values={
               Object {
                 "link": <EuiLink
@@ -200,7 +202,7 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
                   onClick={[Function]}
                 >
                   <FormattedMessage
-                    defaultMessage="create an index pattern"
+                    defaultMessage="create an index pattern against hidden or system indices."
                     id="indexPatternEditor.createIndexPattern.emptyState.createAnywayLink"
                     values={Object {}}
                   />

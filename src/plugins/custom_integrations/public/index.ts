@@ -13,4 +13,8 @@ import { CustomIntegrationsPlugin } from './plugin';
 export function plugin() {
   return new CustomIntegrationsPlugin();
 }
-export { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
+
+export type { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
+
+export { withSuspense, LazyReplacementCard } from './components';
+export { filterCustomIntegrations } from './services/find';

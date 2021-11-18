@@ -12,8 +12,9 @@ import { labsServiceFactory } from './labs';
 import { capabilitiesServiceFactory } from './capabilities';
 import { PresentationUtilServices } from '..';
 
-export { PluginServiceProviders, PluginServiceProvider, PluginServiceRegistry } from '../create';
-export { PresentationUtilServices } from '..';
+export type { PluginServiceProviders } from '../create';
+export { PluginServiceProvider, PluginServiceRegistry } from '../create';
+export type { PresentationUtilServices } from '..';
 
 export interface StorybookParams {
   canAccessDashboards?: boolean;

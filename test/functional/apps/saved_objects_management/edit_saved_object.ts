@@ -49,12 +49,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const focusAndClickButton = async (buttonSubject: string) => {
     const button = await testSubjects.find(buttonSubject);
     await button.scrollIntoViewIfNecessary();
-    await delay(10);
+    await delay(100);
     await button.focus();
-    await delay(10);
+    await delay(100);
     await button.click();
     // Allow some time for the transition/animations to occur before assuming the click is done
-    await delay(10);
+    await delay(100);
   };
 
   describe('saved objects edition page', () => {
@@ -118,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldUseHashForSubUrl: false,
         }
       );
-
+      // wait for the Edit view to load
       await focusAndClickButton('savedObjectEditDelete');
       await PageObjects.common.clickConfirmOnModal();
 

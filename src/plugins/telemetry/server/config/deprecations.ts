@@ -35,6 +35,12 @@ export const deprecateEndpointConfigs: ConfigDeprecation = (
       }
 
       addDeprecation({
+        configPath: fullConfigPath,
+        level: 'critical',
+        title: i18n.translate('telemetry.endpointConfigs.deprecationTitle', {
+          defaultMessage: 'Setting "{configPath}" is deprecated',
+          values: { configPath: fullConfigPath },
+        }),
         message: i18n.translate('telemetry.endpointConfigs.deprecationMessage', {
           defaultMessage:
             '"{configPath}" has been deprecated. Set "telemetry.sendUsageTo: staging" to the Kibana configurations to send usage to the staging endpoint.',

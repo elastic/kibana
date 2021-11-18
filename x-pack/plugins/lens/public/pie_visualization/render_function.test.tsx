@@ -302,12 +302,13 @@ describe('PieVisualization component', () => {
       `);
     });
 
-    test('does not set click listener on non-interactive mode', () => {
+    test('does not set click listener and legend actions on non-interactive mode', () => {
       const defaultArgs = getDefaultArgs();
       const component = shallow(
         <PieComponent args={{ ...args }} {...defaultArgs} interactive={false} />
       );
       expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
+      expect(component.find(Settings).first().prop('legendAction')).toBeUndefined();
     });
 
     test('it renders the empty placeholder when metric contains only falsy data', () => {

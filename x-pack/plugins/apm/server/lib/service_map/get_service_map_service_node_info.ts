@@ -27,7 +27,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
@@ -35,10 +35,12 @@ import {
 import { getErrorRate } from '../transaction_groups/get_error_rate';
 
 interface Options {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   environment: string;
   serviceName: string;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }
 
 interface TaskParameters {
@@ -55,10 +57,10 @@ export function getServiceMapServiceNodeInfo({
   serviceName,
   setup,
   searchAggregatedTransactions,
-}: Options & { serviceName: string }) {
+  start,
+  end,
+}: Options) {
   return withApmSpan('get_service_map_node_stats', async () => {
-    const { start, end } = setup;
-
     const filter: ESFilter[] = [
       { term: { [SERVICE_NAME]: serviceName } },
       ...rangeQuery(start, end),
@@ -73,6 +75,8 @@ export function getServiceMapServiceNodeInfo({
       minutes,
       serviceName,
       setup,
+      start,
+      end,
     };
 
     const [errorStats, transactionStats, cpuStats, memoryStats] =
@@ -96,14 +100,10 @@ async function getErrorStats({
   serviceName,
   environment,
   searchAggregatedTransactions,
-}: {
-  setup: Options['setup'];
-  serviceName: string;
-  environment: string;
-  searchAggregatedTransactions: boolean;
-}) {
+  start,
+  end,
+}: Options) {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
-    const { start, end } = setup;
     const { noHits, average } = await getErrorRate({
       environment,
       setup,

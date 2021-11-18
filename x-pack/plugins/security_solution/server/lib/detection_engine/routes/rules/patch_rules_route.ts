@@ -24,6 +24,7 @@ import { buildSiemResponse } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { readRules } from '../../rules/read_rules';
+import { legacyMigrate } from '../../rules/utils';
 import { PartialFilter } from '../../types';
 
 export const patchRulesRoute = (
@@ -134,8 +135,15 @@ export const patchRulesRoute = (
           throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
         }
 
+        const migratedRule = await legacyMigrate({
+          rulesClient,
+          savedObjectsClient,
+          rule: existingRule,
+        });
+
         const rule = await patchRules({
           rulesClient,
+          savedObjectsClient,
           author,
           buildingBlockType,
           description,
@@ -154,7 +162,7 @@ export const patchRulesRoute = (
           timelineTitle,
           meta,
           filters,
-          rule: existingRule,
+          rule: migratedRule,
           index,
           interval,
           maxSignals,

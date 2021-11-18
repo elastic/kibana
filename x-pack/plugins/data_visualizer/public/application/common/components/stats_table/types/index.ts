@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-export { FieldDataRowProps } from './field_data_row';
-export {
+export type { FieldDataRowProps } from './field_data_row';
+export type {
   FieldVisConfig,
   FileBasedFieldVisConfig,
   MetricFieldVisStats,
-  isFileBasedFieldVisConfig,
-  isIndexBasedFieldVisConfig,
 } from './field_vis_config';
+export { isFileBasedFieldVisConfig, isIndexBasedFieldVisConfig } from './field_vis_config';

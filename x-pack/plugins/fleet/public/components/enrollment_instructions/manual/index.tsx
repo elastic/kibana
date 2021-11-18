@@ -7,7 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiText, EuiSpacer, EuiLink, EuiCodeBlock, EuiSelect } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiLink, EuiCodeBlock, EuiButtonGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -38,9 +38,9 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
 
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
-  const linuxMacCommand = `sudo ./elastic-agent install -f ${enrollArgs}`;
+  const linuxMacCommand = `sudo ./elastic-agent install ${enrollArgs}`;
 
-  const windowsCommand = `.\\elastic-agent.exe install -f ${enrollArgs}`;
+  const windowsCommand = `.\\elastic-agent.exe install ${enrollArgs}`;
 
   return (
     <>
@@ -51,19 +51,11 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
         />
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiSelect
-        prepend={
-          <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.enrollmentInstructions.platformSelectLabel"
-              defaultMessage="Platform"
-            />
-          </EuiText>
-        }
+      <EuiButtonGroup
         options={PLATFORM_OPTIONS}
-        value={platform}
-        onChange={(e) => setPlatform(e.target.value as PLATFORM_TYPE)}
-        aria-label={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
+        idSelected={platform}
+        onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
+        legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
           defaultMessage: 'Platform',
         })}
       />
@@ -86,7 +78,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
             defaultMessage="See the {link} for RPM / DEB deploy instructions."
             values={{
               link: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.elasticAgent}>
+                <EuiLink target="_blank" external href={docLinks.links.fleet.installElasticAgent}>
                   <FormattedMessage
                     id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
                     defaultMessage="Elastic Agent docs"

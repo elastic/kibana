@@ -16,6 +16,7 @@ import { sortOrderSchema } from './common_schemas';
  * - filter
  * - histogram
  * - nested
+ * - reverse_nested
  * - terms
  *
  * Not implemented:
@@ -37,7 +38,6 @@ import { sortOrderSchema } from './common_schemas';
  * - parent
  * - range
  * - rare_terms
- * - reverse_nested
  * - sampler
  * - significant_terms
  * - significant_text
@@ -75,6 +75,9 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
   }),
   nested: s.object({
     path: s.string(),
+  }),
+  reverse_nested: s.object({
+    path: s.maybe(s.string()),
   }),
   terms: s.object({
     field: s.maybe(s.string()),

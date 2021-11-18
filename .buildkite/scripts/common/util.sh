@@ -16,12 +16,14 @@ is_pr() {
 
 verify_no_git_changes() {
   RED='\033[0;31m'
+  YELLOW='\033[0;33m'
   C_RESET='\033[0m' # Reset color
 
-  GIT_CHANGES="$(git ls-files --modified)"
+  GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
   if [ "$GIT_CHANGES" ]; then
     echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
     echo -e "$GIT_CHANGES\n"
+    echo -e "\n${YELLOW}TO FIX: Run '$1' locally, commit the changes and push to your branch${C_RESET}\n"
     exit 1
   fi
 }
@@ -73,4 +75,16 @@ retry() {
       sleep "$delay"
     fi
   done
+}
+
+set_git_merge_base() {
+  GITHUB_PR_MERGE_BASE="$(buildkite-agent meta-data get merge-base --default '')"
+
+  if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
+    git fetch origin "$GITHUB_PR_TARGET_BRANCH"
+    GITHUB_PR_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD)"
+    buildkite-agent meta-data set merge-base "$GITHUB_PR_MERGE_BASE"
+  fi
+
+  export GITHUB_PR_MERGE_BASE
 }

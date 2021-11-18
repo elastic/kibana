@@ -57,6 +57,7 @@ export function setupSavedObjects(
     migrations: getMigrations(encryptedSavedObjects, isPreconfigured),
     mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
     management: {
+      displayName: 'rule',
       importableAndExportable: true,
       getTitle(ruleSavedObject: SavedObject<RawAlert>) {
         return `Rule: [${ruleSavedObject.attributes.name}]`;

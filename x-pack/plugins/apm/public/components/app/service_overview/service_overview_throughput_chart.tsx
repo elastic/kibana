@@ -69,7 +69,7 @@ export function ServiceOverviewThroughputChart({
     (callApmApi) => {
       if (serviceName && transactionType && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
           params: {
             path: {
               serviceName,
@@ -135,29 +135,16 @@ export function ServiceOverviewThroughputChart({
                 'xpack.apm.serviceOverview.throughtputChartTitle',
                 { defaultMessage: 'Throughput' }
               )}
-              {data.throughputUnit === 'second'
-                ? i18n.translate(
-                    'xpack.apm.serviceOverview.throughtputPerSecondChartTitle',
-                    { defaultMessage: ' (per second)' }
-                  )
-                : ''}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            content={
-              data.throughputUnit === 'minute'
-                ? i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
-                    defaultMessage:
-                      'Throughput is measured in transactions per minute (tpm)',
-                  })
-                : i18n.translate('xpack.apm.serviceOverview.tpsHelp', {
-                    defaultMessage:
-                      'Throughput is measured in transactions per second (tps)',
-                  })
-            }
+            content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
+              defaultMessage:
+                'Throughput is measured in transactions per minute (tpm)',
+            })}
             position="right"
           />
         </EuiFlexItem>
@@ -169,7 +156,7 @@ export function ServiceOverviewThroughputChart({
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={(y) => asExactTransactionRate(y, data.throughputUnit)}
+        yLabelFormat={asExactTransactionRate}
         customTheme={comparisonChartTheme}
       />
     </EuiPanel>

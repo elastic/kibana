@@ -30,6 +30,7 @@ describe('threshold_executor', () => {
     updated_at: '2020-03-27T22:55:59.577Z',
     attributes: {
       actions: [],
+      alertTypeId: 'siem.signals',
       enabled: true,
       name: 'rule-name',
       tags: ['some fake tag 1', 'some fake tag 2'],

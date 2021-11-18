@@ -54,7 +54,7 @@ const TransactionLinkName = euiStyled.div`
 `;
 
 interface Props {
-  errorGroup: APIReturnType<'GET /api/apm/services/{serviceName}/errors/{groupId}'>;
+  errorGroup: APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}'>;
   urlParams: ApmUrlParams;
   kuery: string;
 }

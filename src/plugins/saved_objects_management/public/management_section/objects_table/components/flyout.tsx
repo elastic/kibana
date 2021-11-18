@@ -37,6 +37,7 @@ import {
   IndexPattern,
   DataPublicPluginStart,
 } from '../../../../../data/public';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import {
   importFile,
   importLegacyFile,
@@ -62,7 +63,6 @@ const OVERWRITE_ALL_DEFAULT = true;
 
 export interface FlyoutProps {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
-  allowedTypes: string[];
   close: () => void;
   done: () => void;
   newIndexPatternUrl: string;
@@ -71,6 +71,7 @@ export interface FlyoutProps {
   http: HttpStart;
   basePath: IBasePath;
   search: DataPublicPluginStart['search'];
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 export interface FlyoutState {
@@ -280,8 +281,9 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       return;
     }
 
+    const allowedTypeNames = allowedTypes.map((type) => type.name);
     contents = contents
-      .filter((content) => allowedTypes.includes(content._type))
+      .filter((content) => allowedTypeNames.includes(content._type))
       .map((doc) => ({
         ...doc,
         // The server assumes that documents with no migrationVersion are up to date.
@@ -610,6 +612,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderBody() {
+    const { allowedTypes } = this.props;
     const {
       status,
       loadingMessage,
@@ -642,6 +645,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           failedImports={failedImports}
           successfulImports={successfulImports}
           importWarnings={importWarnings ?? []}
+          allowedTypes={allowedTypes}
         />
       );
     }

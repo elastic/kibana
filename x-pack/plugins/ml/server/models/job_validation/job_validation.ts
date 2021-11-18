@@ -17,7 +17,7 @@ import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_ut
 import { validateBucketSpan } from './validate_bucket_span';
 import { validateCardinality } from './validate_cardinality';
 import { validateInfluencers } from './validate_influencers';
-import { validateDatafeedPreview } from './validate_datafeed_preview';
+import { validateDatafeedPreviewWithMessages } from './validate_datafeed_preview';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
 import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
@@ -69,7 +69,7 @@ export async function validateJob(
         const timeField = job.data_description.time_field;
         const timeRange = await fs.getTimeFieldRange(
           index,
-          timeField,
+          timeField!,
           job.datafeed_config.query,
           job.datafeed_config.runtime_mappings,
           job.datafeed_config.indices_options
@@ -111,7 +111,9 @@ export async function validateJob(
         validationMessages.push({ id: 'missing_summary_count_field_name' });
       }
 
-      validationMessages.push(...(await validateDatafeedPreview(mlClient, authHeader, job)));
+      validationMessages.push(
+        ...(await validateDatafeedPreviewWithMessages(mlClient, authHeader, job))
+      );
     } else {
       validationMessages = basicValidation.messages;
       validationMessages.push({ id: 'skipped_extended_tests' });

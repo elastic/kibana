@@ -17,8 +17,10 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('vega.enableExternalUrls', 'vis_type_vega.enableExternalUrls'),
-    renameFromRoot('vega.enabled', 'vis_type_vega.enabled'),
+    renameFromRoot('vega.enableExternalUrls', 'vis_type_vega.enableExternalUrls', {
+      level: 'critical',
+    }),
+    renameFromRoot('vega.enabled', 'vis_type_vega.enabled', { level: 'critical' }),
   ],
 };
 
@@ -26,4 +28,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new VisTypeVegaPlugin(initializerContext);
 }
 
-export { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';
+export type { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';

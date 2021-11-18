@@ -144,7 +144,7 @@ export const TimeSeries = ({
         debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
-        allowBrushingLastHistogramBucket={true}
+        allowBrushingLastHistogramBin={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
         onElementClick={(args) => handleElementClick(args)}
@@ -152,9 +152,6 @@ export const TimeSeries = ({
         onPointerUpdate={handleCursorUpdate}
         theme={[
           {
-            crosshair: {
-              ...chartTheme.crosshair,
-            },
             axes: {
               tickLabel: {
                 padding: {

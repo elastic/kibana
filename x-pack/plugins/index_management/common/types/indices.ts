@@ -58,9 +58,10 @@ export interface Index {
   uuid: string;
   primary: string;
   replica: string;
-  documents: any;
+  documents?: string;
   size: any;
   isFrozen: boolean;
+  hidden: boolean;
   aliases: string | string[];
   data_stream?: string;
   [key: string]: any;

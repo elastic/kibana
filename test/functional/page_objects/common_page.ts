@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
+import moment from 'moment';
 import { FtrService } from '../ftr_provider_context';
 
 interface NavigateProps {
@@ -30,7 +31,8 @@ export class CommonPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly login = this.ctx.getPageObject('login');
+  private readonly loginPage = this.ctx.getPageObject('login');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -60,18 +62,22 @@ export class CommonPageObject extends FtrService {
     if (loginPage && !wantedLoginPage) {
       this.log.debug('Found login page');
       if (this.config.get('security.disableTestUser')) {
-        await this.login.login(
+        await this.loginPage.login(
           this.config.get('servers.kibana.username'),
           this.config.get('servers.kibana.password')
         );
       } else {
-        await this.login.login('test_user', 'changeme');
+        await this.loginPage.login('test_user', 'changeme');
       }
 
-      await this.find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
-        6 * this.defaultFindTimeout
-      );
+      if (appUrl.includes('/status')) {
+        await this.testSubjects.find('statusPageRoot');
+      } else {
+        await this.find.byCssSelector(
+          '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
+          6 * this.defaultFindTimeout
+        );
+      }
       await this.browser.get(appUrl, insertTimestamp);
       currentUrl = await this.browser.getCurrentUrl();
       this.log.debug(`Finished login process currentUrl = ${currentUrl}`);
@@ -219,6 +225,7 @@ export class CommonPageObject extends FtrService {
       basePath = '',
       shouldLoginIfPrompted = true,
       hash = '',
+      search = '',
       disableWelcomePrompt = true,
       insertTimestamp = true,
     } = {}
@@ -230,11 +237,13 @@ export class CommonPageObject extends FtrService {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}${appConfig.pathname}`,
         hash: hash || appConfig.hash,
+        search,
       });
     } else {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}/app/${appName}`,
         hash,
+        search,
       });
     }
 
@@ -270,6 +279,9 @@ export class CommonPageObject extends FtrService {
           const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
           this.log.debug(msg);
           throw new Error(msg);
+        }
+        if (appName === 'discover') {
+          await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
         }
         return currentUrl;
       });
@@ -337,6 +349,12 @@ export class CommonPageObject extends FtrService {
     await this.browser.pressKeys(this.browser.keys.TAB);
   }
 
+  // Pause the browser at a certain place for debugging
+  // Not meant for usage in CI, only for dev-usage
+  async pause() {
+    return this.browser.pause();
+  }
+
   /**
    * Clicks cancel button on modal
    * @param overlayWillStay pass in true if your test will show multiple modals in succession
@@ -395,7 +413,7 @@ export class CommonPageObject extends FtrService {
     const toastShown = await this.find.existsByCssSelector('.euiToast');
     if (toastShown) {
       try {
-        await this.closeToast();
+        await this.find.clickByCssSelector('.euiToast__closeButton');
       } catch (err) {
         // ignore errors, toast clear themselves after timeout
       }
@@ -488,4 +506,48 @@ export class CommonPageObject extends FtrService {
       await this.testSubjects.exists(validator);
     }
   }
+
+  /**
+   * Due to a warning thrown, documented at:
+   * https://github.com/elastic/kibana/pull/114997#issuecomment-950823874
+   * this fn formats time in a format specified, or defaulted
+   * to the same format in
+   * [getTimeDurationInHours()](https://github.com/elastic/kibana/blob/main/test/functional/page_objects/time_picker.ts#L256)
+   * @param time
+   * @param fmt
+   */
+  formatTime(time: TimeStrings, fmt: string = 'MMM D, YYYY @ HH:mm:ss.SSS') {
+    return Object.keys(time)
+      .map((x) => moment(time[x], [fmt]).format())
+      .reduce(
+        (acc, curr, idx) => {
+          if (idx === 0) acc.from = curr;
+          acc.to = curr;
+          return acc;
+        },
+        { from: '', to: '' }
+      );
+  }
+
+  /**
+   * Previously, many tests were using the time picker.
+   * To speed things up, we are now setting time here.
+   * The formatting fn is called here, such that the tests
+   * that were using the time picker can use the same time
+   * parameters as before, but they are auto-formatted.
+   * @param time
+   */
+  async setTime(time: TimeStrings) {
+    await this.kibanaServer.uiSettings.replace({
+      'timepicker:timeDefaults': JSON.stringify(this.formatTime(time)),
+    });
+  }
+
+  async unsetTime() {
+    await this.kibanaServer.uiSettings.unset('timepicker:timeDefaults');
+  }
+}
+export interface TimeStrings extends Record<string, any> {
+  from: string;
+  to: string;
 }

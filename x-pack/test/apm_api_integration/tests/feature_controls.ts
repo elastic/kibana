@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../common/ftr_provider_context';
-import { registry } from '../common/registry';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmWriteUser');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
@@ -44,87 +44,89 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     {
       // this doubles as a smoke test for the _inspect query parameter
       req: {
-        url: `/api/apm/services/foo/errors?start=${start}&end=${end}&_inspect=true&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services/foo/errors?start=${start}&end=${end}&_inspect=true&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/errors/bar?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services/foo/errors/bar?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}&groupId=bar&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services/foo/errors/distribution?start=${start}&end=${end}&groupId=bar&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services/foo/errors/distribution?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/metrics/charts?start=${start}&end=${end}&agentName=cool-agent&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services/foo/metrics/charts?start=${start}&end=${end}&agentName=cool-agent&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/agent?start=${start}&end=${end}`,
+        url: `/internal/apm/services/foo/agent?start=${start}&end=${end}`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
-      req: { url: `/api/apm/services/foo/transaction_types?start=${start}&end=${end}` },
-      expectForbidden: expect403,
-      expectResponse: expect200,
-    },
-    {
-      req: { url: `/api/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=` },
+      req: { url: `/internal/apm/services/foo/transaction_types?start=${start}&end=${end}` },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/traces/foo?start=${start}&end=${end}`,
-      },
-      expectForbidden: expect403,
-      expectResponse: expect200,
-    },
-    {
-      req: {
-        url: `/api/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&kuery=`,
+        url: `/internal/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&transactionName=baz&kuery=`,
+        url: `/internal/apm/traces/foo?start=${start}&end=${end}`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/transactions/traces/samples?start=${start}&end=${end}&transactionType=bar&transactionName=baz&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&kuery=`,
+      },
+      expectForbidden: expect403,
+      expectResponse: expect200,
+    },
+    {
+      req: {
+        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&transactionName=baz&kuery=`,
+      },
+      expectForbidden: expect403,
+      expectResponse: expect200,
+    },
+    {
+      req: {
+        url: `/internal/apm/services/foo/transactions/traces/samples?start=${start}&end=${end}&transactionType=bar&transactionName=baz&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -147,21 +149,21 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/api/apm/settings/custom_links/transaction`,
+        url: `/internal/apm/settings/custom_links/transaction`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/metadata/details?start=${start}&end=${end}`,
+        url: `/internal/apm/services/foo/metadata/details?start=${start}&end=${end}`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/api/apm/services/foo/metadata/icons?start=${start}&end=${end}`,
+        url: `/internal/apm/services/foo/metadata/icons?start=${start}&end=${end}`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

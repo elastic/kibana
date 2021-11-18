@@ -12,8 +12,7 @@ import {
   SERVICE_RUNTIME_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { Setup } from '../helpers/setup_request';
 
 interface ServiceAgent {
   agent?: {
@@ -29,22 +28,22 @@ interface ServiceAgent {
 export async function getServiceAgent({
   serviceName,
   setup,
-  searchAggregatedTransactions,
+  start,
+  end,
 }: {
   serviceName: string;
-  setup: Setup & SetupTimeRange;
-  searchAggregatedTransactions: boolean;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     terminateAfter: 1,
     apm: {
       events: [
         ProcessorEvent.error,
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        ProcessorEvent.transaction,
         ProcessorEvent.metric,
       ],
     },
@@ -67,6 +66,11 @@ export async function getServiceAgent({
               field: SERVICE_RUNTIME_NAME,
             },
           },
+        },
+      },
+      sort: {
+        _score: {
+          order: 'desc' as const,
         },
       },
     },

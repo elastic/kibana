@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
@@ -21,7 +21,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
     describe('when omitting `_inspect` query param', () => {
       it('returns response without `_inspect`', async () => {
         const { status, body } = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/environments',
+          endpoint: 'GET /internal/apm/environments',
           params: {
             query: {
               start: metadata.start,
@@ -39,7 +39,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
       describe('elasticsearch calls made with end-user auth are returned', () => {
         it('for environments', async () => {
           const { status, body } = await apmApiClient.readUser({
-            endpoint: 'GET /api/apm/environments',
+            endpoint: 'GET /internal/apm/environments',
             params: {
               query: {
                 start: metadata.start,
@@ -49,7 +49,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
             },
           });
           expect(status).to.be(200);
-          expect(body._inspect?.length).to.be(2);
+          expect(body._inspect).not.to.be.empty();
 
           // @ts-expect-error
           expect(Object.keys(body._inspect[0])).to.eql([
@@ -67,7 +67,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
       describe('elasticsearch calls made with internal user are not return', () => {
         it('for custom links', async () => {
           const { status, body } = await apmApiClient.readUser({
-            endpoint: 'GET /api/apm/settings/custom_links',
+            endpoint: 'GET /internal/apm/settings/custom_links',
             params: {
               query: {
                 'service.name': 'opbeans-node',

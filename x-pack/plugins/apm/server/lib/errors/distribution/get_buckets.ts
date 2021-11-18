@@ -13,7 +13,7 @@ import {
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 export async function getBuckets({
   environment,
@@ -22,15 +22,19 @@ export async function getBuckets({
   groupId,
   bucketSize,
   setup,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   groupId?: string;
   bucketSize: number;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...rangeQuery(start, end),
@@ -76,13 +80,9 @@ export async function getBuckets({
 
   const buckets = (resp.aggregations?.distribution.buckets || []).map(
     (bucket) => ({
-      key: bucket.key,
-      count: bucket.doc_count,
+      x: bucket.key,
+      y: bucket.doc_count,
     })
   );
-
-  return {
-    noHits: resp.hits.total.value === 0,
-    buckets: resp.hits.total.value > 0 ? buckets : [],
-  };
+  return { buckets };
 }

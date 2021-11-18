@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import { buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Observable } from 'rxjs';
 import { IndexPattern } from 'src/plugins/data/common';
@@ -175,26 +175,14 @@ describe('Test of <Doc /> helper / hook', () => {
     const indexPattern = {
       getComputedFields: () => [],
     };
-    const getMock = jest.fn(() => Promise.resolve(indexPattern));
-    const indexPatternService = {
-      get: getMock,
-    } as unknown as IndexPattern;
     const props = {
       id: '1',
       index: 'index1',
-      indexPatternId: 'xyz',
-      indexPatternService,
-    } as unknown as DocProps;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let hook: any;
-    await act(async () => {
-      hook = renderHook((p: DocProps) => useEsDocSearch(p), { initialProps: props });
-    });
-    expect(hook.result.current.slice(0, 3)).toEqual([
-      ElasticRequestState.Loading,
-      null,
       indexPattern,
-    ]);
-    expect(getMock).toHaveBeenCalled();
+    } as unknown as DocProps;
+
+    const { result } = renderHook((p: DocProps) => useEsDocSearch(p), { initialProps: props });
+
+    expect(result.current.slice(0, 2)).toEqual([ElasticRequestState.Loading, null]);
   });
 });

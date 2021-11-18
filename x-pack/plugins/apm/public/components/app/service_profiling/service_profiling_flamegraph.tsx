@@ -147,7 +147,8 @@ export function ServiceProfilingFlamegraph({
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/profiling/statistics',
+        endpoint:
+          'GET /internal/apm/services/{serviceName}/profiling/statistics',
         params: {
           path: {
             serviceName,

@@ -8,61 +8,213 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about the {kib} 7.x releases.
+Review important information about the {kib} 7.16.x releases.
 
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
-* <<release-notes-7.15.0>>
-* <<release-notes-7.14.2>>
-* <<release-notes-7.14.1>>
-* <<release-notes-7.14.0>>
-* <<release-notes-7.13.4>>
-* <<release-notes-7.13.3>>
-* <<release-notes-7.13.2>>
-* <<release-notes-7.13.1>>
-* <<release-notes-7.13.0>>
-* <<release-notes-7.12.1>>
-* <<release-notes-7.12.0>>
-* <<release-notes-7.11.2>>
-* <<release-notes-7.11.1>>
-* <<release-notes-7.11.0>>
-* <<release-notes-7.10.2>>
-* <<release-notes-7.10.1>>
-* <<release-notes-7.10.0>>
-* <<release-notes-7.9.3>>
-* <<release-notes-7.9.2>>
-* <<release-notes-7.9.1>>
-* <<release-notes-7.9.0>>
-* <<release-notes-7.8.1>>
-* <<release-notes-7.8.0>>
-* <<release-notes-7.7.1>>
-* <<release-notes-7.7.0>>
-* <<release-notes-7.6.2>>
-* <<release-notes-7.6.1>>
-* <<release-notes-7.6.0>>
-* <<release-notes-7.5.2>>
-* <<release-notes-7.5.1>>
-* <<release-notes-7.5.0>>
-* <<release-notes-7.4.2>>
-* <<release-notes-7.4.1>>
-* <<release-notes-7.4.0>>
-* <<release-notes-7.3.2>>
-* <<release-notes-7.3.1>>
-* <<release-notes-7.3.0>>
-* <<release-notes-7.2.1>>
-* <<release-notes-7.2.0>>
-* <<release-notes-7.1.1>>
-* <<release-notes-7.1.0>>
-* <<release-notes-7.0.1>>
-* <<release-notes-7.0.0>>
-* <<release-notes-7.0.0-rc2>>
-* <<release-notes-7.0.0-rc1>>
-* <<release-notes-7.0.0-beta1>>
-* <<release-notes-7.0.0-alpha2>>
-* <<release-notes-7.0.0-alpha1>>
+* <<release-notes-7.16.0>>
+//* <<release-notes-7.15.2>>
+//* <<release-notes-7.15.1>>
+//* <<release-notes-7.15.0>>
+//* <<release-notes-7.14.2>>
+//* <<release-notes-7.14.1>>
+//* <<release-notes-7.14.0>>
+//* <<release-notes-7.13.4>>
+//* <<release-notes-7.13.3>>
+//* <<release-notes-7.13.2>>
+//* <<release-notes-7.13.1>>
+//* <<release-notes-7.13.0>>
+//* <<release-notes-7.12.1>>
+//* <<release-notes-7.12.0>>
+//* <<release-notes-7.11.2>>
+//* <<release-notes-7.11.1>>
+//* <<release-notes-7.11.0>>
+//* <<release-notes-7.10.2>>
+//* <<release-notes-7.10.1>>
+//* <<release-notes-7.10.0>>
+//* <<release-notes-7.9.3>>
+//* <<release-notes-7.9.2>>
+//* <<release-notes-7.9.1>>
+//* <<release-notes-7.9.0>>
+//* <<release-notes-7.8.1>>
+//* <<release-notes-7.8.0>>
+//* <<release-notes-7.7.1>>
+//* <<release-notes-7.7.0>>
+//* <<release-notes-7.6.2>>
+//* <<release-notes-7.6.1>>
+//* <<release-notes-7.6.0>>
+//* <<release-notes-7.5.2>>
+//* <<release-notes-7.5.1>>
+//* <<release-notes-7.5.0>>
+//* <<release-notes-7.4.2>>
+//* <<release-notes-7.4.1>>
+//* <<release-notes-7.4.0>>
+//* <<release-notes-7.3.2>>
+//* <<release-notes-7.3.1>>
+//* <<release-notes-7.3.0>>
+//* <<release-notes-7.2.1>>
+//* <<release-notes-7.2.0>>
+//* <<release-notes-7.1.1>>
+//* <<release-notes-7.1.0>>
+//* <<release-notes-7.0.1>>
+//* <<release-notes-7.0.0>>
+//* <<release-notes-7.0.0-rc2>>
+//* <<release-notes-7.0.0-rc1>>
+//* <<release-notes-7.0.0-beta1>>
+//* <<release-notes-7.0.0-alpha2>>
+//* <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.16.0]]
+== {kib} 7.16.0
+
+coming::[7.16.0]
+
+/////
+[[release-notes-7.15.2]]
+== {kib} 7.15.2
+
+Review the following information about the 7.15.2 release.
+
+[float]
+[[security-updates-v7.15.2]]
+=== Security updates
+
+Review the security updates that were found in previous versions of {kib}.
+
+[discrete]
+[[path-traversal-issue]]
+.Path traversal issue
+[%collapsible]
+====
+*Details* +
+In {kib} 7.9.0 to 7.15.1, {kib} is unable to validate .pbf file paths on Microsoft Windows operating systems, which allows malicious users to arbitrarily traverse the {kib} host to load internal .pbf files. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-37938[CVE-2021-37938]
+Thank you Dominic Couture for finding this issue.
+*Solution* +
+Upgrade to {kib} 7.15.2.
+====
+
+[discrete]
+[[information-disclosure-issue]]
+.Information disclosure issue
+[%collapsible]
+====
+*Details* +
+In {kib} 7.8.0 to 7.15.1, the {kib} JIRA and IBM Resilient connectors could be used to return HTTP response data on internal hosts, which can be hidden from public view. Malicious users with privileges to create connectors can use the JIRA and IBM Resilient connectors to view limited HTTP response data on hosts accessible to the cluster. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-37939[CVE-2021-37939]
+*Solution* +
+Upgrade to {kib} 7.15.2.
+====
+
+[float]
+[[breaking-changes-v7.15.2]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.15.2, review the <<breaking-changes-7.15.0,7.15.0 breaking changes>>.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[enhancement-v7.15.2]]
+=== Enhancements
+Operations::
+* Adds ability to create multiple processes on production by splitting no_transpilation when setting up node env {kibana-pull}114940[#114940]
+
+[float]
+[[fixes-v7.15.2]]
+=== Bug Fixes
+APM::
+* Filter on tx metrics for instance stats {kibana-pull}114758[#114758]
+Elastic Security::
+For the Elastic Security 7.15.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens & Visualizations::
+* Fixes single percentile case on index with many docs {kibana-pull}115214[#115214]
+* Fixes filters not being cleaned when navigating to another visualisation in *Lens* {kibana-pull}115162[#115162]
+Machine Learning::
+* APM Correlations: Get trace samples tab overall distribution via APM endpoint {kibana-pull}114615[#114615]
+* APM Correlations: Show trace samples even when overall histogram chart fails to load {kibana-pull}114247[#114247]
+Management::
+* Fixes memory leak in a browser when doing a search {kibana-pull}113756[#113756]
+Metrics::
+* Adds track_total_hits to Metric Threshold query to support alerts with over 10K documents {kibana-pull}115465[#115465]
+Uptime::
+* TLS and TLS legacy alert translation mismatch {kibana-pull}116113[#116113]
+
+[[release-notes-7.15.1]]
+== {kib} 7.15.1
+
+Review the following information about the 7.15.1 release.
+
+[float]
+[[breaking-changes-v7.15.1]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.15.1, review the <<breaking-changes-7.15.0,7.15.0 breaking changes>>.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[enhancement-v7.15.1]]
+=== Enhancement
+Management::
+* Adds `max_primary_shard_size` input to shrink action {kibana-pull}111394[#111394]
+
+[float]
+[[fixes-v7.15.1]]
+=== Bug Fixes
+APM::
+* Return 200 instead of 404 when agent configuration does not exist {kibana-pull}113273[#113273]
+* Use oldest exit span instead of newest {kibana-pull}113133[#113133]
+Canvas::
+* Hide dashed border on embeddable panel {kibana-pull}113985[#113985]
+Discover::
+* Fixes CSV export problem with _source column {kibana-pull}114178[#114178]
+* Fixes too narrow columns when viewing document {kibana-pull}113124[#113124]
+* Fixes old saved query from becoming active when switching index patterns or creating new saved search {kibana-pull}112262[#112262]
+* Fixes `discover:searchOnPageLoad` not working correctly {kibana-pull}112262[#112262]
+Elastic Security::
+For the Elastic Security 7.15.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes policy upgrades for packages with multiple policy templates {kibana-pull}114011[#114011]
+* Fixes Step 1 in policy editor not loading when agent policy already contains an integration that can only be added once (such as Endpoint Security) {kibana-pull}113883[#113883]
+* Sets code editor height to solve an overlap in default policy settings {kibana-pull}113763[#113763]
+* Fixes issue where some variables from `xpack.fleet.agentPolicies` were not added to package policies {kibana-pull}113204[#113204]
+Lens & Visualizations::
+* Updates the series and metrics IDs that are numbers to strings in *TSVB* {kibana-pull}113619[#113619]
+* Fixes infinite loop when loading rejected data view in *Lens* {kibana-pull}113375[#113375]
+* Fixes error with percentiles on index with many docs {kibana-pull}113216[#113216]
+* Fixes map validation errors crashing *Vega* {kibana-pull}112700[#112700]
+* Fixes heatmap in dashboard with numeric color stops in *Lens* {kibana-pull}111117[#111117]
+* Fixes transition to custom palette inconsistency when in number mode in *Lens* {kibana-pull}110852[#110852]
+Management::
+* Transforms: Align privileges checks with ML plugin {kibana-pull}112970[#112970]
+* Don't show incomplete warning if search requests aren't in session {kibana-pull}112364[#112364]
+Maps::
+* Adds license querystring to EMS requests in Vega {kibana-pull}112765[#112765]
+* Fixes saved object (map) switching issue {kibana-pull}112001[#112001]
+Metrics::
+* Fixes metric threshold alert reason message for gte/lte comparator {kibana-pull}114080[#114080]
+* Removes rounding from Metric Threshold start time {kibana-pull}111634[#111634]
+* Fixes No Data alerts on Metric Threshold with groupBy {kibana-pull}111465[#111465]
+* Filter out APM nodes from the inventory view {kibana-pull}110300[#110300]
+Platform::
+* Removes executionLog to reduce memory consumption {kibana-pull}111911[#111911]
+Uptime::
+* Fixes waterfall chart top axis {kibana-pull}113281[#113281]
+
 [[release-notes-7.15.0]]
 == {kib} 7.15.0
 
@@ -71,6 +223,13 @@ For information about the {kib} 7.15.0 release, review the following information
 [float]
 [[known-issue-7.15.0]]
 === Known issues
+
+.{kib} is unable to restore *Discover* search sessions with a relative time range
+[%collapsible]
+====
+*Impact* +
+When you restore a *Discover* search session, then run a new search, {kib} displays a `Your search session is still running` message. For more information, refer to {kibana-issue}112562[#112562].
+====
 
 .Upgrade Elastic Agents to use Osquery Manager integration
 [%collapsible]
@@ -100,7 +259,7 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 7.15.0, review the breaking changes, then mitigate the impact to your application.
 
 // tag::notable-breaking-changes[]
-      
+
 [discrete]
 [[breaking-osquery]]
 .New scheduled query action ID format for Osquery Manager
@@ -122,7 +281,7 @@ Previously, scheduled query action IDs used the query ID. For example, if you sc
 The legacy area, line, and charts library are deprecated in 7.15.0. In 7.16.0, support for the legacy charts library will be removed. For more information, refer to {kibana-pull}105055[#105055].
 
 *Impact* +
-When you upgrade, {kib} uses the new charts library by default, which includes improved performance, color palettes, fill capacity, and more. 
+When you upgrade, {kib} uses the new charts library by default, which includes improved performance, color palettes, fill capacity, and more.
 
 If you have changed the default {kibana-ref}/advanced-options.html#kibana-visualization-settings[Advanced Settings], you must disable the legacy charts library to use the new charts library:
 
@@ -152,7 +311,7 @@ The import and export dashboard APIs are deprecated. For more information, refer
 *Impact* +
 Use the <<saved-objects-api-import,Import objects>> and <<saved-objects-api-export,Export objects>> APIs.
 ====
-      
+
 [discrete]
 [[deprecation-108281]]
 .Deprecates alerting and action settings
@@ -164,7 +323,7 @@ The ability to disable alerts, actions, task manager, stack alerts, and event lo
 *Impact* +
 Use the supported <<alert-action-settings-kb,Alerting and actions settings in {kib}>>.
 ====
-      
+
 [discrete]
 [[deprecation-106566]]
 .Moves filter utils to package and cleanup API
@@ -199,7 +358,7 @@ For more information, refer to {kibana-pull}106566[#106566].
 *Impact* +
 Import all utility functions from `@kbn/es-query`.
 ====
-      
+
 [discrete]
 [[deprecation-106232]]
 .Refactors `textarea` UI argument
@@ -211,7 +370,7 @@ Based on the `x-pack/plugins/canvas/CONTRIBUTING.md`, `recompose` has been remov
 *Impact* +
 There is no user-facing impact.
 ====
-      
+
 [discrete]
 [[deprecation-105981]]
 .Deprecates `xpack.maps.showMapVisualizationTypes`
@@ -223,7 +382,7 @@ Deprecates the `xpack.maps.showMapVisualizationTypes` *Maps* setting. For more i
 *Impact* +
 When you upgrade, remove `xpack.maps.showMapVisualizationTypes` from your kibana.yml file.
 ====
-      
+
 [discrete]
 [[deprecation-105742]]
 .Refactors `string` UI argument
@@ -235,7 +394,7 @@ Based on the `x-pack/plugins/canvas/CONTRIBUTING.md`, `recompose` has been remov
 *Impact* +
 There is no user-facing impact.
 ====
-      
+
 [discrete]
 [[deprecation-104685]]
 .Deprecates legacy audit logger
@@ -247,7 +406,7 @@ The legacy audit logger is deprecated. For more information, refer to {kibana-pu
 *Impact* +
 Use the ECS-comliant audit logger. For more information, refer to <<audit-logging-settings,Audit logging settings>>.
 ====
-      
+
 [discrete]
 [[deprecation-100781]]
 .Deprecates scripted fields
@@ -259,7 +418,7 @@ Adding scripted fields to index patterns is deprecated. For more information, re
 *Impact* +
 Use runtime fields. For more information, refer to <<runtime-fields,Explore your data with runtime fields>>.
 ====
-      
+
 [float]
 [[features-7.15.0]]
 === Features
@@ -495,16 +654,11 @@ Reporting::
 Review the following information about the 7.14.2 release.
 
 [float]
-[[known-issue-v7.14.2]]
-=== Known issue
-{kib} is unable to restore *Discover* search sessions with a relative time range. When you restore the *Discover* search session, then run a new search, {kib} displays a `Your search session is still running` message. For more information, refer to {kibana-issue}101430[#101430].
-
-[float]
 [[breaking-changes-v7.14.2]]
 === Breaking changes
 Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.14.2, review the <<breaking-changes-7.14.0,7.14.0 breaking changes>>.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | {kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | {kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] |
 {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | {kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] |
@@ -569,7 +723,7 @@ Review the security updates that were found in previous versions of {kib}.
 In {kib} 7.10.2 to 7.14.0, users with Fleet admin privileges could insecurely upload malicious packages. Due to an older version of the js-yaml library, attackers were able to execute commands on the {kib} server. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22150[CVE-2021-22150]
 *Solution* +
 Upgrade to {kib} 7.14.1.
-====    
+====
 [discrete]
 [[path-traversal-issue]]
 .Path traversal issue
@@ -580,7 +734,7 @@ In {kib} 7.13.4 and earlier, {kib} was not validating the user supplied paths th
 Thanks to Luat Nguyen of CyberJutsu for reporting this issue.
 *Solution* +
 Upgrade to {kib} 7.14.1.
-====    
+====
 [discrete]
 [[html-injection-issue]]
 .HTML injection issue
@@ -590,14 +744,14 @@ Upgrade to {kib} 7.14.1.
 In {kib} 7.14.0, {kib} was not sanitizing document fields that contain HTML snippets, allowing attackers with the ability to write documents to an {es} index to inject HTML. When *Discover* highlighted a search term that contained the HTML, the term was rendered. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-37936[CVE-2021-37936]
 *Solution* +
 In <<advanced-options,*Advanced Settings*>>, set `doc_table:highlight` to `false`. If you do not want to change the *Advanced Settings*, upgrade to {kib} 7.14.1.
-====    
+====
 [discrete]
 [[nodejs-security-vulnerabilities]]
 .Node.js security vulnerabilities
 [%collapsible]
 ====
 *Details* +
-In {kib} 7.14.0 and earlier, Node.js 14.17.3 is affected by the following security vulnerabilities: 
+In {kib} 7.14.0 and earlier, Node.js 14.17.3 is affected by the following security vulnerabilities:
 * https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22930[CVE-2021-22930]
 * https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-3672[CVE-2021-3672]
 * https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22931[CVE-2021-22931]
@@ -606,14 +760,14 @@ In {kib} 7.14.0 and earlier, Node.js 14.17.3 is affected by the following securi
 We do not believe an attacker can exploit the security vulnerabilities against {kib}, but are upgrading Node.js out of an abudance of caution. To resolve the security vulnerabilities, {kib} 7.14.1 upgrades Node.js to 14.17.5.
 *Solution* +
 Upgrade to {kib} 7.14.1.
-==== 
+====
 
 [float]
 [[breaking-changes-v7.14.1]]
 === Breaking changes
 Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.14.1, review the <<breaking-changes-7.14.0,7.14.0 breaking changes>>.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | {kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | {kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] |
 {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | {kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] |
@@ -690,7 +844,7 @@ Before you upgrade to 7.14.0, review the breaking changes, then mitigate the imp
 [%collapsible]
 ====
 *Details* +
-The terminology has changed for audit events logged by the alerting framework's rules client when CRUD operations are performed. 
+The terminology has changed for audit events logged by the alerting framework's rules client when CRUD operations are performed.
 
 The following audit actions are renamed:
 
@@ -725,20 +879,20 @@ For more information, refer to {kibana-pull}102263[#102263].
 *Impact* +
 When you upgrade to 7.14.0, {kib} automatically uses the new terminology. No action is needed.
 ====
-      
+
 [discrete]
 [[breaking-99078]]
 .Refactors alerts authorization client
 [%collapsible]
 ====
 *Details* +
-The alerts authorization client has been refactored to be more generic. {kib} uses the existing alerting feature privilege model to provide `all` and `read` privileges to `rules` and `alerts`. 
+The alerts authorization client has been refactored to be more generic. {kib} uses the existing alerting feature privilege model to provide `all` and `read` privileges to `rules` and `alerts`.
 
 For more information, refer to {kibana-pull}99078[#99078].
 
 *Impact* +
 When you upgrade to 7.14.0, {kib} automatically reflects the changes. No action is needed.
-====    
+====
 
 [float]
 [[deprecations-7.14.0]]
@@ -759,7 +913,7 @@ The `map.proxyElasticMapsServiceInMaps` setting is deprecated. For more informat
 *Impact* +
 Remove the `map.proxyElasticMapsServiceInMaps` setting in kibana.yml, the CLI flag, or the Docker environment variable, the host Elastic Maps Service locally.
 ====
-      
+
 [discrete]
 [[deprecation-103721]]
 .Deprecates `apm_oss.fleetMode`
@@ -771,7 +925,7 @@ The `apm_oss.fleetMode` setting in the APM OSS plugin is deprecated. For more in
 *Impact* +
 Remove the `apm_oss.fleetMode` setting from the APM OSS plugin.
 ====
-      
+
 [discrete]
 [[deprecation-103373]]
 .Deprecates the 'map.regionmap' setting and Configured GeoJSON layer
@@ -788,7 +942,7 @@ The 'map.regionmap' setting and Configured GeoJSON layer are deprecated. For mor
 
 For detailed information, refer to <<maps,Maps>>.
 ====
-      
+
 [discrete]
 [[deprecation-102878]]
 .Deprecates Ingest Pipelines URL generator
@@ -800,7 +954,7 @@ The Ingest Pipelines URL generator is deprecated. For more information, refer to
 *Impact* +
 The Machine Learning link that navigates you to *Ingest Managment* now uses locators.
 ====
-      
+
 [discrete]
 [[deprecation-102854]]
 .Deprecates Dashboard URL generator
@@ -812,7 +966,7 @@ The Dashboard URL generator is deprecated. For more information, refer to {kiban
 *Impact* +
 Drilldowns now use the *Dashboard* locator.
 ====
-      
+
 [discrete]
 [[deprecation-102712]]
 .Deprecates Discover URL generator
@@ -824,7 +978,7 @@ The *Explore Underlying Data* URL generator is deprecated. For more information,
 *Impact* +
 The *Explore Underlying Data* interaction now uses the *Discover* locator.
 ====
-      
+
 [discrete]
 [[deprecation-102059]]
 .Deprecates `csp.rules`
@@ -836,7 +990,7 @@ The `csp.rules` configuration property is deprecated. You are no longer required
 *Impact* +
 Use <<csp-script-src,`csp.script_src`>>, <<csp-worker-src,`csp.worker_src`>>, and <<csp-style-src,`csp.style_src`>>.
 ====
-      
+
 [discrete]
 [[deprecation-101162]]
 .Deprecates `xpack.fleet.agents.elasticsearch.host`
@@ -848,7 +1002,7 @@ The `xpack.fleet.agents.elasticsearch.host` setting is deprecated. For more info
 *Impact* +
 Use the <<xpack-fleet-agents-elasticsearch-hosts,`xpack.fleet.agents.elasticsearch.hosts`>> setting.
 ====
-      
+
 [discrete]
 [[deprecation-100586]]
 .Deprecates `kibana.autocompleteTerminateAfter` and `kibana.autocompleteTimeout`
@@ -860,7 +1014,7 @@ The `kibana.autocompleteTerminateAfter` and `kibana.autocompleteTimeout` setting
 *Impact* +
 Use the `data.autocomplete.terminateAfter` and `data.autocomplete.timeout` settings.
 ====
-      
+
 [discrete]
 [[deprecation-99789]]
 .Deprecates beats_management plugin
@@ -872,7 +1026,7 @@ The beats_management plugin is deprecated. For more information, refer to {kiban
 *Impact* +
 Use <<fleet,Fleet>>.
 ====
-      
+
 [float]
 [[features-7.14.0]]
 === Features
@@ -1308,7 +1462,7 @@ Logs::
 Machine Learning::
 * Updates datafeed_high_count_network_denies.json {kibana-pull}101681[#101681]
 * Fixes management app race condition {kibana-pull}100785[#100785]
-* Fixes missing selected-interval styling for Explorer anomaly charts and 
+* Fixes missing selected-interval styling for Explorer anomaly charts and
 mismatched scheduled markers styling {kibana-pull}100272[#100272]
 Maps::
 * Fixes an issue where EMS Boundaries with joins were unable to render {kibana-pull}101604[#101604]
@@ -1319,9 +1473,9 @@ Sharing::
 [[known-issue-7.13.12]]
 === Known issue
 
-*TSVB visualizations with annotations* can't be created as the index pattern dropdown on the *Annotations* tab is missing. 
-The existing *TSVB* visualizations with annotations work fine. 
-If you want to create *TSVB* visualizations with annotations, we recommend that you wait for the {kib} 7.13.3 release, then upgrade. 
+*TSVB visualizations with annotations* can't be created as the index pattern dropdown on the *Annotations* tab is missing.
+The existing *TSVB* visualizations with annotations work fine.
+If you want to create *TSVB* visualizations with annotations, we recommend that you wait for the {kib} 7.13.3 release, then upgrade.
 For more information, refer to {kibana-issue}102180[#102180].
 
 [[release-notes-7.13.1]]
@@ -1333,7 +1487,7 @@ For information about the {kib} 7.13.1 release, review the following information
 [[known-issue-7.13.1]]
 === Known issue
 
-Kibana instances with dashboard panels that are `by value` and have drilldowns may fail to start after upgrade.  
+Kibana instances with dashboard panels that are `by value` and have drilldowns may fail to start after upgrade.
 We recommend that users who have been using drilldowns in Kibana wait for 7.13.2 to upgrade.
 For more information, refer to {kibana-issue}101430[#101430].
 
@@ -1427,8 +1581,8 @@ or unenrollment hangs indefinitely. https://github.com/elastic/fleet-server/issu
 [%collapsible]
 ====
 *Details*  +
-*TSVB* references to the index pattern are not embedded when exporting a saved object. This issue was reported at https://github.com/elastic/kibana/issues/103059[#103059] and was originally related to moving a *TSVB* visualization 
-from one space to another. It should be noted that there may be different variants of this problem due to the fact 
+*TSVB* references to the index pattern are not embedded when exporting a saved object. This issue was reported at https://github.com/elastic/kibana/issues/103059[#103059] and was originally related to moving a *TSVB* visualization
+from one space to another. It should be noted that there may be different variants of this problem due to the fact
 that the used index pattern is not exported correctly.
 
 *Workaround* +
@@ -1453,7 +1607,7 @@ Elastic Agents now use the Fleet Server to enroll agents, get agent policies, co
 *Impact* +
 To run and manage Elastic Agents, use the Fleet Server instead of {kib}. For more information, refer to {fleet-guide}/fleet-server.html[Fleet Server].
 ====
-      
+
 [discrete]
 [[breaking-95789]]
 .Invalidate API keys for existing agents
@@ -1475,7 +1629,7 @@ The existing agent API keys are invalidated and display as `Inactive` on the *Ag
 The *Explore underlying data* context menu on dashboards is now disabled by default. For more information, refer to {kibana-pull}98039[#98039].
 
 *Impact* +
-To enable the *Explore underlying data* context menu, set `xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled` to `true` in kibana.yml. 
+To enable the *Explore underlying data* context menu, set `xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled` to `true` in kibana.yml.
 ====
 
 [float]
@@ -1923,7 +2077,7 @@ For information about the {kib} 7.12.1 release, review the following information
 [[security-update-7.12.1]]
 === Security update
 
-A denial of service vulnerability was found in the {kib} webhook actions due to a lack of timeout or a limit on the request size. 
+A denial of service vulnerability was found in the {kib} webhook actions due to a lack of timeout or a limit on the request size.
 An attacker with permissions to create webhook actions could drain the {kib} host connection pool, making {kib} unavailable for all other users.
 
 Thank you Dominic Couture for finding this issue.
@@ -2079,7 +2233,7 @@ Impact:
 Cluster performance degrades due to a flooding of async search API usage.
 For information on the workaround for 7.12.0, refer to {kibana-issue}96124[#96124].
 
-For information on the fix in 7.12.1, refer to {kibana-pull}96123[#96123]. 
+For information on the fix in 7.12.1, refer to {kibana-pull}96123[#96123].
 
 
 // end::known-issues[]
@@ -3200,7 +3354,7 @@ To rename the Ingest Manger plugin to Fleet:
 ====
 
 Kibana plugins can no longer rely on their server code being automatically transpiled with Babel.
-The https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-helpers[`@kbn/plugin-helpers`]
+The https://github.com/elastic/kibana/tree/main/packages/kbn-plugin-helpers[`@kbn/plugin-helpers`]
 provide a build task that will transform a plugin's server code to plain JS via Babel,
 but plugin authors can use a tool of their choosing to accomplish the same result.
 
@@ -3612,7 +3766,7 @@ Resolves https://github.com/elastic/kibana/issues/73557[#73557].
 {kib} provides the new {es} client
 as a part of the {es} service on the server-side.
 The legacy client is deprecated on and subject for removal in `7.x`. Reference
-the https://github.com/elastic/kibana/blob/master/src/core/MIGRATION_EXAMPLES.md#elasticsearch-client[migration guide] to refactor your code
+the https://github.com/elastic/kibana/blob/main/src/core/MIGRATION_EXAMPLES.md#elasticsearch-client[migration guide] to refactor your code
 
 *via https://github.com/elastic/kibana/pull/73651[#73651]*
 
@@ -4909,8 +5063,8 @@ setup(core: CoreSetup) {
 
 The API reference docs for `state_sync` and `state_containers` are now available:
 
-* https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/public/state_sync/kibana-plugin-plugins-kibana_utils-public-state_sync.md[state_sync]
-* https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/common/state_containers/kibana-plugin-plugins-kibana_utils-common-state_containers.md[state_containers]
+* https://github.com/elastic/kibana/blob/main/docs/development/plugins/kibana_utils/public/state_sync/kibana-plugin-plugins-kibana_utils-public-state_sync.md[state_sync]
+* https://github.com/elastic/kibana/blob/main/docs/development/plugins/kibana_utils/common/state_containers/kibana-plugin-plugins-kibana_utils-common-state_containers.md[state_containers]
 
 *via https://github.com/elastic/kibana/pull/67354[#67354]*
 
@@ -5968,7 +6122,7 @@ The corresponding code was previously moved to the new platform.
 
 For more information on where to locate new platform `data` services,
 refer to the
-https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
+https://github.com/elastic/kibana/blob/main/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
 in `src/core/MIGRATION.md`.
 
 *via https://github.com/elastic/kibana/pull/61618[#61618]*
@@ -6514,7 +6668,7 @@ const myPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginAp
 
 For more information on where to locate new platform `data` services,
 please refer to the table of
-https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
+https://github.com/elastic/kibana/blob/main/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
 in `src/core/MIGRATION.md`.
 
 *via {kib-pull}60449[#60449]*
@@ -6677,7 +6831,7 @@ const trigger = {
 ===== Use log4j pattern syntax
 
 Logging output of the New platform plugins can use adjusted
-via https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[new config].
+via https://github.com/elastic/kibana/blob/main/src/core/server/logging/README.md[new config].
 
 *via {kib-pull}57433[#57433]*
 
@@ -6835,14 +6989,14 @@ const reactToUiComponent: (comp: React.ComponentType) => UiComponent;
 ===== Start consuming np logging config
 
 Provides experimental support of new logging format for **new platform plugins**.
-More about https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[the logging format].
+More about https://github.com/elastic/kibana/blob/main/src/core/server/logging/README.md[the logging format].
 
 *via {kib-pull}56480[#56480]*
 
 [discrete]
 ===== [State Management] State syncing utils docs
 
-Refer to https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync[these docs]
+Refer to https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync[these docs]
 on state syncing utils.
 
 *via {kib-pull}56479[#56479]*
@@ -6958,8 +7112,8 @@ import { BUCKET_TYPES, METRIC_TYPES } from 'src/plugins/data/public';
 
 The above examples are not comprehensive, but represent some of the more
 common uses of `agg_types`. For more details, please refer to the interfaces
-in https://github.com/elastic/kibana/blob/master/src/plugins/data/public/types.ts#L50[the source code],
-as well as the data plugin's https://github.com/elastic/kibana/blob/master/src/plugins/data/public/index.ts#L282[`public/index` file].
+in https://github.com/elastic/kibana/blob/main/src/plugins/data/public/types.ts#L50[the source code],
+as well as the data plugin's https://github.com/elastic/kibana/blob/main/src/plugins/data/public/index.ts#L282[`public/index` file].
 
 
 *`ui/time_buckets`* https://github.com/elastic/kibana/pull/58805[#58805]
@@ -10696,16 +10850,16 @@ The following section is re-used in the Installation and Upgrade Guide
 
 [float]
 [[breaking_74_search_instead_of-msearch]]
-==== Use search instead of msearch when batching is disabled 
+==== Use search instead of msearch when batching is disabled
 
 *Details:*
-When the advanced setting `courier:batchSearches` is disabled, we 
+When the advanced setting `courier:batchSearches` is disabled, we
 previously sent the search requests as `_msearch` requests.
 We now use `_search` when batching is disabled.
 
 *Impact:*
-When the advanced setting `courier:batchSearches` is disabled, 
-requests from *Discover*, *Visualize*, and *Dashboard* will now query {es} 
+When the advanced setting `courier:batchSearches` is disabled,
+requests from *Discover*, *Visualize*, and *Dashboard* will now query {es}
 using the `_search` endpoint rather than the `_msearch` endpoint.
 
 [float]
@@ -11066,7 +11220,7 @@ For information about the Kibana 7.3.0 release, review the following information
 
 Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.3.0, review the breaking changes, then mitigate the impact to your application.
 
-See also {kibana-ref-all}/7.3/release-highlights-7.3.0.html[release highlights] 
+See also {kibana-ref-all}/7.3/release-highlights-7.3.0.html[release highlights]
 and <<release-notes-7.3.0, release notes>>.
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
@@ -11438,15 +11592,15 @@ and <<release-notes-7.2.0, release notes>>.
 
 [float]
 ==== Time-based internal index patterns queried as wildcard index patterns
-*Details:* Time-based interval index patterns were deprecated in 5.x. In 6.x, 
-you could no longer create time-based interval index patterns, but they continued 
-to function as expected. In 7.2, functionality has changed such that {kib} will 
+*Details:* Time-based interval index patterns were deprecated in 5.x. In 6.x,
+you could no longer create time-based interval index patterns, but they continued
+to function as expected. In 7.2, functionality has changed such that {kib} will
 automatically query a time-based interval index pattern as a wildcard index pattern.
-Support for time-based index patterns will be removed in 8.0. You can migrate your 
+Support for time-based index patterns will be removed in 8.0. You can migrate your
 time-based index patterns to a wildcard pattern to prepare for this change.
 
-*Impact:* If you query a time-based index pattern, that query will now be performed 
-on the root wildcard term. For example, a query on an index pattern such as 
+*Impact:* If you query a time-based index pattern, that query will now be performed
+on the root wildcard term. For example, a query on an index pattern such as
 `[logstash-]YYYY.MM.DD` will now query all indices that match `logstash-*`.
 
 
@@ -12030,23 +12184,23 @@ users to use IE11, you might like to disable the warning entirely with `csp.warn
 [float]
 ===== Removed overseas territories from France Departments vector layer
 
-*Details:* Overseas territories in the France Departments vector layer have 
-been removed. These territories have no ISO 3166-2 or INSEE codes to join to 
+*Details:* Overseas territories in the France Departments vector layer have
+been removed. These territories have no ISO 3166-2 or INSEE codes to join to
 {es} data.
 
-*Impact:* Region Map, Vega, and Maps plugin visualizations using the France 
-Departments layer will not show overseas territories. 
+*Impact:* Region Map, Vega, and Maps plugin visualizations using the France
+Departments layer will not show overseas territories.
 
 [float]
 ===== USA Zip Codes vector layer updated with latest US Census data
 
-*Details:* The USA Zip Codes layer has been updated based on the 
-https://www.census.gov/geo/reference/zctas.html[2018 Zip Code Tabulation 
-Areas (ZCTAs)] distributed by the US Census Bureau. ZCTA boundaries have been 
+*Details:* The USA Zip Codes layer has been updated based on the
+https://www.census.gov/geo/reference/zctas.html[2018 Zip Code Tabulation
+Areas (ZCTAs)] distributed by the US Census Bureau. ZCTA boundaries have been
 generalized from the source data for visualization and locations are approximate.
 
-*Impact:* Region Map, Vega, and Maps plugin visualizations using the USA Zip 
-Codes layer will appear differently. ZCTA boundaries have changed dramatically 
+*Impact:* Region Map, Vega, and Maps plugin visualizations using the USA Zip
+Codes layer will appear differently. ZCTA boundaries have changed dramatically
 in some areas. Also, some zip codes have been deprecated and new ones have been added.
 
 [float]
@@ -12077,19 +12231,19 @@ Kibana 7.0 will only use the Node.js distribution included in the package.
 [float]
 ===== Removed support for users relying on direct index privileges to the Kibana index in Elasticsearch
 *Details:* With the introduction of Kibana RBAC in 6.4, users no longer require privileges to the Kibana index in Elasticsearch. Instead, users
-should be granted <<kibana-privileges>>. Prior to 7.0, when a user who relies upon direct index privileges logged into Kibana, a deprecation warning was logged. 
+should be granted <<kibana-privileges>>. Prior to 7.0, when a user who relies upon direct index privileges logged into Kibana, a deprecation warning was logged.
 
-*Impact:* You must change any roles that grant access to Kibana using index privileges to use <<kibana-privileges>> instead. 
+*Impact:* You must change any roles that grant access to Kibana using index privileges to use <<kibana-privileges>> instead.
 Watcher jobs using the Reporting attachment type must also be updated.
 
-If you use a custom `kibana.index` for multitenancy, you can 
-no longer use `kibana_user` or `kibana_dashboard_only_user` to provide access, 
+If you use a custom `kibana.index` for multitenancy, you can
+no longer use `kibana_user` or `kibana_dashboard_only_user` to provide access,
 and will have to start using {kib} privileges.
 
 In addition, roles cannot be shared across Kibana tenants when granting access to Kibana privileges.
-For example, a tenant using `kibana.index: .kibana` will have its own set 
-of roles created to grant access to Kibana. If you create another tenant 
-at `kibana.index: .some-other-index`, it will need its own set of roles 
+For example, a tenant using `kibana.index: .kibana` will have its own set
+of roles created to grant access to Kibana. If you create another tenant
+at `kibana.index: .some-other-index`, it will need its own set of roles
 to grant access to that tenant.
 
 [float]
@@ -12106,7 +12260,7 @@ to grant access to that tenant.
 [float]
 ===== `elasticsearch.ssl.ca` is no longer valid
 
-*Details:* The deprecated `elasticsearch.ssl.ca` setting in the `kibana.yml` 
+*Details:* The deprecated `elasticsearch.ssl.ca` setting in the `kibana.yml`
 file has been removed.
 
 *Impact:* Use `elasticsearch.ssl.certificateAuthorities` instead.
@@ -12126,14 +12280,14 @@ file has been removed.
 file has been removed.
 
 *Impact:* Use `elasticsearch.ssl.verificationMode` instead. If you set
-`elasticsearch.ssl.verify` to `true`, that is equal to setting 
+`elasticsearch.ssl.verify` to `true`, that is equal to setting
 `elasticsearch.ssl.verificationMode` to `full`.
 
 [float]
 ===== `elasticsearch.url` is no longer valid
 
 *Details:* The deprecated `elasticsearch.url` setting in the `kibana.yml` file
-has been removed. 
+has been removed.
 
 *Impact:* Use `elasticsearch.hosts` instead. In prior versions of Kibana, if no
 port was specified in `elasticsearch.url`, a default of 9200 was chosen. The
@@ -12170,11 +12324,11 @@ file have been removed.
 ===== `logging.useUTC` is no longer valid
 
 *Details:* The deprecated `logging.useUTC` setting in the `kibana.yml` file has
-been removed. 
+been removed.
 
 *Impact:* If `logging.useUTC` was set to `true` (its default value), the
 timezone id was `UTC`. Use `logging.timezone` instead. Any timezone can now be
-specified by canonical id. 
+specified by canonical id.
 
 [float]
 ===== `regionmap` is no longer valid
@@ -12249,7 +12403,7 @@ file have been removed.
 ===== `xpack.monitoring.cluster_alerts.index` is no longer valid
 
 *Details:* The unsupported `xpack.monitoring.cluster_alerts.index` setting in
-the `kibana.yml` file has been officially removed. 
+the `kibana.yml` file has been officially removed.
 
 *Impact:* The ability to customize this index is no longer supported.
 
@@ -12265,7 +12419,7 @@ setting in the `kibana.yml` file has been officially removed.
 ===== `xpack.monitoring.elasticsearch.ssl.ca` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.elasticsearch.ssl.ca` setting in the
-`kibana.yml` file has been removed. 
+`kibana.yml` file has been removed.
 
 *Impact:* Use `xpack.monitoring.elasticsearch.ssl.certificateAuthorities` instead.
 
@@ -12273,7 +12427,7 @@ setting in the `kibana.yml` file has been officially removed.
 ===== `xpack.monitoring.elasticsearch.ssl.cert` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.elasticsearch.ssl.cert` setting in
-the `kibana.yml` file has been removed. 
+the `kibana.yml` file has been removed.
 
 *Impact:* Use `xpack.monitoring.elasticsearch.ssl.certificate` instead.
 
@@ -12281,7 +12435,7 @@ the `kibana.yml` file has been removed.
 ===== `xpack.monitoring.elasticsearch.ssl.verify` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.elasticsearch.ssl.verify` setting in
-the `kibana.yml` file has been removed. 
+the `kibana.yml` file has been removed.
 
 *Impact:* Use `xpack.monitoring.elasticsearch.ssl.verificationMode` instead. If
 you previously set `xpack.monitoring.elasticsearch.ssl.verify` to `true`, it is
@@ -12291,7 +12445,7 @@ equal to setting `xpack.monitoring.elasticsearch.ssl.verificationMode` to `full`
 ===== `xpack.monitoring.elasticsearch.url` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.elasticsearch.url` setting in the
-`kibana.yml` file has been removed. 
+`kibana.yml` file has been removed.
 
 *Impact:* Use `xpack.monitoring.elasticsearch.hosts` instead. In prior versions
 of Kibana, if no port was specified in `xpack.monitoring.elasticsearch.url` a
@@ -12341,7 +12495,7 @@ the `path.data` directory when the node or instance starts.
 ===== `xpack.monitoring.report_stats` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.report_stats` setting in the
-`kibana.yml` file has been removed. 
+`kibana.yml` file has been removed.
 
 *Impact:* Use `xpack.xpack_main.telemetry.enabled` instead.
 
@@ -12351,7 +12505,7 @@ the `path.data` directory when the node or instance starts.
 *Details:* Kibana management URLs pertaining to index patterns have been changed
 to accurately reflect their content, from `management/kibana/index` or
 `management/kibana/indices` to `managemen/kibana/index_pattern` or
-`management/kibana/index_patterns`. 
+`management/kibana/index_patterns`.
 
 *Impact:* References to these URLs will need to be updated.
 
@@ -12398,7 +12552,7 @@ to Kibana's advanced setting.
 ===== KQL is now the default query language in the global search bar
 *Details:* Language enhancements that were introduced in 6.3 on an opt-in basis are now turned on by default. This
 is considered a breaking change because the enhancements include a simplifed syntax that has some small incompatibilities
-with the old Lucene syntax. 
+with the old Lucene syntax.
 
 *Impact:* Users simply need to familiarize themselves with the new syntax. Existing saved searches, visualizations, and dashboards
 that use the old Lucene syntax will continue to work, but users should consider migrating them to KQL to enjoy the other benefits
@@ -12428,11 +12582,11 @@ multiple split tables will now see those tables rendered differently.
 
 [float]
 ===== Timelion no longer appears in the side navigation
-*Details:* Timelion sheets will continue to work in *Visualize*, but the 
-Timelion application no longer appears by default in the {kib} side navigation. 
+*Details:* Timelion sheets will continue to work in *Visualize*, but the
+Timelion application no longer appears by default in the {kib} side navigation.
 
-*Impact:* To create a Timelion visualization, go to *Visualize* and select 
-*Timelion* from the visualization types. If you have a lot of existing Timelion 
+*Impact:* To create a Timelion visualization, go to *Visualize* and select
+*Timelion* from the visualization types. If you have a lot of existing Timelion
 visualizations and want to add Timelion back in the side
 navigation, set `timelion.ui.enabled` to `true` in `kibana.yml`.
 
@@ -14520,3 +14674,4 @@ if the field is switched, and then switched back to the previous field {kib-pull
 * Stops creation of nested search source per postflightrequest {kib-pull}20373[#20373]
 * Moves inspector code from Vis to embeddable visualize handler {kib-pull}24112[#24112]
 * Removes inspector from Vis {kib-pull}24112[#24112]
+/////

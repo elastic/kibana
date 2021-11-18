@@ -17,6 +17,17 @@ import { esHits } from '../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { DiscoverGridContext } from './discover_grid_context';
 
+const baseContextMock = {
+  expanded: undefined,
+  setExpanded: jest.fn(),
+  rows: esHits,
+  onFilter: jest.fn(),
+  indexPattern: indexPatternMock,
+  isDarkMode: false,
+  selectedDocs: [],
+  setSelectedDocs: jest.fn(),
+};
+
 describe('document selection', () => {
   describe('getDocId', () => {
     test('doc with custom routing', () => {
@@ -39,14 +50,7 @@ describe('document selection', () => {
   describe('SelectButton', () => {
     test('is not checked', () => {
       const contextMock = {
-        expanded: undefined,
-        setExpanded: jest.fn(),
-        rows: esHits,
-        onFilter: jest.fn(),
-        indexPattern: indexPatternMock,
-        isDarkMode: false,
-        selectedDocs: [],
-        setSelectedDocs: jest.fn(),
+        ...baseContextMock,
       };
 
       const component = mountWithIntl(
@@ -68,14 +72,8 @@ describe('document selection', () => {
 
     test('is checked', () => {
       const contextMock = {
-        expanded: undefined,
-        setExpanded: jest.fn(),
-        rows: esHits,
-        onFilter: jest.fn(),
-        indexPattern: indexPatternMock,
-        isDarkMode: false,
+        ...baseContextMock,
         selectedDocs: ['i::1::'],
-        setSelectedDocs: jest.fn(),
       };
 
       const component = mountWithIntl(
@@ -97,14 +95,7 @@ describe('document selection', () => {
 
     test('adding a selection', () => {
       const contextMock = {
-        expanded: undefined,
-        setExpanded: jest.fn(),
-        rows: esHits,
-        onFilter: jest.fn(),
-        indexPattern: indexPatternMock,
-        isDarkMode: false,
-        selectedDocs: [],
-        setSelectedDocs: jest.fn(),
+        ...baseContextMock,
       };
 
       const component = mountWithIntl(
@@ -126,14 +117,8 @@ describe('document selection', () => {
     });
     test('removing a selection', () => {
       const contextMock = {
-        expanded: undefined,
-        setExpanded: jest.fn(),
-        rows: esHits,
-        onFilter: jest.fn(),
-        indexPattern: indexPatternMock,
-        isDarkMode: false,
+        ...baseContextMock,
         selectedDocs: ['i::1::'],
-        setSelectedDocs: jest.fn(),
       };
 
       const component = mountWithIntl(

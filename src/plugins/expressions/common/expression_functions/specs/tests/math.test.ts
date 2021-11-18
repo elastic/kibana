@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { errors, math } from '../math';
+import { errors, math, MathArguments, MathInput } from '../math';
 import { emptyTable, functionWrapper, testTable } from './utils';
 
 describe('math', () => {
-  const fn = functionWrapper<unknown>(math);
+  const fn = functionWrapper(math);
 
   it('evaluates math expressions without reference to context', () => {
-    expect(fn(null, { expression: '10.5345' })).toBe(10.5345);
-    expect(fn(null, { expression: '123 + 456' })).toBe(579);
-    expect(fn(null, { expression: '100 - 46' })).toBe(54);
+    expect(fn(null as unknown as MathInput, { expression: '10.5345' })).toBe(10.5345);
+    expect(fn(null as unknown as MathInput, { expression: '123 + 456' })).toBe(579);
+    expect(fn(null as unknown as MathInput, { expression: '100 - 46' })).toBe(54);
     expect(fn(1, { expression: '100 / 5' })).toBe(20);
-    expect(fn('foo', { expression: '100 / 5' })).toBe(20);
-    expect(fn(true, { expression: '100 / 5' })).toBe(20);
+    expect(fn('foo' as unknown as MathInput, { expression: '100 / 5' })).toBe(20);
+    expect(fn(true as unknown as MathInput, { expression: '100 / 5' })).toBe(20);
     expect(fn(testTable, { expression: '100 * 5' })).toBe(500);
     expect(fn(emptyTable, { expression: '100 * 5' })).toBe(500);
   });
@@ -54,7 +54,7 @@ describe('math', () => {
   describe('args', () => {
     describe('expression', () => {
       it('sets the math expression to be evaluted', () => {
-        expect(fn(null, { expression: '10' })).toBe(10);
+        expect(fn(null as unknown as MathInput, { expression: '10' })).toBe(10);
         expect(fn(23.23, { expression: 'floor(value)' })).toBe(23);
         expect(fn(testTable, { expression: 'count(price)' })).toBe(9);
         expect(fn(testTable, { expression: 'count(name)' })).toBe(9);
@@ -99,11 +99,11 @@ describe('math', () => {
     it('throws when missing expression', () => {
       expect(() => fn(testTable)).toThrow(new RegExp(errors.emptyExpression().message));
 
-      expect(() => fn(testTable, { expession: '' })).toThrow(
+      expect(() => fn(testTable, { expession: '' } as unknown as MathArguments)).toThrow(
         new RegExp(errors.emptyExpression().message)
       );
 
-      expect(() => fn(testTable, { expession: ' ' })).toThrow(
+      expect(() => fn(testTable, { expession: ' ' } as unknown as MathArguments)).toThrow(
         new RegExp(errors.emptyExpression().message)
       );
     });

@@ -50,6 +50,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/security_api_integration/session_lifespan.config.ts'),
   require.resolve('../test/security_api_integration/login_selector.config.ts'),
   require.resolve('../test/security_api_integration/audit.config.ts'),
+  require.resolve('../test/security_api_integration/http_bearer.config.ts'),
   require.resolve('../test/security_api_integration/kerberos.config.ts'),
   require.resolve('../test/security_api_integration/kerberos_anonymous_access.config.ts'),
   require.resolve('../test/security_api_integration/pki.config.ts'),
@@ -70,6 +71,10 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/saved_object_api_integration/security_only/config_trial.ts'),
   require.resolve('../test/saved_object_api_integration/security_only/config_basic.ts'),
   require.resolve('../test/saved_object_api_integration/spaces_only/config.ts'),
+  // TODO: Enable once RBAC timeline search strategy
+  // tests updated
+  // require.resolve('../test/timeline/security_and_spaces/config_basic.ts'),
+  require.resolve('../test/timeline/security_and_spaces/config_trial.ts'),
   require.resolve('../test/ui_capabilities/security_and_spaces/config.ts'),
   require.resolve('../test/ui_capabilities/security_only/config.ts'),
   require.resolve('../test/ui_capabilities/spaces_only/config.ts'),

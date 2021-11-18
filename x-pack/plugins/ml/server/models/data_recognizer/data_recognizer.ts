@@ -8,17 +8,21 @@
 import fs from 'fs';
 import Boom from '@hapi/boom';
 import numeral from '@elastic/numeral';
-import { KibanaRequest, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import type {
+  KibanaRequest,
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 
 import moment from 'moment';
-import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
-import { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
+import type { DataViewsService } from '../../../../../../src/plugins/data_views/common';
+import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
-import { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlInfoResponse } from '../../../common/types/ml_server_info';
 import type { MlClient } from '../../lib/ml_client';
 import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
-import {
+import type {
   KibanaObjects,
   KibanaObjectConfig,
   ModuleDatafeed,
@@ -35,8 +39,8 @@ import {
   DataRecognizerConfigResponse,
   GeneralDatafeedsOverride,
   JobSpecificOverride,
-  isGeneralJobOverride,
 } from '../../../common/types/modules';
+import { isGeneralJobOverride } from '../../../common/types/modules';
 import {
   getLatestDataOrBucketTimestamp,
   prefixDatafeedId,
@@ -47,10 +51,10 @@ import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_lim
 import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
-import { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
-import { MlJobsStatsResponse } from '../../../common/types/job_service';
-import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
-import { JobSavedObjectService } from '../../saved_objects';
+import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
+import type { MlJobsStatsResponse } from '../../../common/types/job_service';
+import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import type { JobSavedObjectService } from '../../saved_objects';
 import { isDefined } from '../../../common/types/guards';
 import { isPopulatedObject } from '../../../common/util/object_utils';
 
@@ -110,6 +114,7 @@ export class DataRecognizer {
   private _mlClient: MlClient;
   private _savedObjectsClient: SavedObjectsClientContract;
   private _jobSavedObjectService: JobSavedObjectService;
+  private _dataViewsService: DataViewsService;
   private _request: KibanaRequest;
 
   private _authorizationHeader: object;
@@ -130,12 +135,14 @@ export class DataRecognizer {
     mlClusterClient: IScopedClusterClient,
     mlClient: MlClient,
     savedObjectsClient: SavedObjectsClientContract,
+    dataViewsService: DataViewsService,
     jobSavedObjectService: JobSavedObjectService,
     request: KibanaRequest
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
     this._savedObjectsClient = savedObjectsClient;
+    this._dataViewsService = dataViewsService;
     this._jobSavedObjectService = jobSavedObjectService;
     this._request = request;
     this._authorizationHeader = getAuthorizationHeader(request);
@@ -615,22 +622,11 @@ export class DataRecognizer {
     return results;
   }
 
-  private async _loadIndexPatterns() {
-    return await this._savedObjectsClient.find<IndexPatternAttributes>({
-      type: 'index-pattern',
-      perPage: 1000,
-    });
-  }
-
   // returns a id based on an index pattern name
-  private async _getIndexPatternId(name: string) {
+  private async _getIndexPatternId(name: string): Promise<string | undefined> {
     try {
-      const indexPatterns = await this._loadIndexPatterns();
-      if (indexPatterns === undefined || indexPatterns.saved_objects === undefined) {
-        return;
-      }
-      const ip = indexPatterns.saved_objects.find((i) => i.attributes.title === name);
-      return ip !== undefined ? ip.id : undefined;
+      const dataViews = await this._dataViewsService.find(name);
+      return dataViews.find((d) => d.title === name)?.id;
     } catch (error) {
       mlLog.warn(`Error loading index patterns, ${error}`);
       return;
@@ -1131,7 +1127,7 @@ export class DataRecognizer {
           // set the fallback range for all jobs
           // as there may not be a common query, we use a match_all
           const { start: fallbackStart, end: fallbackEnd } = await this._getFallbackTimeRange(
-            firstJobTimeField,
+            firstJobTimeField!,
             { match_all: {} }
           );
           start = fallbackStart;
@@ -1143,7 +1139,7 @@ export class DataRecognizer {
           let latestMs = end;
           if (earliestMs === undefined || latestMs === undefined) {
             const timeFieldRange = await this._getFallbackTimeRange(
-              job.config.data_description.time_field,
+              job.config.data_description.time_field!,
               query
             );
             earliestMs = timeFieldRange.start;
@@ -1154,7 +1150,7 @@ export class DataRecognizer {
             job.config.analysis_config,
             this._indexPatternName,
             query,
-            job.config.data_description.time_field,
+            job.config.data_description.time_field!,
             earliestMs,
             latestMs
           );
@@ -1386,4 +1382,22 @@ export class DataRecognizer {
       });
     }
   }
+}
+
+export function dataRecognizerFactory(
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  dataViewsService: DataViewsService,
+  jobSavedObjectService: JobSavedObjectService,
+  request: KibanaRequest
+) {
+  return new DataRecognizer(
+    client,
+    mlClient,
+    savedObjectsClient,
+    dataViewsService,
+    jobSavedObjectService,
+    request
+  );
 }

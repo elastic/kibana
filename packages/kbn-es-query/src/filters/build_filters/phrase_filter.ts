@@ -100,7 +100,7 @@ export const buildPhraseFilter = (
   if (field.scripted) {
     return {
       meta: { index: indexPattern.id, field: field.name } as PhraseFilterMeta,
-      script: getPhraseScript(field, value),
+      query: { script: getPhraseScript(field, value) },
     };
   } else {
     return {

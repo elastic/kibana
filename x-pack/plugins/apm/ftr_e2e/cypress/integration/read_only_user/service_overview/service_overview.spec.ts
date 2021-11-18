@@ -59,7 +59,7 @@ describe('Service Overview', () => {
   });
 
   it('hides dependency tab when RUM service', () => {
-    cy.intercept('GET', '/api/apm/services/opbeans-rum/agent').as(
+    cy.intercept('GET', '/internal/apm/services/opbeans-rum/agent?*').as(
       'agentRequest'
     );
     cy.visit(

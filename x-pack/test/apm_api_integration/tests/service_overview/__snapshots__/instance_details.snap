@@ -2,7 +2,6 @@
 
 exports[`APM API tests basic apm_8.0.0 Instance details when data is loaded fetch instance details return the correct data 1`] = `
 Object {
-  "@timestamp": "2021-08-03T06:50:50.204Z",
   "agent": Object {
     "ephemeral_id": "2745d454-f57f-4473-a09b-fe6bef295860",
     "name": "java",

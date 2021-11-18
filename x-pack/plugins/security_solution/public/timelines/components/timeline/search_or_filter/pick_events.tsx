@@ -144,7 +144,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         ...kibanaIndexPatterns.map((kip) => kip.title),
         signalIndexName,
       ].reduce<Array<EuiComboBoxOptionOption<string>>>((acc, index) => {
-        if (index != null && !acc.some((o) => o.label.includes(index))) {
+        if (index != null && !acc.some((o) => o.label === index)) {
           return [...acc, { label: index, value: index }];
         }
         return acc;
@@ -153,16 +153,15 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   );
 
   const renderOption = useCallback(
-    (option) => {
-      const { value } = option;
+    ({ value }) => {
       if (kibanaIndexPatterns.some((kip) => kip.title === value)) {
         return (
-          <>
+          <span data-test-subj="sourcerer-option">
             <EuiIcon type="logoKibana" size="s" /> {value}
-          </>
+          </span>
         );
       }
-      return <>{value}</>;
+      return <span data-test-subj="sourcerer-option">{value}</span>;
     },
     [kibanaIndexPatterns]
   );
@@ -193,14 +192,14 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       setFilterEventType(filter);
       if (filter === 'all') {
         setSelectedOptions(
-          [...configIndexPatterns, signalIndexName ?? ''].map((indexSelected) => ({
+          [...configIndexPatterns.sort(), signalIndexName ?? ''].map((indexSelected) => ({
             label: indexSelected,
             value: indexSelected,
           }))
         );
       } else if (filter === 'raw') {
         setSelectedOptions(
-          configIndexPatterns.map((indexSelected) => ({
+          configIndexPatterns.sort().map((indexSelected) => ({
             label: indexSelected,
             value: indexSelected,
           }))
@@ -240,14 +239,8 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   }, [filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
 
   const resetDataSources = useCallback(() => {
-    setSelectedOptions(
-      sourcererScope.selectedPatterns.map((indexSelected) => ({
-        label: indexSelected,
-        value: indexSelected,
-      }))
-    );
-    setFilterEventType(eventType);
-  }, [eventType, sourcererScope.selectedPatterns]);
+    onChangeFilter('all');
+  }, [onChangeFilter]);
 
   const comboBox = useMemo(
     () => (
@@ -302,6 +295,20 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     [isPopoverOpen, sourcererScope.selectedPatterns]
   );
 
+  const buttonWithTooptip = useMemo(() => {
+    return tooltipContent ? (
+      <EuiToolTip
+        position="top"
+        content={tooltipContent}
+        data-test-subj="timeline-sourcerer-tooltip"
+      >
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
+    );
+  }, [button, tooltipContent]);
+
   const ButtonContent = useMemo(
     () => (
       <AdvancedSettings data-test-subj="advanced-settings">
@@ -333,69 +340,66 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   return (
     <PickEventContainer>
-      <EuiToolTip position="top" content={tooltipContent}>
-        <EuiPopover
-          button={button}
-          closePopover={closePopover}
-          id="popover"
-          isOpen={isPopoverOpen}
-          ownFocus
-          repositionOnScroll
-        >
-          <PopoverContent>
-            <EuiPopoverTitle>
-              <>{i18n.SELECT_INDEX_PATTERNS}</>
-            </EuiPopoverTitle>
-            <EuiSpacer size="s" />
-            {filter}
-            <EuiSpacer size="m" />
-            <EuiAccordion
-              id="accordion1"
-              forceState={showAdvanceSettings ? 'open' : 'closed'}
-              buttonContent={ButtonContent}
-              onToggle={setAdvanceSettings}
-            >
-              <>
-                <EuiSpacer size="s" />
-                {comboBox}
-              </>
-            </EuiAccordion>
-            {!showAdvanceSettings && (
-              <>
-                <EuiSpacer size="s" />
-                <ConfigHelper size="s" color="subdued">
-                  {i18n.CONFIGURE_INDEX_PATTERNS}
-                </ConfigHelper>
-              </>
-            )}
-            <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <ResetButton
-                  aria-label={i18n.DATA_SOURCES_RESET}
-                  data-test-subj="sourcerer-reset"
-                  flush="left"
-                  onClick={resetDataSources}
-                  title={i18n.DATA_SOURCES_RESET}
-                >
-                  {i18n.DATA_SOURCES_RESET}
-                </ResetButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={handleSaveIndices}
-                  data-test-subj="add-index"
-                  fill
-                  fullWidth
-                  size="s"
-                >
-                  {i18n.SAVE_INDEX_PATTERNS}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </PopoverContent>
-        </EuiPopover>
-      </EuiToolTip>
+      <EuiPopover
+        button={buttonWithTooptip}
+        closePopover={closePopover}
+        id="popover"
+        isOpen={isPopoverOpen}
+        repositionOnScroll
+      >
+        <PopoverContent>
+          <EuiPopoverTitle>
+            <>{i18n.SELECT_INDEX_PATTERNS}</>
+          </EuiPopoverTitle>
+          <EuiSpacer size="s" />
+          {filter}
+          <EuiSpacer size="m" />
+          <EuiAccordion
+            id="accordion1"
+            forceState={showAdvanceSettings ? 'open' : 'closed'}
+            buttonContent={ButtonContent}
+            onToggle={setAdvanceSettings}
+          >
+            <>
+              <EuiSpacer size="s" />
+              {comboBox}
+            </>
+          </EuiAccordion>
+          {!showAdvanceSettings && (
+            <>
+              <EuiSpacer size="s" />
+              <ConfigHelper size="s" color="subdued">
+                {i18n.CONFIGURE_INDEX_PATTERNS}
+              </ConfigHelper>
+            </>
+          )}
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <ResetButton
+                aria-label={i18n.DATA_SOURCES_RESET}
+                data-test-subj="sourcerer-reset"
+                flush="left"
+                onClick={resetDataSources}
+                title={i18n.DATA_SOURCES_RESET}
+              >
+                {i18n.DATA_SOURCES_RESET}
+              </ResetButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={handleSaveIndices}
+                data-test-subj="add-index"
+                fill
+                fullWidth
+                size="s"
+              >
+                {i18n.SAVE_INDEX_PATTERNS}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </PopoverContent>
+      </EuiPopover>
     </PickEventContainer>
   );
 };

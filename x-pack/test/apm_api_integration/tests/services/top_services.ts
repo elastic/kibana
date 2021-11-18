@@ -6,34 +6,43 @@
  */
 
 import expect from '@kbn/expect';
-import { sortBy, pick, isEmpty } from 'lodash';
+import { sortBy } from 'lodash';
+import { service, timerange } from '@elastic/apm-synthtrace';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
-import { registry } from '../../common/registry';
+import { ENVIRONMENT_ALL } from '../../../../plugins/apm/common/environment_filter_values';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
+
+  const apmApiClient = getService('apmApiClient');
+  const synthtrace = getService('synthtraceEsClient');
+
   const supertestAsApmReadUserWithoutMlAccess = getService(
     'legacySupertestAsApmReadUserWithoutMlAccess'
   );
 
   const archiveName = 'apm_8.0.0';
 
-  const range = archives_metadata[archiveName];
+  const archiveRange = archives_metadata[archiveName];
 
   // url parameters
-  const start = encodeURIComponent(range.start);
-  const end = encodeURIComponent(range.end);
+  const archiveStart = encodeURIComponent(archiveRange.start);
+  const archiveEnd = encodeURIComponent(archiveRange.end);
+
+  const start = '2021-10-01T00:00:00.000Z';
+  const end = '2021-10-01T00:05:00.000Z';
 
   registry.when(
-    'APM Services Overview with a basic license when data is not loaded',
-    { config: 'basic', archives: [] },
+    'APM Services Overview with a basic license when data is not generated',
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+          `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
         );
 
         expect(response.status).to.be(200);
@@ -44,199 +53,254 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'APM Services Overview with a basic license when data is loaded',
-    { config: 'basic', archives: [archiveName] },
+    'APM Services Overview with a basic license when data is generated',
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       let response: {
         status: number;
-        body: APIReturnType<'GET /api/apm/services'>;
+        body: APIReturnType<'GET /internal/apm/services'>;
       };
 
-      let sortedItems: typeof response.body.items;
+      const range = timerange(new Date(start).getTime(), new Date(end).getTime());
+      const transactionInterval = range.interval('1s');
+      const metricInterval = range.interval('30s');
+
+      const multipleEnvServiceProdInstance = service(
+        'multiple-env-service',
+        'production',
+        'go'
+      ).instance('multiple-env-service-production');
+
+      const multipleEnvServiceDevInstance = service(
+        'multiple-env-service',
+        'development',
+        'go'
+      ).instance('multiple-env-service-development');
+
+      const metricOnlyInstance = service('metric-only-service', 'production', 'java').instance(
+        'metric-only-production'
+      );
+
+      const config = {
+        multiple: {
+          prod: {
+            rps: 4,
+            duration: 1000,
+          },
+          dev: {
+            rps: 1,
+            duration: 500,
+          },
+        },
+      };
 
       before(async () => {
-        response = await supertest.get(
-          `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
-        );
-        sortedItems = sortBy(response.body.items, 'serviceName');
-      });
-
-      it('the response is successful', () => {
-        expect(response.status).to.eql(200);
-      });
-
-      it('returns hasLegacyData: false', () => {
-        expect(response.body.hasLegacyData).to.be(false);
-      });
-
-      it('returns the correct service names', () => {
-        expectSnapshot(sortedItems.map((item) => item.serviceName)).toMatchInline(`
-          Array [
-            "auditbeat",
-            "opbeans-dotnet",
-            "opbeans-go",
-            "opbeans-java",
-            "opbeans-node",
-            "opbeans-python",
-            "opbeans-ruby",
-            "opbeans-rum",
-          ]
-        `);
-      });
-
-      it('returns the correct metrics averages', () => {
-        expectSnapshot(
-          sortedItems.map((item) => pick(item, 'transactionErrorRate', 'latency', 'throughput'))
-        ).toMatchInline(`
-          Array [
-            Object {},
-            Object {
-              "latency": 520294.126436782,
-              "throughput": 11.6,
-              "transactionErrorRate": 0.0316091954022989,
-            },
-            Object {
-              "latency": 74805.1452830189,
-              "throughput": 17.6666666666667,
-              "transactionErrorRate": 0.00566037735849057,
-            },
-            Object {
-              "latency": 411589.785714286,
-              "throughput": 7.46666666666667,
-              "transactionErrorRate": 0.0848214285714286,
-            },
-            Object {
-              "latency": 53906.6603773585,
-              "throughput": 7.06666666666667,
-              "transactionErrorRate": 0,
-            },
-            Object {
-              "latency": 420634.9,
-              "throughput": 5.33333333333333,
-              "transactionErrorRate": 0.025,
-            },
-            Object {
-              "latency": 40989.5802047782,
-              "throughput": 9.76666666666667,
-              "transactionErrorRate": 0.00341296928327645,
-            },
-            Object {
-              "latency": 1040880.77777778,
-              "throughput": 2.4,
-              "transactionErrorRate": null,
-            },
-          ]
-        `);
-      });
-
-      it('returns environments', () => {
-        expectSnapshot(sortedItems.map((item) => item.environments ?? [])).toMatchInline(`
-          Array [
-            Array [
-              "production",
-            ],
-            Array [
-              "production",
-            ],
-            Array [
-              "testing",
-            ],
-            Array [
-              "production",
-            ],
-            Array [
-              "testing",
-            ],
-            Array [
-              "production",
-            ],
-            Array [
-              "production",
-            ],
-            Array [
-              "testing",
-            ],
-          ]
-        `);
-      });
-
-      it(`RUM services don't report any transaction error rates`, () => {
-        // RUM transactions don't have event.outcome set,
-        // so they should not have an error rate
-
-        const rumServices = sortedItems.filter((item) => item.agentName === 'rum-js');
-
-        expect(rumServices.length).to.be.greaterThan(0);
-
-        expect(rumServices.every((item) => isEmpty(item.transactionErrorRate)));
-      });
-
-      it('non-RUM services all report transaction error rates', () => {
-        const nonRumServices = sortedItems.filter(
-          (item) => item.agentName !== 'rum-js' && item.serviceName !== 'auditbeat'
-        );
-
-        expect(
-          nonRumServices.every((item) => {
-            return typeof item.transactionErrorRate === 'number';
-          })
-        ).to.be(true);
-      });
-    }
-  );
-
-  registry.when(
-    'APM Services Overview with a basic license when data is loaded excluding transaction events',
-    { config: 'basic', archives: [archiveName] },
-    () => {
-      it('includes services that only report metric data', async () => {
-        interface Response {
-          status: number;
-          body: APIReturnType<'GET /api/apm/services'>;
-        }
-
-        const [unfilteredResponse, filteredResponse] = await Promise.all([
-          supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
-          ) as Promise<Response>,
-          supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=${encodeURIComponent(
-              'not (processor.event:transaction)'
-            )}`
-          ) as Promise<Response>,
+        return synthtrace.index([
+          ...transactionInterval
+            .rate(config.multiple.prod.rps)
+            .flatMap((timestamp) => [
+              ...multipleEnvServiceProdInstance
+                .transaction('GET /api')
+                .timestamp(timestamp)
+                .duration(config.multiple.prod.duration)
+                .success()
+                .serialize(),
+            ]),
+          ...transactionInterval
+            .rate(config.multiple.dev.rps)
+            .flatMap((timestamp) => [
+              ...multipleEnvServiceDevInstance
+                .transaction('GET /api')
+                .timestamp(timestamp)
+                .duration(config.multiple.dev.duration)
+                .failure()
+                .serialize(),
+            ]),
+          ...transactionInterval
+            .rate(config.multiple.prod.rps)
+            .flatMap((timestamp) => [
+              ...multipleEnvServiceDevInstance
+                .transaction('non-request', 'rpc')
+                .timestamp(timestamp)
+                .duration(config.multiple.prod.duration)
+                .success()
+                .serialize(),
+            ]),
+          ...metricInterval.rate(1).flatMap((timestamp) => [
+            ...metricOnlyInstance
+              .appMetrics({
+                'system.memory.actual.free': 1,
+                'system.cpu.total.norm.pct': 1,
+                'system.memory.total': 1,
+                'system.process.cpu.total.norm.pct': 1,
+              })
+              .timestamp(timestamp)
+              .serialize(),
+          ]),
         ]);
+      });
 
-        expect(unfilteredResponse.body.items.length).to.be.greaterThan(0);
+      after(() => {
+        return synthtrace.clean();
+      });
 
-        const unfilteredServiceNames = unfilteredResponse.body.items
-          .map((item) => item.serviceName)
-          .sort();
+      describe('when no additional filters are applied', () => {
+        before(async () => {
+          response = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/services',
+            params: {
+              query: {
+                start,
+                end,
+                environment: ENVIRONMENT_ALL.value,
+                kuery: '',
+              },
+            },
+          });
+        });
 
-        const filteredServiceNames = filteredResponse.body.items
-          .map((item) => item.serviceName)
-          .sort();
+        it('returns a successful response', () => {
+          expect(response.status).to.be(200);
+        });
 
-        expect(unfilteredServiceNames).to.eql(filteredServiceNames);
+        it('returns the correct statistics', () => {
+          const multipleEnvService = response.body.items.find(
+            (item) => item.serviceName === 'multiple-env-service'
+          );
 
-        expect(filteredResponse.body.items.every((item) => !!item.agentName)).to.be(true);
+          const totalRps = config.multiple.prod.rps + config.multiple.dev.rps;
+
+          expect(multipleEnvService).to.eql({
+            serviceName: 'multiple-env-service',
+            transactionType: 'request',
+            environments: ['production', 'development'],
+            agentName: 'go',
+            latency:
+              1000 *
+              ((config.multiple.prod.duration * config.multiple.prod.rps +
+                config.multiple.dev.duration * config.multiple.dev.rps) /
+                totalRps),
+            throughput: totalRps * 60,
+            transactionErrorRate:
+              config.multiple.dev.rps / (config.multiple.prod.rps + config.multiple.dev.rps),
+          });
+        });
+
+        it('returns services without transaction data', () => {
+          const serviceNames = response.body.items.map((item) => item.serviceName);
+
+          expect(serviceNames).to.contain('metric-only-service');
+        });
+      });
+
+      describe('when applying an environment filter', () => {
+        before(async () => {
+          response = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/services',
+            params: {
+              query: {
+                start,
+                end,
+                environment: 'production',
+                kuery: '',
+              },
+            },
+          });
+        });
+
+        it('returns data only for that environment', () => {
+          const multipleEnvService = response.body.items.find(
+            (item) => item.serviceName === 'multiple-env-service'
+          );
+
+          const totalRps = config.multiple.prod.rps;
+
+          expect(multipleEnvService).to.eql({
+            serviceName: 'multiple-env-service',
+            transactionType: 'request',
+            environments: ['production'],
+            agentName: 'go',
+            latency: 1000 * ((config.multiple.prod.duration * config.multiple.prod.rps) / totalRps),
+            throughput: totalRps * 60,
+            transactionErrorRate: 0,
+          });
+        });
+      });
+
+      describe('when applying a kuery filter', () => {
+        before(async () => {
+          response = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/services',
+            params: {
+              query: {
+                start,
+                end,
+                environment: ENVIRONMENT_ALL.value,
+                kuery: 'service.node.name:"multiple-env-service-development"',
+              },
+            },
+          });
+        });
+
+        it('returns data for that kuery filter only', () => {
+          const multipleEnvService = response.body.items.find(
+            (item) => item.serviceName === 'multiple-env-service'
+          );
+
+          const totalRps = config.multiple.dev.rps;
+
+          expect(multipleEnvService).to.eql({
+            serviceName: 'multiple-env-service',
+            transactionType: 'request',
+            environments: ['development'],
+            agentName: 'go',
+            latency: 1000 * ((config.multiple.dev.duration * config.multiple.dev.rps) / totalRps),
+            throughput: totalRps * 60,
+            transactionErrorRate: 1,
+          });
+        });
+      });
+
+      describe('when excluding default transaction types', () => {
+        before(async () => {
+          response = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/services',
+            params: {
+              query: {
+                start,
+                end,
+                environment: ENVIRONMENT_ALL.value,
+                kuery: 'not (transaction.type:request)',
+              },
+            },
+          });
+        });
+
+        it('returns data for the top transaction type that is not a default', () => {
+          const multipleEnvService = response.body.items.find(
+            (item) => item.serviceName === 'multiple-env-service'
+          );
+
+          expect(multipleEnvService?.transactionType).to.eql('rpc');
+        });
       });
     }
   );
 
   registry.when(
-    'APM Services overview with a trial license when data is loaded',
+    'APM Services Overview with a trial license when data is loaded',
     { config: 'trial', archives: [archiveName] },
     () => {
       describe('with the default APM read user', () => {
         describe('and fetching a list of services', () => {
           let response: {
             status: number;
-            body: APIReturnType<'GET /api/apm/services'>;
+            body: APIReturnType<'GET /internal/apm/services'>;
           };
 
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+              `/internal/apm/services?start=${archiveStart}&end=${archiveEnd}&environment=ENVIRONMENT_ALL&kuery=`
             );
           });
 
@@ -282,7 +346,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertestAsApmReadUserWithoutMlAccess.get(
-            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+            `/internal/apm/services?start=${archiveStart}&end=${archiveEnd}&environment=ENVIRONMENT_ALL&kuery=`
           );
         });
 
@@ -307,7 +371,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services?environment=ENVIRONMENT_ALL&start=${start}&end=${end}&kuery=${encodeURIComponent(
+            `/internal/apm/services?environment=ENVIRONMENT_ALL&start=${archiveStart}&end=${archiveEnd}&kuery=${encodeURIComponent(
               'service.name:opbeans-java'
             )}`
           );

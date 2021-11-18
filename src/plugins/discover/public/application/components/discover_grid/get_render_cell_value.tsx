@@ -7,8 +7,10 @@
  */
 
 import React, { Fragment, useContext, useEffect } from 'react';
-import themeLight from '@elastic/eui/dist/eui_theme_light.json';
-import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import {
+  euiLightVars as themeLight,
+  euiDarkVars as themeDark,
+} from '@kbn/ui-shared-deps-src/theme';
 import type { IndexPattern } from 'src/plugins/data/common';
 
 import {
@@ -22,6 +24,8 @@ import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
 import { EsHitRecord } from '../../types';
+import { formatFieldValue } from '../../helpers/format_value';
+import { formatHit } from '../../helpers/format_hit';
 
 export const getRenderCellValueFn =
   (
@@ -145,39 +149,19 @@ export const getRenderCellValueFn =
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return <JsonCodeEditor json={row as any} width={defaultMonacoEditorWidth} />;
       }
-      const formatted = indexPattern.formatHit(row);
-
-      // Put the most important fields first
-      const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
-      const highlightPairs: Array<[string, string]> = [];
-      const sourcePairs: Array<[string, string]> = [];
-      Object.entries(formatted).forEach(([key, val]) => {
-        const pairs = highlights[key] ? highlightPairs : sourcePairs;
-        const displayKey = indexPattern.fields.getByName
-          ? indexPattern.fields.getByName(key)?.displayName
-          : undefined;
-        if (displayKey) {
-          if (fieldsToShow.includes(displayKey)) {
-            pairs.push([displayKey, val as string]);
-          }
-        } else {
-          pairs.push([key, val as string]);
-        }
-      });
+      const pairs = formatHit(row, indexPattern, fieldsToShow);
 
       return (
         <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
-          {[...highlightPairs, ...sourcePairs]
-            .slice(0, maxDocFieldsDisplayed)
-            .map(([key, value]) => (
-              <Fragment key={key}>
-                <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription
-                  dangerouslySetInnerHTML={{ __html: value }}
-                  className="dscDiscoverGrid__descriptionListDescription"
-                />
-              </Fragment>
-            ))}
+          {pairs.map(([key, value]) => (
+            <Fragment key={key}>
+              <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                className="dscDiscoverGrid__descriptionListDescription"
+                dangerouslySetInnerHTML={{ __html: value }}
+              />
+            </Fragment>
+          ))}
         </EuiDescriptionList>
       );
     }
@@ -191,12 +175,13 @@ export const getRenderCellValueFn =
       return <span>{JSON.stringify(rowFlattened[columnId])}</span>;
     }
 
-    const valueFormatted = indexPattern.formatField(row, columnId);
-    if (typeof valueFormatted === 'undefined') {
-      return <span>-</span>;
-    }
     return (
-      // eslint-disable-next-line react/no-danger
-      <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, columnId) }} />
+      <span
+        // formatFieldValue guarantees sanitized values
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: formatFieldValue(rowFlattened[columnId], row, indexPattern, field),
+        }}
+      />
     );
   };

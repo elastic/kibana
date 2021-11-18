@@ -8,9 +8,9 @@
 
 import Path from 'path';
 import { Project } from 'ts-morph';
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 
-import { PluginApi } from '../types';
+import { PluginApi, PluginOrPackage } from '../types';
 import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';
 import { getPluginApi } from '../get_plugin_api';
 import { splitApisByFolder } from './write_plugin_split_by_folder';
@@ -32,7 +32,7 @@ beforeAll(() => {
 
   const pluginA = getKibanaPlatformPlugin('pluginA');
   pluginA.manifest.serviceFolders = ['foo'];
-  const plugins: KibanaPlatformPlugin[] = [pluginA];
+  const plugins: PluginOrPackage[] = [pluginA];
 
   doc = getPluginApi(project, plugins[0], plugins, log, false);
 });

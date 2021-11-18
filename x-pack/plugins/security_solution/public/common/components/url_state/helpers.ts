@@ -22,7 +22,7 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
-import { ReplaceStateInLocation, UpdateUrlStateString } from './types';
+import { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
 import { sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
 
@@ -113,12 +113,7 @@ export const getUrlType = (pageName: string): UrlStateType => {
   return 'overview';
 };
 
-export const getTitle = (
-  pageName: string,
-  detailName: string | undefined,
-  navTabs: Record<string, NavTab>
-): string => {
-  if (detailName != null) return detailName;
+export const getTitle = (pageName: string, navTabs: Record<string, NavTab>): string => {
   return navTabs[pageName] != null ? navTabs[pageName].name : '';
 };
 
@@ -189,13 +184,13 @@ export const makeMapStateToProps = () => {
 
 export const updateTimerangeUrl = (
   timeRange: UrlInputsModel,
-  isInitializing: boolean
+  isFirstPageLoad: boolean
 ): UrlInputsModel => {
   if (timeRange.global.timerange.kind === 'relative') {
     timeRange.global.timerange.from = formatDate(timeRange.global.timerange.fromStr);
     timeRange.global.timerange.to = formatDate(timeRange.global.timerange.toStr, { roundUp: true });
   }
-  if (timeRange.timeline.timerange.kind === 'relative' && isInitializing) {
+  if (timeRange.timeline.timerange.kind === 'relative' && isFirstPageLoad) {
     timeRange.timeline.timerange.from = formatDate(timeRange.timeline.timerange.fromStr);
     timeRange.timeline.timerange.to = formatDate(timeRange.timeline.timerange.toStr, {
       roundUp: true,
@@ -204,90 +199,35 @@ export const updateTimerangeUrl = (
   return timeRange;
 };
 
-export const updateUrlStateString = ({
-  isInitializing,
-  history,
-  newUrlStateString,
-  pathName,
-  search,
-  updateTimerange,
-  urlKey,
-}: UpdateUrlStateString): string => {
-  if (urlKey === CONSTANTS.appQuery) {
-    const queryState = decodeRisonUrlState<Query>(newUrlStateString);
-    if (queryState != null && queryState.query === '') {
-      return replaceStateInLocation({
-        history,
-        pathName,
-        search,
-        urlStateToReplace: '',
-        urlStateKey: urlKey,
-      });
-    }
-  } else if (urlKey === CONSTANTS.timerange && updateTimerange) {
-    const queryState = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
-    if (queryState != null && queryState.global != null) {
-      return replaceStateInLocation({
-        history,
-        pathName,
-        search,
-        urlStateToReplace: updateTimerangeUrl(queryState, isInitializing),
-        urlStateKey: urlKey,
-      });
-    }
-  } else if (urlKey === CONSTANTS.sourcerer) {
-    const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
-    if (sourcererState != null && Object.keys(sourcererState).length > 0) {
-      return replaceStateInLocation({
-        history,
-        pathName,
-        search,
-        urlStateToReplace: sourcererState,
-        urlStateKey: urlKey,
-      });
-    }
-  } else if (urlKey === CONSTANTS.filters) {
-    const queryState = decodeRisonUrlState<Filter[]>(newUrlStateString);
-    if (isEmpty(queryState)) {
-      return replaceStateInLocation({
-        history,
-        pathName,
-        search,
-        urlStateToReplace: '',
-        urlStateKey: urlKey,
-      });
-    }
-  } else if (urlKey === CONSTANTS.timeline) {
-    const queryState = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
-    if (queryState != null && queryState.id === '') {
-      return replaceStateInLocation({
-        history,
-        pathName,
-        search,
-        urlStateToReplace: '',
-        urlStateKey: urlKey,
-      });
-    }
-  }
-  return search;
-};
+export const isQueryStateEmpty = (
+  queryState: ValueUrlState | undefined | null,
+  urlKey: KeyUrlState
+): boolean =>
+  queryState == null ||
+  (urlKey === CONSTANTS.appQuery && isEmpty((queryState as Query).query)) ||
+  (urlKey === CONSTANTS.filters && isEmpty(queryState)) ||
+  (urlKey === CONSTANTS.timeline && (queryState as TimelineUrl).id === '');
 
-export const replaceStateInLocation = <T>({
-  history,
-  urlStateToReplace,
-  urlStateKey,
-  pathName,
-  search,
-}: ReplaceStateInLocation<T>) => {
-  const newLocation = replaceQueryStringInLocation(
-    {
-      hash: '',
-      pathname: pathName,
-      search,
-      state: '',
-    },
-    replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(getQueryStringFromLocation(search))
-  );
+export const replaceStatesInLocation = (
+  states: ReplaceStateInLocation[],
+  pathname: string,
+  search: string,
+  history?: H.History
+) => {
+  const location = {
+    hash: '',
+    pathname,
+    search,
+    state: '',
+  };
+
+  const queryString = getQueryStringFromLocation(search);
+  const newQueryString = states.reduce((updatedQueryString, { urlStateKey, urlStateToReplace }) => {
+    return replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(updatedQueryString);
+  }, queryString);
+
+  const newLocation = replaceQueryStringInLocation(location, newQueryString);
+
   if (history) {
     newLocation.state = history.location.state;
     history.replace(newLocation);

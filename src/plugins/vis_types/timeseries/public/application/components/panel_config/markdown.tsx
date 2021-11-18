@@ -283,7 +283,7 @@ export class MarkdownPanelConfig extends Component<
             <EuiSpacer size="s" />
             <CodeEditor
               height="500px"
-              languageId={CssLang.ID}
+              languageId={CssLang}
               options={{ fontSize: 14 }}
               value={model.markdown_less ?? ''}
               onChange={this.handleCSSChange}

@@ -9,6 +9,8 @@ import { allowedExperimentalValues } from '../../../../../common/experimental_fe
 import { createThresholdAlertType } from './create_threshold_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { getThresholdRuleParams } from '../../schemas/rule_schemas.mock';
+import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../../rule_execution_log/rule_execution_log_client');
 
@@ -16,17 +18,21 @@ describe('Threshold Alerts', () => {
   it('does not send an alert when no events found', async () => {
     const params = getThresholdRuleParams();
     const { dependencies, executor } = createRuleTypeMocks('threshold', params);
-    const thresholdAlertTpe = createThresholdAlertType({
-      experimentalFeatures: allowedExperimentalValues,
+    const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
       lists: dependencies.lists,
       logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
+      config: createMockConfig(),
       ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
-      version: '1.0.0',
+      eventLogService: dependencies.eventLogService,
     });
-    dependencies.alerting.registerType(thresholdAlertTpe);
+    const thresholdAlertType = securityRuleTypeWrapper(
+      createThresholdAlertType({
+        experimentalFeatures: allowedExperimentalValues,
+        logger: dependencies.logger,
+        version: '1.0.0',
+      })
+    );
+    dependencies.alerting.registerType(thresholdAlertType);
 
     await executor({ params });
     expect(dependencies.ruleDataClient.getWriter).not.toBeCalled();

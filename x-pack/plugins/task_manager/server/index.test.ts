@@ -7,8 +7,11 @@
 
 import { config } from './index';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 
 const CONFIG_PATH = 'xpack.task_manager';
+
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyTaskManagerDeprecations = (settings: Record<string, unknown> = {}) => {
   const deprecations = config.deprecations!(configDeprecationFactory);
@@ -21,6 +24,7 @@ const applyTaskManagerDeprecations = (settings: Record<string, unknown> = {}) =>
     deprecations.map((deprecation) => ({
       deprecation,
       path: CONFIG_PATH,
+      context: deprecationContext,
     })),
     () =>
       ({ message }) =>
@@ -48,7 +52,7 @@ describe('deprecations', () => {
     const { messages } = applyTaskManagerDeprecations({ max_workers: 1000 });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "setting \\"xpack.task_manager.max_workers\\" (1000) greater than 100 is deprecated. Values greater than 100 will not be supported starting in 8.0.",
+        "setting \\"xpack.task_manager.max_workers\\" (1000) greater than 100 is deprecated.",
       ]
     `);
   });

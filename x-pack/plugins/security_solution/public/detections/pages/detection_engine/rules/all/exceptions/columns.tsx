@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import { EuiButtonIcon, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
 

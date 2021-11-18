@@ -1,6 +1,6 @@
 ---
 id: kibDevPerformance
-slug: /kibana-dev-docs/performance
+slug: /kibana-dev-docs/key-concepts/performance
 title: Performance
 summary: Performance tips for Kibana development.
 date: 2021-09-02
@@ -9,13 +9,13 @@ tags: ['kibana', 'onboarding', 'dev', 'performance']
 
 ## Keep Kibana fast
 
-*tl;dr*: Load as much code lazily as possible. Everyone loves snappy
+_tl;dr_: Load as much code lazily as possible. Everyone loves snappy
 applications with a responsive UI and hates spinners. Users deserve the
 best experience whether they run Kibana locally or
 in the cloud, regardless of their hardware and environment.
 
 There are 2 main aspects of the perceived speed of an application: loading time
-and responsiveness to user actions. Kibana loads and bootstraps *all*
+and responsiveness to user actions. Kibana loads and bootstraps _all_
 the plugins whenever a user lands on any page. It means that
 every new application affects the overall _loading performance_, as plugin code is
 loaded _eagerly_ to initialize the plugin and provide plugin API to dependent
@@ -60,12 +60,12 @@ export class MyPlugin implements Plugin<MyPluginSetup> {
 
 ### Understanding plugin bundle size
 
-Kibana Platform plugins are pre-built with `@kbn/optimizer` 
+Kibana Platform plugins are pre-built with `@kbn/optimizer`
 and distributed as package artifacts. This means that it is no
-longer necessary for us to include the `optimizer` in the 
+longer necessary for us to include the `optimizer` in the
 distributable version of Kibana Every plugin artifact contains all
 plugin dependencies required to run the plugin, except some
-stateful dependencies shared across plugin bundles via 
+stateful dependencies shared across plugin bundles via
 `@kbn/ui-shared-deps-npm` and `@kbn/ui-shared-deps-src`. This means
 that plugin artifacts _tend to be larger_ than they were in the
 legacy platform. To understand the current size of your plugin
@@ -101,7 +101,7 @@ node scripts/build_kibana_platform_plugins.js --dist --no-examples --profile
 
 Many OSS tools allow you to analyze the generated stats file:
 
-* [An official tool](https://webpack.github.io/analyse/#modules) from
-Webpack authors
-* [webpack-visualizer](https://chrisbateman.github.io/webpack-visualizer/)
-* [webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer)
+- [An official tool](https://webpack.github.io/analyse/#modules) from
+  Webpack authors
+- [webpack-visualizer](https://chrisbateman.github.io/webpack-visualizer/)
+- [webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer)

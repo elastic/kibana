@@ -109,7 +109,6 @@ kibana_vars=(
     map.tilemap.url
     migrations.batchSize
     migrations.maxBatchSizeBytes
-    migrations.enableV2
     migrations.pollInterval
     migrations.retryAttempts
     migrations.scrollDuration
@@ -221,10 +220,17 @@ kibana_vars=(
     xpack.alerting.healthCheck.interval
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
+    xpack.alerting.defaultRuleTaskTimeout
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
     xpack.apm.enabled
+    xpack.apm.indices.error
+    xpack.apm.indices.metric
+    xpack.apm.indices.onboarding
+    xpack.apm.indices.sourcemap
+    xpack.apm.indices.span
+    xpack.apm.indices.transaction
     xpack.apm.maxServiceEnvironments
     xpack.apm.searchAggregatedTransactions
     xpack.apm.serviceMapEnabled
@@ -387,6 +393,7 @@ kibana_vars=(
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
     xpack.security.sessionTimeout
+    xpack.security.showInsecureClusterWarning
     xpack.securitySolution.alertMergeStrategy
     xpack.securitySolution.alertIgnoreFields
     xpack.securitySolution.endpointResultListDefaultFirstPageIndex

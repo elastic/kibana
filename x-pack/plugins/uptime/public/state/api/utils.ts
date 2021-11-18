@@ -9,7 +9,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
 import { HttpFetchQuery, HttpSetup } from 'src/core/public';
 import * as t from 'io-ts';
-import { startsWith } from 'lodash';
+import { FETCH_STATUS, AddInspectorRequest } from '../../../../observability/public';
 
 function isObject(value: unknown) {
   const type = typeof value;
@@ -43,6 +43,7 @@ export const formatErrors = (errors: t.Errors): string[] => {
 class ApiService {
   private static instance: ApiService;
   private _http!: HttpSetup;
+  private _addInspectorRequest!: AddInspectorRequest;
 
   public get http() {
     return this._http;
@@ -50,6 +51,14 @@ class ApiService {
 
   public set http(httpSetup: HttpSetup) {
     this._http = httpSetup;
+  }
+
+  public get addInspectorRequest() {
+    return this._addInspectorRequest;
+  }
+
+  public set addInspectorRequest(addInspectorRequest: AddInspectorRequest) {
+    this._addInspectorRequest = addInspectorRequest;
   }
 
   private constructor() {}
@@ -63,14 +72,13 @@ class ApiService {
   }
 
   public async get(apiUrl: string, params?: HttpFetchQuery, decodeType?: any, asResponse = false) {
-    const debugEnabled =
-      sessionStorage.getItem('uptime_debug') === 'true' && startsWith(apiUrl, '/api/uptime');
-
     const response = await this._http!.fetch({
       path: apiUrl,
-      query: { ...params, ...(debugEnabled ? { _inspect: true } : {}) },
+      query: params,
       asResponse,
     });
+
+    this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
 
     if (decodeType) {
       const decoded = decodeType.decode(response);

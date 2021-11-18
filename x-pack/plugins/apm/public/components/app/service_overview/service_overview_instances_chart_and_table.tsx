@@ -28,9 +28,9 @@ interface ServiceOverviewInstancesChartAndTableProps {
 }
 
 type ApiResponseMainStats =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type ApiResponseDetailedStats =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATS = {
   currentPeriodItems: [] as ApiResponseMainStats['currentPeriod'],
@@ -100,7 +100,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics',
+          'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
         params: {
           path: {
             serviceName,
@@ -181,7 +181,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
+            'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
           params: {
             path: {
               serviceName,

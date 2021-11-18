@@ -65,7 +65,9 @@ describe('Workload Statistics Aggregator', () => {
             doc_count: 13,
           },
           ownerIds: {
-            value: 1,
+            ownerIds: {
+              value: 1,
+            },
           },
           // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
           // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
@@ -127,8 +129,19 @@ describe('Workload Statistics Aggregator', () => {
               missing: { field: 'task.schedule' },
             },
             ownerIds: {
-              cardinality: {
-                field: 'task.ownerId',
+              filter: {
+                range: {
+                  'task.startedAt': {
+                    gte: 'now-1w/w',
+                  },
+                },
+              },
+              aggs: {
+                ownerIds: {
+                  cardinality: {
+                    field: 'task.ownerId',
+                  },
+                },
               },
             },
             idleTasks: {
@@ -264,7 +277,9 @@ describe('Workload Statistics Aggregator', () => {
           doc_count: 13,
         },
         ownerIds: {
-          value: 1,
+          ownerIds: {
+            value: 1,
+          },
         },
         // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
         // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
@@ -501,6 +516,7 @@ describe('Workload Statistics Aggregator', () => {
     const taskStore = taskStoreMock.create({});
     taskStore.aggregate
       .mockResolvedValueOnce(
+        // @ts-expect-error not full interface
         mockAggregatedResult().then((res) =>
           setTaskTypeCount(res, 'alerting_telemetry', {
             idle: 2,
@@ -509,6 +525,7 @@ describe('Workload Statistics Aggregator', () => {
       )
       .mockRejectedValueOnce(new Error('Elasticsearch has gone poof'))
       .mockResolvedValueOnce(
+        // @ts-expect-error not full interface
         mockAggregatedResult().then((res) =>
           setTaskTypeCount(res, 'alerting_telemetry', {
             idle: 1,
@@ -605,7 +622,9 @@ describe('Workload Statistics Aggregator', () => {
             doc_count: 13,
           },
           ownerIds: {
-            value: 3,
+            ownerIds: {
+              value: 3,
+            },
           },
           // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
           // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
@@ -668,6 +687,8 @@ describe('Workload Statistics Aggregator', () => {
 
     return new Promise<void>((resolve, reject) => {
       let errorWasThrowAt = 0;
+
+      // @ts-expect-error not full interface
       taskStore.aggregate.mockImplementation(async () => {
         if (errorWasThrowAt === 0) {
           errorWasThrowAt = Date.now();

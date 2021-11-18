@@ -6,98 +6,113 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import { RemoveSeries } from './remove_series';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesUrl } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
+import { useDiscoverLink } from '../../hooks/use_discover_link';
 
 interface Props {
-  seriesId: string;
-  editorMode?: boolean;
+  seriesId: number;
+  series: SeriesUrl;
+  seriesConfig?: SeriesConfig;
+  onEditClick?: () => void;
 }
-export function SeriesActions({ seriesId, editorMode = false }: Props) {
-  const { getSeries, setSeries, allSeriesIds, removeSeries } = useSeriesStorage();
-  const series = getSeries(seriesId);
 
-  const onEdit = () => {
-    setSeries(seriesId, { ...series, isNew: true });
-  };
+export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: Props) {
+  const { setSeries, allSeries } = useSeriesStorage();
+
+  const { href: discoverHref } = useDiscoverLink({ series, seriesConfig });
 
   const copySeries = () => {
-    let copySeriesId: string = `${seriesId}-copy`;
-    if (allSeriesIds.includes(copySeriesId)) {
-      copySeriesId = copySeriesId + allSeriesIds.length;
+    let copySeriesId: string = `${series.name}-copy`;
+    if (allSeries.find(({ name }) => name === copySeriesId)) {
+      copySeriesId = copySeriesId + allSeries.length;
     }
-    setSeries(copySeriesId, series);
+    setSeries(allSeries.length, { ...series, name: copySeriesId, breakdown: undefined });
   };
 
-  const { reportType, reportDefinitions, isNew, ...restSeries } = series;
-  const isSaveAble = reportType && !isEmpty(reportDefinitions);
-
-  const saveSeries = () => {
-    if (isSaveAble) {
-      const reportDefId = Object.values(reportDefinitions ?? {})[0];
-      let newSeriesId = `${reportDefId}-${reportType}`;
-
-      if (allSeriesIds.includes(newSeriesId)) {
-        newSeriesId = `${newSeriesId}-${allSeriesIds.length}`;
-      }
-      const newSeriesN: SeriesUrl = {
-        ...restSeries,
-        reportType,
-        reportDefinitions,
-      };
-
-      setSeries(newSeriesId, newSeriesN);
-      removeSeries(seriesId);
+  const toggleSeries = () => {
+    if (series.hidden) {
+      setSeries(seriesId, { ...series, hidden: undefined });
+    } else {
+      setSeries(seriesId, { ...series, hidden: true });
     }
   };
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
-      {!editorMode && (
-        <EuiFlexItem grow={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="flexEnd" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={EDIT_SERIES_LABEL}>
           <EuiButtonIcon
-            iconType="documentEdit"
-            aria-label={i18n.translate('xpack.observability.seriesEditor.edit', {
-              defaultMessage: 'Edit series',
-            })}
+            iconType="pencil"
+            color="text"
+            aria-label={EDIT_SERIES_LABEL}
             size="s"
-            onClick={onEdit}
+            onClick={onEditClick}
           />
-        </EuiFlexItem>
-      )}
-      {editorMode && (
-        <EuiFlexItem grow={false}>
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={VIEW_SAMPLE_DOCUMENTS_LABEL}>
           <EuiButtonIcon
-            iconType={'save'}
-            aria-label={i18n.translate('xpack.observability.seriesEditor.save', {
-              defaultMessage: 'Save series',
-            })}
+            iconType="discoverApp"
+            aria-label={VIEW_SAMPLE_DOCUMENTS_LABEL}
             size="s"
-            onClick={saveSeries}
-            color="success"
-            isDisabled={!isSaveAble}
+            color="text"
+            target="_blank"
+            href={discoverHref}
+            isDisabled={!series.dataType || !series.selectedMetricField}
           />
-        </EuiFlexItem>
-      )}
-      {editorMode && (
-        <EuiFlexItem grow={false}>
+        </EuiToolTip>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={HIDE_SERIES_LABEL}>
+          <EuiButtonIcon
+            iconType={series.hidden ? 'eyeClosed' : 'eye'}
+            aria-label={HIDE_SERIES_LABEL}
+            size="s"
+            color="text"
+            onClick={toggleSeries}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={COPY_SERIES_LABEL}>
           <EuiButtonIcon
             iconType={'copy'}
-            aria-label={i18n.translate('xpack.observability.seriesEditor.clone', {
-              defaultMessage: 'Copy series',
-            })}
+            color="text"
+            aria-label={COPY_SERIES_LABEL}
             size="s"
             onClick={copySeries}
           />
-        </EuiFlexItem>
-      )}
+        </EuiToolTip>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <RemoveSeries seriesId={seriesId} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
+
+const EDIT_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.edit', {
+  defaultMessage: 'Edit series',
+});
+
+const HIDE_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.hide', {
+  defaultMessage: 'Hide series',
+});
+
+const COPY_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.clone', {
+  defaultMessage: 'Copy series',
+});
+
+const VIEW_SAMPLE_DOCUMENTS_LABEL = i18n.translate(
+  'xpack.observability.seriesEditor.sampleDocuments',
+  {
+    defaultMessage: 'View sample documents in new tab',
+  }
+);

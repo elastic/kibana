@@ -29,7 +29,7 @@ export function zscalerLogsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.zscalerLogs.shortDescription', {
-      defaultMessage: 'This is a module for receiving Zscaler NSS logs over Syslog or a file.',
+      defaultMessage: 'Collect and parse logs from Zscaler NSS with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.zscalerLogs.longDescription', {
       defaultMessage:
@@ -56,5 +56,6 @@ export function zscalerLogsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['network', 'security'],
   };
 }

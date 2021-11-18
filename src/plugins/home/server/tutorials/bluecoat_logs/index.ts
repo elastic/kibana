@@ -24,12 +24,12 @@ export function bluecoatLogsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'bluecoatLogs',
     name: i18n.translate('home.tutorials.bluecoatLogs.nameTitle', {
-      defaultMessage: 'Bluecoat logs',
+      defaultMessage: 'Bluecoat Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.bluecoatLogs.shortDescription', {
-      defaultMessage: 'Collect Blue Coat Director logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from Blue Coat Director with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.bluecoatLogs.longDescription', {
       defaultMessage:
@@ -56,5 +56,6 @@ export function bluecoatLogsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['network', 'security'],
   };
 }

@@ -17,11 +17,11 @@ const serviceInventoryHref = url.format({
 
 const apisToIntercept = [
   {
-    endpoint: '/api/apm/service',
+    endpoint: '/internal/apm/service?*',
     name: 'servicesMainStatistics',
   },
   {
-    endpoint: '/api/apm/services/detailed_statistics',
+    endpoint: '/internal/apm/services/detailed_statistics?*',
     name: 'servicesDetailedStatistics',
   },
 ];

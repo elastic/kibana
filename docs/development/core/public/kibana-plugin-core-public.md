@@ -6,7 +6,7 @@
 
 The Kibana Core APIs for client-side plugins.
 
-A plugin's `public/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) which returns an object that implements [Plugin](./kibana-plugin-core-public.plugin.md)<!-- -->.
+A plugin's `public/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) which returns an object that implements .
 
 The plugin integrates with the core system via lifecycle events: `setup`<!-- -->, `start`<!-- -->, and `stop`<!-- -->. In each lifecycle method, the plugin will receive the corresponding core services available (either [CoreSetup](./kibana-plugin-core-public.coresetup.md) or [CoreStart](./kibana-plugin-core-public.corestart.md)<!-- -->) and any interfaces returned by dependency plugins' lifecycle method. Anything returned by the plugin's lifecycle method will be exposed to downstream dependencies when their corresponding lifecycle methods are invoked.
 
@@ -60,7 +60,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md) | DeprecationsService provides methods to fetch domain deprecation details from the Kibana server. |
 |  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
-|  [DomainDeprecationDetails](./kibana-plugin-core-public.domaindeprecationdetails.md) |  |
 |  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs. |
 |  [FatalErrorInfo](./kibana-plugin-core-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
@@ -95,7 +94,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayModalStart](./kibana-plugin-core-public.overlaymodalstart.md) | APIs to open and manage modal dialogs. |
 |  [OverlayRef](./kibana-plugin-core-public.overlayref.md) | Returned by [OverlayStart](./kibana-plugin-core-public.overlaystart.md) methods for closing a mounted overlay. |
 |  [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |  |
-|  [Plugin](./kibana-plugin-core-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
+|  [Plugin\_2](./kibana-plugin-core-public.plugin_2.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-core-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [ResolvedSimpleSavedObject](./kibana-plugin-core-public.resolvedsimplesavedobject.md) | This interface is a very simple wrapper for SavedObjects resolved from the server with the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md)<!-- -->. |
 |  [SavedObject](./kibana-plugin-core-public.savedobject.md) |  |

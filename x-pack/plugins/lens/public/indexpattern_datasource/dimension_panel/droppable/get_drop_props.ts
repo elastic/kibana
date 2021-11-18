@@ -150,6 +150,9 @@ function getDropPropsFromIncompatibleGroup({
   const sourceColumn = state.layers[dragging.layerId].columns[dragging.columnId];
 
   const layerIndexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
+  if (!layerIndexPattern) {
+    return;
+  }
   const sourceField = getField(sourceColumn, layerIndexPattern);
   const newOperationForSource = getNewOperation(sourceField, filterOperations, targetColumn);
 

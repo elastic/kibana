@@ -110,7 +110,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       map((rows) => {
         let type: DatatableColumnType = 'null';
         for (const row of rows) {
-          const rowType = getType(row[id]);
+          const rowType = getType(row[id]) as DatatableColumnType;
           if (rowType !== 'null') {
             type = rowType;
             break;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { HttpResponsePayload } from 'kibana/server';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { RouteDependencies } from '../types';
@@ -26,6 +26,7 @@ const bodySchema = schema.object({
     schema.literal('long_field'),
   ]),
   document: schema.object({}, { unknowns: 'allow' }),
+  documentId: schema.string(),
 });
 
 export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void => {
@@ -39,30 +40,41 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
     async (ctx, req, res) => {
       const { client } = ctx.core.elasticsearch;
 
-      const body = JSON.stringify({
-        script: req.body.script,
-        context: req.body.context,
-        context_setup: {
-          document: req.body.document,
-          index: req.body.index,
-        } as any,
-      });
+      const type = req.body.context.split('_field')[0] as estypes.MappingRuntimeFieldType;
+      const body = {
+        runtime_mappings: {
+          my_runtime_field: {
+            type,
+            script: req.body.script,
+          },
+        },
+        size: 1,
+        query: {
+          term: {
+            _id: req.body.documentId,
+          },
+        },
+        fields: ['my_runtime_field'],
+      };
 
       try {
-        const response = await client.asCurrentUser.scriptsPainlessExecute({
-          // @ts-expect-error `ExecutePainlessScriptRequest.body` does not allow `string`
+        const response = await client.asCurrentUser.search({
+          index: req.body.index,
           body,
         });
 
-        const fieldValue = response.body.result as any[] as HttpResponsePayload;
+        const fieldValue = response.body.hits.hits[0]?.fields?.my_runtime_field ?? '';
 
         return res.ok({ body: { values: fieldValue } });
-      } catch (error) {
+      } catch (error: any) {
         // Assume invalid painless script was submitted
         // Return 200 with error object
         const handleCustomError = () => {
           return res.ok({
-            body: { values: [], ...error.body },
+            body: {
+              values: [],
+              error: error.body.error.failed_shards[0]?.reason ?? {},
+            },
           });
         };
 

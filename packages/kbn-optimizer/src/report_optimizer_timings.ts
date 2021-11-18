@@ -46,8 +46,8 @@ export function reportOptimizerTimings(log: ToolingLog, config: OptimizerConfig)
         await reporter.timings({
           timings: [
             {
-              group: '@kbn/optimizer',
-              id: 'overall time',
+              group: 'scripts/build_kibana_platform_plugins',
+              id: 'total',
               ms: time,
               meta: {
                 optimizerBundleCount: config.filteredBundles.length,

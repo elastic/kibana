@@ -212,6 +212,24 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
         visibleInManagement: true,
       },
     });
+
+    // example of a SO type specifying a display name
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-with-display-name',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        displayName: 'my display name',
+      },
+    });
   }
 
   public start() {}

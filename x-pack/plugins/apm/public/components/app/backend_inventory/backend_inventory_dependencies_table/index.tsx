@@ -45,7 +45,7 @@ export function BackendInventoryDependenciesTable() {
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/backends/top_backends',
+        endpoint: 'GET /internal/apm/backends/top_backends',
         params: {
           query: { start, end, environment, numBuckets: 20, offset, kuery },
         },
@@ -64,11 +64,11 @@ export function BackendInventoryDependenciesTable() {
       }
       const link = (
         <BackendLink
-          backendName={location.backendName}
           type={location.spanType}
           subtype={location.spanSubtype}
           query={{
-            comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+            backendName: location.backendName,
+            comparisonEnabled,
             comparisonType,
             environment,
             kuery,

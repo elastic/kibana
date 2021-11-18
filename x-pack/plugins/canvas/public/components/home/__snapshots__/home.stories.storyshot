@@ -13,7 +13,7 @@ exports[`Storyshots Home Home Page 1`] = `
     className="euiPageBody euiPageBody--borderRadiusNone"
   >
     <header
-      className="euiPageHeader euiPageHeader--paddingLarge euiPageHeader--responsive euiPageHeader--tabsAtBottom euiPage--restrictWidth-default euiPageHeader--center"
+      className="euiPageHeader euiPageHeader--paddingLarge euiPageHeader--restrictWidth-default euiPageHeader--responsive euiPageHeader--tabsAtBottom euiPageHeader--center"
     >
       <div
         className="euiPageHeaderContent"
@@ -78,7 +78,7 @@ exports[`Storyshots Home Home Page 1`] = `
             className="euiSpacer euiSpacer--l"
           />
           <div
-            className="euiTabs euiTabs--condensed euiTabs--large"
+            className="euiTabs euiTabs--large euiTabs--condensed"
             role="tablist"
           >
             <button

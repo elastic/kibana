@@ -7,7 +7,7 @@
  */
 import { monaco } from './monaco_imports';
 
-export interface LangModule {
+export interface LangModuleType {
   ID: string;
   lexerRules: monaco.languages.IMonarchLanguage;
   languageConfiguration?: monaco.languages.LanguageConfiguration;
@@ -15,7 +15,7 @@ export interface LangModule {
   getSyntaxErrors?: Function;
 }
 
-export interface CompleteLangModule extends LangModule {
+export interface CompleteLangModuleType extends LangModuleType {
   languageConfiguration: monaco.languages.LanguageConfiguration;
   getSuggestionProvider: Function;
   getSyntaxErrors: Function;

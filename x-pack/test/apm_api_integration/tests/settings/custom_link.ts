@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import { CustomLink } from '../../../../plugins/apm/common/custom_link/custom_link_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { ApmApiError } from '../../common/apm_api_supertest';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const log = getService('log');
 
@@ -126,7 +126,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
 
       it('fetches a transaction sample', async () => {
         const response = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/settings/custom_links/transaction',
+          endpoint: 'GET /internal/apm/settings/custom_links/transaction',
           params: {
             query: {
               'service.name': 'opbeans-java',
@@ -141,7 +141,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
 
   function searchCustomLinks(filters?: any) {
     return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/settings/custom_links',
+      endpoint: 'GET /internal/apm/settings/custom_links',
       params: {
         query: filters,
       },
@@ -152,7 +152,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
     log.debug('creating configuration', customLink);
 
     return apmApiClient.writeUser({
-      endpoint: 'POST /api/apm/settings/custom_links',
+      endpoint: 'POST /internal/apm/settings/custom_links',
       params: {
         body: customLink,
       },
@@ -163,7 +163,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
     log.debug('updating configuration', id, customLink);
 
     return apmApiClient.writeUser({
-      endpoint: 'PUT /api/apm/settings/custom_links/{id}',
+      endpoint: 'PUT /internal/apm/settings/custom_links/{id}',
       params: {
         path: { id },
         body: customLink,
@@ -175,7 +175,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
     log.debug('deleting configuration', id);
 
     return apmApiClient.writeUser({
-      endpoint: 'DELETE /api/apm/settings/custom_links/{id}',
+      endpoint: 'DELETE /internal/apm/settings/custom_links/{id}',
       params: { path: { id } },
     });
   }

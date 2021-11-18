@@ -77,7 +77,6 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
       {
         migrations: {
           skip: false,
-          enableV2: true,
           // There are 53 docs in fixtures. Batch size configured to enforce 3 migration steps.
           batchSize: 20,
         },

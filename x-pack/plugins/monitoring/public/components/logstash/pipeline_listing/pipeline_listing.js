@@ -127,7 +127,7 @@ export class PipelineListing extends Component {
   }
 
   render() {
-    const { data, sorting, pagination, onTableChange, fetchMoreData, upgradeMessage, className } =
+    const { data, sorting, pagination, onTableChange, upgradeMessage, className, ...props } =
       this.props;
 
     const sortingOptions = sorting || { field: 'id', direction: 'asc' };
@@ -149,7 +149,6 @@ export class PipelineListing extends Component {
               sorting={sortingOptions}
               message={upgradeMessage}
               pagination={pagination}
-              fetchMoreData={fetchMoreData}
               search={{
                 box: {
                   placeholder: i18n.translate(
@@ -161,6 +160,7 @@ export class PipelineListing extends Component {
                 },
               }}
               onTableChange={onTableChange}
+              {...props}
             />
           </EuiPageContent>
         </EuiPageBody>

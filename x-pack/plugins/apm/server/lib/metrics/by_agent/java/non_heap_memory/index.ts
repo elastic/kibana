@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
 import { i18n } from '@kbn/i18n';
 import {
   METRIC_JAVA_NON_HEAP_MEMORY_MAX,
@@ -13,7 +13,7 @@ import {
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
   AGENT_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { Setup } from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
@@ -55,12 +55,16 @@ export async function getNonHeapMemoryChart({
   setup,
   serviceName,
   serviceNodeName,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
 }) {
   return fetchAndTransformMetrics({
     environment,
@@ -68,6 +72,8 @@ export async function getNonHeapMemoryChart({
     setup,
     serviceName,
     serviceNodeName,
+    start,
+    end,
     chartBase,
     aggs: {
       nonHeapMemoryMax: { avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_MAX } },

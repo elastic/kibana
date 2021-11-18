@@ -6,20 +6,14 @@
  */
 
 import { MiddlewareAPI } from '@reduxjs/toolkit';
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { LensAppState, setState } from '..';
-import { updateLayer, updateVisualizationState, LensStoreDeps } from '..';
+import { setState, initEmpty, LensStoreDeps } from '..';
+import { getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
 import { initializeDatasources } from '../../editor_frame_service/editor_frame';
-import { generateId } from '../../id_generator';
-import {
-  getVisualizeFieldSuggestions,
-  switchToSuggestion,
-} from '../../editor_frame_service/editor_frame/suggestion_helpers';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { Document, injectFilterReferences } from '../../persistence';
@@ -33,7 +27,7 @@ export const getPersisted = async ({
   lensServices: LensAppServices;
   history?: History<unknown>;
 }): Promise<
-  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'errorJSON'> } | undefined
+  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'sourceId'> } | undefined
 > => {
   const { notifications, spaces, attributeService } = lensServices;
   let doc: Document;
@@ -89,97 +83,53 @@ export const getPersisted = async ({
 
 export function loadInitial(
   store: MiddlewareAPI,
-  {
-    lensServices,
-    datasourceMap,
-    visualizationMap,
-    embeddableEditorIncomingState,
-    initialContext,
-  }: LensStoreDeps,
+  storeDeps: LensStoreDeps,
   {
     redirectCallback,
     initialInput,
-    emptyState,
     history,
   }: {
     redirectCallback: (savedObjectId?: string) => void;
     initialInput?: LensEmbeddableInput;
-    emptyState?: LensAppState;
     history?: History<unknown>;
   }
 ) {
-  const { getState, dispatch } = store;
+  const { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext } = storeDeps;
+  const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
+    getPreloadedState(storeDeps);
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
-  const { persistedDoc } = getState().lens;
+  const currentSessionId = data.search.session.getSessionId();
 
+  const { lens } = store.getState();
   if (
     !initialInput ||
     (attributeService.inputIsRefType(initialInput) &&
-      initialInput.savedObjectId === persistedDoc?.savedObjectId)
+      initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
   ) {
-    return initializeDatasources(
-      datasourceMap,
-      getState().lens.datasourceStates,
-      undefined,
-      initialContext,
-      {
-        isFullEditor: true,
-      }
-    )
+    return initializeDatasources(datasourceMap, lens.datasourceStates, undefined, initialContext, {
+      isFullEditor: true,
+    })
       .then((result) => {
-        const datasourceStates = Object.entries(result).reduce(
-          (state, [datasourceId, datasourceState]) => ({
-            ...state,
-            [datasourceId]: {
-              ...datasourceState,
+        store.dispatch(
+          initEmpty({
+            newState: {
+              ...emptyState,
+              searchSessionId: currentSessionId || data.search.session.start(),
+              datasourceStates: Object.entries(result).reduce(
+                (state, [datasourceId, datasourceState]) => ({
+                  ...state,
+                  [datasourceId]: {
+                    ...datasourceState,
+                    isLoading: false,
+                  },
+                }),
+                {}
+              ),
               isLoading: false,
             },
-          }),
-          {}
-        );
-        dispatch(
-          setState({
-            ...emptyState,
-            datasourceStates,
-            isLoading: false,
+            initialContext,
           })
         );
-        if (initialContext) {
-          const selectedSuggestion = getVisualizeFieldSuggestions({
-            datasourceMap,
-            datasourceStates,
-            visualizationMap,
-            activeVisualization: visualizationMap?.[Object.keys(visualizationMap)[0]] || null,
-            visualizationState: null,
-            visualizeTriggerFieldContext: initialContext,
-          });
-          if (selectedSuggestion) {
-            switchToSuggestion(dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
-          }
-        }
-        const activeDatasourceId = getInitialDatasourceId(datasourceMap);
-        const visualization = getState().lens.visualization;
-        const activeVisualization =
-          visualization.activeId && visualizationMap[visualization.activeId];
-
-        if (visualization.state === null && activeVisualization) {
-          const newLayerId = generateId();
-
-          const initialVisualizationState = activeVisualization.initialize(() => newLayerId);
-          dispatch(
-            updateLayer({
-              datasourceId: activeDatasourceId!,
-              layerId: newLayerId,
-              updater: datasourceMap[activeDatasourceId!].insertLayer,
-            })
-          );
-          dispatch(
-            updateVisualizationState({
-              visualizationId: activeVisualization.id,
-              updater: initialVisualizationState,
-            })
-          );
-        }
       })
       .catch((e: { message: string }) => {
         notifications.toasts.addDanger({
@@ -188,6 +138,7 @@ export function loadInitial(
         redirectCallback();
       });
   }
+
   getPersisted({ initialInput, lensServices, history })
     .then(
       (persisted) => {
@@ -200,10 +151,6 @@ export function loadInitial(
               initialInput.savedObjectId
             );
           }
-          // Don't overwrite any pinned filters
-          data.query.filterManager.setAppFilters(
-            injectFilterReferences(doc.state.filters, doc.references)
-          );
 
           const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
             (stateMap, [datasourceId, datasourceState]) => ({
@@ -216,6 +163,10 @@ export function loadInitial(
             {}
           );
 
+          const filters = injectFilterReferences(doc.state.filters, doc.references);
+          // Don't overwrite any pinned filters
+          data.query.filterManager.setAppFilters(filters);
+
           initializeDatasources(
             datasourceMap,
             docDatasourceStates,
@@ -226,13 +177,11 @@ export function loadInitial(
             }
           )
             .then((result) => {
-              const activeDatasourceId = getInitialDatasourceId(datasourceMap, doc);
-
-              const currentSessionId = data.search.session.getSessionId();
-
-              dispatch(
+              store.dispatch(
                 setState({
+                  isSaveable: true,
                   sharingSavedObjectProps,
+                  filters,
                   query: doc.state.query,
                   searchSessionId:
                     dashboardFeatureFlag.allowByValueEmbeddables &&
@@ -241,8 +190,8 @@ export function loadInitial(
                     currentSessionId
                       ? currentSessionId
                       : data.search.session.start(),
-                  ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
-                  activeDatasourceId,
+                  persistedDoc: doc,
+                  activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                   visualization: {
                     activeId: doc.visualizationType,
                     state: doc.state.visualization,
@@ -271,7 +220,7 @@ export function loadInitial(
         }
       },
       () => {
-        dispatch(
+        store.dispatch(
           setState({
             isLoading: false,
           })
@@ -279,9 +228,10 @@ export function loadInitial(
         redirectCallback();
       }
     )
-    .catch((e: { message: string }) =>
+    .catch((e: { message: string }) => {
       notifications.toasts.addDanger({
         title: e.message,
-      })
-    );
+      });
+      redirectCallback();
+    });
 }

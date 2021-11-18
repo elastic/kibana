@@ -17,7 +17,7 @@ Consult your administrator if you do not have the appropriate access.
 [cols="50, 50"]
 |===
 
-| {ref}/ingest.html[Ingest Node Pipelines]
+| {ref}/ingest.html[Ingest Pipelines]
 | Create and manage ingest pipelines that let you perform common transformations
 and enrichments on your data.
 
@@ -45,7 +45,7 @@ through the hot, warm, cold, and delete phases.
 Such policies help you control operation costs
 because you can put data in different resource tiers.
 
-| <<snapshot-repositories, Snapshot and Restore>>
+| {ref}/snapshot-restore.html[Snapshot and Restore]
 |Define a policy that creates, schedules, and automatically deletes snapshots to ensure that you
 have backups of your cluster in case something goes wrong.
 
@@ -192,8 +192,6 @@ include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
 include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
 
 include::security/index.asciidoc[]
-
-include::{kib-repo-dir}/management/snapshot-restore/index.asciidoc[]
 
 include::{kib-repo-dir}/spaces/index.asciidoc[]
 

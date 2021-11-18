@@ -52,8 +52,10 @@ describe('alerts default_config', () => {
             type: 'exists',
             value: 'exists',
           },
-          exists: {
-            field: 'signal.rule.threat_mapping',
+          query: {
+            exists: {
+              field: 'signal.rule.threat_mapping',
+            },
           },
         };
         expect(filters).toHaveLength(1);

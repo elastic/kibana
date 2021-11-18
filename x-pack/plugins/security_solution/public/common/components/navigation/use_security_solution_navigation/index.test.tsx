@@ -18,12 +18,15 @@ import { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { TestProviders } from '../../../mock';
+import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_selector');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
+jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
+
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
     [CONSTANTS.appQuery]: { query: 'host.name:"security-solution-es"', language: 'kuery' },
@@ -75,6 +78,7 @@ describe('useSecuritySolutionNavigation', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ urlState: mockUrlState });
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
+    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
 
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -233,6 +237,16 @@ describe('useSecuritySolutionNavigation', () => {
                 "name": "Event filters",
                 "onClick": [Function],
               },
+              Object {
+                "data-href": "securitySolution/host_isolation_exceptions",
+                "data-test-subj": "navigation-host_isolation_exceptions",
+                "disabled": false,
+                "href": "securitySolution/host_isolation_exceptions",
+                "id": "host_isolation_exceptions",
+                "isSelected": false,
+                "name": "Host isolation exceptions",
+                "onClick": [Function],
+              },
             ],
             "name": "Manage",
           },
@@ -250,8 +264,22 @@ describe('useSecuritySolutionNavigation', () => {
       { wrapper: TestProviders }
     );
 
-    // @ts-ignore possibly undefined, but if undefined we want this test to fail
+    // possibly undefined, but if undefined we want this test to fail
+    // @ts-expect-error TS2532
     expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.ueba);
+  });
+
+  it('should omit host isolation exceptions if hook reports false', () => {
+    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValueOnce(false);
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
+    );
+    expect(
+      result.current?.items
+        .find((item) => item.id === 'manage')
+        ?.items?.find((item) => item.id === 'host_isolation_exceptions')
+    ).toBeUndefined();
   });
 
   describe('Permission gated routes', () => {

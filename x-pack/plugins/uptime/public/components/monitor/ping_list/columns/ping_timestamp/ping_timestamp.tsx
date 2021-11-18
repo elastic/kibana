@@ -8,15 +8,17 @@
 import React, { useContext, useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+
 import {
   isScreenshotImageBlob,
   isScreenshotRef,
   ScreenshotRefImageData,
-} from '../../../../../../common/runtime_types/ping';
+} from '../../../../../../common/runtime_types';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../../contexts';
+
 import { NoImageDisplay } from './no_image_display';
 import { StepImageCaption } from './step_image_caption';
 import { StepImagePopover } from './step_image_popover';
@@ -129,9 +131,12 @@ export const PingTimestamp = ({ label, checkGroup, initialStepNo = 1 }: Props) =
           )}
         </StepDiv>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <span className="eui-textNoWrap">{label}</span>
-      </EuiFlexItem>
+
+      {label && (
+        <EuiFlexItem grow={false}>
+          <EuiText className="eui-textNoWrap">{label}</EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

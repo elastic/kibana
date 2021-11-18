@@ -21,12 +21,18 @@ describe('AlertingBuiltins Plugin', () => {
       context = coreMock.createPluginInitializerContext();
       plugin = new AlertingBuiltinsPlugin(context);
       coreSetup = coreMock.createSetup();
+      coreSetup.getStartServices = jest.fn().mockResolvedValue([
+        {
+          application: {},
+        },
+        { triggersActionsUi: {} },
+      ]);
     });
 
-    it('should register built-in alert types', async () => {
+    it('should register built-in alert types', () => {
       const alertingSetup = alertsMock.createSetup();
       const featuresSetup = featuresPluginMock.createSetup();
-      await plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
+      plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
       expect(alertingSetup.registerType).toHaveBeenCalledTimes(3);
 

@@ -7,9 +7,7 @@
  */
 
 import { ElasticsearchClient } from '../../../../';
-import { InternalCoreStart } from '../../../../internal_types';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
-import { Root } from '../../../../root';
 import { SavedObjectsRawDoc } from '../../../serialization';
 import {
   bulkOverwriteTransformedDocuments,
@@ -43,12 +41,14 @@ import * as Option from 'fp-ts/lib/Option';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../../migrations/core';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
+import Path from 'path';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
       license: 'basic',
+      dataArchive: Path.join(__dirname, './archives', '7.7.2_xpack_100k_obj.zip'),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
@@ -56,22 +56,11 @@ const { startES } = kbnTestServer.createTestServers({
 let esServer: kbnTestServer.TestElasticsearchUtils;
 
 describe('migration actions', () => {
-  let root: Root;
-  let start: InternalCoreStart;
   let client: ElasticsearchClient;
 
   beforeAll(async () => {
     esServer = await startES();
-    root = kbnTestServer.createRootWithCorePlugins({
-      server: {
-        basePath: '/hello',
-      },
-    });
-
-    await root.preboot();
-    await root.setup();
-    start = await root.start();
-    client = start.elasticsearch.client.asInternalUser;
+    client = esServer.es.getClient();
 
     // Create test fixture data:
     await createIndex({
@@ -117,7 +106,6 @@ describe('migration actions', () => {
 
   afterAll(async () => {
     await esServer.stop();
-    await root.shutdown();
   });
 
   describe('fetchIndices', () => {
@@ -320,14 +308,14 @@ describe('migration actions', () => {
       });
       expect.assertions(1);
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Right",
-                        "right": Object {
-                          "acknowledged": true,
-                          "shardsAcknowledged": true,
-                        },
-                      }
-                  `);
+          Object {
+            "_tag": "Right",
+            "right": Object {
+              "acknowledged": true,
+              "shardsAcknowledged": true,
+            },
+          }
+      `);
     });
     it('resolves right after waiting for index status to be yellow if clone target already existed', async () => {
       expect.assertions(2);
@@ -421,14 +409,15 @@ describe('migration actions', () => {
         timeout: '0s',
       })();
 
-      await expect(cloneIndexPromise).resolves.toMatchObject({
-        _tag: 'Left',
-        left: {
-          error: expect.any(ResponseError),
-          message: expect.stringMatching(/\"timed_out\":true/),
-          type: 'retryable_es_client_error',
-        },
-      });
+      await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "message": "Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
+            "type": "retryable_es_client_error",
+          },
+        }
+      `);
     });
   });
 
@@ -803,11 +792,15 @@ describe('migration actions', () => {
               `);
     });
 
-    // FLAKY https://github.com/elastic/kibana/issues/113012
-    it.skip('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
+    it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
+      await waitForIndexStatusYellow({
+        client,
+        index: '.kibana_1',
+      })();
+
       const res = (await reindex({
         client,
-        sourceIndex: 'existing_index_with_docs',
+        sourceIndex: '.kibana_1',
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
@@ -1166,7 +1159,7 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'existing_index_with_docs'
+        '.kibana_1'
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1547,7 +1540,8 @@ describe('migration actions', () => {
         }
       `);
     });
-    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
+    // TODO: unskip after https://github.com/elastic/kibana/issues/116111
+    it.skip('resolves left request_entity_too_large_exception when the payload is too large', async () => {
       const newDocs = new Array(10000).fill({
         _source: {
           title:

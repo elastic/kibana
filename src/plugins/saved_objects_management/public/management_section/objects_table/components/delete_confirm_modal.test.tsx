@@ -9,7 +9,7 @@
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test/jest';
-import { SavedObjectWithMetadata } from '../../../../common';
+import type { SavedObjectWithMetadata, SavedObjectManagementTypeInfo } from '../../../../common';
 import { DeleteConfirmModal } from './delete_confirm_modal';
 
 interface CreateObjectOptions {
@@ -32,6 +32,7 @@ const createObject = ({
 });
 
 describe('DeleteConfirmModal', () => {
+  const allowedTypes: SavedObjectManagementTypeInfo[] = [];
   let onConfirm: jest.Mock;
   let onCancel: jest.Mock;
 
@@ -47,6 +48,7 @@ describe('DeleteConfirmModal', () => {
         onConfirm={onConfirm}
         onCancel={onCancel}
         selectedObjects={[]}
+        allowedTypes={allowedTypes}
       />
     );
     expect(wrapper.find('EuiLoadingElastic')).toHaveLength(1);
@@ -61,6 +63,7 @@ describe('DeleteConfirmModal', () => {
         onConfirm={onConfirm}
         onCancel={onCancel}
         selectedObjects={objs}
+        allowedTypes={allowedTypes}
       />
     );
     expect(wrapper.find('.euiTableRow')).toHaveLength(3);
@@ -73,6 +76,7 @@ describe('DeleteConfirmModal', () => {
         onConfirm={onConfirm}
         onCancel={onCancel}
         selectedObjects={[]}
+        allowedTypes={allowedTypes}
       />
     );
     wrapper.find('EuiButtonEmpty').simulate('click');
@@ -88,6 +92,7 @@ describe('DeleteConfirmModal', () => {
         onConfirm={onConfirm}
         onCancel={onCancel}
         selectedObjects={[createObject()]}
+        allowedTypes={allowedTypes}
       />
     );
     wrapper.find('EuiButton').simulate('click');
@@ -109,6 +114,7 @@ describe('DeleteConfirmModal', () => {
           onConfirm={onConfirm}
           onCancel={onCancel}
           selectedObjects={objs}
+          allowedTypes={allowedTypes}
         />
       );
       expect(wrapper.find('.euiTableRow')).toHaveLength(1);
@@ -126,6 +132,7 @@ describe('DeleteConfirmModal', () => {
           onConfirm={onConfirm}
           onCancel={onCancel}
           selectedObjects={objs}
+          allowedTypes={allowedTypes}
         />
       );
 
@@ -145,6 +152,7 @@ describe('DeleteConfirmModal', () => {
           onConfirm={onConfirm}
           onCancel={onCancel}
           selectedObjects={objs}
+          allowedTypes={allowedTypes}
         />
       );
 
@@ -164,6 +172,7 @@ describe('DeleteConfirmModal', () => {
           onConfirm={onConfirm}
           onCancel={onCancel}
           selectedObjects={objs}
+          allowedTypes={allowedTypes}
         />
       );
 
@@ -184,6 +193,7 @@ describe('DeleteConfirmModal', () => {
           onConfirm={onConfirm}
           onCancel={onCancel}
           selectedObjects={objs}
+          allowedTypes={allowedTypes}
         />
       );
       const callout = findTestSubject(wrapper, 'sharedObjectsWarning');
@@ -202,6 +212,7 @@ describe('DeleteConfirmModal', () => {
           onConfirm={onConfirm}
           onCancel={onCancel}
           selectedObjects={objs}
+          allowedTypes={allowedTypes}
         />
       );
       const callout = findTestSubject(wrapper, 'sharedObjectsWarning');

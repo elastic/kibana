@@ -17,10 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Filter panel', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('kibana_sample_data_flights');
     });

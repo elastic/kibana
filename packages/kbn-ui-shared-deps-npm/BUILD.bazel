@@ -23,20 +23,18 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "eui_theme_vars/package.json",
   "package.json",
   "README.md"
 ]
 
 RUNTIME_DEPS = [
   "//packages/elastic-datemath",
-  "//packages/kbn-utils",
+  "@npm//@babel/runtime",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
   "@npm//@emotion/react",
   "@npm//abortcontroller-polyfill",
-  "@npm//angular",
   "@npm//babel-loader",
   "@npm//babel-plugin-transform-react-remove-prop-types",
   "@npm//core-js",
@@ -45,24 +43,25 @@ RUNTIME_DEPS = [
   "@npm//jquery",
   "@npm//loader-utils",
   "@npm//mini-css-extract-plugin",
-  "@npm//moment",
   "@npm//moment-timezone",
+  "@npm//moment",
   "@npm//raw-loader",
-  "@npm//react",
   "@npm//react-dom",
   "@npm//react-intl",
   "@npm//react-is",
-  "@npm//react-router",
   "@npm//react-router-dom",
+  "@npm//react-router",
+  "@npm//react",
   "@npm//regenerator-runtime",
   "@npm//resize-observer-polyfill",
   "@npm//rison-node",
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//symbol-observable",
+  "@npm//tslib",
   "@npm//url-loader",
   "@npm//val-loader",
-  "@npm//whatwg-fetch"
+  "@npm//whatwg-fetch",
 ]
 
 WEBPACK_DEPS = [
@@ -70,14 +69,11 @@ WEBPACK_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-datemath",
-  "//packages/kbn-utils",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
   "@npm//@emotion/react",
   "@npm//abortcontroller-polyfill",
-  "@npm//angular",
   "@npm//babel-loader",
   "@npm//core-js",
   "@npm//css-loader",

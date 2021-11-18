@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
@@ -14,7 +14,7 @@ import {
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
 export async function getErrorGroupSample({
@@ -23,14 +23,18 @@ export async function getErrorGroupSample({
   serviceName,
   groupId,
   setup,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   groupId: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     apm: {
@@ -51,9 +55,9 @@ export async function getErrorGroupSample({
         },
       },
       sort: asMutableArray([
-        { _score: 'desc' }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
-        { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
-      ] as const),
+        { _score: { order: 'desc' as const } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
+        { '@timestamp': { order: 'desc' as const } }, // sort by timestamp to get the most recent error
+      ]) as estypes.SearchSortCombinations[],
     },
   };
 
@@ -64,7 +68,13 @@ export async function getErrorGroupSample({
 
   let transaction;
   if (transactionId && traceId) {
-    transaction = await getTransaction({ transactionId, traceId, setup });
+    transaction = await getTransaction({
+      transactionId,
+      traceId,
+      setup,
+      start,
+      end,
+    });
   }
 
   return {

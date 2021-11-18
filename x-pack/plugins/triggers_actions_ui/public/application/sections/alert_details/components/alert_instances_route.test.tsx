@@ -179,6 +179,10 @@ function mockAlertInstanceSummary(overloads: Partial<any> = {}): any {
         muted: false,
       },
     },
+    executionDuration: {
+      average: 0,
+      values: [],
+    },
   };
   return summary;
 }

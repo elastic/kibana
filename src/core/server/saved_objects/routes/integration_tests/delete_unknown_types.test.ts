@@ -13,7 +13,6 @@ import { elasticsearchServiceMock } from '../../../../../core/server/elasticsear
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { setupServer } from '../test_utils';
 import { KibanaConfigType } from '../../../kibana_config';
-import { SavedObjectConfig } from '../../saved_objects_config';
 import { SavedObjectsType } from 'kibana/server';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
@@ -23,13 +22,6 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
   const kibanaConfig: KibanaConfigType = {
     enabled: true,
     index: '.kibana',
-  };
-  const config: SavedObjectConfig = {
-    maxImportExportSize: 10000,
-    maxImportPayloadBytes: 24000000,
-    migration: {
-      enableV2: true,
-    } as SavedObjectConfig['migration'],
   };
 
   let server: SetupServerReturn['server'];
@@ -54,7 +46,6 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
     registerDeleteUnknownTypesRoute(router, {
       kibanaVersion,
       kibanaConfig,
-      config,
     });
 
     await server.start();

@@ -4,22 +4,58 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { service, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
-import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
+import { meanBy, sumBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
+import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
+import { roundNumber } from '../../utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const registry = getService('registry');
+  const apmApiClient = getService('apmApiClient');
 
-  const archiveName = 'apm_8.0.0';
-  const metadata = archives_metadata[archiveName];
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
-  // url parameters
-  const start = encodeURIComponent(metadata.start);
-  const end = encodeURIComponent(metadata.end);
-  const bucketSize = '60s';
+  const start = new Date('2021-01-01T00:00:00.000Z').getTime();
+  const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
+  const intervalString = '60s';
+  const bucketSize = 60;
+
+  async function getThroughputValues() {
+    const commonQuery = { start: new Date(start).toISOString(), end: new Date(end).toISOString() };
+    const [serviceInventoryAPIResponse, observabilityOverviewAPIResponse] = await Promise.all([
+      apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/services',
+        params: {
+          query: {
+            ...commonQuery,
+            environment: 'ENVIRONMENT_ALL',
+            kuery: '',
+          },
+        },
+      }),
+      apmApiClient.readUser({
+        endpoint: `GET /internal/apm/observability_overview`,
+        params: {
+          query: {
+            ...commonQuery,
+            bucketSize,
+            intervalString,
+          },
+        },
+      }),
+    ]);
+    const serviceInventoryThroughputSum = roundNumber(
+      sumBy(serviceInventoryAPIResponse.body.items, 'throughput')
+    );
+
+    return {
+      serviceInventoryCount: serviceInventoryAPIResponse.body.items.length,
+      serviceInventoryThroughputSum,
+      observabilityOverview: observabilityOverviewAPIResponse.body,
+    };
+  }
 
   registry.when(
     'Observability overview when data is not loaded',
@@ -27,9 +63,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
-          const response = await supertest.get(
-            `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
-          );
+          const response = await apmApiClient.readUser({
+            endpoint: `GET /internal/apm/observability_overview`,
+            params: {
+              query: {
+                start: new Date(start).toISOString(),
+                end: new Date(end).toISOString(),
+                bucketSize,
+                intervalString,
+              },
+            },
+          });
           expect(response.status).to.be(200);
 
           expect(response.body.serviceCount).to.be(0);
@@ -40,54 +84,93 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Observability overview when data is loaded',
-    { config: 'basic', archives: [archiveName] },
+    'data is loaded',
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      it('returns the service count and transaction coordinates', async () => {
-        const response = await supertest.get(
-          `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
-        );
-        expect(response.status).to.be(200);
+      describe('Observability overview api ', () => {
+        const GO_PROD_RATE = 50;
+        const GO_DEV_RATE = 5;
+        const JAVA_PROD_RATE = 45;
+        before(async () => {
+          const serviceGoProdInstance = service('synth-go', 'production', 'go').instance(
+            'instance-a'
+          );
+          const serviceGoDevInstance = service('synth-go', 'development', 'go').instance(
+            'instance-b'
+          );
+          const serviceJavaInstance = service('synth-java', 'production', 'java').instance(
+            'instance-c'
+          );
 
-        expect(response.body.serviceCount).to.be.greaterThan(0);
-        expect(response.body.transactionPerMinute.timeseries.length).to.be.greaterThan(0);
+          await synthtraceEsClient.index([
+            ...timerange(start, end)
+              .interval('1m')
+              .rate(GO_PROD_RATE)
+              .flatMap((timestamp) =>
+                serviceGoProdInstance
+                  .transaction('GET /api/product/list')
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .serialize()
+              ),
+            ...timerange(start, end)
+              .interval('1m')
+              .rate(GO_DEV_RATE)
+              .flatMap((timestamp) =>
+                serviceGoDevInstance
+                  .transaction('GET /api/product/:id')
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .serialize()
+              ),
+            ...timerange(start, end)
+              .interval('1m')
+              .rate(JAVA_PROD_RATE)
+              .flatMap((timestamp) =>
+                serviceJavaInstance
+                  .transaction('POST /api/product/buy')
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .serialize()
+              ),
+          ]);
+        });
 
-        expectSnapshot(response.body.serviceCount).toMatchInline(`8`);
+        after(() => synthtraceEsClient.clean());
 
-        expectSnapshot(response.body.transactionPerMinute.value).toMatchInline(`58.9`);
-        expectSnapshot(response.body.transactionPerMinute.timeseries.length).toMatchInline(`30`);
+        describe('compare throughput values', () => {
+          let throughputValues: PromiseReturnType<typeof getThroughputValues>;
+          before(async () => {
+            throughputValues = await getThroughputValues();
+          });
 
-        expectSnapshot(
-          response.body.transactionPerMinute.timeseries
-            .slice(0, 5)
-            .map(({ x, y }: { x: number; y: number }) => ({
-              x: new Date(x).toISOString(),
-              y,
-            }))
-        ).toMatchInline(`
-          Array [
-            Object {
-              "x": "2021-08-03T06:50:00.000Z",
-              "y": 36,
-            },
-            Object {
-              "x": "2021-08-03T06:51:00.000Z",
-              "y": 55,
-            },
-            Object {
-              "x": "2021-08-03T06:52:00.000Z",
-              "y": 40,
-            },
-            Object {
-              "x": "2021-08-03T06:53:00.000Z",
-              "y": 53,
-            },
-            Object {
-              "x": "2021-08-03T06:54:00.000Z",
-              "y": 39,
-            },
-          ]
-        `);
+          it('returns same number of service as shown on service inventory API', () => {
+            const { serviceInventoryCount, observabilityOverview } = throughputValues;
+            [serviceInventoryCount, observabilityOverview.serviceCount].forEach((value) =>
+              expect(value).to.be.equal(2)
+            );
+          });
+
+          it('returns same throughput value on service inventory and obs throughput count', () => {
+            const { serviceInventoryThroughputSum, observabilityOverview } = throughputValues;
+            const obsThroughputCount = roundNumber(
+              observabilityOverview.transactionPerMinute.value
+            );
+            [serviceInventoryThroughputSum, obsThroughputCount].forEach((value) =>
+              expect(value).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE + JAVA_PROD_RATE))
+            );
+          });
+
+          it('returns same throughput value on service inventory and obs mean throughput timeseries', () => {
+            const { serviceInventoryThroughputSum, observabilityOverview } = throughputValues;
+            const obsThroughputMean = roundNumber(
+              meanBy(observabilityOverview.transactionPerMinute.timeseries, 'y')
+            );
+            [serviceInventoryThroughputSum, obsThroughputMean].forEach((value) =>
+              expect(value).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE + JAVA_PROD_RATE))
+            );
+          });
+        });
       });
     }
   );

@@ -6,7 +6,6 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExamplesList } from '../../../examples_list';
 import { DocumentStatsTable } from './document_stats';
@@ -15,14 +14,12 @@ import { ExpandedRowContent } from './expanded_row_content';
 export const OtherContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) return null;
-  return (
+  return stats.count === undefined ? (
+    <>{Array.isArray(stats.examples) && <ExamplesList examples={stats.examples} />}</>
+  ) : (
     <ExpandedRowContent dataTestSubj={'dataVisualizerOtherContent'}>
       <DocumentStatsTable config={config} />
-      {Array.isArray(stats.examples) && (
-        <EuiFlexItem>
-          <ExamplesList examples={stats.examples} />
-        </EuiFlexItem>
-      )}
+      {Array.isArray(stats.examples) && <ExamplesList examples={stats.examples} />}
     </ExpandedRowContent>
   );
 };

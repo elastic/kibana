@@ -24,12 +24,12 @@ export function redisLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'redisLogs',
     name: i18n.translate('home.tutorials.redisLogs.nameTitle', {
-      defaultMessage: 'Redis logs',
+      defaultMessage: 'Redis Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.redisLogs.shortDescription', {
-      defaultMessage: 'Collect and parse error and slow logs created by Redis.',
+      defaultMessage: 'Collect and parse logs from Redis servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.redisLogs.longDescription', {
       defaultMessage:
@@ -65,5 +65,6 @@ Note that the `slowlog` fileset is experimental. \
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['datastore', 'message_queue'],
   };
 }

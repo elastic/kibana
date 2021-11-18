@@ -46,14 +46,14 @@ export const EmptyIndexListPrompt = ({
   const createAnywayLink = (
     <EuiText color="subdued" textAlign="center" size="xs">
       <FormattedMessage
-        id="indexPatternEditor.createIndexPattern.emptyState.createAnyway"
-        defaultMessage="Some indices may be hidden. Try to {link} anyway."
+        id="indexPatternEditor.createIndexPattern.emptyState.createAnywayTxt"
+        defaultMessage="You can also {link}"
         values={{
           link: (
             <EuiLink onClick={() => createAnyway()} data-test-subj="createAnyway">
               <FormattedMessage
                 id="indexPatternEditor.createIndexPattern.emptyState.createAnywayLink"
-                defaultMessage="create an index pattern"
+                defaultMessage="create an index pattern against hidden or system indices."
               />
             </EuiLink>
           ),
@@ -91,7 +91,7 @@ export const EmptyIndexListPrompt = ({
               <EuiCard
                 className="inpEmptyState__card"
                 onClick={() => {
-                  navigateToApp('home', { path: '#/tutorial_directory' });
+                  navigateToApp('integrations', { path: '/browse' });
                   closeFlyout();
                 }}
                 icon={<EuiIcon size="xl" type="database" color="subdued" />}
@@ -153,8 +153,8 @@ export const EmptyIndexListPrompt = ({
           </EuiFlexGrid>
           <EuiSpacer size="xxl" />
           <div className="inpEmptyState__footer">
-            <EuiFlexGroup>
-              <EuiFlexItem grow={1} className="inpEmptyState__footerFlexItem">
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false} className="inpEmptyState__footerFlexItem">
                 <EuiDescriptionList
                   listItems={[
                     {
@@ -176,7 +176,7 @@ export const EmptyIndexListPrompt = ({
                   ]}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={2} className="inpEmptyState__footerFlexItem">
+              <EuiFlexItem grow={false} className="inpEmptyState__footerFlexItem">
                 <EuiDescriptionList
                   listItems={[
                     {

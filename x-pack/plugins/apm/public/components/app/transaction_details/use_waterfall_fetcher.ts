@@ -36,7 +36,7 @@ export function useWaterfallFetcher() {
     (callApmApi) => {
       if (traceId && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/traces/{traceId}',
+          endpoint: 'GET /internal/apm/traces/{traceId}',
           params: {
             path: { traceId },
             query: {

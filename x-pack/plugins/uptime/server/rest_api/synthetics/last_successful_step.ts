@@ -22,17 +22,18 @@ export const createLastSuccessfulStepRoute: UMRestApiRouteFactory = (libs: UMSer
       monitorId: schema.string(),
       stepIndex: schema.number(),
       timestamp: schema.string(),
-      _inspect: schema.maybe(schema.boolean()),
+      location: schema.maybe(schema.string()),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }) => {
-    const { timestamp, monitorId, stepIndex } = request.query;
+    const { timestamp, monitorId, stepIndex, location } = request.query;
 
     const step: JourneyStep | null = await libs.requests.getStepLastSuccessfulStep({
       uptimeEsClient,
       monitorId,
       stepIndex,
       timestamp,
+      location,
     });
 
     if (step === null) {

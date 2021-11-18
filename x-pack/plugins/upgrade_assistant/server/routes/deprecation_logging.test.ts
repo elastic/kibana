@@ -45,7 +45,7 @@ describe('deprecation logging API', () => {
           .getSettings as jest.Mock
       ).mockResolvedValue({
         body: {
-          default: {
+          defaults: {
             cluster: { deprecation_indexing: { enabled: 'true' } },
           },
         },
@@ -84,7 +84,7 @@ describe('deprecation logging API', () => {
           .putSettings as jest.Mock
       ).mockResolvedValue({
         body: {
-          default: {
+          defaults: {
             logger: { deprecation: 'WARN' },
             cluster: { deprecation_indexing: { enabled: 'true' } },
           },
@@ -172,6 +172,44 @@ describe('deprecation logging API', () => {
         routeDependencies.router.getHandler({
           method: 'get',
           pathPattern: '/api/upgrade_assistant/deprecation_logging/count',
+        })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
+      ).rejects.toThrow('scary error!');
+    });
+  });
+
+  describe('DELETE /api/upgrade_assistant/deprecation_logging/cache', () => {
+    it('returns ok if if the cache was deleted', async () => {
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
+          .request as jest.Mock
+      ).mockResolvedValue({
+        body: 'ok',
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'delete',
+        pathPattern: '/api/upgrade_assistant/deprecation_logging/cache',
+      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
+
+      expect(resp.status).toEqual(200);
+      expect(
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport.request
+      ).toHaveBeenCalledWith({
+        method: 'DELETE',
+        path: '/_logging/deprecation_cache',
+      });
+      expect(resp.payload).toEqual('ok');
+    });
+
+    it('returns an error if it throws', async () => {
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
+          .request as jest.Mock
+      ).mockRejectedValue(new Error('scary error!'));
+      await expect(
+        routeDependencies.router.getHandler({
+          method: 'delete',
+          pathPattern: '/api/upgrade_assistant/deprecation_logging/cache',
         })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
       ).rejects.toThrow('scary error!');
     });

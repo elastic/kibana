@@ -19,7 +19,7 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerting/server';
-import { BaseSearchResponse, SearchHit, TermAggregationBucket } from '../../types';
+import { TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -255,6 +255,7 @@ export interface SignalHit {
 
 export interface AlertAttributes<T extends RuleParams = RuleParams> {
   actions: RuleAlertAction[];
+  alertTypeId: string;
   enabled: boolean;
   name: string;
   tags: string[];
@@ -332,7 +333,9 @@ export interface SearchAfterAndBulkCreateReturnType {
 }
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {
-  top_threshold_hits: BaseSearchResponse<SignalSource>;
+  max_timestamp: {
+    value_as_string: string;
+  };
   cardinality_count: {
     value: number;
   };
@@ -348,13 +351,7 @@ export interface MultiAggBucket {
     value: string;
   }>;
   docCount: number;
-  topThresholdHits?:
-    | {
-        hits: {
-          hits: SearchHit[];
-        };
-      }
-    | undefined;
+  maxTimestamp: string;
 }
 
 export interface ThresholdQueryBucket extends TermAggregationBucket {

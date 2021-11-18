@@ -9,11 +9,14 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'src/core/server';
 
 export const config: PluginConfigDescriptor = {
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
+  deprecations: ({ deprecate, unused }) => [
+    deprecate('enabled', '8.0.0', { level: 'critical' }),
+    unused('unsafe.indexUpgrade.enabled', { level: 'warning' }),
+  ],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     write: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+      enabled: schema.boolean({ defaultValue: true }),
     }),
     unsafe: schema.object({
       legacyMultiTenancy: schema.object({

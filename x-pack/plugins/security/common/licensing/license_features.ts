@@ -66,6 +66,11 @@ export interface SecurityLicenseFeatures {
   readonly allowRbac: boolean;
 
   /**
+   * Indicates if Machine Learning features are available.
+   */
+  readonly allowML: boolean;
+
+  /**
    * Indicates whether we allow sub-feature privileges.
    */
   readonly allowSubFeaturePrivileges: boolean;

@@ -1486,7 +1486,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -1516,6 +1516,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
@@ -2245,7 +2259,7 @@
         "tags": [],
         "label": "createSessionStorageStateStorage",
         "description": [
-          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           "(storage?: Storage) => ",
@@ -2565,7 +2579,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",
@@ -3918,7 +3932,7 @@
         "tags": [],
         "label": "syncState",
         "description": [
-          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
+          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
         ],
         "signature": [
           "({\n  storageKey,\n  stateStorage,\n  stateContainer,\n}: ",
@@ -4690,7 +4704,7 @@
         "tags": [],
         "label": "IKbnUrlStateStorage",
         "description": [
-          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
+          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
         ],
         "signature": [
           {
@@ -4939,7 +4953,7 @@
         "tags": [],
         "label": "ISessionStorageStateStorage",
         "description": [
-          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           {
@@ -6353,9 +6367,21 @@
         "description": [],
         "signature": [
           "{ [K in keyof T]: ReturnType<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T[K], ",
           {
             "pluginId": "kibanaUtils",
@@ -6386,7 +6412,13 @@
         "label": "PureSelectorToSelector",
         "description": [],
         "signature": [
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T, ",
           {
             "pluginId": "kibanaUtils",
@@ -6842,7 +6874,55 @@
         ],
         "initialIsOpen": false
       }
-    ]
+    ],
+    "setup": {
+      "parentPluginId": "kibanaUtils",
+      "id": "def-public.KibanaUtilsSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "KibanaUtilsSetup",
+      "description": [],
+      "path": "src/plugins/kibana_utils/public/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "kibanaUtils",
+          "id": "def-public.KibanaUtilsSetup.setVersion",
+          "type": "Function",
+          "tags": [],
+          "label": "setVersion",
+          "description": [],
+          "signature": [
+            "(history: Pick<",
+            "History",
+            "<any>, \"replace\" | \"location\">) => void"
+          ],
+          "path": "src/plugins/kibana_utils/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "kibanaUtils",
+              "id": "def-public.KibanaUtilsSetup.setVersion.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "history",
+              "description": [],
+              "signature": [
+                "Pick<",
+                "History",
+                "<any>, \"replace\" | \"location\">"
+              ],
+              "path": "src/plugins/kibana_utils/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [
@@ -7047,7 +7127,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -7077,6 +7157,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
@@ -7218,6 +7312,94 @@
         "returnComment": [
           "`KbnServerError`"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-server.mergeMigrationFunctionMaps",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeMigrationFunctionMaps",
+        "description": [],
+        "signature": [
+          "(obj1: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          },
+          ", obj2: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          },
+          ") => { [x: string]: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunction",
+            "text": "MigrateFunction"
+          },
+          "<any, any>; } & ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.mergeMigrationFunctionMaps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "obj1",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.mergeMigrationFunctionMaps.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "obj2",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -8532,7 +8714,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -8562,6 +8744,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
@@ -8786,7 +8982,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",
@@ -9146,7 +9342,13 @@
             "text": "VersionedState"
           },
           "<",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">) => S"
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
@@ -9188,7 +9390,13 @@
                 "text": "VersionedState"
               },
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
@@ -9991,7 +10199,13 @@
                 "text": "VersionedState"
               },
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">) => P) | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
@@ -10015,7 +10229,13 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
                   ">"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
@@ -10936,9 +11156,21 @@
         ],
         "signature": [
           "(state: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ", version: string) => ",
-          "SerializableRecord"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
@@ -10952,7 +11184,13 @@
             "label": "state",
             "description": [],
             "signature": [
-              "SerializableRecord"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              }
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false
@@ -11017,9 +11255,21 @@
         "description": [],
         "signature": [
           "{ [K in keyof T]: ReturnType<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T[K], ",
           {
             "pluginId": "kibanaUtils",
@@ -11050,7 +11300,13 @@
         "label": "PureSelectorToSelector",
         "description": [],
         "signature": [
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T, ",
           {
             "pluginId": "kibanaUtils",

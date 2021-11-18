@@ -37,6 +37,7 @@ const _deprecate = (
     return;
   }
   addDeprecation({
+    configPath: fullPath,
     title: getDeprecationTitle(fullPath),
     message: i18n.translate('kbnConfig.deprecations.deprecatedSettingMessage', {
       defaultMessage: 'Configuring "{fullPath}" is deprecated and will be removed in {removeBy}.',
@@ -73,6 +74,7 @@ const _rename = (
   const newValue = get(config, fullNewPath);
   if (newValue === undefined) {
     addDeprecation({
+      configPath: fullOldPath,
       title: getDeprecationTitle(fullOldPath),
       message: i18n.translate('kbnConfig.deprecations.replacedSettingMessage', {
         defaultMessage: `Setting "{fullOldPath}" has been replaced by "{fullNewPath}"`,
@@ -95,6 +97,7 @@ const _rename = (
     };
   } else {
     addDeprecation({
+      configPath: fullOldPath,
       title: getDeprecationTitle(fullOldPath),
       message: i18n.translate('kbnConfig.deprecations.conflictSettingMessage', {
         defaultMessage:
@@ -135,6 +138,7 @@ const _unused = (
     return;
   }
   addDeprecation({
+    configPath: fullPath,
     title: getDeprecationTitle(fullPath),
     message: i18n.translate('kbnConfig.deprecations.unusedSettingMessage', {
       defaultMessage: 'You no longer need to configure "{fullPath}".',

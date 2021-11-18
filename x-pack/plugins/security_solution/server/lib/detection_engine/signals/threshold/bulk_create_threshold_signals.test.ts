@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { sampleDocNoSortId, sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
+import { sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
 import { sampleThresholdSignalHistory } from '../__mocks__/threshold_signal_history.mock';
 import { calculateThresholdSignalUuid } from '../utils';
 import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals';
@@ -32,6 +32,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
         aggregations: {
           'threshold_0:source.ip': {
             buckets: [
+              // @ts-expect-error not full primary_interface
               {
                 key: '127.0.0.1',
                 doc_count: 15,
@@ -40,10 +41,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
                     {
                       key: 'garden-gnomes',
                       doc_count: 12,
-                      top_threshold_hits: {
-                        hits: {
-                          hits: [sampleDocNoSortId('abcd')],
-                        },
+                      max_timestamp: {
+                        value_as_string: '2020-04-20T21:27:45+0000',
                       },
                       cardinality_count: {
                         value: 7,
@@ -143,6 +142,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
         aggregations: {
           'threshold_0:source.ip': {
             buckets: [
+              // @ts-expect-error not full interface
               {
                 key: '127.0.0.1',
                 doc_count: 15,
@@ -205,13 +205,12 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
         aggregations: {
           threshold_0: {
             buckets: [
+              // @ts-expect-error not full interface
               {
                 key: '',
                 doc_count: 15,
-                top_threshold_hits: {
-                  hits: {
-                    hits: [sampleDocNoSortId('abcd')],
-                  },
+                max_timestamp: {
+                  value_as_string: '2020-04-20T21:27:45+0000',
                 },
                 cardinality_count: {
                   value: 7,

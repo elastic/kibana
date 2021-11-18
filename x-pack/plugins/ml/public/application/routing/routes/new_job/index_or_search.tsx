@@ -19,9 +19,6 @@ import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { checkBasicLicense } from '../../../license';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 enum MODE {
   NEW_JOB,
@@ -83,10 +80,8 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
       application: { navigateToUrl },
     },
   } = useMlKibana();
+
   const { redirectToMlAccessDeniedPage } = deps;
-  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
-  );
 
   const newJobResolvers = {
     ...basicResolvers(deps),
@@ -97,7 +92,6 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
   };
 
   const { context } = useResolver(

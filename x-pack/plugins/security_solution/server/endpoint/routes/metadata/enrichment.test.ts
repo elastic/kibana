@@ -114,8 +114,8 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
       expect(enrichedHostList.policy_info).toBeDefined();
-      expect(enrichedHostList.policy_info!.agent.applied.id).toEqual(policyID);
-      expect(enrichedHostList.policy_info!.agent.applied.revision).toEqual(policyRev);
+      expect(enrichedHostList.policy_info?.agent.applied.id).toEqual(policyID);
+      expect(enrichedHostList.policy_info?.agent.applied.revision).toEqual(policyRev);
     });
 
     it('reflects current fleet agent info', async () => {
@@ -130,8 +130,8 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
       expect(enrichedHostList.policy_info).toBeDefined();
-      expect(enrichedHostList.policy_info!.agent.configured.id).toEqual(policyID);
-      expect(enrichedHostList.policy_info!.agent.configured.revision).toEqual(policyRev);
+      expect(enrichedHostList.policy_info?.agent.configured.id).toEqual(policyID);
+      expect(enrichedHostList.policy_info?.agent.configured.revision).toEqual(policyRev);
     });
 
     it('reflects current endpoint policy info', async () => {
@@ -151,8 +151,8 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
       expect(enrichedHostList.policy_info).toBeDefined();
-      expect(enrichedHostList.policy_info!.endpoint.id).toEqual(policyID);
-      expect(enrichedHostList.policy_info!.endpoint.revision).toEqual(policyRev);
+      expect(enrichedHostList.policy_info?.endpoint.id).toEqual(policyID);
+      expect(enrichedHostList.policy_info?.endpoint.revision).toEqual(policyRev);
     });
   });
 });

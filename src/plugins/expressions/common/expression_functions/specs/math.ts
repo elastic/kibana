@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { map, zipObject } from 'lodash';
+import { map, zipObject, isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { evaluate } from '@kbn/tinymath';
 import { ExpressionFunctionDefinition } from '../types';
@@ -23,19 +23,18 @@ const TINYMATH = '`TinyMath`';
 const TINYMATH_URL =
   'https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html';
 
-const isString = (val: any): boolean => typeof val === 'string';
-
 function pivotObjectArray<
-  RowType extends { [key: string]: any },
-  ReturnColumns extends string | number | symbol = keyof RowType
->(rows: RowType[], columns?: string[]): Record<string, ReturnColumns[]> {
+  RowType extends { [key: string]: unknown },
+  ReturnColumns extends keyof RowType & string
+>(rows: RowType[], columns?: ReturnColumns[]) {
   const columnNames = columns || Object.keys(rows[0]);
   if (!columnNames.every(isString)) {
     throw new Error('Columns should be an array of strings');
   }
 
   const columnValues = map(columnNames, (name) => map(rows, name));
-  return zipObject(columnNames, columnValues);
+
+  return zipObject(columnNames, columnValues) as { [K in ReturnColumns]: Array<RowType[K]> };
 }
 
 export const errors = {

@@ -14,14 +14,6 @@ import { notificationServiceMock } from '../../../../../core/public/notification
 import { setNotifications } from '../../services';
 import { IKibanaSearchResponse } from 'src/plugins/data/common';
 
-jest.mock('@kbn/i18n', () => {
-  return {
-    i18n: {
-      translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
-    },
-  };
-});
-
 describe('handleResponse', () => {
   const notifications = notificationServiceMock.createStartContract();
 

@@ -30,9 +30,9 @@ interface Props {
   serviceName: string;
 }
 type ErrorGroupMainStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
 type ErrorGroupDetailedStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
 type SortField = 'name' | 'lastSeen' | 'occurrences';
@@ -97,7 +97,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/error_groups/main_statistics',
+          'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -150,7 +150,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       if (requestId && items.length && start && end && transactionType) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics',
+            'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {

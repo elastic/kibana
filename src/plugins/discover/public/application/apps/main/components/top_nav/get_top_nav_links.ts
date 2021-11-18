@@ -7,7 +7,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import type { IndexPattern, ISearchSource } from 'src/plugins/data/common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../utils/get_sharing_data';
@@ -77,6 +76,8 @@ export const getTopNavLinks = ({
       defaultMessage: 'Save Search',
     }),
     testId: 'discoverSaveButton',
+    iconType: 'save',
+    emphasize: true,
     run: () => onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state }),
   };
 
@@ -128,8 +129,7 @@ export const getTopNavLinks = ({
           title:
             savedSearch.title ||
             i18n.translate('discover.localMenu.fallbackReportTitle', {
-              defaultMessage: 'Discover search [{date}]',
-              values: { date: moment().toISOString(true) },
+              defaultMessage: 'Untitled discover search',
             }),
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
@@ -155,9 +155,9 @@ export const getTopNavLinks = ({
   return [
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
-    ...(services.capabilities.discover.save ? [saveSearch] : []),
     openSearch,
     shareSearch,
     inspectSearch,
+    ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];
 };

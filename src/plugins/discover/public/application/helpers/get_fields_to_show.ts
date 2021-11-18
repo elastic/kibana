@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPattern } from '../../../../data/common';
+import { IndexPattern, getFieldSubtypeMulti } from '../../../../data/common';
 
 export const getFieldsToShow = (
   fields: string[],
@@ -16,13 +16,15 @@ export const getFieldsToShow = (
   const mapping = (name: string) => indexPattern.fields.getByName(name);
   fields.forEach((key) => {
     const mapped = mapping(key);
-    if (mapped && mapped.spec?.subType?.multi?.parent) {
-      childParentFieldsMap[mapped.name] = mapped.spec.subType.multi.parent;
+    const subTypeMulti = mapped && getFieldSubtypeMulti(mapped.spec);
+    if (mapped && subTypeMulti?.multi?.parent) {
+      childParentFieldsMap[mapped.name] = subTypeMulti.multi.parent;
     }
   });
   return fields.filter((key: string) => {
     const fieldMapping = mapping(key);
-    const isMultiField = !!fieldMapping?.spec?.subType?.multi;
+    const subTypeMulti = fieldMapping && getFieldSubtypeMulti(fieldMapping.spec);
+    const isMultiField = !!subTypeMulti?.multi;
     if (!isMultiField) {
       return true;
     }

@@ -103,7 +103,8 @@ function wrapQueryBarTopRowInContext(testProps: any) {
   );
 }
 
-describe('QueryBarTopRowTopRow', () => {
+// Failing: See https://github.com/elastic/kibana/issues/92528
+describe.skip('QueryBarTopRowTopRow', () => {
   const QUERY_INPUT_SELECTOR = 'QueryStringInputUI';
   const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
   const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';

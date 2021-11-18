@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { KibanaLegacySetup, KibanaLegacyStart } from '../../../kibana_legacy/public';
+export type { KibanaLegacySetup, KibanaLegacyStart } from '../../../kibana_legacy/public';

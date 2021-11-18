@@ -10,18 +10,19 @@ import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 
 import * as is from './is';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 import { estypes } from '@elastic/elasticsearch';
 
 jest.mock('../grammar');
 
 describe('kuery functions', () => {
   describe('is', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 

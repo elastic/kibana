@@ -34,8 +34,10 @@ import type {
   CopyAgentPolicyResponse,
   DeleteAgentPolicyResponse,
   GetFullAgentPolicyResponse,
+  GetFullAgentConfigMapResponse,
 } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
+import { incrementPackageName } from '../../services/package_policy';
 
 export const getAgentPoliciesHandler: RequestHandler<
   undefined,
@@ -107,6 +109,7 @@ export const createAgentPolicyHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
+
   try {
     // eslint-disable-next-line prefer-const
     let [agentPolicy, newSysPackagePolicy] = await Promise.all<
@@ -130,6 +133,8 @@ export const createAgentPolicyHandler: RequestHandler<
     if (withSysMonitoring && newSysPackagePolicy !== undefined && agentPolicy !== undefined) {
       newSysPackagePolicy.policy_id = agentPolicy.id;
       newSysPackagePolicy.namespace = agentPolicy.namespace;
+      newSysPackagePolicy.name = await incrementPackageName(soClient, FLEET_SYSTEM_PACKAGE);
+
       await packagePolicyService.create(soClient, esClient, newSysPackagePolicy, {
         user,
         bumpRevision: false,
@@ -232,27 +237,52 @@ export const getFullAgentPolicy: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
 
-  try {
-    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
-      soClient,
-      request.params.agentPolicyId,
-      { standalone: request.query.standalone === true }
-    );
-    if (fullAgentPolicy) {
-      const body: GetFullAgentPolicyResponse = {
-        item: fullAgentPolicy,
-      };
-      return response.ok({
-        body,
-      });
-    } else {
-      return response.customError({
-        statusCode: 404,
-        body: { message: 'Agent policy not found' },
-      });
+  if (request.query.kubernetes === true) {
+    try {
+      const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
+        soClient,
+        request.params.agentPolicyId,
+        { standalone: request.query.standalone === true }
+      );
+      if (fullAgentConfigMap) {
+        const body: GetFullAgentConfigMapResponse = {
+          item: fullAgentConfigMap,
+        };
+        return response.ok({
+          body,
+        });
+      } else {
+        return response.customError({
+          statusCode: 404,
+          body: { message: 'Agent config map not found' },
+        });
+      }
+    } catch (error) {
+      return defaultIngestErrorHandler({ error, response });
     }
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+  } else {
+    try {
+      const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
+        soClient,
+        request.params.agentPolicyId,
+        { standalone: request.query.standalone === true }
+      );
+      if (fullAgentPolicy) {
+        const body: GetFullAgentPolicyResponse = {
+          item: fullAgentPolicy,
+        };
+        return response.ok({
+          body,
+        });
+      } else {
+        return response.customError({
+          statusCode: 404,
+          body: { message: 'Agent policy not found' },
+        });
+      }
+    } catch (error) {
+      return defaultIngestErrorHandler({ error, response });
+    }
   }
 };
 
@@ -265,27 +295,55 @@ export const downloadFullAgentPolicy: RequestHandler<
     params: { agentPolicyId },
   } = request;
 
-  try {
-    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
-      standalone: request.query.standalone === true,
-    });
-    if (fullAgentPolicy) {
-      const body = fullAgentPolicyToYaml(fullAgentPolicy, safeDump);
-      const headers: ResponseHeaders = {
-        'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent.yml"`,
-      };
-      return response.ok({
-        body,
-        headers,
-      });
-    } else {
-      return response.customError({
-        statusCode: 404,
-        body: { message: 'Agent policy not found' },
-      });
+  if (request.query.kubernetes === true) {
+    try {
+      const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
+        soClient,
+        request.params.agentPolicyId,
+        { standalone: request.query.standalone === true }
+      );
+      if (fullAgentConfigMap) {
+        const body = fullAgentConfigMap;
+        const headers: ResponseHeaders = {
+          'content-type': 'text/x-yaml',
+          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yaml"`,
+        };
+        return response.ok({
+          body,
+          headers,
+        });
+      } else {
+        return response.customError({
+          statusCode: 404,
+          body: { message: 'Agent config map not found' },
+        });
+      }
+    } catch (error) {
+      return defaultIngestErrorHandler({ error, response });
     }
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+  } else {
+    try {
+      const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
+        standalone: request.query.standalone === true,
+      });
+      if (fullAgentPolicy) {
+        const body = fullAgentPolicyToYaml(fullAgentPolicy, safeDump);
+        const headers: ResponseHeaders = {
+          'content-type': 'text/x-yaml',
+          'content-disposition': `attachment; filename="elastic-agent.yml"`,
+        };
+        return response.ok({
+          body,
+          headers,
+        });
+      } else {
+        return response.customError({
+          statusCode: 404,
+          body: { message: 'Agent policy not found' },
+        });
+      }
+    } catch (error) {
+      return defaultIngestErrorHandler({ error, response });
+    }
   }
 };

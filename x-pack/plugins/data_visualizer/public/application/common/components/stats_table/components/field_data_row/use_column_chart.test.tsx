@@ -122,8 +122,8 @@ describe('getLegendText()', () => {
         })}
       </>
     );
-    expect(getByText('true')).toBeInTheDocument();
-    expect(getByText('false')).toBeInTheDocument();
+    expect(getByText('t')).toBeInTheDocument();
+    expect(getByText('f')).toBeInTheDocument();
   });
   it('should return the chart legend text for ordinal chart data with less than max categories', () => {
     expect(getLegendText({ ...validOrdinalChartData, data: [{ key: 'cat', doc_count: 10 }] })).toBe(

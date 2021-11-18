@@ -7,20 +7,23 @@
 
 import { getSearchAggregatedTransactions } from '.';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../setup_request';
+import { Setup } from '../setup_request';
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export async function getIsUsingTransactionEvents({
-  setup: { config, start, end, apmEventClient },
+  setup: { config, apmEventClient },
   kuery,
+  start,
+  end,
 }: {
-  setup: Setup & Partial<SetupTimeRange>;
+  setup: Setup;
   kuery: string;
+  start?: number;
+  end?: number;
 }): Promise<boolean> {
-  const searchAggregatedTransactions =
-    config['xpack.apm.searchAggregatedTransactions'];
+  const searchAggregatedTransactions = config.searchAggregatedTransactions;
 
   if (
     searchAggregatedTransactions === SearchAggregatedTransactionSetting.never

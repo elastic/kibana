@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export {
-  DashboardContainerFactoryDefinition,
-  DashboardContainerFactory,
-} from './dashboard_container_factory';
+export type { DashboardContainerFactory } from './dashboard_container_factory';
+export { DashboardContainerFactoryDefinition } from './dashboard_container_factory';
 export { DashboardContainer } from './dashboard_container';
 export { createPanelState } from './panel';
 

@@ -7,7 +7,11 @@
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 
+import { configDeprecationsMock } from '../../../../src/core/server/mocks';
+
 import { config } from '.';
+
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   if (!config.deprecations) {
@@ -20,6 +24,7 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
     deprecations.map((deprecation) => ({
       deprecation,
       path: '',
+      context: deprecationContext,
     })),
     () =>
       ({ message }) =>

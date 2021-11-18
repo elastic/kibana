@@ -172,6 +172,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is updating a space.
 | `failure` | User is not authorized to update a space.
 
+.2+| `alert_update`
+| `unknown` | User is updating an alert.
+| `failure` | User is not authorized to update an alert.
+
 3+a|
 ====== Type: deletion
 
@@ -241,6 +245,14 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `space_find`
 | `success` | User has accessed a space as part of a search operation.
 | `failure` | User is not authorized to search for spaces.
+
+.2+| `alert_get`
+| `success` | User has accessed an alert.
+| `failure` | User is not authorized to access an alert.
+
+.2+| `alert_find`
+| `success` | User has accessed an alert as part of a search operation.
+| `failure` | User is not authorized to access alerts.
 
 3+a|
 ===== Category: web

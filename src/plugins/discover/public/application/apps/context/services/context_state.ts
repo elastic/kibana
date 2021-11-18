@@ -16,7 +16,7 @@ import {
   withNotifyOnErrors,
   ReduxLikeStateContainer,
 } from '../../../../../../kibana_utils/public';
-import { esFilters, FilterManager, Filter, SortDirection } from '../../../../../../data/public';
+import { esFilters, FilterManager, Filter } from '../../../../../../data/public';
 import { handleSourceColumnState } from '../../../helpers/state_helpers';
 
 export interface AppState {
@@ -33,13 +33,15 @@ export interface AppState {
    */
   predecessorCount: number;
   /**
-   * Sorting of the records to be fetched, assumed to be a legacy parameter
-   */
-  sort: string[][];
-  /**
    * Number of records to be fetched after the anchor records (older records)
    */
   successorCount: number;
+  /**
+   * Array of the used sorting [[field,direction],...]
+   * this is actually not needed in Discover Context, there's no sorting
+   * but it's used in the DocTable component
+   */
+  sort?: string[][];
 }
 
 interface GlobalState {
@@ -54,10 +56,6 @@ export interface GetStateParams {
    * Number of records to be fetched when 'Load' link/button is clicked
    */
   defaultSize: number;
-  /**
-   * The timefield used for sorting
-   */
-  timeFieldName: string;
   /**
    * Determins the use of long vs. short/hashed urls
    */
@@ -124,7 +122,6 @@ const APP_STATE_URL_KEY = '_a';
  */
 export function getState({
   defaultSize,
-  timeFieldName,
   storeInSessionStorage = false,
   history,
   toasts,
@@ -140,12 +137,7 @@ export function getState({
   const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial);
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
-  const appStateInitial = createInitialAppState(
-    defaultSize,
-    timeFieldName,
-    appStateFromUrl,
-    uiSettings
-  );
+  const appStateInitial = createInitialAppState(defaultSize, appStateFromUrl, uiSettings);
   const appStateContainer = createStateContainer<AppState>(appStateInitial);
 
   const { start, stop } = syncStates([
@@ -267,7 +259,6 @@ function getFilters(state: AppState | GlobalState): Filter[] {
  */
 function createInitialAppState(
   defaultSize: number,
-  timeFieldName: string,
   urlState: AppState,
   uiSettings: IUiSettingsClient
 ): AppState {
@@ -276,7 +267,6 @@ function createInitialAppState(
     filters: [],
     predecessorCount: defaultSize,
     successorCount: defaultSize,
-    sort: [[timeFieldName, SortDirection.desc]],
   };
   if (typeof urlState !== 'object') {
     return defaultState;

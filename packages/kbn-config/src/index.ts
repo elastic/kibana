@@ -13,22 +13,23 @@ export type {
   ConfigDeprecationWithContext,
   ConfigDeprecation,
   ConfigDeprecationCommand,
+  ConfigDeprecationContext,
   ChangedDeprecatedPaths,
 } from './deprecation';
 
 export { applyDeprecations, configDeprecationFactory } from './deprecation';
 
-export {
-  RawConfigurationProvider,
-  RawConfigService,
-  RawConfigAdapter,
-  getConfigFromFiles,
-} from './raw';
+export type { RawConfigurationProvider, RawConfigAdapter } from './raw';
+export { RawConfigService, getConfigFromFiles } from './raw';
 
-export { ConfigService, IConfigService, ConfigValidateParameters } from './config_service';
-export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
+export type { IConfigService, ConfigValidateParameters } from './config_service';
+export { ConfigService } from './config_service';
+export type { Config, ConfigPath } from './config';
+export { isConfigPath, hasConfigPathIntersection } from './config';
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { CliArgs, Env, RawPackageInfo } from './env';
-export { EnvironmentMode, PackageInfo } from './types';
-export { LegacyObjectToConfigAdapter, LegacyLoggingConfig } from './legacy';
+export type { CliArgs, RawPackageInfo } from './env';
+export { Env } from './env';
+export type { EnvironmentMode, PackageInfo } from './types';
+export type { LegacyLoggingConfig } from './legacy';
+export { LegacyObjectToConfigAdapter } from './legacy';
 export { getPluginSearchPaths } from './plugins';

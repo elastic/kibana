@@ -8,7 +8,8 @@
 
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import { IndexPattern, ISearchSource } from '../../../../../../data/common';
-import { SortOrder } from '../../../../saved_searches/types';
+import { DataViewType } from '../../../../../../data_views/common';
+import type { SortOrder } from '../../../../saved_searches';
 import { DiscoverServices } from '../../../../build_services';
 import { getSortForSearchSource } from '../components/doc_table';
 
@@ -44,14 +45,9 @@ export function updateSearchSource(
       indexPattern,
       uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
     );
-    searchSource
-      .setField('trackTotalHits', true)
-      .setField('sort', usedSort)
-      // Even when searching rollups, we want to use the default strategy so that we get back a
-      // document-like response.
-      .setPreferredSearchStrategyId('default');
+    searchSource.setField('trackTotalHits', true).setField('sort', usedSort);
 
-    if (indexPattern.type !== 'rollup') {
+    if (indexPattern.type !== DataViewType.ROLLUP) {
       // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
       searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern));
     }

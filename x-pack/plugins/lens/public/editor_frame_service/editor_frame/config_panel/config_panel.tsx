@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './config_panel.scss';
-
 import React, { useMemo, memo } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { mapValues } from 'lodash';

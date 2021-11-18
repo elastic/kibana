@@ -14,7 +14,7 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIndexFields } from '../source';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { ALERTS_PATH, RULES_PATH, UEBA_PATH } from '../../../../common/constants';
+import { ALERTS_PATH, CASES_PATH, RULES_PATH, UEBA_PATH } from '../../../../common/constants';
 import { TimelineId } from '../../../../common';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 
@@ -129,7 +129,7 @@ export const getScopeFromPath = (
   pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections => {
   return matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${UEBA_PATH}/:id`],
+    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${UEBA_PATH}/:id`, `${CASES_PATH}/:detailName`],
     strict: false,
   }) == null
     ? SourcererScopeName.default

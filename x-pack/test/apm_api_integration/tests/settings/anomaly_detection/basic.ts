@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { registry } from '../../../common/registry';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const noAccessUser = getService('legacySupertestAsNoAccessUser');
   const readUser = getService('legacySupertestAsApmReadUser');
   const writeUser = getService('legacySupertestAsApmWriteUser');
@@ -17,12 +17,12 @@ export default function apiTest({ getService }: FtrProviderContext) {
   type SupertestAsUser = typeof noAccessUser | typeof readUser | typeof writeUser;
 
   function getJobs(user: SupertestAsUser) {
-    return user.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
+    return user.get(`/internal/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
   }
 
   function createJobs(user: SupertestAsUser, environments: string[]) {
     return user
-      .post(`/api/apm/settings/anomaly-detection/jobs`)
+      .post(`/internal/apm/settings/anomaly-detection/jobs`)
       .send({ environments })
       .set('kbn-xsrf', 'foo');
   }

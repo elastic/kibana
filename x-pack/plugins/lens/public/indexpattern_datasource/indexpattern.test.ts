@@ -1696,7 +1696,7 @@ describe('IndexPattern Data Source', () => {
                 isBucketed: false,
                 label: 'Static value: 0',
                 operationType: 'static_value',
-                params: { value: 0 },
+                params: { value: '0' },
                 references: [],
                 scale: 'ratio',
               },

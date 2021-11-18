@@ -80,9 +80,9 @@ export function UserPercentile() {
 
   return (
     <EuiSelect
+      fullWidth
       prepend={I18LABELS.percentile}
       data-test-subj="uxPercentileSelect"
-      style={{ width: 150 }}
       options={options}
       onChange={(evt) => onChange(evt.target.value)}
     />

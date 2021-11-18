@@ -35,6 +35,15 @@ export const GetInfoRequestSchema = {
   }),
 };
 
+export const UpdatePackageRequestSchema = {
+  params: schema.object({
+    pkgkey: schema.string(),
+  }),
+  body: schema.object({
+    keepPoliciesUpToDate: schema.boolean(),
+  }),
+};
+
 export const GetStatsRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),

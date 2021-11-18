@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import type { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { buildExpressionFunction } from '../../../../../../plugins/expressions/common';
 
-import { IndexPatternExpressionType } from '../../../data_views/expressions';
+import { IndexPatternExpressionType } from '../../../../../data_views/common/expressions';
 import { IndexPatternsContract } from '../../..';
 
 import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';

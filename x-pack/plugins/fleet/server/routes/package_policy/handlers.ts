@@ -191,6 +191,8 @@ export const deletePackagePolicyHandler: RequestHandler<
   }
 };
 
+// TODO: Separate the upgrade and dry-run processes into separate endpoints, and address
+// duplicate logic in error handling as part of https://github.com/elastic/kibana/issues/63123
 export const upgradePackagePolicyHandler: RequestHandler<
   unknown,
   unknown,
@@ -211,6 +213,16 @@ export const upgradePackagePolicyHandler: RequestHandler<
         );
         body.push(result);
       }
+
+      const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+
+      if (firstFatalError) {
+        return response.customError({
+          statusCode: firstFatalError.statusCode!,
+          body: { message: firstFatalError.body!.message },
+        });
+      }
+
       return response.ok({
         body,
       });
@@ -221,6 +233,15 @@ export const upgradePackagePolicyHandler: RequestHandler<
         request.body.packagePolicyIds,
         { user }
       );
+
+      const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+
+      if (firstFatalError) {
+        return response.customError({
+          statusCode: firstFatalError.statusCode!,
+          body: { message: firstFatalError.body!.message },
+        });
+      }
       return response.ok({
         body,
       });

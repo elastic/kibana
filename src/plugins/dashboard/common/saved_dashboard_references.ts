@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import Semver from 'semver';
+import semverGt from 'semver/functions/gt';
 import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
 import { DashboardContainerStateWithType, DashboardPanelState } from './types';
 import { EmbeddablePersistableStateService } from '../../embeddable/common/types';
@@ -23,7 +23,7 @@ export interface SavedObjectAttributesAndReferences {
 }
 
 const isPre730Panel = (panel: Record<string, string>): boolean => {
-  return 'version' in panel ? Semver.gt('7.3.0', panel.version) : true;
+  return 'version' in panel ? semverGt('7.3.0', panel.version) : true;
 };
 
 function dashboardAttributesToState(attributes: SavedObjectAttributes): {

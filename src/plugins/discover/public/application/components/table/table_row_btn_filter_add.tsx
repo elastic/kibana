@@ -20,7 +20,7 @@ export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props
   const tooltipContent = disabled ? (
     <FormattedMessage
       id="discover.docViews.table.unindexedFieldsCanNotBeSearchedTooltip"
-      defaultMessage="Unindexed fields can not be searched"
+      defaultMessage="Unindexed fields or ignored values cannot be searched"
     />
   ) : (
     <FormattedMessage

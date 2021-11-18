@@ -63,7 +63,7 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
 
   const {
     types: { buckets },
-  } = aggregations as { types: { buckets: Array<{ key: string }> } };
+  } = aggregations as unknown as { types: { buckets: Array<{ key: string }> } };
   counts.mbIndicesCount = buckets.filter(({ key }: { key: string }) => key.includes('-mb-')).length;
 
   counts.legacyIndicesCount = buckets.length - counts.mbIndicesCount;

@@ -17,11 +17,11 @@ describe('getSignalVersionsByIndex', () => {
 
   it('properly transforms the elasticsearch aggregation', async () => {
     esClient.search.mockResolvedValueOnce({
-      // @ts-expect-error mocking only what we need
       body: {
         aggregations: {
           signals_indices: {
             buckets: [
+              // @ts-expect-error mocking only what we need
               {
                 key: 'index1',
                 signal_versions: {

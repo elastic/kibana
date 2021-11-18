@@ -40,8 +40,8 @@ export const getCloudMetadata = async (
   }
 
   const metricQuery = {
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     index: sourceConfiguration.metricAlias,
     body: {
       query: {

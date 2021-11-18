@@ -71,7 +71,7 @@ describe('TutorialsRegistry', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let testProvider: TutorialProvider;
   let testScopedTutorialContextFactory: ScopedTutorialContextFactory;
-  let mockCustomIntegrationsPluginSetup: MockedKeys<CustomIntegrationsPluginSetup>;
+  let mockCustomIntegrationsPluginSetup: jest.Mocked<CustomIntegrationsPluginSetup>;
 
   beforeEach(() => {
     mockCustomIntegrationsPluginSetup = customIntegrationsMock.createSetup();
@@ -107,8 +107,6 @@ describe('TutorialsRegistry', () => {
       const setup = new TutorialsRegistry().setup(mockCoreSetup, mockCustomIntegrationsPluginSetup);
       testProvider = ({}) => validTutorialProvider;
       expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
-
-      // @ts-expect-error
       expect(mockCustomIntegrationsPluginSetup.registerCustomIntegration.mock.calls).toEqual([
         [
           {
@@ -151,7 +149,10 @@ describe('TutorialsRegistry', () => {
 
   describe('start', () => {
     test('exposes proper contract', () => {
-      const start = new TutorialsRegistry().start();
+      const start = new TutorialsRegistry().start(
+        coreMock.createStart(),
+        mockCustomIntegrationsPluginSetup
+      );
       expect(start).toBeDefined();
     });
   });

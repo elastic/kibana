@@ -13,9 +13,9 @@ import { PresentationDashboardsService } from './dashboards';
 import { PresentationLabsService } from './labs';
 import { registry as stubRegistry } from './stub';
 
-export { PresentationCapabilitiesService } from './capabilities';
-export { PresentationDashboardsService } from './dashboards';
-export { PresentationLabsService } from './labs';
+export type { PresentationCapabilitiesService } from './capabilities';
+export type { PresentationDashboardsService } from './dashboards';
+export type { PresentationLabsService } from './labs';
 export interface PresentationUtilServices {
   dashboards: PresentationDashboardsService;
   capabilities: PresentationCapabilitiesService;

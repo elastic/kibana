@@ -8,7 +8,7 @@ import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiSpacer, EuiPanel, EuiLink, EuiCallOut, EuiCode } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiLink, EuiCallOut, EuiCode } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { useAppContext } from '../../../app_context';
@@ -24,9 +24,6 @@ import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
 const i18nTexts = {
   identifyStepTitle: i18n.translate('xpack.upgradeAssistant.overview.identifyStepTitle', {
     defaultMessage: 'Identify deprecated API use and update your applications',
-  }),
-  toggleTitle: i18n.translate('xpack.upgradeAssistant.overview.toggleTitle', {
-    defaultMessage: 'Log Elasticsearch deprecation issues',
   }),
   analyzeTitle: i18n.translate('xpack.upgradeAssistant.overview.analyzeTitle', {
     defaultMessage: 'Analyze deprecation logs',
@@ -46,7 +43,7 @@ const i18nTexts = {
   apiCompatibilityNoteBody: (docLink: string) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.apiCompatibilityNoteBody"
-      defaultMessage="We recommend you resolve all deprecation issues before upgrading. However, it can be challenging to ensure all requests are fixed. For additional safety, include API version compatibility headers in your requests. {learnMoreLink}."
+      defaultMessage="We recommend you resolve all deprecation issues before upgrading. If needed, you can apply API compatibility headers to requests that use deprecated features. {learnMoreLink}."
       values={{
         learnMoreLink: (
           <EuiLink href={docLink} target="_blank">
@@ -69,7 +66,7 @@ const i18nTexts = {
     'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningBody',
     {
       defaultMessage:
-        'Go to your logs directory to view the deprecation logs or enable log collecting to see them in the UI.',
+        'Go to your logs directory to view the deprecation logs or enable deprecation log collection to see them in Kibana.',
     }
   ),
   deniedPrivilegeTitle: i18n.translate(
@@ -106,12 +103,23 @@ const FixLogsStep: FunctionComponent<Props> = ({
   hasPrivileges,
   privilegesMissing,
 }) => {
-  const state = useDeprecationLogging();
   const {
     services: {
       core: { docLinks },
     },
   } = useAppContext();
+
+  const {
+    isDeprecationLogIndexingEnabled,
+    onlyDeprecationLogWritingEnabled,
+    isLoading,
+    isUpdating,
+    fetchError,
+    updateError,
+    resendRequest,
+    toggleLogging,
+  } = useDeprecationLogging();
+
   const [checkpoint, setCheckpoint] = useState(loadLogsCheckpoint());
 
   useEffect(() => {
@@ -119,25 +127,27 @@ const FixLogsStep: FunctionComponent<Props> = ({
   }, [checkpoint]);
 
   useEffect(() => {
-    if (!state.isDeprecationLogIndexingEnabled) {
+    if (!isDeprecationLogIndexingEnabled) {
       setIsComplete(false);
     }
 
     // Depending upon setIsComplete would create an infinite loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.isDeprecationLogIndexingEnabled]);
+  }, [isDeprecationLogIndexingEnabled]);
 
   return (
     <>
-      <EuiText>
-        <h4>{i18nTexts.toggleTitle}</h4>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiPanel>
-        <DeprecationLoggingToggle {...state} />
-      </EuiPanel>
+      <DeprecationLoggingToggle
+        isDeprecationLogIndexingEnabled={isDeprecationLogIndexingEnabled}
+        isLoading={isLoading}
+        isUpdating={isUpdating}
+        fetchError={fetchError}
+        updateError={updateError}
+        resendRequest={resendRequest}
+        toggleLogging={toggleLogging}
+      />
 
-      {state.onlyDeprecationLogWritingEnabled && (
+      {onlyDeprecationLogWritingEnabled && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
@@ -151,7 +161,7 @@ const FixLogsStep: FunctionComponent<Props> = ({
         </>
       )}
 
-      {!hasPrivileges && state.isDeprecationLogIndexingEnabled && (
+      {!hasPrivileges && isDeprecationLogIndexingEnabled && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
@@ -165,7 +175,7 @@ const FixLogsStep: FunctionComponent<Props> = ({
         </>
       )}
 
-      {hasPrivileges && state.isDeprecationLogIndexingEnabled && (
+      {hasPrivileges && isDeprecationLogIndexingEnabled && (
         <>
           <EuiSpacer size="xl" />
           <EuiText data-test-subj="externalLinksTitle">

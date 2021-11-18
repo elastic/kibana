@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, Plugin } from 'src/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup, DeprecationsDetails } from 'src/core/server';
 import { CodeConfigSchema } from './config';
 
 /**
@@ -15,17 +16,37 @@ import { CodeConfigSchema } from './config';
 export class CodePlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup() {
+  public async setup(core: CoreSetup) {
     const config = this.initializerContext.config.get<TypeOf<typeof CodeConfigSchema>>();
 
-    if (config && Object.keys(config).length > 0) {
-      this.initializerContext.logger
-        .get('config', 'deprecation')
-        .warn(
-          'The experimental app "Code" has been removed from Kibana. Remove all xpack.code.* ' +
-            'configurations from kibana.yml so Kibana does not fail to start up in the next major version.'
-        );
-    }
+    core.deprecations.registerDeprecations({
+      getDeprecations: (context) => {
+        const deprecations: DeprecationsDetails[] = [];
+        if (config && Object.keys(config).length > 0) {
+          deprecations.push({
+            level: 'critical',
+            deprecationType: 'feature',
+            title: i18n.translate('xpack.code.deprecations.removed.title', {
+              defaultMessage: 'The experimental plugin "Code" has been removed from Kibana',
+            }),
+            message: i18n.translate('xpack.code.deprecations.removed.message', {
+              defaultMessage:
+                'The experimental plugin "Code" has been removed from Kibana. The associated configuration ' +
+                'properties need to be removed from the Kibana configuration file.',
+            }),
+            requireRestart: true,
+            correctiveActions: {
+              manualSteps: [
+                i18n.translate('xpack.code.deprecations.removed.manualSteps1', {
+                  defaultMessage: 'Remove all xpack.code.* properties from the Kibana config file.',
+                }),
+              ],
+            },
+          });
+        }
+        return deprecations;
+      },
+    });
   }
 
   public start() {}

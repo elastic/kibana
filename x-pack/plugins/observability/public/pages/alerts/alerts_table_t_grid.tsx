@@ -11,23 +11,14 @@
  * This way plugins can do targeted imports to reduce the final code bundle
  */
 import {
-  ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_REASON as ALERT_REASON_TYPED,
+  ALERT_DURATION,
+  ALERT_REASON,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
-  ALERT_STATUS as ALERT_STATUS_TYPED,
-  ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_TYPED,
-} from '@kbn/rule-data-utils';
-// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-import {
-  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_REASON as ALERT_REASON_NON_TYPED,
-  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_NON_TYPED,
+  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
-  // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
+} from '@kbn/rule-data-utils/technical_field_names';
 
 import {
   EuiButtonIcon,
@@ -36,6 +27,7 @@ import {
   EuiFlexItem,
   EuiContextMenuPanel,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -65,11 +57,6 @@ import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
-
-const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
-const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
-const ALERT_WORKFLOW_STATUS: typeof ALERT_WORKFLOW_STATUS_TYPED = ALERT_WORKFLOW_STATUS_NON_TYPED;
 
 interface AlertsTableTGridProps {
   indexNames: string[];
@@ -248,40 +235,63 @@ function ObservabilityActions({
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
 
+  const viewDetailsTextLabel = i18n.translate(
+    'xpack.observability.alertsTable.viewDetailsTextLabel',
+    {
+      defaultMessage: 'View details',
+    }
+  );
+  const viewInAppTextLabel = i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
+    defaultMessage: 'View in app',
+  });
+  const moreActionsTextLabel = i18n.translate(
+    'xpack.observability.alertsTable.moreActionsTextLabel',
+    {
+      defaultMessage: 'More actions',
+    }
+  );
+
   return (
     <>
       <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
-          <EuiButtonIcon
-            size="s"
-            iconType="expand"
-            color="text"
-            onClick={() => setFlyoutAlert(alert)}
-            data-test-subj="openFlyoutButton"
-          />
+          <EuiToolTip content={viewDetailsTextLabel}>
+            <EuiButtonIcon
+              size="s"
+              iconType="expand"
+              color="text"
+              onClick={() => setFlyoutAlert(alert)}
+              data-test-subj="openFlyoutButton"
+              aria-label={viewDetailsTextLabel}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButtonIcon
-            size="s"
-            href={prepend(alert.link ?? '')}
-            iconType="eye"
-            color="text"
-            aria-label="View alert in app"
-          />
+          <EuiToolTip content={viewInAppTextLabel}>
+            <EuiButtonIcon
+              size="s"
+              href={prepend(alert.link ?? '')}
+              iconType="eye"
+              color="text"
+              aria-label={viewInAppTextLabel}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         {actionsMenuItems.length > 0 && (
           <EuiFlexItem>
             <EuiPopover
               button={
-                <EuiButtonIcon
-                  display="empty"
-                  size="s"
-                  color="text"
-                  iconType="boxesHorizontal"
-                  aria-label="More"
-                  onClick={() => toggleActionsPopover(eventId)}
-                  data-test-subj="alerts-table-row-action-more"
-                />
+                <EuiToolTip content={moreActionsTextLabel}>
+                  <EuiButtonIcon
+                    display="empty"
+                    size="s"
+                    color="text"
+                    iconType="boxesHorizontal"
+                    aria-label={moreActionsTextLabel}
+                    onClick={() => toggleActionsPopover(eventId)}
+                    data-test-subj="alerts-table-row-action-more"
+                  />
+                </EuiToolTip>
               }
               isOpen={openActionsPopoverId === eventId}
               closePopover={closeActionsPopover}
@@ -386,7 +396,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
       },
-      renderCellValue: getRenderCellValue({ rangeFrom, rangeTo, setFlyoutAlert }),
+      renderCellValue: getRenderCellValue({ setFlyoutAlert }),
       rowRenderers: NO_ROW_RENDER,
       start: rangeFrom,
       setRefetch,

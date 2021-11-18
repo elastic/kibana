@@ -29,6 +29,8 @@ describe('metrics queries', () => {
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
+          start: 0,
+          end: 50000,
         })
       );
 
@@ -43,6 +45,8 @@ describe('metrics queries', () => {
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
+          start: 0,
+          end: 50000,
         })
       );
 
@@ -57,6 +61,8 @@ describe('metrics queries', () => {
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
+          start: 0,
+          end: 50000,
         })
       );
 
@@ -71,6 +77,8 @@ describe('metrics queries', () => {
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
+          start: 0,
+          end: 50000,
         })
       );
 
@@ -85,6 +93,8 @@ describe('metrics queries', () => {
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
+          start: 0,
+          end: 50000,
         })
       );
 

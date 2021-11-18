@@ -33,8 +33,11 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     },
 
     async clickUseFullDataButton(expectedFormattedTotalDocCount: string) {
-      await testSubjects.clickWhenNotDisabled('dataVisualizerButtonUseFullData');
-      await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled('dataVisualizerButtonUseFullData');
+        await testSubjects.clickWhenNotDisabled('superDatePickerApplyTimeButton');
+        await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
+      });
     },
 
     async assertTotalDocCountHeaderExist() {

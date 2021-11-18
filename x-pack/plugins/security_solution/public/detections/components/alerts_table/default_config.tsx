@@ -15,7 +15,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
-} from '@kbn/rule-data-utils';
+} from '@kbn/rule-data-utils/technical_field_names';
 
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
@@ -130,8 +130,7 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             key: 'signal.rule.building_block_type',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'signal.rule.building_block_type' },
+          query: { exists: { field: 'signal.rule.building_block_type' } },
         },
       ];
 
@@ -147,8 +146,7 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
             type: 'exists',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'signal.rule.threat_mapping' },
+          query: { exists: { field: 'signal.rule.threat_mapping' } },
         },
       ]
     : [];
@@ -268,8 +266,7 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
             key: 'kibana.rule.building_block_type',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'kibana.rule.building_block_type' },
+          query: { exists: { field: 'kibana.rule.building_block_type' } },
         },
       ];
 

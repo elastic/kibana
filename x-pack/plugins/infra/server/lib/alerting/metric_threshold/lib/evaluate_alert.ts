@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mapValues, first, last, isNaN, isNumber, isObject, has } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
+import { mapValues, first, last, isNaN, isNumber, isObject, has } from 'lodash';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
@@ -222,6 +222,7 @@ const getMetric: (
       return groupedResults;
     }
     const { body: result } = await esClient.search({
+      // @ts-expect-error buckets_path is not compatible with @elastic/elasticsearch
       body: searchBody,
       index,
     });
@@ -232,10 +233,14 @@ const getMetric: (
         aggType,
         dropPartialBucketsOptions,
         calculatedTimerange,
-        isNumber(result.hits.total) ? result.hits.total : result.hits.total.value
+        result.hits
+          ? isNumber(result.hits.total)
+            ? result.hits.total
+            : result.hits.total.value
+          : 0
       ),
     };
-  } catch (e) {
+  } catch (e: any) {
     if (timeframe) {
       // This code should only ever be reached when previewing the alert, not executing it
       const causedByType = e.body?.error?.caused_by?.type;

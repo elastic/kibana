@@ -64,33 +64,44 @@ Array [
 ]
 `;
 
-exports[`index table should show system indices only when the switch is turned on 1`] = `
+exports[`index table should show hidden indices only when the switch is turned on 1`] = `
 Array [
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "…",
-  "11",
+  "testy0",
+  "testy1",
+  "testy2",
+  "testy3",
+  "testy4",
+  "testy5",
+  "testy6",
+  "testy7",
+  "testy8",
+  "testy9",
 ]
 `;
 
-exports[`index table should show system indices only when the switch is turned on 2`] = `
+exports[`index table should show hidden indices only when the switch is turned on 2`] = `
 Array [
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "…",
-  "21",
+  "testy0",
+  ".admin0",
+  "testy1",
+  ".admin1",
+  "testy2",
+  ".admin2",
+  "testy3",
+  ".admin3",
+  "testy4",
+  ".admin4",
 ]
 `;
 
 exports[`index table should show the right context menu options when more than one closed index is selected 1`] = `
 Array [
-  "Open indices",
+  "Close indices",
+  "Force merge indices",
+  "Refresh indices",
+  "Clear indices cache",
+  "Flush indices",
+  "Freeze indices",
   "Delete indices",
 ]
 `;
@@ -111,8 +122,14 @@ exports[`index table should show the right context menu options when one index i
 Array [
   "Show index settings",
   "Show index mapping",
+  "Show index stats",
   "Edit index settings",
-  "Open index",
+  "Close index",
+  "Force merge index",
+  "Refresh index",
+  "Clear index cache",
+  "Flush index",
+  "Freeze index",
   "Delete index",
 ]
 `;
@@ -135,7 +152,12 @@ Array [
 
 exports[`index table should show the right context menu options when one open and one closed index is selected 1`] = `
 Array [
-  "Open indices",
+  "Close indices",
+  "Force merge indices",
+  "Refresh indices",
+  "Clear indices cache",
+  "Flush indices",
+  "Freeze indices",
   "Delete indices",
 ]
 `;

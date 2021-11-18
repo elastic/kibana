@@ -20,24 +20,31 @@ export class DocLinksService {
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
     const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
+    const STACK_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/${DOC_LINK_VERSION}/`;
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
     const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
     const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
     const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
     const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
+    const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
+    const STACK_GETTING_STARTED = `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-get-started/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
         settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
+        elasticStackGetStarted: `${STACK_GETTING_STARTED}get-started-elastic-stack.html`,
+        upgrade: {
+          upgradingElasticStack: `${STACK_DOCS}upgrading-elastic-stack.html`,
+        },
         apm: {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
           customLinks: `${KIBANA_DOCS}custom-links.html`,
-          droppedTransactionSpans: `${APM_DOCS}get-started/master/transaction-spans.html#dropped-spans`,
-          upgrading: `${APM_DOCS}server/master/upgrading.html`,
-          metaData: `${APM_DOCS}get-started/master/metadata.html`,
+          droppedTransactionSpans: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-spans.html#data-model-dropped-spans`,
+          upgrading: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade.html`,
+          metaData: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-metadata.html`,
         },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
@@ -153,7 +160,11 @@ export class DocLinksService {
         },
         addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
         kibana: `${KIBANA_DOCS}index.html`,
-        upgradeAssistant: `${KIBANA_DOCS}upgrade-assistant.html`,
+        upgradeAssistant: {
+          overview: `${KIBANA_DOCS}upgrade-assistant.html`,
+          batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
+          remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
+        },
         rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
         elasticsearch: {
           docsBase: `${ELASTICSEARCH_DOCS}`,
@@ -225,13 +236,17 @@ export class DocLinksService {
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
         },
         siem: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
-          gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
-          privileges: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/sec-requirements.html`,
-          ml: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/machine-learning.html`,
-          ruleChangeLog: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/prebuilt-rules-changelog.html`,
-          detectionsReq: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/detections-permissions-section.html`,
-          networkMap: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/conf-map-ui.html`,
+          guide: `${SECURITY_SOLUTION_DOCS}index.html`,
+          gettingStarted: `${SECURITY_SOLUTION_DOCS}index.html`,
+          privileges: `${SECURITY_SOLUTION_DOCS}sec-requirements.html`,
+          ml: `${SECURITY_SOLUTION_DOCS}machine-learning.html`,
+          ruleChangeLog: `${SECURITY_SOLUTION_DOCS}prebuilt-rules-changelog.html`,
+          detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
+          networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
+          troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
+        },
+        securitySolution: {
+          trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
         },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -286,6 +301,8 @@ export class DocLinksService {
         },
         transforms: {
           guide: `${ELASTICSEARCH_DOCS}transforms.html`,
+          // TODO add valid docs URL
+          alertingRules: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-alerts.html`,
         },
         visualize: {
           guide: `${KIBANA_DOCS}dashboard.html`,
@@ -297,9 +314,9 @@ export class DocLinksService {
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
-          infrastructureThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/infrastructure-threshold-alert.html`,
-          logsThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/logs-threshold-alert.html`,
-          metricsThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/metrics-threshold-alert.html`,
+          infrastructureThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/infrastructure-threshold-alert.html`,
+          logsThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/logs-threshold-alert.html`,
+          metricsThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/metrics-threshold-alert.html`,
           monitorStatus: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-status-alert.html`,
           monitorUptime: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
           tlsCertificate: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/tls-certificate-alert.html`,
@@ -311,6 +328,8 @@ export class DocLinksService {
           apmRules: `${KIBANA_DOCS}apm-alerts.html`,
           emailAction: `${KIBANA_DOCS}email-action-type.html`,
           emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
+          emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
+          emailExchangeClientIdConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-tenant-id`,
           generalSettings: `${KIBANA_DOCS}alert-action-settings-kb.html#general-alert-action-settings`,
           indexAction: `${KIBANA_DOCS}index-action-type.html`,
           esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,
@@ -319,6 +338,7 @@ export class DocLinksService {
           preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
           preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}index-action-type.html#preconfigured-connector-alert-history`,
           serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
+          serviceNowSIRAction: `${KIBANA_DOCS}servicenow-sir-action-type.html`,
           setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
           slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
           teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
@@ -348,12 +368,17 @@ export class DocLinksService {
           clusterPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-cluster`,
           elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
           elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}configuring-stack-security.html`,
+          elasticsearchEnableApiKeys: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
           indicesPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-indices`,
           kibanaTLS: `${ELASTICSEARCH_DOCS}security-basic-setup.html#encrypt-internode-communication`,
           kibanaPrivileges: `${KIBANA_DOCS}kibana-privileges.html`,
           mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
           mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
           runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
+        },
+        spaces: {
+          kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
+          kibanaDisableLegacyUrlAliasesApi: `${KIBANA_DOCS}spaces-api-disable-legacy-url-aliases.html`,
         },
         watcher: {
           jiraAction: `${ELASTICSEARCH_DOCS}actions-jira.html`,
@@ -402,7 +427,7 @@ export class DocLinksService {
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
         },
         snapshotRestore: {
-          guide: `${KIBANA_DOCS}snapshot-repositories.html`,
+          guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
           changeIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
@@ -463,15 +488,38 @@ export class DocLinksService {
           fleetServerAddFleetServer: `${FLEET_DOCS}fleet-server.html#add-fleet-server`,
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
+          settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
-          elasticAgent: `${FLEET_DOCS}elastic-agent-installation-configuration.html`,
+          elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
+          beatsAgentComparison: `${FLEET_DOCS}beats-agent-comparison.html`,
           datastreams: `${FLEET_DOCS}data-streams.html`,
+          datastreamsILM: `${FLEET_DOCS}data-streams.html#data-streams-ilm`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
+          installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
+          learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
+          apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
+          onPremRegistry: `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/air-gapped.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
+        },
+        clients: {
+          /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
+          goOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/overview.html`,
+          javaIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/index.html`,
+          jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/introduction.html`,
+          netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/7.x/index.html`,
+          perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/current/index.html`,
+          phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/7.x/index.html`,
+          pythonGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/python-api/${DOC_LINK_VERSION}/index.html`,
+          rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
+          rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/current/index.html`,
+        },
+        endpoints: {
+          troubleshooting: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/ts-management.html#ts-endpoints`,
         },
       },
     });
@@ -484,6 +532,10 @@ export interface DocLinksStart {
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
     readonly settings: string;
+    readonly elasticStackGetStarted: string;
+    readonly upgrade: {
+      readonly upgradingElasticStack: string;
+    };
     readonly apm: {
       readonly kibanaSettings: string;
       readonly supportedServiceMaps: string;
@@ -607,7 +659,11 @@ export interface DocLinksStart {
     };
     readonly addData: string;
     readonly kibana: string;
-    readonly upgradeAssistant: string;
+    readonly upgradeAssistant: {
+      readonly overview: string;
+      readonly batchReindex: string;
+      readonly remoteReindex: string;
+    };
     readonly rollupJobs: string;
     readonly elasticsearch: Record<string, string>;
     readonly siem: {
@@ -618,6 +674,10 @@ export interface DocLinksStart {
       readonly ruleChangeLog: string;
       readonly detectionsReq: string;
       readonly networkMap: string;
+      readonly troubleshootGaps: string;
+    };
+    readonly securitySolution: {
+      readonly trustedApps: string;
     };
     readonly query: {
       readonly eql: string;
@@ -681,6 +741,7 @@ export interface DocLinksStart {
       clusterPrivileges: string;
       elasticsearchSettings: string;
       elasticsearchEnableSecurity: string;
+      elasticsearchEnableApiKeys: string;
       indicesPrivileges: string;
       kibanaTLS: string;
       kibanaPrivileges: string;
@@ -688,26 +749,52 @@ export interface DocLinksStart {
       mappingRolesFieldRules: string;
       runAsPrivilege: string;
     }>;
+    readonly spaces: Readonly<{
+      kibanaLegacyUrlAliases: string;
+      kibanaDisableLegacyUrlAliasesApi: string;
+    }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
     readonly plugins: Record<string, string>;
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{
+      datastreamsILM: string;
+      beatsAgentComparison: string;
       guide: string;
       fleetServer: string;
       fleetServerAddFleetServer: string;
       settings: string;
       settingsFleetServerHostSettings: string;
+      settingsFleetServerProxySettings: string;
       troubleshooting: string;
       elasticAgent: string;
       datastreams: string;
       datastreamsNamingScheme: string;
+      installElasticAgent: string;
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
+      learnMoreBlog: string;
+      apiKeysLearnMore: string;
+      onPremRegistry: string;
     }>;
     readonly ecs: {
       readonly guide: string;
+    };
+    readonly clients: {
+      readonly guide: string;
+      readonly goOverview: string;
+      readonly javaIndex: string;
+      readonly jsIntro: string;
+      readonly netGuide: string;
+      readonly perlGuide: string;
+      readonly phpGuide: string;
+      readonly pythonGuide: string;
+      readonly rubyOverview: string;
+      readonly rustGuide: string;
+    };
+    readonly endpoints: {
+      readonly troubleshooting: string;
     };
   };
 }

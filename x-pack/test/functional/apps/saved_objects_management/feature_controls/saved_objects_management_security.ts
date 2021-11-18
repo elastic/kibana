@@ -9,24 +9,24 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'error', 'savedObjects']);
+  const kibanaServer = getService('kibanaServer');
   let version: string = '';
 
-  describe('feature controls saved objects management', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/118272
+  describe.skip('feature controls saved objects management', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/functional/es_archives/saved_objects_management/feature_controls/security'
+      version = await kibanaServer.version.get();
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/feature_controls/security'
       );
-      const versionService = getService('kibanaServer').version;
-      version = await versionService.get();
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/saved_objects_management/feature_controls/security'
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/feature_controls/security'
       );
     });
 
@@ -58,6 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_all_role'),
@@ -172,6 +173,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_som_read_role'),
@@ -291,6 +293,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_visualize_all_role'),

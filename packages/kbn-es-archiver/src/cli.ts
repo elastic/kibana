@@ -40,12 +40,13 @@ export function runCli() {
         --es-ca            if Elasticsearch url points to https://localhost we default to the CA from @kbn/dev-utils, customize the CA with this flag
       `,
     },
-    async extendContext({ log, flags, addCleanupTask }) {
+    async extendContext({ log, flags, addCleanupTask, statsMeta }) {
       const configPath = flags.config || defaultConfigPath;
       if (typeof configPath !== 'string') {
         throw createFlagError('--config must be a string');
       }
       const config = await readConfigFile(log, Path.resolve(configPath));
+      statsMeta.set('ftrConfigPath', configPath);
 
       let esUrl = flags['es-url'];
       if (esUrl && typeof esUrl !== 'string') {
@@ -141,25 +142,35 @@ export function runCli() {
           $ node scripts/es_archiver save test/functional/es_archives/my_test_data logstash-*
       `,
       flags: {
-        boolean: ['raw'],
+        boolean: ['raw', 'keep-index-names'],
         string: ['query'],
         help: `
-          --raw              don't gzip the archives
-          --query            query object to limit the documents being archived, needs to be properly escaped JSON
+          --raw                    don't gzip the archives
+          --keep-index-names       don't change the names of Kibana indices to .kibana_1
+          --query                  query object to limit the documents being archived, needs to be properly escaped JSON
         `,
       },
-      async run({ flags, esArchiver }) {
+      async run({ flags, esArchiver, statsMeta }) {
         const [path, ...indices] = flags._;
         if (!path) {
           throw createFlagError('missing [path] argument');
         }
+
         if (!indices.length) {
           throw createFlagError('missing [...indices] arguments');
         }
 
+        statsMeta.set('esArchiverPath', path);
+        statsMeta.set('esArchiverIndices', indices.join(','));
+
         const raw = flags.raw;
         if (typeof raw !== 'boolean') {
           throw createFlagError('--raw does not take a value');
+        }
+
+        const keepIndexNames = flags['keep-index-names'];
+        if (typeof keepIndexNames !== 'boolean') {
+          throw createFlagError('--keep-index-names does not take a value');
         }
 
         const query = flags.query;
@@ -172,7 +183,7 @@ export function runCli() {
           }
         }
 
-        await esArchiver.save(path, indices, { raw, query: parsedQuery });
+        await esArchiver.save(path, indices, { raw, keepIndexNames, query: parsedQuery });
       },
     })
     .command({
@@ -190,12 +201,13 @@ export function runCli() {
           $ node scripts/es_archiver load my_test_data --config ../config.js
       `,
       flags: {
-        boolean: ['use-create'],
+        boolean: ['use-create', 'docs-only'],
         help: `
           --use-create       use create instead of index for loading documents
+          --docs-only        load only documents, not indices
         `,
       },
-      async run({ flags, esArchiver }) {
+      async run({ flags, esArchiver, statsMeta }) {
         const [path] = flags._;
         if (!path) {
           throw createFlagError('missing [path] argument');
@@ -203,20 +215,27 @@ export function runCli() {
         if (flags._.length > 1) {
           throw createFlagError(`unknown extra arguments: [${flags._.slice(1).join(', ')}]`);
         }
+
+        statsMeta.set('esArchiverPath', path);
 
         const useCreate = flags['use-create'];
         if (typeof useCreate !== 'boolean') {
           throw createFlagError('--use-create does not take a value');
         }
 
-        await esArchiver.load(path, { useCreate });
+        const docsOnly = flags['docs-only'];
+        if (typeof docsOnly !== 'boolean') {
+          throw createFlagError('--docs-only does not take a value');
+        }
+
+        await esArchiver.load(path, { useCreate, docsOnly });
       },
     })
     .command({
       name: 'unload',
       usage: 'unload [path]',
       description: 'remove indices created by the archive at [path]',
-      async run({ flags, esArchiver }) {
+      async run({ flags, esArchiver, statsMeta }) {
         const [path] = flags._;
         if (!path) {
           throw createFlagError('missing [path] argument');
@@ -224,6 +243,8 @@ export function runCli() {
         if (flags._.length > 1) {
           throw createFlagError(`unknown extra arguments: [${flags._.slice(1).join(', ')}]`);
         }
+
+        statsMeta.set('esArchiverPath', path);
 
         await esArchiver.unload(path);
       },
@@ -233,7 +254,7 @@ export function runCli() {
       usage: 'edit [path]',
       description:
         'extract the archives within or at [path], wait for edits to be completed, and then recompress the archives',
-      async run({ flags, esArchiver }) {
+      async run({ flags, esArchiver, statsMeta }) {
         const [path] = flags._;
         if (!path) {
           throw createFlagError('missing [path] argument');
@@ -241,6 +262,8 @@ export function runCli() {
         if (flags._.length > 1) {
           throw createFlagError(`unknown extra arguments: [${flags._.slice(1).join(', ')}]`);
         }
+
+        statsMeta.set('esArchiverPath', path);
 
         await esArchiver.edit(path, async () => {
           const rl = readline.createInterface({

@@ -12,7 +12,7 @@ import { IServiceSettings } from './service_settings';
 import type { MapsEmsConfig } from '../config';
 
 /** @public */
-export {
+export type {
   VectorLayer,
   FileLayerField,
   FileLayer,

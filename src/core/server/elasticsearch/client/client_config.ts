@@ -59,6 +59,10 @@ export function parseClientOptions(
     // do not make assumption on user-supplied data content
     // fixes https://github.com/elastic/kibana/issues/101944
     disablePrototypePoisoningProtection: true,
+    agent: {
+      maxSockets: Infinity,
+      keepAlive: config.keepAlive ?? true,
+    },
   };
 
   if (config.pingTimeout != null) {
@@ -72,11 +76,6 @@ export function parseClientOptions(
       typeof config.sniffInterval === 'boolean'
         ? config.sniffInterval
         : getDurationAsMs(config.sniffInterval);
-  }
-  if (config.keepAlive) {
-    clientOptions.agent = {
-      keepAlive: config.keepAlive,
-    };
   }
 
   if (!scoped) {

@@ -9,7 +9,7 @@ import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/serve
 import { ConfigSchema, IEventLogConfig } from './types';
 import { Plugin } from './plugin';
 
-export {
+export type {
   IEventLogService,
   IEventLogger,
   IEventLogClientService,
@@ -17,8 +17,8 @@ export {
   IValidatedEvent,
   IEventLogClient,
   QueryEventsBySavedObjectResult,
-  SAVED_OBJECT_REL_PRIMARY,
 } from './types';
+export { SAVED_OBJECT_REL_PRIMARY } from './types';
 
 export { ClusterClientAdapter } from './es/cluster_client_adapter';
 
@@ -33,6 +33,7 @@ export const config: PluginConfigDescriptor<IEventLogConfig> = {
         settings?.xpack?.eventLog?.enabled === true
       ) {
         addDeprecation({
+          configPath: 'xpack.eventLog.enabled',
           message: `"xpack.eventLog.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
             manualSteps: [`Remove "xpack.eventLog.enabled" from your kibana configs.`],

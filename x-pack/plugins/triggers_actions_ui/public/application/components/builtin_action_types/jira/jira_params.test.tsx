@@ -95,6 +95,10 @@ describe('JiraParamsFields renders', () => {
       description: { allowedValues: [], defaultValue: {} },
     },
   };
+  const useGetFieldsByIssueTypeResponseLoading = {
+    isLoading: true,
+    fields: {},
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -420,6 +424,20 @@ describe('JiraParamsFields renders', () => {
       });
       expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
       expect(editAction.mock.calls[1][1].incident.priority).toEqual(null);
+    });
+
+    test('Preserve priority when the issue type fields are loading and hasPriority becomes stale', () => {
+      useGetFieldsByIssueTypeMock
+        .mockReturnValueOnce(useGetFieldsByIssueTypeResponseLoading)
+        .mockReturnValue(useGetFieldsByIssueTypeResponse);
+      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+
+      expect(editAction).not.toBeCalled();
+
+      wrapper.setProps({ ...defaultProps }); // just to force component call useGetFieldsByIssueType again
+
+      expect(editAction).toBeCalledTimes(1);
+      expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
     });
   });
 });

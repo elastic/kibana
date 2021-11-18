@@ -11,9 +11,11 @@ import { initializeGetWorkpadRoute } from './get';
 import { initializeCreateWorkpadRoute } from './create';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
 import { initializeDeleteWorkpadRoute } from './delete';
+import { initializeResolveWorkpadRoute } from './resolve';
 
 export function initWorkpadRoutes(deps: RouteInitializerDeps) {
   initializeFindWorkpadsRoute(deps);
+  initializeResolveWorkpadRoute(deps);
   initializeGetWorkpadRoute(deps);
   initializeCreateWorkpadRoute(deps);
   initializeUpdateWorkpadRoute(deps);

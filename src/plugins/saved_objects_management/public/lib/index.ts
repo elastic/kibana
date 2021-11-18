@@ -24,15 +24,13 @@ export {
   saveObjects,
 } from './resolve_saved_objects';
 export { logLegacyImport } from './log_legacy_import';
-export {
-  processImportResponse,
-  ProcessedImportResponse,
-  FailedImport,
-} from './process_import_response';
+export type { ProcessedImportResponse, FailedImport } from './process_import_response';
+export { processImportResponse } from './process_import_response';
 export { getDefaultTitle } from './get_default_title';
 export { findObjects } from './find_objects';
 export { bulkGetObjects } from './bulk_get_objects';
-export { extractExportDetails, SavedObjectsExportResultDetails } from './extract_export_details';
+export type { SavedObjectsExportResultDetails } from './extract_export_details';
+export { extractExportDetails } from './extract_export_details';
 export { createFieldList } from './create_field_list';
 export { getAllowedTypes } from './get_allowed_types';
 export { getTagFindReferences } from './get_tag_references';

@@ -6,11 +6,11 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
 import { EsDeprecations } from '../../../public/application/components/es_deprecations';
 import { WithAppDependencies } from '../helpers';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: ['/es_deprecations'],
     componentRoutePath: '/es_deprecations',
@@ -125,11 +125,22 @@ const createActions = (testBed: TestBed) => {
     },
   };
 
+  const reindexDeprecationFlyout = {
+    clickReindexButton: async () => {
+      await act(async () => {
+        find('startReindexingButton').simulate('click');
+      });
+
+      component.update();
+    },
+  };
+
   return {
     table,
     searchBar,
     pagination,
     mlDeprecationFlyout,
+    reindexDeprecationFlyout,
     indexSettingsDeprecationFlyout,
   };
 };

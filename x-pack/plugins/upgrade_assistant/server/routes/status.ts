@@ -12,6 +12,9 @@ import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { getKibanaUpgradeStatus } from '../lib/kibana_status';
 import { RouteDependencies } from '../types';
 
+/**
+ * Note that this route is primarily intended for consumption by Cloud.
+ */
 export function registerUpgradeStatusRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {

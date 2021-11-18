@@ -23,9 +23,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               }
@@ -348,7 +348,39 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.isSavedSearchSavedObject",
+        "type": "Function",
+        "tags": [],
+        "label": "isSavedSearchSavedObject",
+        "description": [],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.isSavedSearchSavedObject.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "dataVisualizer",
@@ -542,7 +574,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
+              "\"number\" | \"boolean\" | \"keyword\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
             ],
             "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
@@ -924,6 +956,67 @@
       },
       {
         "parentPluginId": "dataVisualizer",
+        "id": "def-common.applicationPath",
+        "type": "string",
+        "tags": [],
+        "label": "applicationPath",
+        "description": [],
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.featureDescription",
+        "type": "string",
+        "tags": [],
+        "label": "featureDescription",
+        "description": [],
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.featureId",
+        "type": "string",
+        "tags": [],
+        "label": "featureId",
+        "description": [],
+        "signature": [
+          "\"file_data_visualizer\""
+        ],
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.featureTitle",
+        "type": "string",
+        "tags": [],
+        "label": "featureTitle",
+        "description": [],
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.FILE_DATA_VIS_TAB_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FILE_DATA_VIS_TAB_ID",
+        "description": [],
+        "signature": [
+          "\"fileDataViz\""
+        ],
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.FILE_SIZE_DISPLAY_FORMAT",
         "type": "string",
         "tags": [],
@@ -972,7 +1065,7 @@
         "label": "JobFieldType",
         "description": [],
         "signature": [
-          "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
+          "\"number\" | \"boolean\" | \"keyword\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
         ],
         "path": "x-pack/plugins/data_visualizer/common/types/job_field_type.ts",
         "deprecated": false,
@@ -1080,329 +1173,6 @@
         ],
         "path": "x-pack/plugins/data_visualizer/common/constants.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataVisualizer",
-        "id": "def-common.JOB_FIELD_TYPES_OPTIONS",
-        "type": "Object",
-        "tags": [],
-        "label": "JOB_FIELD_TYPES_OPTIONS",
-        "description": [],
-        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.BOOLEAN",
-            "type": "Object",
-            "tags": [],
-            "label": "[JOB_FIELD_TYPES.BOOLEAN]",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.BOOLEAN.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.BOOLEAN.icon",
-                "type": "string",
-                "tags": [],
-                "label": "icon",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.DATE",
-            "type": "Object",
-            "tags": [],
-            "label": "[JOB_FIELD_TYPES.DATE]",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.DATE.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.DATE.icon",
-                "type": "string",
-                "tags": [],
-                "label": "icon",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.GEO_POINT",
-            "type": "Object",
-            "tags": [],
-            "label": "[JOB_FIELD_TYPES.GEO_POINT]",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.GEO_POINT.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.GEO_POINT.icon",
-                "type": "string",
-                "tags": [],
-                "label": "icon",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.GEO_SHAPE",
-            "type": "Object",
-            "tags": [],
-            "label": "[JOB_FIELD_TYPES.GEO_SHAPE]",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.GEO_SHAPE.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.GEO_SHAPE.icon",
-                "type": "string",
-                "tags": [],
-                "label": "icon",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.IP",
-            "type": "Object",
-            "tags": [],
-            "label": "[JOB_FIELD_TYPES.IP]",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.IP.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.IP.icon",
-                "type": "string",
-                "tags": [],
-                "label": "icon",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.KEYWORD",
-            "type": "Object",
-            "tags": [],
-            "label": "[JOB_FIELD_TYPES.KEYWORD]",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.KEYWORD.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.KEYWORD.icon",
-                "type": "string",
-                "tags": [],
-                "label": "icon",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.NUMBER",
-            "type": "Object",
-            "tags": [],
-            "label": "[JOB_FIELD_TYPES.NUMBER]",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.NUMBER.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.NUMBER.icon",
-                "type": "string",
-                "tags": [],
-                "label": "icon",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.TEXT",
-            "type": "Object",
-            "tags": [],
-            "label": "[JOB_FIELD_TYPES.TEXT]",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.TEXT.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.TEXT.icon",
-                "type": "string",
-                "tags": [],
-                "label": "icon",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.HISTOGRAM",
-            "type": "Object",
-            "tags": [],
-            "label": "[JOB_FIELD_TYPES.HISTOGRAM]",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.HISTOGRAM.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.HISTOGRAM.icon",
-                "type": "string",
-                "tags": [],
-                "label": "icon",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.UNKNOWN",
-            "type": "Object",
-            "tags": [],
-            "label": "[JOB_FIELD_TYPES.UNKNOWN]",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-common.JOB_FIELD_TYPES_OPTIONS.JOB_FIELD_TYPES.UNKNOWN.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/data_visualizer/common/constants.ts",
-                "deprecated": false
-              }
-            ]
-          }
-        ],
         "initialIsOpen": false
       },
       {

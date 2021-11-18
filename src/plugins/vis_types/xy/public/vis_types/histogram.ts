@@ -80,7 +80,7 @@ export const histogramVisTypeDefinition = {
             truncate: 100,
           },
           title: {
-            text: defaultCountLabel,
+            text: '',
           },
           style: {},
         },

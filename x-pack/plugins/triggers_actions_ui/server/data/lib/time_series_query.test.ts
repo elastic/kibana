@@ -9,12 +9,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import {
-  TimeSeriesQueryParameters,
-  TimeSeriesQuery,
-  timeSeriesQuery,
-  getResultFromEs,
-} from './time_series_query';
+import { Logger } from '../../../../../../src/core/server';
+import { TimeSeriesQuery, timeSeriesQuery, getResultFromEs } from './time_series_query';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 
@@ -34,22 +30,22 @@ const DefaultQueryParams: TimeSeriesQuery = {
 };
 
 describe('timeSeriesQuery', () => {
-  let params: TimeSeriesQueryParameters;
   const esClient = elasticsearchClientMock.createClusterClient().asScoped().asCurrentUser;
-
-  beforeEach(async () => {
-    params = {
-      logger: loggingSystemMock.create().get(),
-      esClient,
-      query: DefaultQueryParams,
-    };
-  });
+  const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const params = {
+    logger,
+    esClient,
+    query: DefaultQueryParams,
+  };
 
   it('fails as expected when the callCluster call fails', async () => {
     esClient.search = jest.fn().mockRejectedValue(new Error('woopsie'));
-    expect(timeSeriesQuery(params)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error running search"`
-    );
+    await timeSeriesQuery(params);
+    expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "indexThreshold timeSeriesQuery: callCluster error: woopsie",
+      ]
+    `);
   });
 
   it('fails as expected when the query params are invalid', async () => {
@@ -63,6 +59,7 @@ describe('timeSeriesQuery', () => {
 describe('getResultFromEs', () => {
   it('correctly parses time series results for count aggregation', () => {
     expect(
+      // @ts-expect-error not full interface
       getResultFromEs(true, false, {
         took: 0,
         timed_out: false,

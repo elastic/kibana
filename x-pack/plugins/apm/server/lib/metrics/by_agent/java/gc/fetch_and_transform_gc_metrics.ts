@@ -6,9 +6,9 @@
  */
 
 import { sum, round } from 'lodash';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { Setup } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
 import { getMetricsProjection } from '../../../../../projections/metrics';
@@ -32,26 +32,31 @@ export async function fetchAndTransformGcMetrics({
   chartBase,
   fieldName,
   operationName,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
   operationName: string;
 }) {
-  const { start, end, apmEventClient, config } = setup;
+  const { apmEventClient, config } = setup;
 
   const { bucketSize } = getBucketSize({ start, end });
 
   const projection = getMetricsProjection({
     environment,
     kuery,
-    setup,
     serviceName,
     serviceNodeName,
+    start,
+    end,
   });
 
   // GC rate and time are reported by the agents as monotonically
@@ -80,7 +85,7 @@ export async function fetchAndTransformGcMetrics({
               date_histogram: getMetricsDateHistogramParams({
                 start,
                 end,
-                metricsInterval: config['xpack.apm.metricsInterval'],
+                metricsInterval: config.metricsInterval,
               }),
               aggs: {
                 // get the max value
@@ -130,9 +135,16 @@ export async function fetchAndTransformGcMetrics({
     const data = timeseriesData.buckets.map((bucket) => {
       // derivative/value will be undefined for the first hit and if the `max` value is null
       const bucketValue = bucket.value?.value;
-      const y = isFiniteNumber(bucketValue)
+
+      const unconvertedY = isFiniteNumber(bucketValue)
         ? round(bucketValue * (60 / bucketSize), 1)
         : null;
+
+      // convert to milliseconds if we're calculating time, but not for rate
+      const y =
+        unconvertedY !== null && fieldName === METRIC_JAVA_GC_TIME
+          ? unconvertedY * 1000
+          : unconvertedY;
 
       return {
         y,

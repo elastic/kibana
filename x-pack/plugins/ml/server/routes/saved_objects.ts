@@ -12,10 +12,12 @@ import {
   jobsAndSpaces,
   jobsAndCurrentSpace,
   syncJobObjects,
+  syncCheckSchema,
   canDeleteJobSchema,
   jobTypeSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
+import { JobType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -116,6 +118,39 @@ export function savedObjectsRoutes(
 
         return response.ok({
           body: savedObjects,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
+   * @api {get} /api/ml/saved_objects/sync_needed Check whether job saved objects need synchronizing
+   * @apiName SyncCheck
+   * @apiDescription Check whether job saved objects need synchronizing.
+   *
+   */
+  router.post(
+    {
+      path: '/api/ml/saved_objects/sync_check',
+      validate: {
+        body: syncCheckSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
+      try {
+        const { jobType } = request.body;
+        const { isSyncNeeded } = syncSavedObjectsFactory(client, jobSavedObjectService);
+        const result = await isSyncNeeded(jobType as JobType);
+
+        return response.ok({
+          body: { result },
         });
       } catch (e) {
         return response.customError(wrapError(e));

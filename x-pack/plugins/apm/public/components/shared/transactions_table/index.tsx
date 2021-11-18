@@ -30,7 +30,7 @@ import { ElasticDocsLink } from '../Links/ElasticDocsLink';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 type ApiResponse =
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 interface InitialState {
   requestId: string;
@@ -116,7 +116,7 @@ export function TransactionsTable({
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics',
+          'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -189,7 +189,7 @@ export function TransactionsTable({
       ) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+            'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -222,6 +222,7 @@ export function TransactionsTable({
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,
+    comparisonType,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;

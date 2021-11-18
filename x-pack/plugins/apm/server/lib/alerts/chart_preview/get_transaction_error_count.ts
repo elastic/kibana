@@ -10,17 +10,17 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 export async function getTransactionErrorCountChartPreview({
   setup,
   alertParams,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   alertParams: AlertParams;
 }) {
-  const { apmEventClient, start, end } = setup;
-  const { serviceName, environment, interval } = alertParams;
+  const { apmEventClient } = setup;
+  const { serviceName, environment, interval, start, end } = alertParams;
 
   const query = {
     bool: {

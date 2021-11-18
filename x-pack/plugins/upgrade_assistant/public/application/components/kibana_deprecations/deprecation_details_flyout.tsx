@@ -21,13 +21,12 @@ import {
   EuiTitle,
   EuiText,
   EuiCallOut,
-  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../shared';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
-import { DeprecationBadge } from '../shared';
 
 import './_deprecation_details_flyout.scss';
 
@@ -39,12 +38,6 @@ export interface DeprecationDetailsFlyoutProps {
 }
 
 const i18nTexts = {
-  learnMoreLinkLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.flyout.learnMoreLinkLabel',
-    {
-      defaultMessage: 'Learn more about this deprecation',
-    }
-  ),
   closeButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.closeButtonLabel',
     {
@@ -75,22 +68,10 @@ const i18nTexts = {
       defaultMessage: 'Resolution in progress…',
     }
   ),
-  quickResolveCalloutTitle: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveCalloutTitle',
-    {
-      defaultMessage: 'Quick resolve action available',
-    }
-  ),
-  quickResolveErrorTitle: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveErrorTitle',
-    {
-      defaultMessage: 'Error resolving deprecation',
-    }
-  ),
-  quickResolveCalloutDescription: (
+  quickResolveCalloutTitle: (
     <FormattedMessage
-      id="xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveCalloutDescription"
-      defaultMessage="The steps to resolve this issue may be automated with {quickResolve} action below."
+      id="xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveCalloutTitle"
+      defaultMessage="Click {quickResolve} to fix this issue automatically."
       values={{
         quickResolve: (
           <strong>
@@ -102,10 +83,16 @@ const i18nTexts = {
       }}
     />
   ),
+  quickResolveErrorTitle: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveErrorTitle',
+    {
+      defaultMessage: 'Error resolving issue',
+    }
+  ),
   manualFixTitle: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.manualFixTitle',
     {
-      defaultMessage: 'Fix manually',
+      defaultMessage: 'How to fix',
     }
   ),
 };
@@ -169,12 +156,9 @@ export const DeprecationDetailsFlyout = ({
 
         <EuiText>
           <p className="eui-textBreakWord">{message}</p>
-
           {documentationUrl && (
             <p>
-              <EuiLink target="_blank" href={documentationUrl}>
-                {i18nTexts.learnMoreLinkLabel}
-              </EuiLink>
+              <DeprecationFlyoutLearnMoreLink documentationUrl={documentationUrl} />
             </p>
           )}
         </EuiText>
@@ -191,29 +175,39 @@ export const DeprecationDetailsFlyout = ({
                   color="primary"
                   iconType="iInCircle"
                   data-test-subj="quickResolveCallout"
-                >
-                  <p>{i18nTexts.quickResolveCalloutDescription}</p>
-                </EuiCallOut>
+                />
 
                 <EuiSpacer />
               </>
             )}
 
-            <EuiTitle size="s">
-              <h3>{i18nTexts.manualFixTitle}</h3>
-            </EuiTitle>
-
-            <EuiSpacer />
-
-            <EuiText>
-              <ol data-test-subj="manualStepsList">
-                {correctiveActions.manualSteps.map((step, stepIndex) => (
-                  <li key={`step-${stepIndex}`} className="upgResolveStep eui-textBreakWord">
-                    {step}
-                  </li>
-                ))}
-              </ol>
-            </EuiText>
+            {correctiveActions.manualSteps.length > 0 && (
+              <>
+                <EuiTitle size="s" data-test-subj="manualStepsTitle">
+                  <h3>{i18nTexts.manualFixTitle}</h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  {correctiveActions.manualSteps.length === 1 ? (
+                    <p data-test-subj="manualStep" className="eui-textBreakWord">
+                      {correctiveActions.manualSteps[0]}
+                    </p>
+                  ) : (
+                    <ol data-test-subj="manualStepsList">
+                      {correctiveActions.manualSteps.map((step, stepIndex) => (
+                        <li
+                          data-test-subj="manualStepsListItem"
+                          key={`step-${stepIndex}`}
+                          className="upgResolveStep eui-textBreakWord"
+                        >
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </EuiText>
+              </>
+            )}
           </div>
         )}
       </EuiFlyoutBody>

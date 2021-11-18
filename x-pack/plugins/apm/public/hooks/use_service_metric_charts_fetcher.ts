@@ -40,7 +40,7 @@ export function useServiceMetricChartsFetcher({
     (callApmApi) => {
       if (serviceName && start && end && agentName) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/metrics/charts',
+          endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
           params: {
             path: { serviceName },
             query: {

@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 
 import { extractErrorMessage } from '../../../../common/util/errors';
 
@@ -34,7 +34,7 @@ export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
   const trainedModelsApiService = useTrainedModelsApiService();
 
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
+  const [indexPattern, setIndexPattern] = useState<DataView | undefined>(undefined);
   const [indexPatternErrorMessage, setIndexPatternErrorMessage] = useState<undefined | string>(
     undefined
   );
@@ -99,7 +99,7 @@ export const useResultsViewConfig = (jobId: string) => {
               ? jobConfigUpdate.dest.index[0]
               : jobConfigUpdate.dest.index;
             const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
-            let indexP: IndexPattern | undefined;
+            let indexP: DataView | undefined;
 
             try {
               indexP = await mlContext.indexPatterns.get(destIndexPatternId);

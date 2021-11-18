@@ -12,9 +12,22 @@ import type { estypes } from '@elastic/elasticsearch';
  * A field's sub type
  * @public
  */
-export interface IFieldSubType {
+export type IFieldSubType = IFieldSubTypeMultiOptional | IFieldSubTypeNestedOptional;
+
+export interface IFieldSubTypeMultiOptional {
   multi?: { parent: string };
+}
+
+export interface IFieldSubTypeMulti {
+  multi: { parent: string };
+}
+
+export interface IFieldSubTypeNestedOptional {
   nested?: { path: string };
+}
+
+export interface IFieldSubTypeNested {
+  nested: { path: string };
 }
 
 /**
@@ -52,7 +65,7 @@ export type IndexPatternFieldBase = DataViewFieldBase;
 export interface DataViewBase {
   fields: DataViewFieldBase[];
   id?: string;
-  title?: string;
+  title: string;
 }
 
 /**

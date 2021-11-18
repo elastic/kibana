@@ -107,7 +107,7 @@ export const mathColumn: ExpressionFunctionDefinition<
     let type: DatatableColumnType = 'null';
     if (newRows.length) {
       for (const row of newRows) {
-        const rowType = getType(row[args.id]);
+        const rowType = getType(row[args.id]) as DatatableColumnType;
         if (rowType !== 'null') {
           type = rowType;
           break;

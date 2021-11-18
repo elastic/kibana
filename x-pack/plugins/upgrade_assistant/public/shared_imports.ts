@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-export {
-  sendRequest,
+export type {
   SendRequestConfig,
   SendRequestResponse,
-  useRequest,
   UseRequestConfig,
-  UseRequestResponse,
+  Privileges,
+  MissingPrivileges,
+  Authorization,
+} from '../../../../src/plugins/es_ui_shared/public/';
+export {
+  sendRequest,
+  useRequest,
   SectionLoading,
   GlobalFlyout,
   WithPrivileges,
-  Privileges,
-  MissingPrivileges,
   AuthorizationProvider,
   AuthorizationContext,
-  Authorization,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
 export { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -29,6 +30,6 @@ export {
   reactRouterNavigate,
 } from '../../../../src/plugins/kibana_react/public';
 
-export { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+export type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export { APP_WRAPPER_CLASS } from '../../../../src/core/public';

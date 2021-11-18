@@ -7075,19 +7075,19 @@
               "min": {
                 "type": "long",
                 "_meta": {
-                  "description": "The minimum recorded event loop delay."
+                  "description": "The minimum recorded event loop delay in ms."
                 }
               },
               "max": {
                 "type": "long",
                 "_meta": {
-                  "description": "The maximum recorded event loop delay."
+                  "description": "The maximum recorded event loop delay in ms."
                 }
               },
               "mean": {
                 "type": "long",
                 "_meta": {
-                  "description": "The mean of the recorded event loop delays."
+                  "description": "The mean of the recorded event loop delays in ms."
                 }
               },
               "exceeds": {
@@ -7099,7 +7099,7 @@
               "stddev": {
                 "type": "long",
                 "_meta": {
-                  "description": "The standard deviation of the recorded event loop delays."
+                  "description": "The standard deviation of the recorded event loop delays  in ms."
                 }
               },
               "percentiles": {
@@ -7107,25 +7107,25 @@
                   "50": {
                     "type": "long",
                     "_meta": {
-                      "description": "The 50th accumulated percentile distribution"
+                      "description": "The 50th accumulated percentile distribution in ms"
                     }
                   },
                   "75": {
                     "type": "long",
                     "_meta": {
-                      "description": "The 75th accumulated percentile distribution"
+                      "description": "The 75th accumulated percentile distribution in ms"
                     }
                   },
                   "95": {
                     "type": "long",
                     "_meta": {
-                      "description": "The 95th accumulated percentile distribution"
+                      "description": "The 95th accumulated percentile distribution in ms"
                     }
                   },
                   "99": {
                     "type": "long",
                     "_meta": {
-                      "description": "The 99th accumulated percentile distribution"
+                      "description": "The 99th accumulated percentile distribution in ms"
                     }
                   }
                 }
@@ -7772,13 +7772,19 @@
             "description": "Non-default value of setting."
           }
         },
-        "apm:enableSignificantTerms": {
+        "observability:enableInspectEsQueries": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableInspectEsQueries": {
+        "observability:maxSuggestions": {
+          "type": "integer",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableComparisonByDefault": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -9249,6 +9255,12 @@
           "type": "long",
           "_meta": {
             "description": "Number of TSVB visualizations using \"last value\" as a time range"
+          }
+        },
+        "timeseries_table_use_aggregate_function": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of TSVB table visualizations using aggregate function"
           }
         }
       }

@@ -113,6 +113,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     [dataProviders, kqlQuery]
   );
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
 
   const kqlQueryExpression =
@@ -333,6 +334,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
         <FormattedRelative
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           value={new Date(updated!)}
         />
       </EuiTextColor>
@@ -372,6 +374,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   );
   const { dataProviders, filters, timelineType, kqlMode, activeTab } = timeline;
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
 
   const kqlQueryExpression =

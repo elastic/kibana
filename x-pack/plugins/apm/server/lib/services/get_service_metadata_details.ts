@@ -23,7 +23,7 @@ import { ContainerType } from '../../../common/service_metadata';
 import { rangeQuery } from '../../../../observability/server';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { should } from './get_service_metadata_icons';
 
 type ServiceMetadataDetailsRaw = Pick<
@@ -62,12 +62,16 @@ export async function getServiceMetadataDetails({
   serviceName,
   setup,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }): Promise<ServiceMetadataDetails> {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },

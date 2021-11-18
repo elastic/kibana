@@ -10,19 +10,20 @@ import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 
 jest.mock('../settings/apm_indices/get_apm_indices', () => ({
-  getApmIndices: async () => ({
-    /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.sourcemapIndices': 'apm-*',
-    'apm_oss.errorIndices': 'apm-*',
-    'apm_oss.onboardingIndices': 'apm-*',
-    'apm_oss.spanIndices': 'apm-*',
-    'apm_oss.transactionIndices': 'apm-*',
-    'apm_oss.metricsIndices': 'apm-*',
-    /* eslint-enable @typescript-eslint/naming-convention */
-    apmAgentConfigurationIndex: 'apm-*',
-  }),
+  getApmIndices: async () =>
+    ({
+      sourcemap: 'apm-*',
+      error: 'apm-*',
+      onboarding: 'apm-*',
+      span: 'apm-*',
+      transaction: 'apm-*',
+      metric: 'apm-*',
+      apmAgentConfigurationIndex: 'apm-*',
+    } as PromiseReturnType<typeof getApmIndices>),
 }));
 
 jest.mock('../index_pattern/get_dynamic_index_pattern', () => ({

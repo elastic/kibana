@@ -27,7 +27,6 @@ async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecations
   const deprecations: DeprecationsDetails[] = [];
   const count = await getFooCount(savedObjectsClient);
   if (count > 0) {
-    // Example of a manual correctiveAction
     deprecations.push({
       title: i18n.translate('xpack.foo.deprecations.title', {
         defaultMessage: `Foo's are deprecated`
@@ -76,12 +75,11 @@ export class Plugin() {
     core.deprecations.registerDeprecations({ getDeprecations });
   }
 }
-
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [registerDeprecations](./kibana-plugin-core-server.deprecationsservicesetup.registerdeprecations.md) | <code>(deprecationContext: RegisterDeprecationsConfig) =&gt; void</code> |  |
+|  [registerDeprecations](./kibana-plugin-core-server.deprecationsservicesetup.registerdeprecations.md) | (deprecationContext: RegisterDeprecationsConfig) =&gt; void |  |
 

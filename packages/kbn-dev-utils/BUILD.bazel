@@ -62,18 +62,14 @@ RUNTIME_DEPS = [
   "@npm//tar",
   "@npm//tree-kill",
   "@npm//vinyl",
-  "@npm//yauzl"
+  "@npm//yauzl",
 ]
 
 TYPES_DEPS = [
   "//packages/kbn-std",
   "//packages/kbn-utils",
-  "@npm//axios",
-  "@npm//execa",
-  "@npm//exit-hook",
-  "@npm//getopts",
-  "@npm//rxjs",
-  "@npm//tree-kill",
+  "@npm//@babel/parser",
+  "@npm//@babel/types",
   "@npm//@types/babel__core",
   "@npm//@types/cheerio",
   "@npm//@types/dedent",
@@ -87,7 +83,13 @@ TYPES_DEPS = [
   "@npm//@types/tar",
   "@npm//@types/testing-library__jest-dom",
   "@npm//@types/vinyl",
-  "@npm//@types/yauzl"
+  "@npm//@types/yauzl",
+  "@npm//axios",
+  "@npm//execa",
+  "@npm//exit-hook",
+  "@npm//getopts",
+  "@npm//rxjs",
+  "@npm//tree-kill",
 ]
 
 jsts_transpiler(

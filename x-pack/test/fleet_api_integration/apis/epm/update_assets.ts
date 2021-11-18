@@ -225,12 +225,9 @@ export default function (providerContext: FtrProviderContext) {
               limit: '10000',
             },
           },
-          number_of_routing_shards: '30',
-          number_of_shards: '1',
           query: {
             default_field: ['logs_test_name', 'new_field_name'],
           },
-          refresh_interval: '5s',
         },
       });
       const resUserSettings = await es.transport.request({
@@ -342,6 +339,10 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_ml_module',
             type: 'ml-module',
           },
+          {
+            id: 'sample_tag',
+            type: 'tag',
+          },
         ],
         installed_es: [
           {
@@ -421,6 +422,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: '4281a436-45a8-54ab-9724-fda6849f789d', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
           { id: '4035007b-9c33-5227-9803-2de8a17523b5', type: 'epm-packages-assets' },
+          { id: 'e6ae7d31-6920-5408-9219-91ef1662044b', type: 'epm-packages-assets' },
           { id: 'c7bf1a39-e057-58a0-afde-fb4b48751d8c', type: 'epm-packages-assets' },
           { id: '8c665f28-a439-5f43-b5fd-8fda7b576735', type: 'epm-packages-assets' },
         ],
@@ -432,6 +434,7 @@ export default function (providerContext: FtrProviderContext) {
         install_status: 'installed',
         install_started_at: res.attributes.install_started_at,
         install_source: 'registry',
+        keep_policies_up_to_date: false,
       });
     });
   });

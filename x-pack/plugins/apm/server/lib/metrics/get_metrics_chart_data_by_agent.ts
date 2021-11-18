@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { getJavaMetricsCharts } from './by_agent/java';
 import { getDefaultMetricsCharts } from './by_agent/default';
 import { GenericMetricsChart } from './transform_metrics_chart';
@@ -22,13 +22,17 @@ export async function getMetricsChartDataByAgent({
   serviceName,
   serviceNodeName,
   agentName,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
   agentName: string;
+  start: number;
+  end: number;
 }): Promise<MetricsChartsByAgentAPIResponse> {
   if (isJavaAgentName(agentName)) {
     return getJavaMetricsCharts({
@@ -37,6 +41,8 @@ export async function getMetricsChartDataByAgent({
       setup,
       serviceName,
       serviceNodeName,
+      start,
+      end,
     });
   }
 
@@ -45,5 +51,7 @@ export async function getMetricsChartDataByAgent({
     kuery,
     setup,
     serviceName,
+    start,
+    end,
   });
 }

@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { toBooleanRt } from '@kbn/io-ts-utils/to_boolean_rt';
+import { maxSuggestions } from '../../../../observability/common';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
 import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
@@ -205,7 +206,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
       logger.debug(
         `[Central configuration] Config was not found for ${service.name}/${service.environment}`
       );
-      throw Boom.notFound();
+      return null;
     }
 
     // whether to update `applied_by_agent` field
@@ -243,14 +244,21 @@ const listAgentConfigurationServicesRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
+    const { start, end } = resources.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
+      start,
+      end,
     });
+    const size = await resources.context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const serviceNames = await getServiceNames({
-      setup,
       searchAggregatedTransactions,
+      setup,
+      size,
     });
 
     return { serviceNames };
@@ -266,19 +274,24 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params } = resources;
+    const { context, params } = resources;
 
-    const { serviceName } = params.query;
+    const { serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
+      start,
+      end,
     });
-
+    const size = await context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const environments = await getEnvironments({
       serviceName,
       setup,
       searchAggregatedTransactions,
+      size,
     });
 
     return { environments };

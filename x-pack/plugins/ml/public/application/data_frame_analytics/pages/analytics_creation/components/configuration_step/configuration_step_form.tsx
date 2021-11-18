@@ -88,7 +88,6 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
     if (isRuntimeField(field) && shouldAddAsDepVarOption(id, field.type, jobType)) {
       runtimeOptions.push({
         label: id,
-        key: `runtime_mapping_${id}`,
       });
     }
   });
@@ -127,6 +126,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     dependentVariable,
     includes,
     jobConfigQuery,
+    jobConfigQueryLanguage,
     jobConfigQueryString,
     jobType,
     modelMemoryLimit,
@@ -150,14 +150,18 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   const [query, setQuery] = useState<Query>({
     query: jobConfigQueryString ?? '',
-    language: SEARCH_QUERY_LANGUAGE.KUERY,
+    language: jobConfigQueryLanguage ?? SEARCH_QUERY_LANGUAGE.KUERY,
   });
 
   const toastNotifications = getToastNotifications();
 
   const setJobConfigQuery: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
     if (update.query) {
-      setFormState({ jobConfigQuery: update.query, jobConfigQueryString: update.queryString });
+      setFormState({
+        jobConfigQuery: update.query,
+        jobConfigQueryLanguage: update.language,
+        jobConfigQueryString: update.queryString,
+      });
     }
     setQuery({ query: update.queryString, language: update.language });
   };
@@ -663,17 +667,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           </EuiFormRow>
         </Fragment>
       )}
-      <EuiFormRow
-        fullWidth
-        isInvalid={requiredFieldsError !== undefined}
-        error={i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
-          defaultMessage: 'Invalid. {message}',
-          values: { message: requiredFieldsError },
-        })}
-      >
-        <Fragment />
-      </EuiFormRow>
-
       <AnalysisFieldsTable
         dependentVariable={dependentVariable}
         includes={includes}
@@ -684,6 +677,17 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         setUnsupportedFieldsError={setUnsupportedFieldsError}
         setFormState={setFormState}
       />
+      <EuiFormRow
+        fullWidth
+        isInvalid={requiredFieldsError !== undefined}
+        error={i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
+          defaultMessage: 'Invalid. {message}',
+          values: { message: requiredFieldsError },
+        })}
+      >
+        <Fragment />
+      </EuiFormRow>
+      <EuiSpacer />
       {showScatterplotMatrix && (
         <>
           <EuiFormRow

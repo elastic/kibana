@@ -20,6 +20,11 @@ import { DiscoverDocuments } from './discover_documents';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { indexPatternMock } from '../../../../../__mocks__/index_pattern';
 
+jest.mock('../../../../../kibana_services', () => ({
+  ...jest.requireActual('../../../../../kibana_services'),
+  getServices: () => jest.requireActual('../../../../../__mocks__/services').discoverServiceMock,
+}));
+
 setHeaderActionMenuMounter(jest.fn());
 
 function getProps(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {

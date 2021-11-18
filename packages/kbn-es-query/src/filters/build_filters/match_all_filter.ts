@@ -17,7 +17,9 @@ export interface MatchAllFilterMeta extends FilterMeta {
 
 export type MatchAllFilter = Filter & {
   meta: MatchAllFilterMeta;
-  match_all: estypes.QueryDslMatchAllQuery;
+  query: {
+    match_all: estypes.QueryDslMatchAllQuery;
+  };
 };
 
 /**
@@ -27,4 +29,4 @@ export type MatchAllFilter = Filter & {
  * @public
  */
 export const isMatchAllFilter = (filter: Filter): filter is MatchAllFilter =>
-  has(filter, 'match_all');
+  has(filter, 'query.match_all');

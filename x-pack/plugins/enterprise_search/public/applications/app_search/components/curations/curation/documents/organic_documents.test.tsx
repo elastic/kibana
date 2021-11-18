@@ -13,6 +13,8 @@ import { shallow } from 'enzyme';
 
 import { EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 
+import { mountWithIntl } from '../../../../../test_helpers';
+
 import { DataPanel } from '../../../data_panel';
 import { CurationResult } from '../results';
 
@@ -30,6 +32,7 @@ describe('OrganicDocuments', () => {
     },
     activeQuery: 'world',
     organicDocumentsLoading: false,
+    isAutomated: false,
   };
   const actions = {
     addPromotedId: jest.fn(),
@@ -63,11 +66,28 @@ describe('OrganicDocuments', () => {
     expect(wrapper.find(EuiLoadingContent)).toHaveLength(1);
   });
 
-  it('renders an empty state', () => {
-    setMockValues({ ...values, curation: { organic: [] } });
-    const wrapper = shallow(<OrganicDocuments />);
+  describe('empty state', () => {
+    it('renders when organic results is empty', () => {
+      setMockValues({ ...values, curation: { organic: [] } });
+      const wrapper = shallow(<OrganicDocuments />);
 
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    });
+
+    it('renders when organic results is undefined', () => {
+      setMockValues({ ...values, curation: { organic: undefined } });
+      const wrapper = shallow(<OrganicDocuments />);
+
+      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    });
+
+    it('tells the user to modify the query if the curation is manual', () => {
+      setMockValues({ ...values, curation: { organic: [] }, isAutomated: false });
+      const wrapper = shallow(<OrganicDocuments />);
+      const emptyPromptBody = mountWithIntl(<>{wrapper.find(EuiEmptyPrompt).prop('body')}</>);
+
+      expect(emptyPromptBody.text()).toContain('Add or change');
+    });
   });
 
   describe('actions', () => {
@@ -85,6 +105,14 @@ describe('OrganicDocuments', () => {
       result.prop('actions')[0].onClick();
 
       expect(actions.addHiddenId).toHaveBeenCalledWith('mock-document-3');
+    });
+
+    it('hides actions when the curation is automated', () => {
+      setMockValues({ ...values, isAutomated: true });
+      const wrapper = shallow(<OrganicDocuments />);
+      const result = wrapper.find(CurationResult).first();
+
+      expect(result.prop('actions')).toEqual([]);
     });
   });
 });

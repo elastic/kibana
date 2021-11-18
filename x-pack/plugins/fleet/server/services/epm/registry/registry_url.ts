@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { appContextService, licenseService } from '../../';
+import { appContextService } from '../../';
 
 // from https://github.com/elastic/package-registry#docker (maybe from OpenAPI one day)
 // the unused variables cause a TS warning about unused values
@@ -32,16 +32,9 @@ const getDefaultRegistryUrl = (): string => {
 
 export const getRegistryUrl = (): string => {
   const customUrl = appContextService.getConfig()?.registryUrl;
-  const isEnterprise = licenseService.isEnterprise();
-
-  if (customUrl && isEnterprise) {
-    return customUrl;
-  }
 
   if (customUrl) {
-    appContextService
-      .getLogger()
-      .warn('Enterprise license is required to use a custom registry url.');
+    return customUrl;
   }
 
   return getDefaultRegistryUrl();

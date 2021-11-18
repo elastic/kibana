@@ -21,7 +21,10 @@ configuration using `${MY_ENV_VAR}` syntax.
 |===
 
 | `console.enabled:`
- | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
+ | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported. Use `console.ui.enabled` instead."]
+Set to `false` to disable Console. *Default: `true`*
+
+| `console.ui.enabled:`
 Toggling this causes the server to regenerate assets on the next startup,
 which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
@@ -291,7 +294,7 @@ that the {kib} server uses to perform maintenance on the {kib} index at startup.
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
 | `enterpriseSearch.host`
-  | The URL of your Enterprise Search instance
+  | The http(s) URL of your Enterprise Search instance. For example, in a local self-managed setup, set this to `http://localhost:3002`. Authentication between Kibana and the Enterprise Search host URL, such as via OAuth, is not supported. You can also {enterprise-search-ref}/configure-ssl-tls.html#configure-ssl-tls-in-kibana[configure Kibana to trust your Enterprise Search TLS certificate authority].
 
 | `interpreter.enableInVisualize`
   | Enables use of interpreter in Visualize. *Default: `true`*
@@ -493,9 +496,6 @@ override this parameter to use their own Tile Map Service. For example:
 
  | `migrations.maxBatchSizeBytes:`
  | Defines the maximum payload size for indexing batches of upgraded saved objects to avoid migrations failing due to a 413 Request Entity Too Large response from Elasticsearch. This value should be lower than or equal to your Elasticsearch cluster's `http.max_content_length` configuration option. *Default: `100mb`*
-
-| `migrations.enableV2:`
- | experimental[]. Enables the new Saved Objects migration algorithm. For information about the migration algorithm, refer to <<upgrade-migrations>>. When `migrations v2` is stable, the setting will be removed in an upcoming release without any further notice. Setting the value to `false` causes {kib} to use the legacy migration algorithm, which shipped in 7.11 and earlier versions. *Default: `true`*
 
 | `migrations.retryAttempts:`
  | The number of times migrations retry temporary failures, such as a network timeout, 503 status code, or `snapshot_in_progress_exception`. When upgrade migrations frequently fail after exhausting all retry attempts with a message such as `Unable to complete the [...] step after 15 attempts, terminating.`, increase the setting value. *Default: `15`*
@@ -786,6 +786,10 @@ out through *Advanced Settings*. *Default: `true`*
  | Set this value to true to allow Vega to use any URL to access external data
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
+| `xpack.ccr.ui.enabled`
+Set this value to false to disable the Cross-Cluster Replication UI.
+*Default: `true`*
+
 |[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`
 `exploreDataInContextMenu.enabled`
  | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
@@ -794,14 +798,40 @@ sources and images. When false, Vega can only get data from {es}. *Default: `fal
 `exploreDataInChart.enabled`
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 
+
+| `xpack.ilm.ui.enabled`
+Set this value to false to disable the Index Lifecycle Policies UI.
+*Default: `true`*
+
+| `xpack.index_management.ui.enabled`
+Set this value to false to disable the Index Management UI.
+*Default: `true`*
+
 | `xpack.license_management.enabled`
  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
 Set this value to false to disable the License Management UI.
 *Default: `true`*
 
+| `xpack.license_management.ui.enabled`
+Set this value to false to disable the License Management UI.
+*Default: `true`*
+
+| `xpack.remote_clusters.ui.enabled`
+Set this value to false to disable the Remote Clusters UI.
+*Default: `true`*
+
 | `xpack.rollup.enabled:`
  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
 Set this value to false to disable the Rollup UI. *Default: true*
+
+| `xpack.rollup.ui.enabled:`
+Set this value to false to disable the Rollup Jobs UI. *Default: true*
+
+| `xpack.snapshot_restore.ui.enabled:`
+Set this value to false to disable the Snapshot and Restore UI. *Default: true*
+
+| `xpack.upgrade_assistant.ui.enabled:`
+Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 | `i18n.locale` {ess-icon}
  | Set this value to change the {kib} interface language.

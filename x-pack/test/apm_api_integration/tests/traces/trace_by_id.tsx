@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { createApmApiClient, SupertestReturnType } from '../../common/apm_api_supertest';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('supertest');
   const apmApiSupertest = createApmApiClient(supertest);
 
@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Trace does not exist', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
       const response = await apmApiSupertest({
-        endpoint: `GET /api/apm/traces/{traceId}`,
+        endpoint: `GET /internal/apm/traces/{traceId}`,
         params: {
           path: { traceId: 'foo' },
           query: { start, end },
@@ -35,10 +35,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when('Trace exists', { config: 'basic', archives: [archiveName] }, () => {
-    let response: SupertestReturnType<`GET /api/apm/traces/{traceId}`>;
+    let response: SupertestReturnType<`GET /internal/apm/traces/{traceId}`>;
     before(async () => {
       response = await apmApiSupertest({
-        endpoint: `GET /api/apm/traces/{traceId}`,
+        endpoint: `GET /internal/apm/traces/{traceId}`,
         params: {
           path: { traceId: '64d0014f7530df24e549dd17cc0a8895' },
           query: { start, end },
@@ -60,6 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       `);
       expectSnapshot(
         response.body.traceDocs.map((doc) =>
+          // @ts-expect-error processor doesn't exist on Profile
           doc.processor.event === 'transaction'
             ? // @ts-expect-error
               `${doc.transaction.name} (transaction)`

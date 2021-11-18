@@ -18,6 +18,7 @@ import {
   ApiStats,
   MissingApiItemMap,
   PluginApi,
+  PluginMetaInfo,
   ReferencedDeprecationsByPlugin,
   TypeKind,
 } from './types';
@@ -26,6 +27,7 @@ import { pathsOutsideScopes } from './build_api_declarations/utils';
 import { getPluginApiMap } from './get_plugin_api_map';
 import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
 import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
+import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -81,6 +83,21 @@ export function runBuildApiDocsCli() {
         });
 
       const reporter = CiStatsReporter.fromEnv(log);
+
+      const allPluginStats = plugins.reduce((acc, plugin) => {
+        const id = plugin.manifest.id;
+        const pluginApi = pluginApiMap[id];
+        acc[id] = {
+          ...collectApiStatsForPlugin(pluginApi, missingApiItems, referencedDeprecations),
+          owner: plugin.manifest.owner,
+          description: plugin.manifest.description,
+          isPlugin: plugin.isPlugin,
+        };
+        return acc;
+      }, {} as { [key: string]: PluginMetaInfo });
+
+      writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
+
       plugins.forEach((plugin) => {
         // Note that the filtering is done here, and not above because the entire public plugin API has to
         // be parsed in order to correctly determine reference links, and ensure that `removeBrokenLinks`
@@ -91,42 +108,44 @@ export function runBuildApiDocsCli() {
 
         const id = plugin.manifest.id;
         const pluginApi = pluginApiMap[id];
-        const pluginStats = collectApiStatsForPlugin(
-          pluginApi,
-          missingApiItems,
-          referencedDeprecations
-        );
+        const pluginStats = allPluginStats[id];
+        const pluginTeam = plugin.manifest.owner.name;
 
         reporter.metrics([
           {
             id,
+            meta: { pluginTeam },
             group: 'API count',
             value: pluginStats.apiCount,
           },
           {
             id,
+            meta: { pluginTeam },
             group: 'API count missing comments',
             value: pluginStats.missingComments.length,
           },
           {
             id,
+            meta: { pluginTeam },
             group: 'API count with any type',
             value: pluginStats.isAnyType.length,
           },
           {
             id,
+            meta: { pluginTeam },
             group: 'Non-exported public API item count',
             value: missingApiItems[id] ? Object.keys(missingApiItems[id]).length : 0,
           },
           {
             id,
+            meta: { pluginTeam },
             group: 'References to deprecated APIs',
             value: pluginStats.deprecatedAPIsReferencedCount,
           },
         ]);
 
         const getLink = (d: ApiDeclaration) =>
-          `https://github.com/elastic/kibana/tree/master/${d.path}#:~:text=${encodeURIComponent(
+          `https://github.com/elastic/kibana/tree/main/${d.path}#:~:text=${encodeURIComponent(
             d.label
           )}`;
 
@@ -244,6 +263,7 @@ function getTsProject(repoPath: string) {
   });
   project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
   project.addSourceFilesAtPaths(`${repoPath}/src/plugins/**/*{.d.ts,.ts}`);
+  project.addSourceFilesAtPaths(`${repoPath}/packages/**/*{.d.ts,.ts}`);
   project.resolveSourceFileDependencies();
   return project;
 }

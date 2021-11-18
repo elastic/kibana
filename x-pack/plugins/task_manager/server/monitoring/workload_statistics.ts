@@ -147,8 +147,19 @@ export function createWorkloadAggregator(
             missing: { field: 'task.schedule' },
           },
           ownerIds: {
-            cardinality: {
-              field: 'task.ownerId',
+            filter: {
+              range: {
+                'task.startedAt': {
+                  gte: 'now-1w/w',
+                },
+              },
+            },
+            aggs: {
+              ownerIds: {
+                cardinality: {
+                  field: 'task.ownerId',
+                },
+              },
             },
           },
           idleTasks: {
@@ -213,7 +224,7 @@ export function createWorkloadAggregator(
 
       const taskTypes = aggregations.taskType.buckets;
       const nonRecurring = aggregations.nonRecurringTasks.doc_count;
-      const ownerIds = aggregations.ownerIds.value;
+      const ownerIds = aggregations.ownerIds.ownerIds.value;
 
       const {
         overdue: {
@@ -441,17 +452,23 @@ function hasAggregations(
   );
 }
 export interface WorkloadAggregationResponse {
+  // @ts-expect-error is not compatible with AggregationsAggregate
   taskType: TaskTypeAggregation;
+  // @ts-expect-error is not compatible with AggregationsAggregate
   schedule: ScheduleAggregation;
   idleTasks: IdleTasksAggregation;
   nonRecurringTasks: {
     doc_count: number;
   };
+  // @ts-expect-error is not compatible with AggregationsAggregate
   ownerIds: {
-    value: number;
+    ownerIds: {
+      value: number;
+    };
   };
   [otherAggs: string]: estypes.AggregationsAggregate;
 }
+// @ts-expect-error key doesn't accept a string
 export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;
@@ -468,6 +485,7 @@ export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregat
   doc_count_error_upper_bound?: number | undefined;
   sum_other_doc_count?: number | undefined;
 }
+// @ts-expect-error key doesn't accept a string
 export interface ScheduleAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;

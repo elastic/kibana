@@ -14,10 +14,12 @@ import {
   IBulkInstallPackageHTTPError,
 } from '../../../../plugins/fleet/common';
 import { setupFleetAndAgents } from '../agents/services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const deletePackage = async (pkgkey: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
@@ -43,6 +45,13 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should return 400 if no packages are requested for upgrade', async function () {
         await supertest.post(`/api/fleet/epm/packages/_bulk`).set('kbn-xsrf', 'xxxx').expect(400);
+      });
+      it('should return 403 if read only user requests upgrade', async function () {
+        await supertestWithoutAuth
+          .post(`/api/fleet/epm/packages/_bulk`)
+          .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(403);
       });
       it('should return 200 and an array for upgrading a package', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest

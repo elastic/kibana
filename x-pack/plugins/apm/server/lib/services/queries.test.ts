@@ -28,7 +28,8 @@ describe('services queries', () => {
       getServiceAgent({
         serviceName: 'foo',
         setup,
-        searchAggregatedTransactions: false,
+        start: 0,
+        end: 50000,
       })
     );
 
@@ -41,6 +42,8 @@ describe('services queries', () => {
         serviceName: 'foo',
         setup,
         searchAggregatedTransactions: false,
+        start: 0,
+        end: 50000,
       })
     );
 
@@ -55,6 +58,8 @@ describe('services queries', () => {
         logger: {} as any,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
+        start: 0,
+        end: 50000,
       })
     );
 
@@ -64,7 +69,11 @@ describe('services queries', () => {
   });
 
   it('fetches the legacy data status', async () => {
-    mock = await inspectSearchParams((setup) => getLegacyDataStatus(setup));
+    const start = 1;
+    const end = 50000;
+    mock = await inspectSearchParams((setup) =>
+      getLegacyDataStatus(setup, start, end)
+    );
 
     expect(mock.params).toMatchSnapshot();
   });

@@ -22,9 +22,6 @@ export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory = (libs: 
     body: schema.object({
       hashes: schema.arrayOf(schema.string()),
     }),
-    query: schema.object({
-      _inspect: schema.maybe(schema.boolean()),
-    }),
   },
   handler: async ({ request, response, uptimeEsClient }) => {
     const { hashes: blockIds } = request.body;

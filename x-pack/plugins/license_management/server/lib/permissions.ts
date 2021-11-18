@@ -27,6 +27,7 @@ export async function getPermissions({ isSecurityEnabled, client }: GetPermissio
   };
 
   try {
+    // @ts-expect-error SecurityClusterPrivilege doesn't contain all possible priviledges
     const { body: response } = await client.asCurrentUser.security.hasPrivileges(options);
     return {
       hasPermission: response.cluster.manage,

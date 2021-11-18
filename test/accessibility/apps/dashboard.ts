@@ -15,24 +15,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
 
-  describe.skip('Dashboard', () => {
+  describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
     const clonedDashboardName = 'Dashboard Listing A11y Copy';
-
-    before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.addSampleDataSet('flights');
-    });
-
-    after(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await listingTable.searchForItemWithName(dashboardName);
-      await listingTable.checkListingSelectAllCheckbox();
-      await listingTable.clickDeleteSelected();
-      await PageObjects.common.clickConfirmOnModal();
-    });
 
     it('dashboard', async () => {
       await PageObjects.common.navigateToApp('dashboard');

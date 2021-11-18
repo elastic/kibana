@@ -15,14 +15,16 @@ import {
   ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 
 export async function getTraceItems(
   traceId: string,
-  setup: Setup & SetupTimeRange
+  setup: Setup,
+  start: number,
+  end: number
 ) {
-  const { start, end, apmEventClient, config } = setup;
-  const maxTraceItems = config['xpack.apm.ui.maxTraceItems'];
+  const { apmEventClient, config } = setup;
+  const maxTraceItems = config.ui.maxTraceItems;
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
   const errorResponsePromise = apmEventClient.search('get_errors_docs', {
@@ -78,9 +80,5 @@ export async function getTraceItems(
   const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
   const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
 
-  return {
-    exceedsMax,
-    traceDocs,
-    errorDocs,
-  };
+  return { exceedsMax, traceDocs, errorDocs };
 }

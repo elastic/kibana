@@ -11,7 +11,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaRequest } from 'src/core/server';
 import type { KibanaExecutionContext } from 'src/core/public';
 
-import { ExpressionType } from '../expression_types';
+import { Datatable, ExpressionType } from '../expression_types';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { TablesAdapter } from '../util/tables_adapter';
 
@@ -69,6 +69,11 @@ export interface ExecutionContext<
    * Contains the meta-data about the source of the expression.
    */
   getExecutionContext: () => KibanaExecutionContext | undefined;
+
+  /**
+   * Logs datatable.
+   */
+  logDatatable?(name: string, datatable: Datatable): void;
 }
 
 /**

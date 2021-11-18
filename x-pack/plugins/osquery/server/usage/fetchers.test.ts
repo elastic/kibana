@@ -21,6 +21,7 @@ describe('extractBeatUsageMetrics', () => {
     expect(
       extractBeatUsageMetrics({
         aggregations: {
+          // @ts-expect-error not full interface
           lastDay: {
             max_rss: {
               value: 1,
@@ -42,6 +43,7 @@ describe('extractBeatUsageMetrics', () => {
     expect(
       extractBeatUsageMetrics({
         aggregations: {
+          // @ts-expect-error not full interface
           lastDay: {
             max_rss: {
               value: 1,

@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiFieldNumber, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
 import type {
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -813,11 +813,11 @@ describe('terms', () => {
       instance
         .find('[data-test-subj="indexPattern-terms-other-bucket"]')
         .find(EuiSwitch)
-        .prop('onChange')!({
-        target: {
-          checked: true,
-        },
-      } as EuiSwitchEvent);
+        .simulate('change', {
+          target: {
+            checked: true,
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -871,11 +871,11 @@ describe('terms', () => {
       instance
         .find(EuiSelect)
         .find('[data-test-subj="indexPattern-terms-orderBy"]')
-        .prop('onChange')!({
-        target: {
-          value: 'column$$$col2',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+        .simulate('change', {
+          target: {
+            value: 'column$$$col2',
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -931,11 +931,11 @@ describe('terms', () => {
       instance
         .find('[data-test-subj="indexPattern-terms-orderDirection"]')
         .find(EuiSelect)
-        .prop('onChange')!({
-        target: {
-          value: 'desc',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+        .simulate('change', {
+          target: {
+            value: 'desc',
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,

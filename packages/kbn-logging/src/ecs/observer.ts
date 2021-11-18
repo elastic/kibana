@@ -29,7 +29,7 @@ interface NestedIngressFields {
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-observer.html
+ * https://www.elastic.co/guide/en/ecs/1.12/ecs-observer.html
  *
  * @internal
  */

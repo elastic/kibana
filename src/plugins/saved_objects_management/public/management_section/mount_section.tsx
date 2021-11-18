@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
+import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { getAllowedTypes } from './../lib';
@@ -24,7 +25,7 @@ interface MountParams {
   mountParams: ManagementAppMountParams;
 }
 
-let allowedObjectTypes: string[] | undefined;
+let allowedObjectTypes: SavedObjectManagementTypeInfo[] | undefined;
 
 const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
   defaultMessage: 'Saved Objects',
@@ -39,14 +40,14 @@ export const mountManagementSection = async ({
 }: MountParams) => {
   const [coreStart, { data, savedObjectsTaggingOss, spaces: spacesApi }, pluginStart] =
     await core.getStartServices();
+  const { capabilities } = coreStart.application;
   const { element, history, setBreadcrumbs } = mountParams;
-  if (allowedObjectTypes === undefined) {
+
+  if (!allowedObjectTypes) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
 
   coreStart.chrome.docTitle.change(title);
-
-  const capabilities = coreStart.application.capabilities;
 
   const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
     const allowed = capabilities?.management?.kibana?.objects ?? false;
@@ -98,6 +99,7 @@ export const mountManagementSection = async ({
   );
 
   return () => {
+    coreStart.chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

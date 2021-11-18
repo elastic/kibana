@@ -58,22 +58,9 @@ describe('findThresholdSignals', () => {
               min_doc_count: 100,
             },
             aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
                 },
               },
             },
@@ -108,22 +95,9 @@ describe('findThresholdSignals', () => {
               size: 10000,
             },
             aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
                 },
               },
             },
@@ -166,22 +140,9 @@ describe('findThresholdSignals', () => {
                   size: 10000,
                 },
                 aggs: {
-                  top_threshold_hits: {
-                    top_hits: {
-                      sort: [
-                        {
-                          '@timestamp': {
-                            order: 'desc',
-                          },
-                        },
-                      ],
-                      fields: [
-                        {
-                          field: '*',
-                          include_unmapped: true,
-                        },
-                      ],
-                      size: 1,
+                  max_timestamp: {
+                    max: {
+                      field: '@timestamp',
                     },
                   },
                 },
@@ -245,22 +206,9 @@ describe('findThresholdSignals', () => {
                       script: 'params.cardinalityCount >= 2',
                     },
                   },
-                  top_threshold_hits: {
-                    top_hits: {
-                      sort: [
-                        {
-                          '@timestamp': {
-                            order: 'desc',
-                          },
-                        },
-                      ],
-                      fields: [
-                        {
-                          field: '*',
-                          include_unmapped: true,
-                        },
-                      ],
-                      size: 1,
+                  max_timestamp: {
+                    max: {
+                      field: '@timestamp',
                     },
                   },
                 },
@@ -319,22 +267,9 @@ describe('findThresholdSignals', () => {
                   script: 'params.cardinalityCount >= 5',
                 },
               },
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
                 },
               },
             },

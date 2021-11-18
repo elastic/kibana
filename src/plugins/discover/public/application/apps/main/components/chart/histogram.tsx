@@ -7,13 +7,21 @@
  */
 import './histogram.scss';
 import moment, { unitOfTime } from 'moment-timezone';
-import React, { useCallback } from 'react';
-import { EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiLoadingChart,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
+import dateMath from '@elastic/datemath';
 import {
   Axis,
   BrushEndListener,
+  XYBrushEvent,
   Chart,
   ElementClickListener,
   HistogramBarSeries,
@@ -23,8 +31,8 @@ import {
   TooltipType,
   XYChartElementEvent,
 } from '@elastic/charts';
-
 import { IUiSettingsClient } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
   CurrentTime,
   Endzones,
@@ -64,10 +72,10 @@ export function DiscoverHistogram({
 
   const uiSettings = services.uiSettings;
   const timeZone = getTimezone(uiSettings);
-  const { chartData, fetchStatus } = dataState;
+  const { chartData, fetchStatus, bucketInterval } = dataState;
 
-  const onBrushEnd: BrushEndListener = useCallback(
-    ({ x }) => {
+  const onBrushEnd = useCallback(
+    ({ x }: XYBrushEvent) => {
       if (!x) {
         return;
       }
@@ -92,14 +100,42 @@ export function DiscoverHistogram({
     [timefilterUpdateHandler]
   );
 
+  const { timefilter } = services.data.query.timefilter;
+
+  const { from, to } = timefilter.getAbsoluteTime();
+  const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
+
+  const toMoment = useCallback(
+    (datetime: moment.Moment | undefined) => {
+      if (!datetime) {
+        return '';
+      }
+      if (!dateFormat) {
+        return String(datetime);
+      }
+      return datetime.format(dateFormat);
+    },
+    [dateFormat]
+  );
+
+  const timeRangeText = useMemo(() => {
+    const timeRange = {
+      from: dateMath.parse(from),
+      to: dateMath.parse(to, { roundUp: true }),
+    };
+    return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)}`;
+  }, [from, to, toMoment]);
+
   if (!chartData && fetchStatus === FetchStatus.LOADING) {
     return (
-      <div className="dscChart__loading">
-        <EuiText size="xs" color="subdued">
-          <EuiLoadingChart mono size="l" />
-          <EuiSpacer size="s" />
-          <FormattedMessage id="discover.loadingChartResults" defaultMessage="Loading chart" />
-        </EuiText>
+      <div className="dscHistogram" data-test-subj="discoverChart">
+        <div className="dscChart__loading">
+          <EuiText size="xs" color="subdued">
+            <EuiLoadingChart mono size="l" />
+            <EuiSpacer size="s" />
+            <FormattedMessage id="discover.loadingChartResults" defaultMessage="Loading chart" />
+          </EuiText>
+        </div>
       </div>
     );
   }
@@ -151,52 +187,96 @@ export function DiscoverHistogram({
 
   const xAxisFormatter = services.data.fieldFormats.deserialize(chartData.yAxisFormat);
 
+  const toolTipTitle = i18n.translate('discover.timeIntervalWithValueWarning', {
+    defaultMessage: 'Warning',
+  });
+
+  const toolTipContent = i18n.translate('discover.bucketIntervalTooltip', {
+    defaultMessage:
+      'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
+    values: {
+      bucketsDescription:
+        bucketInterval!.scale && bucketInterval!.scale > 1
+          ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
+              defaultMessage: 'buckets that are too large',
+            })
+          : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
+              defaultMessage: 'too many buckets',
+            }),
+      bucketIntervalDescription: bucketInterval?.description,
+    },
+  });
+
+  let timeRange = (
+    <EuiText size="xs" className="dscHistogramTimeRange" textAlign="center">
+      {timeRangeText}
+    </EuiText>
+  );
+  if (bucketInterval?.scaled) {
+    timeRange = (
+      <EuiFlexGroup
+        alignItems="baseline"
+        justifyContent="center"
+        gutterSize="none"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>{timeRange}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip type="alert" color="warning" title={toolTipTitle} content={toolTipContent} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
-    <Chart size="100%">
-      <Settings
-        xDomain={xDomain}
-        onBrushEnd={onBrushEnd}
-        onElementClick={onElementClick(xInterval)}
-        tooltip={tooltipProps}
-        theme={chartTheme}
-        baseTheme={chartBaseTheme}
-        allowBrushingLastHistogramBucket={true}
-      />
-      <Axis
-        id="discover-histogram-left-axis"
-        position={Position.Left}
-        ticks={5}
-        title={chartData.yAxisLabel}
-        integersOnly
-        tickFormat={(value) => xAxisFormatter.convert(value)}
-      />
-      <Axis
-        id="discover-histogram-bottom-axis"
-        position={Position.Bottom}
-        title={chartData.xAxisLabel}
-        tickFormat={formatXValue}
-        ticks={10}
-      />
-      <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
-      <Endzones
-        isDarkMode={isDarkMode}
-        domainStart={domainStart}
-        domainEnd={domainEnd}
-        interval={xDomain.minInterval}
-        domainMin={xDomain.min}
-        domainMax={xDomain.max}
-      />
-      <HistogramBarSeries
-        id="discover-histogram"
-        minBarHeight={2}
-        xScaleType={ScaleType.Time}
-        yScaleType={ScaleType.Linear}
-        xAccessor="x"
-        yAccessors={['y']}
-        data={data}
-        timeZone={timeZone}
-        name={chartData.yAxisLabel}
-      />
-    </Chart>
+    <React.Fragment>
+      <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
+        <Chart size="100%">
+          <Settings
+            xDomain={xDomain}
+            onBrushEnd={onBrushEnd as BrushEndListener}
+            onElementClick={onElementClick(xInterval)}
+            tooltip={tooltipProps}
+            theme={chartTheme}
+            baseTheme={chartBaseTheme}
+            allowBrushingLastHistogramBin={true}
+          />
+          <Axis
+            id="discover-histogram-left-axis"
+            position={Position.Left}
+            ticks={5}
+            integersOnly
+            tickFormat={(value) => xAxisFormatter.convert(value)}
+          />
+          <Axis
+            id="discover-histogram-bottom-axis"
+            position={Position.Bottom}
+            tickFormat={formatXValue}
+            ticks={10}
+          />
+          <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
+          <Endzones
+            isDarkMode={isDarkMode}
+            domainStart={domainStart}
+            domainEnd={domainEnd}
+            interval={xDomain.minInterval}
+            domainMin={xDomain.min}
+            domainMax={xDomain.max}
+          />
+          <HistogramBarSeries
+            id="discover-histogram"
+            minBarHeight={2}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            data={data}
+            timeZone={timeZone}
+            name={chartData.yAxisLabel}
+          />
+        </Chart>
+      </div>
+      {timeRange}
+    </React.Fragment>
   );
 }

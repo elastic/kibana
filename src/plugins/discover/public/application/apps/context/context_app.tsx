@@ -12,14 +12,14 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import { esFilters, SortDirection } from '../../../../../data/public';
+import { esFilters } from '../../../../../data/public';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { IndexPattern, IndexPatternField } from '../../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
 import { getServices } from '../../../kibana_services';
 import { AppState, isEqualFilters } from './services/context_state';
-import { useDataGridColumns } from '../../helpers/use_data_grid_columns';
+import { useColumns } from '../../helpers/use_data_grid_columns';
 import { useContextAppState } from './utils/use_context_app_state';
 import { useContextAppFetch } from './utils/use_context_app_fetch';
 import { popularizeField } from '../../helpers/popularize_field';
@@ -31,42 +31,48 @@ const ContextAppContentMemoized = memo(ContextAppContent);
 
 export interface ContextAppProps {
   indexPattern: IndexPattern;
-  indexPatternId: string;
   anchorId: string;
 }
 
-export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAppProps) => {
+export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const services = getServices();
-  const { uiSettings: config, capabilities, indexPatterns, navigation, filterManager } = services;
+  const { uiSettings, capabilities, indexPatterns, navigation, filterManager } = services;
 
-  const isLegacy = useMemo(() => config.get(DOC_TABLE_LEGACY), [config]);
-  const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
+  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
+  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   /**
    * Context app state
    */
-  const { appState, setAppState } = useContextAppState({ indexPattern, services });
+  const { appState, setAppState } = useContextAppState({ services });
   const prevAppState = useRef<AppState>();
 
   /**
    * Context fetched state
    */
-  const { fetchedState, fetchContextRows, fetchAllRows, fetchSurroundingRows } = useContextAppFetch(
-    {
+  const { fetchedState, fetchContextRows, fetchAllRows, fetchSurroundingRows, resetFetchedState } =
+    useContextAppFetch({
       anchorId,
-      indexPatternId,
       indexPattern,
       appState,
       useNewFieldsApi,
       services,
+    });
+  /**
+   * Reset state when anchor changes
+   */
+  useEffect(() => {
+    if (prevAppState.current) {
+      prevAppState.current = undefined;
+      resetFetchedState();
     }
-  );
+  }, [anchorId, resetFetchedState]);
 
   /**
    * Fetch docs on ui changes
    */
   useEffect(() => {
-    if (!prevAppState.current || fetchedState.anchor._id !== anchorId) {
+    if (!prevAppState.current) {
       fetchAllRows();
     } else if (prevAppState.current.predecessorCount !== appState.predecessorCount) {
       fetchSurroundingRows(SurrDocType.PREDECESSORS);
@@ -79,7 +85,6 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
     prevAppState.current = cloneDeep(appState);
   }, [
     appState,
-    indexPatternId,
     anchorId,
     fetchContextRows,
     fetchAllRows,
@@ -87,9 +92,9 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
     fetchedState.anchor._id,
   ]);
 
-  const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
+  const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
     capabilities,
-    config,
+    config: uiSettings,
     indexPattern,
     indexPatterns,
     state: appState,
@@ -112,7 +117,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
         field,
         values,
         operation,
-        indexPatternId
+        indexPattern.id!
       );
       filterManager.addFilters(newFilters);
       if (indexPatterns) {
@@ -120,7 +125,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
         await popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       }
     },
-    [filterManager, indexPatternId, indexPatterns, indexPattern, capabilities]
+    [filterManager, indexPatterns, indexPattern, capabilities]
   );
 
   const TopNavMenu = navigation.ui.TopNavMenu;
@@ -166,7 +171,6 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
                 onAddColumn={onAddColumn}
                 onRemoveColumn={onRemoveColumn}
                 onSetColumns={onSetColumns}
-                sort={appState.sort as [[string, SortDirection]]}
                 predecessorCount={appState.predecessorCount}
                 successorCount={appState.successorCount}
                 setAppState={setAppState}

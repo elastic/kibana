@@ -418,7 +418,9 @@
             "parentPluginId": "core",
             "id": "def-public.SavedObjectsClient.resolve",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "note"
+            ],
             "label": "resolve",
             "description": [
               "\nResolves a single object\n"
@@ -468,6 +470,52 @@
             ],
             "returnComment": [
               "The resolve result for the saved object for the given type and id."
+            ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsClient.bulkResolve",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "bulkResolve",
+            "description": [
+              "\nResolves an array of objects by id, using any legacy URL aliases if they exist\n"
+            ],
+            "signature": [
+              "<T = unknown>(objects?: { id: string; type: string; }[]) => Promise<{ resolved_objects: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.ResolvedSimpleSavedObject",
+                "text": "ResolvedSimpleSavedObject"
+              },
+              "<T>[]; }>"
+            ],
+            "path": "src/core/public/saved_objects/saved_objects_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.SavedObjectsClient.bulkResolve.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [
+                  "- an array of objects containing id, type"
+                ],
+                "signature": [
+                  "{ id: string; type: string; }[]"
+                ],
+                "path": "src/core/public/saved_objects/saved_objects_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The bulk resolve result for the saved objects for the given types and ids."
             ]
           },
           {
@@ -799,7 +847,7 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
+                  ", \"create\" | \"bulkCreate\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "path": "src/core/public/saved_objects/simple_saved_object.ts",
                 "deprecated": false,
@@ -1465,17 +1513,7 @@
               "{@link SavedObjectsClient}"
             ],
             "signature": [
-              "{ get: <T = unknown>(type: string, id: string) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
-              "<T>>; delete: (type: string, id: string, options?: ",
-              "SavedObjectsDeleteOptions",
-              " | undefined) => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+              "{ create: <T = unknown>(type: string, attributes: T, options?: ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -1515,7 +1553,9 @@
                 "section": "def-public.SavedObjectsBatchResponse",
                 "text": "SavedObjectsBatchResponse"
               },
-              "<unknown>>; find: <T = unknown, A = unknown>(options: Pick<",
+              "<unknown>>; delete: (type: string, id: string, options?: ",
+              "SavedObjectsDeleteOptions",
+              " | undefined) => Promise<{}>; find: <T = unknown, A = unknown>(options: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1539,7 +1579,23 @@
                 "section": "def-public.SavedObjectsBatchResponse",
                 "text": "SavedObjectsBatchResponse"
               },
-              "<unknown>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
+              "<unknown>>; bulkResolve: <T = unknown>(objects?: { id: string; type: string; }[]) => Promise<{ resolved_objects: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.ResolvedSimpleSavedObject",
+                "text": "ResolvedSimpleSavedObject"
+              },
+              "<T>[]; }>; get: <T = unknown>(type: string, id: string) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
+              "<T>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -1663,17 +1719,7 @@
           "\nSavedObjectsClientContract as implemented by the {@link SavedObjectsClient}\n"
         ],
         "signature": [
-          "{ get: <T = unknown>(type: string, id: string) => Promise<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SimpleSavedObject",
-            "text": "SimpleSavedObject"
-          },
-          "<T>>; delete: (type: string, id: string, options?: ",
-          "SavedObjectsDeleteOptions",
-          " | undefined) => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+          "{ create: <T = unknown>(type: string, attributes: T, options?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1713,7 +1759,9 @@
             "section": "def-public.SavedObjectsBatchResponse",
             "text": "SavedObjectsBatchResponse"
           },
-          "<unknown>>; find: <T = unknown, A = unknown>(options: Pick<",
+          "<unknown>>; delete: (type: string, id: string, options?: ",
+          "SavedObjectsDeleteOptions",
+          " | undefined) => Promise<{}>; find: <T = unknown, A = unknown>(options: Pick<",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1737,7 +1785,23 @@
             "section": "def-public.SavedObjectsBatchResponse",
             "text": "SavedObjectsBatchResponse"
           },
-          "<unknown>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
+          "<unknown>>; bulkResolve: <T = unknown>(objects?: { id: string; type: string; }[]) => Promise<{ resolved_objects: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.ResolvedSimpleSavedObject",
+            "text": "ResolvedSimpleSavedObject"
+          },
+          "<T>[]; }>; get: <T = unknown>(type: string, id: string) => Promise<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.SimpleSavedObject",
+            "text": "SimpleSavedObject"
+          },
+          "<T>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2373,6 +2437,94 @@
                 "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
                 "deprecated": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsClient.bulkResolve",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "bulkResolve",
+            "description": [
+              "\nResolves an array of objects by id, using any legacy URL aliases if they exist\n"
+            ],
+            "signature": [
+              "<T = unknown>(objects: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveObject",
+                "text": "SavedObjectsBulkResolveObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveResponse",
+                "text": "SavedObjectsBulkResolveResponse"
+              },
+              "<T>>"
+            ],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsClient.bulkResolve.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [
+                  "- an array of objects containing id, type"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsBulkResolveObject",
+                    "text": "SavedObjectsBulkResolveObject"
+                  },
+                  "[]"
+                ],
+                "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsClient.bulkResolve.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsBaseOptions",
+                    "text": "SavedObjectsBaseOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -4341,25 +4493,7 @@
             "label": "#savedObjectsClient",
             "description": [],
             "signature": [
-              "{ get: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              "SavedObject",
-              "<T>>; delete: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteOptions",
-                "text": "SavedObjectsDeleteOptions"
-              },
-              ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+              "{ create: <T = unknown>(type: string, attributes: T, options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -4417,7 +4551,15 @@
                 "section": "def-server.SavedObjectsCheckConflictsResponse",
                 "text": "SavedObjectsCheckConflictsResponse"
               },
-              ">; find: <T = unknown, A = unknown>(options: ",
+              ">; delete: (type: string, id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsDeleteOptions",
+                "text": "SavedObjectsDeleteOptions"
+              },
+              ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -4457,6 +4599,40 @@
                 "section": "def-server.SavedObjectsBulkResponse",
                 "text": "SavedObjectsBulkResponse"
               },
+              "<T>>; bulkResolve: <T = unknown>(objects: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveObject",
+                "text": "SavedObjectsBulkResolveObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveResponse",
+                "text": "SavedObjectsBulkResolveResponse"
+              },
+              "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              ") => Promise<",
+              "SavedObject",
               "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
               {
                 "pluginId": "core",
@@ -4709,7 +4885,13 @@
             "label": "#log",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
             "deprecated": false
@@ -4745,25 +4927,7 @@
                     "label": "savedObjectsClient",
                     "description": [],
                     "signature": [
-                      "{ get: <T = unknown>(type: string, id: string, options?: ",
-                      {
-                        "pluginId": "core",
-                        "scope": "server",
-                        "docId": "kibCoreSavedObjectsPluginApi",
-                        "section": "def-server.SavedObjectsBaseOptions",
-                        "text": "SavedObjectsBaseOptions"
-                      },
-                      ") => Promise<",
-                      "SavedObject",
-                      "<T>>; delete: (type: string, id: string, options?: ",
-                      {
-                        "pluginId": "core",
-                        "scope": "server",
-                        "docId": "kibCoreSavedObjectsPluginApi",
-                        "section": "def-server.SavedObjectsDeleteOptions",
-                        "text": "SavedObjectsDeleteOptions"
-                      },
-                      ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+                      "{ create: <T = unknown>(type: string, attributes: T, options?: ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -4821,7 +4985,15 @@
                         "section": "def-server.SavedObjectsCheckConflictsResponse",
                         "text": "SavedObjectsCheckConflictsResponse"
                       },
-                      ">; find: <T = unknown, A = unknown>(options: ",
+                      ">; delete: (type: string, id: string, options?: ",
+                      {
+                        "pluginId": "core",
+                        "scope": "server",
+                        "docId": "kibCoreSavedObjectsPluginApi",
+                        "section": "def-server.SavedObjectsDeleteOptions",
+                        "text": "SavedObjectsDeleteOptions"
+                      },
+                      ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -4861,6 +5033,40 @@
                         "section": "def-server.SavedObjectsBulkResponse",
                         "text": "SavedObjectsBulkResponse"
                       },
+                      "<T>>; bulkResolve: <T = unknown>(objects: ",
+                      {
+                        "pluginId": "core",
+                        "scope": "server",
+                        "docId": "kibCoreSavedObjectsPluginApi",
+                        "section": "def-server.SavedObjectsBulkResolveObject",
+                        "text": "SavedObjectsBulkResolveObject"
+                      },
+                      "[], options?: ",
+                      {
+                        "pluginId": "core",
+                        "scope": "server",
+                        "docId": "kibCoreSavedObjectsPluginApi",
+                        "section": "def-server.SavedObjectsBaseOptions",
+                        "text": "SavedObjectsBaseOptions"
+                      },
+                      " | undefined) => Promise<",
+                      {
+                        "pluginId": "core",
+                        "scope": "server",
+                        "docId": "kibCoreSavedObjectsPluginApi",
+                        "section": "def-server.SavedObjectsBulkResolveResponse",
+                        "text": "SavedObjectsBulkResolveResponse"
+                      },
+                      "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
+                      {
+                        "pluginId": "core",
+                        "scope": "server",
+                        "docId": "kibCoreSavedObjectsPluginApi",
+                        "section": "def-server.SavedObjectsBaseOptions",
+                        "text": "SavedObjectsBaseOptions"
+                      },
+                      ") => Promise<",
+                      "SavedObject",
                       "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
                       {
                         "pluginId": "core",
@@ -5113,7 +5319,13 @@
                     "label": "logger",
                     "description": [],
                     "signature": [
-                      "Logger"
+                      {
+                        "pluginId": "@kbn/logging",
+                        "scope": "server",
+                        "docId": "kibKbnLoggingPluginApi",
+                        "section": "def-server.Logger",
+                        "text": "Logger"
+                      }
                     ],
                     "path": "src/core/server/saved_objects/export/saved_objects_exporter.ts",
                     "deprecated": false
@@ -5497,25 +5709,7 @@
             "label": "#savedObjectsClient",
             "description": [],
             "signature": [
-              "{ get: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              "SavedObject",
-              "<T>>; delete: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteOptions",
-                "text": "SavedObjectsDeleteOptions"
-              },
-              ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+              "{ create: <T = unknown>(type: string, attributes: T, options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -5573,7 +5767,15 @@
                 "section": "def-server.SavedObjectsCheckConflictsResponse",
                 "text": "SavedObjectsCheckConflictsResponse"
               },
-              ">; find: <T = unknown, A = unknown>(options: ",
+              ">; delete: (type: string, id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsDeleteOptions",
+                "text": "SavedObjectsDeleteOptions"
+              },
+              ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -5613,6 +5815,40 @@
                 "section": "def-server.SavedObjectsBulkResponse",
                 "text": "SavedObjectsBulkResponse"
               },
+              "<T>>; bulkResolve: <T = unknown>(objects: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveObject",
+                "text": "SavedObjectsBulkResolveObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveResponse",
+                "text": "SavedObjectsBulkResolveResponse"
+              },
+              "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              ") => Promise<",
+              "SavedObject",
               "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
               {
                 "pluginId": "core",
@@ -5909,25 +6145,7 @@
                     "label": "savedObjectsClient",
                     "description": [],
                     "signature": [
-                      "{ get: <T = unknown>(type: string, id: string, options?: ",
-                      {
-                        "pluginId": "core",
-                        "scope": "server",
-                        "docId": "kibCoreSavedObjectsPluginApi",
-                        "section": "def-server.SavedObjectsBaseOptions",
-                        "text": "SavedObjectsBaseOptions"
-                      },
-                      ") => Promise<",
-                      "SavedObject",
-                      "<T>>; delete: (type: string, id: string, options?: ",
-                      {
-                        "pluginId": "core",
-                        "scope": "server",
-                        "docId": "kibCoreSavedObjectsPluginApi",
-                        "section": "def-server.SavedObjectsDeleteOptions",
-                        "text": "SavedObjectsDeleteOptions"
-                      },
-                      ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+                      "{ create: <T = unknown>(type: string, attributes: T, options?: ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -5985,7 +6203,15 @@
                         "section": "def-server.SavedObjectsCheckConflictsResponse",
                         "text": "SavedObjectsCheckConflictsResponse"
                       },
-                      ">; find: <T = unknown, A = unknown>(options: ",
+                      ">; delete: (type: string, id: string, options?: ",
+                      {
+                        "pluginId": "core",
+                        "scope": "server",
+                        "docId": "kibCoreSavedObjectsPluginApi",
+                        "section": "def-server.SavedObjectsDeleteOptions",
+                        "text": "SavedObjectsDeleteOptions"
+                      },
+                      ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -6025,6 +6251,40 @@
                         "section": "def-server.SavedObjectsBulkResponse",
                         "text": "SavedObjectsBulkResponse"
                       },
+                      "<T>>; bulkResolve: <T = unknown>(objects: ",
+                      {
+                        "pluginId": "core",
+                        "scope": "server",
+                        "docId": "kibCoreSavedObjectsPluginApi",
+                        "section": "def-server.SavedObjectsBulkResolveObject",
+                        "text": "SavedObjectsBulkResolveObject"
+                      },
+                      "[], options?: ",
+                      {
+                        "pluginId": "core",
+                        "scope": "server",
+                        "docId": "kibCoreSavedObjectsPluginApi",
+                        "section": "def-server.SavedObjectsBaseOptions",
+                        "text": "SavedObjectsBaseOptions"
+                      },
+                      " | undefined) => Promise<",
+                      {
+                        "pluginId": "core",
+                        "scope": "server",
+                        "docId": "kibCoreSavedObjectsPluginApi",
+                        "section": "def-server.SavedObjectsBulkResolveResponse",
+                        "text": "SavedObjectsBulkResolveResponse"
+                      },
+                      "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
+                      {
+                        "pluginId": "core",
+                        "scope": "server",
+                        "docId": "kibCoreSavedObjectsPluginApi",
+                        "section": "def-server.SavedObjectsBaseOptions",
+                        "text": "SavedObjectsBaseOptions"
+                      },
+                      ") => Promise<",
+                      "SavedObject",
                       "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
                       {
                         "pluginId": "core",
@@ -7161,6 +7421,95 @@
             ],
             "returnComment": [
               "- { saved_objects: [{ id, type, version, attributes }] }"
+            ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.bulkResolve",
+            "type": "Function",
+            "tags": [
+              "property"
+            ],
+            "label": "bulkResolve",
+            "description": [
+              "\nResolves an array of objects by id, using any legacy URL aliases if they exist\n"
+            ],
+            "signature": [
+              "<T = unknown>(objects: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveObject",
+                "text": "SavedObjectsBulkResolveObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveResponse",
+                "text": "SavedObjectsBulkResolveResponse"
+              },
+              "<T>>"
+            ],
+            "path": "src/core/server/saved_objects/service/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkResolve.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [
+                  "- an array of objects containing id, type"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsBulkResolveObject",
+                    "text": "SavedObjectsBulkResolveObject"
+                  },
+                  "[]"
+                ],
+                "path": "src/core/server/saved_objects/service/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkResolve.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsBaseOptions",
+                    "text": "SavedObjectsBaseOptions"
+                  }
+                ],
+                "path": "src/core/server/saved_objects/service/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "- { resolved_objects: [{ saved_object, outcome }] }"
             ]
           },
           {
@@ -9786,6 +10135,86 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.SavedObjectsBulkResolveObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkResolveObject",
+        "description": [
+          "\n"
+        ],
+        "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkResolveObject.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkResolveObject.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsBulkResolveResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsBulkResolveResponse",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBulkResolveResponse",
+            "text": "SavedObjectsBulkResolveResponse"
+          },
+          "<T>"
+        ],
+        "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkResolveResponse.resolved_objects",
+            "type": "Array",
+            "tags": [],
+            "label": "resolved_objects",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsResolveResponse",
+                "text": "SavedObjectsResolveResponse"
+              },
+              "<T>[]"
+            ],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.SavedObjectsBulkResponse",
         "type": "Interface",
         "tags": [],
@@ -10167,25 +10596,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              "{ get: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              "SavedObject",
-              "<T>>; delete: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteOptions",
-                "text": "SavedObjectsDeleteOptions"
-              },
-              ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+              "{ create: <T = unknown>(type: string, attributes: T, options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -10243,7 +10654,15 @@
                 "section": "def-server.SavedObjectsCheckConflictsResponse",
                 "text": "SavedObjectsCheckConflictsResponse"
               },
-              ">; find: <T = unknown, A = unknown>(options: ",
+              ">; delete: (type: string, id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsDeleteOptions",
+                "text": "SavedObjectsDeleteOptions"
+              },
+              ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -10283,6 +10702,40 @@
                 "section": "def-server.SavedObjectsBulkResponse",
                 "text": "SavedObjectsBulkResponse"
               },
+              "<T>>; bulkResolve: <T = unknown>(objects: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveObject",
+                "text": "SavedObjectsBulkResolveObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveResponse",
+                "text": "SavedObjectsBulkResolveResponse"
+              },
+              "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              ") => Promise<",
+              "SavedObject",
               "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
               {
                 "pluginId": "core",
@@ -13013,9 +13466,21 @@
             "description": [],
             "signature": [
               "<Meta extends ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               " = ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               ">(msg: string, meta: Meta) => void"
             ],
             "path": "src/core/server/saved_objects/migrations/core/migration_logger.ts",
@@ -13397,7 +13862,7 @@
                 "section": "def-server.SavedObjectsRepository",
                 "text": "SavedObjectsRepository"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -13460,7 +13925,7 @@
                 "section": "def-server.SavedObjectsRepository",
                 "text": "SavedObjectsRepository"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -13865,7 +14330,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -13941,7 +14406,7 @@
                 "section": "def-server.SavedObjectsRepository",
                 "text": "SavedObjectsRepository"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -14006,7 +14471,7 @@
                 "section": "def-server.SavedObjectsRepository",
                 "text": "SavedObjectsRepository"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -14072,7 +14537,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -14101,7 +14566,7 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                  ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
                 "path": "src/core/server/saved_objects/saved_objects_service.ts",
                 "deprecated": false,
@@ -14128,7 +14593,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -14157,7 +14622,7 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                  ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
                 "path": "src/core/server/saved_objects/saved_objects_service.ts",
                 "deprecated": false,
@@ -14454,6 +14919,36 @@
             "label": "importableAndExportable",
             "description": [
               "\nIs the type importable or exportable. Defaults to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/server/saved_objects/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.displayName",
+            "type": "string",
+            "tags": [],
+            "label": "displayName",
+            "description": [
+              "\nWhen specified, will be used instead of the type's name in SO management section's labels."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/server/saved_objects/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.visibleInManagement",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visibleInManagement",
+            "description": [
+              "\nWhen set to false, the type will not be listed or searchable in the SO management section.\nMain usage of setting this property to false for a type is when objects from the type should\nbe included in the export via references or export hooks, but should not directly appear in the SOM.\nDefaults to `true`.\n"
             ],
             "signature": [
               "boolean | undefined"
@@ -15143,25 +15638,7 @@
           "\nSee {@link SavedObjectsRepository}\n"
         ],
         "signature": [
-          "{ get: <T = unknown>(type: string, id: string, options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsBaseOptions",
-            "text": "SavedObjectsBaseOptions"
-          },
-          ") => Promise<",
-          "SavedObject",
-          "<T>>; delete: (type: string, id: string, options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsDeleteOptions",
-            "text": "SavedObjectsDeleteOptions"
-          },
-          ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+          "{ create: <T = unknown>(type: string, attributes: T, options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -15219,7 +15696,15 @@
             "section": "def-server.SavedObjectsCheckConflictsResponse",
             "text": "SavedObjectsCheckConflictsResponse"
           },
-          ">; deleteByNamespace: (namespace: string, options?: ",
+          ">; delete: (type: string, id: string, options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsDeleteOptions",
+            "text": "SavedObjectsDeleteOptions"
+          },
+          ") => Promise<{}>; deleteByNamespace: (namespace: string, options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -15267,6 +15752,40 @@
             "section": "def-server.SavedObjectsBulkResponse",
             "text": "SavedObjectsBulkResponse"
           },
+          "<T>>; bulkResolve: <T = unknown>(objects: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBulkResolveObject",
+            "text": "SavedObjectsBulkResolveObject"
+          },
+          "[], options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBaseOptions",
+            "text": "SavedObjectsBaseOptions"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBulkResolveResponse",
+            "text": "SavedObjectsBulkResolveResponse"
+          },
+          "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBaseOptions",
+            "text": "SavedObjectsBaseOptions"
+          },
+          ") => Promise<",
+          "SavedObject",
           "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
           {
             "pluginId": "core",
@@ -15632,25 +16151,7 @@
           "\nSaved Objects is Kibana's data persisentence mechanism allowing plugins to\nuse Elasticsearch for storing plugin state.\n\n## SavedObjectsClient errors\n\nSince the SavedObjectsClient has its hands in everything we\nare a little paranoid about the way we present errors back to\nto application code. Ideally, all errors will be either:\n\n  1. Caused by bad implementation (ie. undefined is not a function) and\n     as such unpredictable\n  2. An error that has been classified and decorated appropriately\n     by the decorators in {@link SavedObjectsErrorHelpers}\n\nType 1 errors are inevitable, but since all expected/handle-able errors\nshould be Type 2 the `isXYZError()` helpers exposed at\n`SavedObjectsErrorHelpers` should be used to understand and manage error\nresponses from the `SavedObjectsClient`.\n\nType 2 errors are decorated versions of the source error, so if\nthe elasticsearch client threw an error it will be decorated based\non its type. That means that rather than looking for `error.body.error.type` or\ndoing substring checks on `error.body.error.reason`, just use the helpers to\nunderstand the meaning of the error:\n\n  ```js\n  if (SavedObjectsErrorHelpers.isNotFoundError(error)) {\n     // handle 404\n  }\n\n  if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) {\n     // 401 handling should be automatic, but in case you wanted to know\n  }\n\n  // always rethrow the error unless you handle it\n  throw error;\n  ```\n\n### 404s from missing index\n\nFrom the perspective of application code and APIs the SavedObjectsClient is\na black box that persists objects. One of the internal details that users have\nno control over is that we use an elasticsearch index for persistance and that\nindex might be missing.\n\nAt the time of writing we are in the process of transitioning away from the\noperating assumption that the SavedObjects index is always available. Part of\nthis transition is handling errors resulting from an index missing. These used\nto trigger a 500 error in most cases, and in others cause 404s with different\nerror messages.\n\nFrom my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The\nobject the request/call was targeting could not be found. This is why #14141\ntakes special care to ensure that 404 errors are generic and don't distinguish\nbetween index missing or document missing.\n\nSee {@link SavedObjectsClient}\nSee {@link SavedObjectsErrorHelpers}\n"
         ],
         "signature": [
-          "{ get: <T = unknown>(type: string, id: string, options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsBaseOptions",
-            "text": "SavedObjectsBaseOptions"
-          },
-          ") => Promise<",
-          "SavedObject",
-          "<T>>; delete: (type: string, id: string, options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsDeleteOptions",
-            "text": "SavedObjectsDeleteOptions"
-          },
-          ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+          "{ create: <T = unknown>(type: string, attributes: T, options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -15708,7 +16209,15 @@
             "section": "def-server.SavedObjectsCheckConflictsResponse",
             "text": "SavedObjectsCheckConflictsResponse"
           },
-          ">; find: <T = unknown, A = unknown>(options: ",
+          ">; delete: (type: string, id: string, options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsDeleteOptions",
+            "text": "SavedObjectsDeleteOptions"
+          },
+          ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -15748,6 +16257,40 @@
             "section": "def-server.SavedObjectsBulkResponse",
             "text": "SavedObjectsBulkResponse"
           },
+          "<T>>; bulkResolve: <T = unknown>(objects: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBulkResolveObject",
+            "text": "SavedObjectsBulkResolveObject"
+          },
+          "[], options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBaseOptions",
+            "text": "SavedObjectsBaseOptions"
+          },
+          " | undefined) => Promise<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBulkResolveResponse",
+            "text": "SavedObjectsBulkResolveResponse"
+          },
+          "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsBaseOptions",
+            "text": "SavedObjectsBaseOptions"
+          },
+          ") => Promise<",
+          "SavedObject",
           "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
           {
             "pluginId": "core",
@@ -15964,7 +16507,7 @@
             "section": "def-server.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
         ],
         "path": "src/core/server/saved_objects/service/lib/scoped_client_provider.ts",
         "deprecated": false,
@@ -16073,7 +16616,7 @@
             "section": "def-server.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
         ],
         "path": "src/core/server/saved_objects/service/lib/scoped_client_provider.ts",
         "deprecated": false,

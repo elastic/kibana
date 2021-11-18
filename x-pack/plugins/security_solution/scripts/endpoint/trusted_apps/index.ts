@@ -10,11 +10,17 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import bluebird from 'bluebird';
 import { basename } from 'path';
+import { AxiosResponse } from 'axios';
 import { TRUSTED_APPS_CREATE_API, TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
 import { TrustedApp } from '../../../common/endpoint/types';
 import { TrustedAppGenerator } from '../../../common/endpoint/data_generators/trusted_app_generator';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
+import { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
+import {
+  PACKAGE_POLICY_API_ROUTES,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../fleet/common';
 
 const defaultLogger = new ToolingLog({ level: 'info', writeTo: process.stdout });
 const separator = '----------------------------------------';
@@ -35,7 +41,7 @@ export const cli = async () => {
 node ${basename(process.argv[1])} [options]
 
 Options:${Object.keys(cliDefaults.default).reduce((out, option) => {
-      // @ts-ignore
+      // @ts-expect-error TS7053
       return `${out}\n  --${option}=${cliDefaults.default[option]}`;
     }, '')}
 `);
@@ -83,21 +89,25 @@ export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
     }),
   ]);
 
-  // Setup a list of read endpoint policies and return a method to randomly select one
+  // Setup a list of real endpoint policies and return a method to randomly select one
   const randomPolicyId: () => string = await (async () => {
     const randomN = (max: number): number => Math.floor(Math.random() * max);
-    const policyIds: string[] = [];
+    const policyIds: string[] =
+      (await fetchEndpointPolicies(kbnClient)).data.items.map((policy) => policy.id) || [];
 
-    for (let i = 0, t = 5; i < t; i++) {
-      policyIds.push(
-        (
-          await indexFleetEndpointPolicy(
-            kbnClient,
-            `Policy for Trusted App assignment ${i + 1}`,
-            installedEndpointPackage.version
-          )
-        ).integrationPolicies[0].id
-      );
+    // If the number of existing policies is less than 5, then create some more policies
+    if (policyIds.length < 5) {
+      for (let i = 0, t = 5 - policyIds.length; i < t; i++) {
+        policyIds.push(
+          (
+            await indexFleetEndpointPolicy(
+              kbnClient,
+              `Policy for Trusted App assignment ${i + 1}`,
+              installedEndpointPackage.version
+            )
+          ).integrationPolicies[0].id
+        );
+      }
     }
 
     return () => policyIds[randomN(policyIds.length)];
@@ -150,6 +160,19 @@ const createRunLogger = () => {
           }
         }
       },
+    },
+  });
+};
+
+const fetchEndpointPolicies = (
+  kbnClient: KbnClient
+): Promise<AxiosResponse<GetPolicyListResponse>> => {
+  return kbnClient.request<GetPolicyListResponse>({
+    method: 'GET',
+    path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+    query: {
+      perPage: 100,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
     },
   });
 };

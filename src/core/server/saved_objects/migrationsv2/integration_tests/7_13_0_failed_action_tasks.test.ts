@@ -113,7 +113,6 @@ function createRoot() {
     {
       migrations: {
         skip: false,
-        enableV2: true,
         batchSize: 250,
       },
       logging: {

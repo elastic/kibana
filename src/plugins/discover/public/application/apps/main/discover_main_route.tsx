@@ -8,15 +8,18 @@
 import React, { useEffect, useState, memo } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
-import type { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/public';
-import { IndexPatternAttributes, SavedObject } from 'src/plugins/data/common';
+import { i18n } from '@kbn/i18n';
+import { EuiEmptyPrompt } from '@elastic/eui';
+
+import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
 import { DiscoverServices } from '../../../build_services';
-import { SavedSearch } from '../../../saved_searches';
+import { SavedSearch, getSavedSearch, getSavedSearchFullPathUrl } from '../../../saved_searches';
 import { getState } from './services/discover_state';
 import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pattern';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/breadcrumbs';
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
+import { DataViewSavedObjectConflictError } from '../../../../../data_views/common';
 import { getUrlTracker } from '../../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 
@@ -37,6 +40,21 @@ interface DiscoverLandingParams {
   id: string;
 }
 
+const DiscoverError = ({ error }: { error: Error }) => (
+  <EuiEmptyPrompt
+    iconType="alert"
+    iconColor="danger"
+    title={
+      <h2>
+        {i18n.translate('discover.discoverError.title', {
+          defaultMessage: 'Error loading Discover',
+        })}
+      </h2>
+    }
+    body={<p>{error.message}</p>}
+  />
+);
+
 export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   const {
     core,
@@ -46,7 +64,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     toastNotifications,
     http: { basePath },
   } = services;
-
+  const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const indexPattern = savedSearch?.searchSource?.getField('index');
   const [indexPatternList, setIndexPatternList] = useState<
@@ -58,60 +76,76 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   useEffect(() => {
     const savedSearchId = id;
 
-    async function loadDefaultOrCurrentIndexPattern(usedSavedSearch: SavedSearch) {
-      await data.indexPatterns.ensureDefaultDataView();
-      const { appStateContainer } = getState({ history, uiSettings: config });
-      const { index } = appStateContainer.getState();
-      const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
-      const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
-      const indexPatternData = await resolveIndexPattern(
-        ip,
-        usedSavedSearch.searchSource,
-        toastNotifications
-      );
-      setIndexPatternList(ipList);
-      return indexPatternData;
+    async function loadDefaultOrCurrentIndexPattern(searchSource: ISearchSource) {
+      try {
+        await data.indexPatterns.ensureDefaultDataView();
+        const { appStateContainer } = getState({ history, uiSettings: config });
+        const { index } = appStateContainer.getState();
+        const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
+
+        const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
+        const indexPatternData = await resolveIndexPattern(ip, searchSource, toastNotifications);
+
+        setIndexPatternList(ipList);
+
+        return indexPatternData;
+      } catch (e) {
+        setError(e);
+      }
     }
 
     async function loadSavedSearch() {
       try {
-        // force a refresh if a given saved search without id was saved
-        setSavedSearch(undefined);
-        const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
-        const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(loadedSavedSearch);
-        if (loadedSavedSearch && !loadedSavedSearch?.searchSource.getField('index')) {
-          loadedSavedSearch.searchSource.setField('index', loadedIndexPattern);
+        const currentSavedSearch = await getSavedSearch(savedSearchId, {
+          search: services.data.search,
+          savedObjectsClient: core.savedObjects.client,
+          spaces: services.spaces,
+        });
+
+        const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(
+          currentSavedSearch.searchSource
+        );
+
+        if (!currentSavedSearch.searchSource.getField('index')) {
+          currentSavedSearch.searchSource.setField('index', loadedIndexPattern);
         }
-        setSavedSearch(loadedSavedSearch);
-        if (savedSearchId) {
+
+        setSavedSearch(currentSavedSearch);
+
+        if (currentSavedSearch.id) {
           chrome.recentlyAccessed.add(
-            (loadedSavedSearch as unknown as SavedObjectDeprecated).getFullPath(),
-            loadedSavedSearch.title,
-            loadedSavedSearch.id
+            getSavedSearchFullPathUrl(currentSavedSearch.id),
+            currentSavedSearch.title ?? '',
+            currentSavedSearch.id
           );
         }
       } catch (e) {
-        redirectWhenMissing({
-          history,
-          navigateToApp: core.application.navigateToApp,
-          basePath,
-          mapping: {
-            search: '/',
-            'index-pattern': {
-              app: 'management',
-              path: `kibana/objects/savedSearches/${id}`,
+        if (e instanceof DataViewSavedObjectConflictError) {
+          setError(e);
+        } else {
+          redirectWhenMissing({
+            history,
+            navigateToApp: core.application.navigateToApp,
+            basePath,
+            mapping: {
+              search: '/',
+              'index-pattern': {
+                app: 'management',
+                path: `kibana/objects/savedSearches/${id}`,
+              },
             },
-          },
-          toastNotifications,
-          onBeforeRedirect() {
-            getUrlTracker().setTrackedUrl('/');
-          },
-        })(e);
+            toastNotifications,
+            onBeforeRedirect() {
+              getUrlTracker().setTrackedUrl('/');
+            },
+          })(e);
+        }
       }
     }
 
     loadSavedSearch();
   }, [
+    core.savedObjects.client,
     basePath,
     chrome.recentlyAccessed,
     config,
@@ -130,6 +164,10 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
         : getRootBreadcrumbs()
     );
   }, [chrome, savedSearch]);
+
+  if (error) {
+    return <DiscoverError error={error} />;
+  }
 
   if (!indexPattern || !savedSearch) {
     return <LoadingIndicator />;

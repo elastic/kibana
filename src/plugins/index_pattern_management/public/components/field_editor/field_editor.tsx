@@ -15,7 +15,6 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiCode,
-  EuiCodeEditor,
   EuiConfirmModal,
   EuiFieldNumber,
   EuiFieldText,
@@ -33,6 +32,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { PainlessLang } from '@kbn/monaco';
 import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import {
   getEnabledScriptingLanguages,
@@ -46,7 +46,7 @@ import {
   ES_FIELD_TYPES,
   DataPublicPluginStart,
 } from '../../../../../plugins/data/public';
-import { context as contextType } from '../../../../kibana_react/public';
+import { context as contextType, CodeEditor } from '../../../../kibana_react/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
@@ -58,9 +58,6 @@ import { IndexPatternManagmentContextValue } from '../../types';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { executeScript, isScriptValid } from './lib';
-
-// This loads Ace editor's "groovy" mode, used below to highlight the script.
-import 'brace/mode/groovy';
 
 const getFieldTypeFormatsList = (
   field: IndexPatternField['spec'],
@@ -509,8 +506,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           helpText={
             <FormattedMessage
               id="indexPatternManagement.formatLabel"
-              defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
-              completely changed and prevent highlighting in Discover from working."
+              defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
             />
           }
         >
@@ -594,13 +590,16 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           isInvalid={isInvalid}
           error={isInvalid ? errorMsg : null}
         >
-          <EuiCodeEditor
-            value={spec.script}
-            data-test-subj="editorFieldScript"
-            onChange={this.onScriptChange}
-            mode="groovy"
+          <CodeEditor
+            languageId={PainlessLang.ID}
             width="100%"
             height="300px"
+            value={spec.script ?? ''}
+            onChange={this.onScriptChange}
+            data-test-subj="editorFieldScript"
+            aria-label={i18n.translate('indexPatternManagement.scriptLabelAriaLabel', {
+              defaultMessage: 'Script editor',
+            })}
           />
         </EuiFormRow>
 

@@ -31,59 +31,74 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await observability.alerts.navigateToTimeWithData();
+      await observability.alerts.common.navigateToTimeWithData();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
+    describe('With no data', () => {
+      it('Shows the no data screen', async () => {
+        await observability.alerts.common.getNoDataPageOrFail();
+      });
+    });
+
     describe('Alerts table', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await observability.alerts.common.navigateToTimeWithData();
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
       it('Renders the table', async () => {
-        await observability.alerts.getTableOrFail();
+        await observability.alerts.common.getTableOrFail();
       });
 
       it('Renders the correct number of cells', async () => {
         await retry.try(async () => {
-          const cells = await observability.alerts.getTableCells();
+          const cells = await observability.alerts.common.getTableCells();
           expect(cells.length).to.be(TOTAL_ALERTS_CELL_COUNT);
         });
       });
 
       describe('Filtering', () => {
         afterEach(async () => {
-          await observability.alerts.clearQueryBar();
+          await observability.alerts.common.clearQueryBar();
         });
 
         after(async () => {
           // NOTE: We do this as the query bar takes the place of the datepicker when it is in focus, so we'll reset
           // back to default.
-          await observability.alerts.submitQuery('');
+          await observability.alerts.common.submitQuery('');
         });
 
         it('Autocompletion works', async () => {
-          await observability.alerts.typeInQueryBar('kibana.alert.s');
+          await observability.alerts.common.typeInQueryBar('kibana.alert.s');
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
         });
 
         it('Applies filters correctly', async () => {
-          await observability.alerts.submitQuery('kibana.alert.status: recovered');
+          await observability.alerts.common.submitQuery('kibana.alert.status: recovered');
           await retry.try(async () => {
-            const cells = await observability.alerts.getTableCells();
+            const cells = await observability.alerts.common.getTableCells();
             expect(cells.length).to.be(RECOVERED_ALERTS_CELL_COUNT);
           });
         });
 
         it('Displays a no data state when filters produce zero results', async () => {
-          await observability.alerts.submitQuery('kibana.alert.consumer: uptime');
-          await observability.alerts.getNoDataStateOrFail();
+          await observability.alerts.common.submitQuery('kibana.alert.consumer: uptime');
+          await observability.alerts.common.getNoDataStateOrFail();
         });
       });
 
       describe('Date selection', () => {
         after(async () => {
-          await observability.alerts.navigateToTimeWithData();
+          await observability.alerts.common.navigateToTimeWithData();
         });
 
         it('Correctly applies date picker selections', async () => {
@@ -91,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
             // We shouldn't expect any data for the last 15 minutes
             await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
-            await observability.alerts.getNoDataStateOrFail();
+            await observability.alerts.common.getNoDataStateOrFail();
             await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
           });
         });
@@ -99,37 +114,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Flyout', () => {
         it('Can be opened', async () => {
-          await observability.alerts.openAlertsFlyout();
-          await observability.alerts.getAlertsFlyoutOrFail();
+          await observability.alerts.common.openAlertsFlyout();
+          await observability.alerts.common.getAlertsFlyoutOrFail();
         });
 
         it('Can be closed', async () => {
-          await observability.alerts.closeAlertsFlyout();
+          await observability.alerts.common.closeAlertsFlyout();
           await testSubjects.missingOrFail('alertsFlyout');
         });
 
         describe('When open', async () => {
           before(async () => {
-            await observability.alerts.openAlertsFlyout();
+            await observability.alerts.common.openAlertsFlyout();
           });
 
           after(async () => {
-            await observability.alerts.closeAlertsFlyout();
+            await observability.alerts.common.closeAlertsFlyout();
           });
 
           it('Displays the correct title', async () => {
             await retry.try(async () => {
               const titleText = await (
-                await observability.alerts.getAlertsFlyoutTitle()
+                await observability.alerts.common.getAlertsFlyoutTitle()
               ).getVisibleText();
               expect(titleText).to.contain('Log threshold');
             });
           });
 
           it('Displays the correct content', async () => {
-            const flyoutTitles = await observability.alerts.getAlertsFlyoutDescriptionListTitles();
+            const flyoutTitles =
+              await observability.alerts.common.getAlertsFlyoutDescriptionListTitles();
             const flyoutDescriptions =
-              await observability.alerts.getAlertsFlyoutDescriptionListDescriptions();
+              await observability.alerts.common.getAlertsFlyoutDescriptionListDescriptions();
 
             const expectedTitles = [
               'Status',
@@ -158,7 +174,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('Displays a View in App button', async () => {
-            await observability.alerts.getAlertsFlyoutViewInAppButtonOrFail();
+            await observability.alerts.common.getAlertsFlyoutViewInAppButtonOrFail();
           });
         });
       });
@@ -166,35 +182,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('Cell actions', () => {
         beforeEach(async () => {
           await retry.try(async () => {
-            const cells = await observability.alerts.getTableCells();
+            const cells = await observability.alerts.common.getTableCells();
             const alertStatusCell = cells[2];
             await alertStatusCell.moveMouseTo();
             await retry.waitFor(
               'cell actions visible',
-              async () => await observability.alerts.copyToClipboardButtonExists()
+              async () => await observability.alerts.common.copyToClipboardButtonExists()
             );
           });
         });
 
         afterEach(async () => {
-          await observability.alerts.clearQueryBar();
+          await observability.alerts.common.clearQueryBar();
         });
 
         it('Copy button works', async () => {
           // NOTE: We don't have access to the clipboard in a headless environment,
           // so we'll just check the button is clickable in the functional tests.
-          await (await observability.alerts.getCopyToClipboardButton()).click();
+          await (await observability.alerts.common.getCopyToClipboardButton()).click();
         });
 
         it('Filter for value works', async () => {
-          await (await observability.alerts.getFilterForValueButton()).click();
+          await (await observability.alerts.common.getFilterForValueButton()).click();
           const queryBarValue = await (
-            await observability.alerts.getQueryBar()
+            await observability.alerts.common.getQueryBar()
           ).getAttribute('value');
           expect(queryBarValue).to.be('kibana.alert.status: "active"');
           // Wait for request
           await retry.try(async () => {
-            const cells = await observability.alerts.getTableCells();
+            const cells = await observability.alerts.common.getTableCells();
             expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
           });
         });

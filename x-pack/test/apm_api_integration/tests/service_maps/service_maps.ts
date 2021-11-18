@@ -8,13 +8,13 @@
 import querystring from 'querystring';
 import url from 'url';
 import expect from '@kbn/expect';
-import { isEmpty, uniq } from 'lodash';
+import { isEmpty, orderBy, uniq } from 'lodash';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
   const supertestAsApmReadUserWithoutMlAccess = getService(
     'legacySupertestAsApmReadUserWithoutMlAccess'
@@ -28,7 +28,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   registry.when('Service map with a basic license', { config: 'basic', archives: [] }, () => {
     it('is only be available to users with Platinum license (or higher)', async () => {
       const response = await supertest.get(
-        `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+        `/internal/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
       );
 
       expect(response.status).to.be(403);
@@ -40,10 +40,10 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   });
 
   registry.when('Service map without data', { config: 'trial', archives: [] }, () => {
-    describe('/api/apm/service-map', () => {
+    describe('/internal/apm/service-map', () => {
       it('returns an empty list', async () => {
         const response = await supertest.get(
-          `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+          `/internal/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
         );
 
         expect(response.status).to.be(200);
@@ -51,14 +51,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/api/apm/service-map/service/{serviceName}', () => {
+    describe('/internal/apm/service-map/service/{serviceName}', () => {
       it('returns an object with nulls', async () => {
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
           environment: 'ENVIRONMENT_ALL',
         });
-        const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
+        const response = await supertest.get(`/internal/apm/service-map/service/opbeans-node?${q}`);
 
         expect(response.status).to.be(200);
 
@@ -76,14 +76,15 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/api/apm/service-map/backend/{backendName}', () => {
+    describe('/internal/apm/service-map/backend', () => {
       it('returns an object with nulls', async () => {
         const q = querystring.stringify({
+          backendName: 'postgres',
           start: metadata.start,
           end: metadata.end,
           environment: 'ENVIRONMENT_ALL',
         });
-        const response = await supertest.get(`/api/apm/service-map/backend/postgres?${q}`);
+        const response = await supertest.get(`/internal/apm/service-map/backend?${q}`);
 
         expect(response.status).to.be(200);
 
@@ -101,12 +102,12 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   });
 
   registry.when('Service Map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
-    describe('/api/apm/service-map', () => {
+    describe('/internal/apm/service-map', () => {
       let response: PromiseReturnType<typeof supertest.get>;
 
       before(async () => {
         response = await supertest.get(
-          `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+          `/internal/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
         );
       });
 
@@ -151,15 +152,13 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             ">sqlite",
           ]
         `);
-
-        expectSnapshot(elements).toMatch();
       });
 
       describe('with ML data', () => {
         describe('with the default apm user', () => {
           before(async () => {
             response = await supertest.get(
-              `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+              `/internal/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
             );
           });
 
@@ -186,67 +185,65 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             expect(dataWithAnomalies).not.to.be.empty();
 
             expectSnapshot(dataWithAnomalies.length).toMatchInline(`7`);
-            expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
+            expectSnapshot(orderBy(dataWithAnomalies, 'data.id').slice(0, 3)).toMatchInline(`
               Array [
                 Object {
                   "data": Object {
-                    "agent.name": "rum-js",
-                    "id": "opbeans-rum",
-                    "service.environment": "testing",
-                    "service.name": "opbeans-rum",
-                    "serviceAnomalyStats": Object {
-                      "actualValue": 1020870.96774194,
-                      "anomalyScore": 0,
-                      "healthStatus": "healthy",
-                      "jobId": "apm-testing-41e5-high_mean_transaction_duration",
-                      "serviceName": "opbeans-rum",
-                      "transactionType": "page-load",
-                    },
-                  },
-                },
-                Object {
-                  "data": Object {
-                    "agent.name": "ruby",
-                    "id": "opbeans-ruby",
+                    "agent.name": "dotnet",
+                    "id": "opbeans-dotnet",
                     "service.environment": "production",
-                    "service.name": "opbeans-ruby",
+                    "service.name": "opbeans-dotnet",
                     "serviceAnomalyStats": Object {
-                      "actualValue": 62009.3356643357,
+                      "actualValue": 868025.86875,
                       "anomalyScore": 0,
                       "healthStatus": "healthy",
                       "jobId": "apm-production-6117-high_mean_transaction_duration",
-                      "serviceName": "opbeans-ruby",
+                      "serviceName": "opbeans-dotnet",
                       "transactionType": "request",
                     },
                   },
                 },
                 Object {
                   "data": Object {
-                    "agent.name": "python",
-                    "id": "opbeans-python",
-                    "service.environment": "production",
-                    "service.name": "opbeans-python",
+                    "agent.name": "go",
+                    "id": "opbeans-go",
+                    "service.environment": "testing",
+                    "service.name": "opbeans-go",
                     "serviceAnomalyStats": Object {
-                      "actualValue": 38862.7831325301,
-                      "anomalyScore": 0.0725701910161626,
+                      "actualValue": 102786.319148936,
+                      "anomalyScore": 0,
+                      "healthStatus": "healthy",
+                      "jobId": "apm-testing-41e5-high_mean_transaction_duration",
+                      "serviceName": "opbeans-go",
+                      "transactionType": "request",
+                    },
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "agent.name": "java",
+                    "id": "opbeans-java",
+                    "service.environment": "production",
+                    "service.name": "opbeans-java",
+                    "serviceAnomalyStats": Object {
+                      "actualValue": 175568.855769231,
+                      "anomalyScore": 0,
                       "healthStatus": "healthy",
                       "jobId": "apm-production-6117-high_mean_transaction_duration",
-                      "serviceName": "opbeans-python",
+                      "serviceName": "opbeans-java",
                       "transactionType": "request",
                     },
                   },
                 },
               ]
             `);
-
-            expectSnapshot(response.body).toMatch();
           });
         });
 
         describe('with a user that does not have access to ML', () => {
           before(async () => {
             response = await supertestAsApmReadUserWithoutMlAccess.get(
-              `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+              `/internal/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
             );
           });
 
@@ -267,7 +264,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           it('returns service map elements', async () => {
             response = await supertest.get(
               url.format({
-                pathname: '/api/apm/service-map',
+                pathname: '/internal/apm/service-map',
                 query: {
                   environment: 'ENVIRONMENT_ALL',
                   start: metadata.start,
@@ -284,14 +281,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/api/apm/service-map/service/{serviceName}', () => {
+    describe('/internal/apm/service-map/service/{serviceName}', () => {
       it('returns an object with data', async () => {
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
           environment: 'ENVIRONMENT_ALL',
         });
-        const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
+        const response = await supertest.get(`/internal/apm/service-map/service/opbeans-node?${q}`);
 
         expect(response.status).to.be(200);
 
@@ -301,22 +298,23 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             "avgErrorRate": 0,
             "avgMemoryUsage": 0.202572668763642,
             "transactionStats": Object {
-              "avgRequestsPerMinute": 5.2,
-              "avgTransactionDuration": 53906.6603773585,
+              "avgRequestsPerMinute": 7.13333333333333,
+              "avgTransactionDuration": 53147.5747663551,
             },
           }
         `);
       });
     });
 
-    describe('/api/apm/service-map/backend/{backendName}', () => {
+    describe('/internal/apm/service-map/backend', () => {
       it('returns an object with data', async () => {
         const q = querystring.stringify({
+          backendName: 'postgresql',
           start: metadata.start,
           end: metadata.end,
           environment: 'ENVIRONMENT_ALL',
         });
-        const response = await supertest.get(`/api/apm/service-map/backend/postgresql?${q}`);
+        const response = await supertest.get(`/internal/apm/service-map/backend?${q}`);
 
         expect(response.status).to.be(200);
 

@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
@@ -39,6 +40,7 @@ import {
 export interface TableProps {
   taggingApi?: SavedObjectsTaggingApi;
   basePath: IBasePath;
+  allowedTypes: SavedObjectManagementTypeInfo[];
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
@@ -71,6 +73,8 @@ interface TableState {
   isIncludeReferencesDeepChecked: boolean;
   activeAction?: SavedObjectsManagementAction;
 }
+
+const MAX_PAGINATED_ITEM = 10000;
 
 export class Table extends PureComponent<TableProps, TableState> {
   state: TableState = {
@@ -145,12 +149,15 @@ export class Table extends PureComponent<TableProps, TableState> {
       actionRegistry,
       columnRegistry,
       taggingApi,
+      allowedTypes,
     } = this.props;
+
+    const cappedTotalItemCount = Math.min(totalItemCount, MAX_PAGINATED_ITEM);
 
     const pagination = {
       pageIndex,
       pageSize,
-      totalItemCount,
+      totalItemCount: cappedTotalItemCount,
       pageSizeOptions: [5, 10, 20, 50],
     };
 
@@ -182,10 +189,11 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowType',
         render: (type: string, object: SavedObjectWithMetadata) => {
+          const typeLabel = getSavedObjectLabel(type, allowedTypes);
           return (
-            <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+            <EuiToolTip position="top" content={typeLabel}>
               <EuiIcon
-                aria-label={getSavedObjectLabel(type)}
+                aria-label={typeLabel}
                 type={object.meta.icon || 'apps'}
                 size="s"
                 data-test-subj="objectType"
@@ -318,6 +326,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     );
 
     const activeActionContents = this.state.activeAction?.render() ?? null;
+    const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
     return (
       <Fragment>
@@ -389,6 +398,18 @@ export class Table extends PureComponent<TableProps, TableState> {
         />
         {queryParseError}
         <EuiSpacer size="s" />
+        {exceededResultCount && (
+          <>
+            <EuiText color="subdued" size="s" data-test-subj="savedObjectsTableTooManyResultsLabel">
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.table.tooManyResultsLabel"
+                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# object} other {# objects}}"
+                values={{ totalItemCount, limit: MAX_PAGINATED_ITEM }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable
             loading={isSearching}

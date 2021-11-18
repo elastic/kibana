@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { filter } from 'rxjs/operators';
 import { Adapters } from '../../../../../../inspector/common';
-import { isCompleteResponse, SearchSource } from '../../../../../../data/common';
+import { isCompleteResponse, ISearchSource } from '../../../../../../data/common';
 import { FetchStatus } from '../../../types';
 import { SavedSearchData } from '../services/use_saved_search';
 import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
@@ -17,7 +17,7 @@ import { DiscoverServices } from '../../../../build_services';
 
 export const fetchDocuments = (
   data$: SavedSearchData,
-  searchSource: SearchSource,
+  searchSource: ISearchSource,
   {
     abortController,
     inspectorAdapters,
@@ -38,6 +38,13 @@ export const fetchDocuments = (
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', true);
+  if (searchSource.getField('index')?.type === 'rollup') {
+    // We treat that index pattern as "normal" even if it was a rollup index pattern,
+    // since the rollup endpoint does not support querying individual documents, but we
+    // can get them from the regular _search API that will be used if the index pattern
+    // not a rollup index pattern.
+    searchSource.setOverwriteDataViewType(undefined);
+  }
 
   sendLoadingMsg(documents$);
 

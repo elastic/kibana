@@ -16,10 +16,11 @@ import {
   EuiListGroupItem,
   EuiShowFor,
   EuiCollapsibleNavProps,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
-import React, { Fragment, useRef } from 'react';
+import React, { Fragment, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
@@ -27,8 +28,12 @@ import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
-
+import {
+  createEuiListItem,
+  createRecentNavLink,
+  isModifiedOrPrevented,
+  createEuiButtonItem,
+} from './nav_link';
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
 
@@ -95,12 +100,28 @@ export function CollapsibleNav({
   button,
   ...observables
 }: Props) {
-  const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
+  const allLinks = useObservable(observables.navLinks$, []);
+  const allowedLinks = useMemo(
+    () =>
+      allLinks.filter(
+        // Filterting out hidden links and the integrations one in favor of a specific Add Data button at the bottom
+        (link) => !link.hidden
+      ),
+    [allLinks]
+  );
+  const integrationsLink = useMemo(
+    () =>
+      allLinks.find(
+        // Find just the integrations link
+        (link) => link.id === 'integrations'
+      ),
+    [allLinks]
+  );
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
   const customNavLink = useObservable(observables.customNavLink$, undefined);
   const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
-  const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
+  const groupedNavLinks = groupBy(allowedLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
@@ -176,6 +197,7 @@ export function CollapsibleNav({
                 iconType: 'home',
                 href: homeHref,
                 'data-test-subj': 'homeLink',
+                isActive: appId === 'home',
                 onClick: (event) => {
                   if (isModifiedOrPrevented(event)) {
                     return;
@@ -217,7 +239,7 @@ export function CollapsibleNav({
               // Can remove icon from recent links completely
               const { iconType, onClick, ...hydratedLink } = createRecentNavLink(
                 link,
-                navLinks,
+                allowedLinks,
                 basePath,
                 navigateToUrl
               );
@@ -323,6 +345,29 @@ export function CollapsibleNav({
           </EuiCollapsibleNavGroup>
         </EuiShowFor>
       </EuiFlexItem>
+      {integrationsLink && (
+        <EuiFlexItem grow={false}>
+          {/* Span fakes the nav group into not being the first item and therefore adding a top border */}
+          <span />
+          <EuiCollapsibleNavGroup>
+            <EuiButton
+              {...createEuiButtonItem({
+                link: integrationsLink,
+                navigateToUrl,
+                onClick: closeNav,
+                dataTestSubj: `collapsibleNavAppButton-${integrationsLink.id}`,
+              })}
+              fill
+              fullWidth
+              iconType="plusInCircleFilled"
+            >
+              {i18n.translate('core.ui.primaryNav.addData', {
+                defaultMessage: 'Add integrations',
+              })}
+            </EuiButton>
+          </EuiCollapsibleNavGroup>
+        </EuiFlexItem>
+      )}
     </EuiCollapsibleNav>
   );
 }

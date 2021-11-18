@@ -9,10 +9,9 @@ import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server'
 import { configSchema, ConfigSchema } from '../config';
 import { TriggersActionsPlugin } from './plugin';
 
-export { PluginStartContract } from './plugin';
+export type { PluginStartContract } from './plugin';
+export type { TimeSeriesQuery, CoreQueryParams } from './data';
 export {
-  TimeSeriesQuery,
-  CoreQueryParams,
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
   validateTimeWindowUnits,
@@ -31,6 +30,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
       const triggersActionsUi = get(settings, fromPath);
       if (triggersActionsUi?.enabled === false || triggersActionsUi?.enabled === true) {
         addDeprecation({
+          configPath: 'xpack.trigger_actions_ui.enabled',
           message: `"xpack.trigger_actions_ui.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
             manualSteps: [`Remove "xpack.trigger_actions_ui.enabled" from your kibana configs.`],

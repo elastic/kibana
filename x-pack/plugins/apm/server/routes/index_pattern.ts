@@ -12,7 +12,7 @@ import { getDynamicIndexPattern } from '../lib/index_pattern/get_dynamic_index_p
 import { createApmServerRoute } from './create_apm_server_route';
 
 const staticIndexPatternRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/index_pattern/static',
+  endpoint: 'POST /internal/apm/index_pattern/static',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const {
@@ -43,7 +43,7 @@ const staticIndexPatternRoute = createApmServerRoute({
 });
 
 const dynamicIndexPatternRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/index_pattern/dynamic',
+  endpoint: 'GET /internal/apm/index_pattern/dynamic',
   options: { tags: ['access:apm'] },
   handler: async ({ context, config, logger }) => {
     const dynamicIndexPattern = await getDynamicIndexPattern({

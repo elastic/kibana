@@ -19,6 +19,8 @@ import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { updateRules } from '../../rules/update_rules';
+import { legacyMigrate } from '../../rules/utils';
+import { readRules } from '../../rules/read_rules';
 
 export const updateRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
@@ -69,11 +71,25 @@ export const updateRulesBulkRoute = (
 
             throwHttpError(await mlAuthz.validateRuleType(payloadRule.type));
 
+            const existingRule = await readRules({
+              isRuleRegistryEnabled,
+              rulesClient,
+              ruleId: payloadRule.rule_id,
+              id: payloadRule.id,
+            });
+
+            const migratedRule = await legacyMigrate({
+              rulesClient,
+              savedObjectsClient,
+              rule: existingRule,
+            });
+
             const rule = await updateRules({
               spaceId: context.securitySolution.getSpaceId(),
               rulesClient,
               ruleStatusClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
+              existingRule: migratedRule,
               ruleUpdate: payloadRule,
               isRuleRegistryEnabled,
             });

@@ -24,12 +24,12 @@ export function mysqlLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'mysqlLogs',
     name: i18n.translate('home.tutorials.mysqlLogs.nameTitle', {
-      defaultMessage: 'MySQL logs',
+      defaultMessage: 'MySQL Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.mysqlLogs.shortDescription', {
-      defaultMessage: 'Collect and parse error and slow logs created by MySQL.',
+      defaultMessage: 'Collect and parse logs from MySQL servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mysqlLogs.longDescription', {
       defaultMessage:
@@ -59,5 +59,6 @@ export function mysqlLogsSpecProvider(context: TutorialContext): TutorialSchema 
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['datastore'],
   };
 }

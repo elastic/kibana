@@ -4,24 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { APIReturnType } from '../..//services/rest/createCallApmApi';
+import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../common/fleet';
+import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { getCommands } from './commands/get_commands';
-import { CopyCommands } from './copy_commands';
 import { getPolicyOptions, PolicyOption } from './get_policy_options';
 import { PolicySelector } from './policy_selector';
 
-export type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
+export type APIResponseType = APIReturnType<'GET /internal/apm/fleet/agents'>;
 
 const CentralizedContainer = styled.div`
   display: flex;
@@ -72,7 +66,7 @@ function getFleetLink({
       }
     : {
         label: GET_STARTED_WITH_FLEET_LABEL,
-        href: `${basePath}/app/integrations#/detail/apm-0.4.0/overview`,
+        href: `${basePath}/app/integrations#/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`,
       };
 }
 
@@ -90,7 +84,7 @@ function TutorialConfigAgent({
     async function fetchData() {
       setIsLoading(true);
       try {
-        const response = await http.get('/api/apm/fleet/agents');
+        const response = await http.get('/internal/apm/fleet/agents');
         if (response) {
           setData(response as APIResponseType);
         }
@@ -136,27 +130,19 @@ function TutorialConfigAgent({
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <PolicySelector
-            options={options}
-            selectedOption={selectedOption}
-            onChange={(newSelectedOption) =>
-              setSelectedOption(newSelectedOption)
-            }
-            fleetLink={getFleetLink({
-              isFleetEnabled: data.isFleetEnabled,
-              hasFleetAgents,
-              basePath,
-            })}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CopyCommands commands={commands} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <PolicySelector
+        options={options}
+        selectedOption={selectedOption}
+        onChange={(newSelectedOption) => setSelectedOption(newSelectedOption)}
+        fleetLink={getFleetLink({
+          isFleetEnabled: data.isFleetEnabled,
+          hasFleetAgents,
+          basePath,
+        })}
+      />
+
       <EuiSpacer />
-      <EuiCodeBlock language="bash" data-test-subj="commands">
+      <EuiCodeBlock isCopyable language="bash" data-test-subj="commands">
         {commands}
       </EuiCodeBlock>
     </>

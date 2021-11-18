@@ -37,7 +37,6 @@ jest.mock('../../../../../common/lib/kibana/kibana_react', () => {
 });
 
 jest.mock('../../../../../common/components/draggables', () => ({
-  // eslint-disable-next-line react/display-name
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
 

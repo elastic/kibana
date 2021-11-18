@@ -16,16 +16,35 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useReadonlyHeader } from '../../hooks/use_readonly_header';
 import { casesBreadcrumbs } from './links';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useHasData } from '../../hooks/use_has_data';
+import { LoadingObservability } from '../overview/loading_observability';
+import { getNoDataConfig } from '../../utils/no_data_config';
 
 export const AllCasesPage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { core, ObservabilityPageTemplate } = usePluginContext();
   useReadonlyHeader();
-
   useBreadcrumbs([casesBreadcrumbs.cases]);
+
+  const { hasAnyData, isAllRequestsComplete } = useHasData();
+
+  if (!hasAnyData && !isAllRequestsComplete) {
+    return <LoadingObservability />;
+  }
+
+  // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
+  const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
+
+  const noDataConfig = getNoDataConfig({
+    hasData,
+    basePath: core.http.basePath,
+    docsLink: core.docLinks.links.observability.guide,
+  });
 
   return userPermissions == null || userPermissions?.read ? (
     <ObservabilityPageTemplate
+      data-test-subj={noDataConfig ? 'noDataPage' : undefined}
+      noDataConfig={noDataConfig}
       pageHeader={{
         pageTitle: <>{i18n.PAGE_TITLE}</>,
       }}

@@ -54,13 +54,6 @@ test('getTopNavLinks result', () => {
         "testId": "discoverNewButton",
       },
       Object {
-        "description": "Save Search",
-        "id": "save",
-        "label": "Save",
-        "run": [Function],
-        "testId": "discoverSaveButton",
-      },
-      Object {
         "description": "Open Saved Search",
         "id": "open",
         "label": "Open",
@@ -80,6 +73,15 @@ test('getTopNavLinks result', () => {
         "label": "Inspect",
         "run": [Function],
         "testId": "openInspectorButton",
+      },
+      Object {
+        "description": "Save Search",
+        "emphasize": true,
+        "iconType": "save",
+        "id": "save",
+        "label": "Save",
+        "run": [Function],
+        "testId": "discoverSaveButton",
       },
     ]
   `);

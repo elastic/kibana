@@ -42,7 +42,7 @@ describe('Discover topnav component', () => {
     const props = getProps(true);
     const component = shallowWithIntl(<DiscoverTopNav {...props} />);
     const topMenuConfig = component.props().config.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['options', 'new', 'save', 'open', 'share', 'inspect']);
+    expect(topMenuConfig).toEqual(['options', 'new', 'open', 'share', 'inspect', 'save']);
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {

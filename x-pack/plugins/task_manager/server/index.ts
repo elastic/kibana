@@ -12,14 +12,17 @@ import { configSchema, TaskManagerConfig, MAX_WORKERS_LIMIT } from './config';
 
 export const plugin = (initContext: PluginInitializerContext) => new TaskManagerPlugin(initContext);
 
-export {
+export type {
   TaskInstance,
   ConcreteTaskInstance,
   EphemeralTask,
   TaskRunCreatorFunction,
-  TaskStatus,
   RunContext,
 } from './task';
+
+export { TaskStatus } from './task';
+
+export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
 export { asInterval } from './lib/intervals';
 export {
@@ -27,10 +30,10 @@ export {
   throwUnrecoverableError,
   isEphemeralTaskRejectedDueToCapacityError,
 } from './task_running';
-export { RunNowResult } from './task_scheduling';
+export type { RunNowResult } from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 
-export {
+export type {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -38,11 +41,16 @@ export {
 
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,
+  exposeToUsage: {
+    max_workers: true,
+  },
   deprecations: () => [
     (settings, fromPath, addDeprecation) => {
       const taskManager = get(settings, fromPath);
       if (taskManager?.index) {
         addDeprecation({
+          level: 'critical',
+          configPath: `${fromPath}.index`,
           documentationUrl: 'https://ela.st/kbn-remove-legacy-multitenancy',
           message: `"${fromPath}.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
           correctiveActions: {
@@ -55,7 +63,9 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
       }
       if (taskManager?.max_workers > MAX_WORKERS_LIMIT) {
         addDeprecation({
-          message: `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated. Values greater than ${MAX_WORKERS_LIMIT} will not be supported starting in 8.0.`,
+          level: 'critical',
+          configPath: `${fromPath}.max_workers`,
+          message: `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated.`,
           correctiveActions: {
             manualSteps: [
               `Maximum allowed value of "${fromPath}.max_workers" is ${MAX_WORKERS_LIMIT}.` +
@@ -69,6 +79,7 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
       const taskManager = get(settings, fromPath);
       if (taskManager?.enabled === false || taskManager?.enabled === true) {
         addDeprecation({
+          configPath: 'xpack.task_manager.enabled',
           message: `"xpack.task_manager.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
             manualSteps: [`Remove "xpack.task_manager.enabled" from your kibana configs.`],

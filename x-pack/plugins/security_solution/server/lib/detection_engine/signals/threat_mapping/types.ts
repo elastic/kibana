@@ -179,7 +179,7 @@ export interface ThreatEnrichment {
 }
 
 export interface SortWithTieBreaker {
-  [key: string]: string;
+  [key: string]: 'asc' | 'desc';
 }
 
 export interface ThreatMatchNamedQuery {

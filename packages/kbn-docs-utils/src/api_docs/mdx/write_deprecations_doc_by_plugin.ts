@@ -52,7 +52,7 @@ export function writeDeprecationDocByPlugin(
               (ref) =>
                 `[${ref.path.substr(
                   ref.path.lastIndexOf(Path.sep) + 1
-                )}](https://github.com/elastic/kibana/tree/master/${
+                )}](https://github.com/elastic/kibana/tree/main/${
                   ref.path
                 }#:~:text=${encodeURIComponent(api.label)})`
             )
@@ -70,7 +70,7 @@ export function writeDeprecationDocByPlugin(
   const mdx = dedent(`
 ---
 id: kibDevDocsDeprecationsByPlugin
-slug: /kibana-dev-docs/deprecated-api-list-by-plugin
+slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-plugin
 title: Deprecated API usage by plugin
 summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
 date: 2021-05-02

@@ -224,14 +224,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   ]);
 
   const expressionExists = Boolean(expression);
-  const hasLoaded = Boolean(
-    activeVisualization && visualization.state && datasourceMap && datasourceStates
-  );
   useEffect(() => {
-    if (hasLoaded) {
-      dispatchLens(setSaveable(expressionExists));
-    }
-  }, [hasLoaded, expressionExists, dispatchLens]);
+    dispatchLens(setSaveable(expressionExists));
+  }, [expressionExists, dispatchLens]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
@@ -275,7 +270,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
       trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
-      switchToSuggestion(dispatchLens, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
+      switchToSuggestion(dispatchLens, suggestionForDraggedField, true);
     }
   }, [suggestionForDraggedField, expressionExists, dispatchLens]);
 

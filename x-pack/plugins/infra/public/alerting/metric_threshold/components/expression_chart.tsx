@@ -10,7 +10,7 @@ import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/cha
 import { first, last } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
@@ -34,7 +34,7 @@ import { ThresholdAnnotations } from '../../common/criterion_preview_chart/thres
 
 interface Props {
   expression: MetricExpression;
-  derivedIndexPattern: IIndexPattern;
+  derivedIndexPattern: DataViewBase;
   source: MetricsSourceConfiguration | null;
   filterQuery?: string;
   groupBy?: string | string[];

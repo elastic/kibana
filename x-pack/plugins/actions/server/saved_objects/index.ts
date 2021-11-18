@@ -39,6 +39,7 @@ export function setupSavedObjects(
     mappings: mappings.action as SavedObjectsTypeMappingDefinition,
     migrations: getActionsMigrations(encryptedSavedObjects),
     management: {
+      displayName: 'connector',
       defaultSearchField: 'name',
       importableAndExportable: true,
       getTitle(savedObject: SavedObject<RawAction>) {

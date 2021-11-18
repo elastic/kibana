@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import url from 'url';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
-import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
@@ -21,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('handles the empty state', async () => {
       const response = await supertest.get(
         url.format({
-          pathname: `/api/apm/services/opbeans-java/metadata/icons`,
+          pathname: `/internal/apm/services/opbeans-java/metadata/icons`,
           query: { start, end },
         })
       );
@@ -38,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns java service icons', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/metadata/icons`,
+            pathname: `/internal/apm/services/opbeans-java/metadata/icons`,
             query: { start, end },
           })
         );
@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns python service icons', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-python/metadata/icons`,
+            pathname: `/internal/apm/services/opbeans-python/metadata/icons`,
             query: { start, end },
           })
         );

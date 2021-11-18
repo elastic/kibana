@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { RecursiveReadonly } from '@kbn/utility-types';
+
 /**
  * Config deprecation hook used when invoking a {@link ConfigDeprecation}
  *
@@ -19,9 +20,11 @@ export type AddConfigDeprecation = (details: DeprecatedConfigDetails) => void;
  * @public
  */
 export interface DeprecatedConfigDetails {
-  /* The title to be displayed for the deprecation. */
+  /** The path of the deprecated config setting */
+  configPath: string;
+  /** The title to be displayed for the deprecation. */
   title?: string;
-  /* The message to be displayed for the deprecation. */
+  /** The message to be displayed for the deprecation. */
   message: string;
   /**
    * levels:
@@ -29,11 +32,11 @@ export interface DeprecatedConfigDetails {
    * - critical: needs to be addressed before upgrade.
    */
   level?: 'warning' | 'critical';
-  /* (optional) set false to prevent the config service from logging the deprecation message. */
+  /** (optional) set to `true` to prevent the config service from logging the deprecation message. */
   silent?: boolean;
-  /* (optional) link to the documentation for more details on the deprecation. */
+  /** (optional) link to the documentation for more details on the deprecation. */
   documentationUrl?: string;
-  /* corrective action needed to fix this deprecation. */
+  /** corrective action needed to fix this deprecation. */
   correctiveActions: {
     /**
      * Specify a list of manual steps our users need to follow
@@ -55,13 +58,26 @@ export interface DeprecatedConfigDetails {
  * ```typescript
  * const provider: ConfigDeprecation = (config, path) => ({ unset: [{ key: 'path.to.key' }] })
  * ```
- * @internal
+ * @public
  */
 export type ConfigDeprecation = (
   config: RecursiveReadonly<Record<string, any>>,
   fromPath: string,
-  addDeprecation: AddConfigDeprecation
+  addDeprecation: AddConfigDeprecation,
+  context: ConfigDeprecationContext
 ) => void | ConfigDeprecationCommand;
+
+/**
+ * Deprecation context provided to {@link ConfigDeprecation | config deprecations}
+ *
+ * @public
+ */
+export interface ConfigDeprecationContext {
+  /** The current Kibana version, e.g `7.16.1`, `8.0.0` */
+  version: string;
+  /** The current Kibana branch, e.g `7.x`, `7.16`, `master` */
+  branch: string;
+}
 
 /**
  * List of config paths changed during deprecation.
@@ -137,6 +153,7 @@ export interface ConfigDeprecationFactory {
     removeBy: string,
     details?: Partial<DeprecatedConfigDetails>
   ): ConfigDeprecation;
+
   /**
    * Deprecate a configuration property from the root configuration.
    * Will log a deprecation warning if the deprecatedKey was found.
@@ -157,6 +174,7 @@ export interface ConfigDeprecationFactory {
     removeBy: string,
     details?: Partial<DeprecatedConfigDetails>
   ): ConfigDeprecation;
+
   /**
    * Rename a configuration property from inside a plugin's configuration path.
    * Will log a deprecation warning if the oldKey was found and deprecation applied.
@@ -174,6 +192,7 @@ export interface ConfigDeprecationFactory {
     newKey: string,
     details?: Partial<DeprecatedConfigDetails>
   ): ConfigDeprecation;
+
   /**
    * Rename a configuration property from the root configuration.
    * Will log a deprecation warning if the oldKey was found and deprecation applied.
@@ -194,6 +213,7 @@ export interface ConfigDeprecationFactory {
     newKey: string,
     details?: Partial<DeprecatedConfigDetails>
   ): ConfigDeprecation;
+
   /**
    * Remove a configuration property from inside a plugin's configuration path.
    * Will log a deprecation warning if the unused key was found and deprecation applied.
@@ -207,6 +227,7 @@ export interface ConfigDeprecationFactory {
    * ```
    */
   unused(unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation;
+
   /**
    * Remove a configuration property from the root configuration.
    * Will log a deprecation warning if the unused key was found and deprecation applied.
@@ -229,4 +250,5 @@ export interface ConfigDeprecationFactory {
 export interface ConfigDeprecationWithContext {
   deprecation: ConfigDeprecation;
   path: string;
+  context: ConfigDeprecationContext;
 }

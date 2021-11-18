@@ -19,6 +19,7 @@ import type {
 import { History } from 'history';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { ScreenshotModePluginStart } from 'src/plugins/screenshot_mode/public';
 import { Query, Filter, IndexPattern, RefreshInterval, TimeRange } from './services/data';
 import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
 import { SharePluginStart } from './services/share';
@@ -35,8 +36,9 @@ import { IKbnUrlStateStorage } from './services/kibana_utils';
 import { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
+import { SpacesPluginStart } from './services/spaces';
 
-export { SavedDashboardPanel };
+export type { SavedDashboardPanel };
 
 export type NavAction = (anchorElement?: any) => void;
 export interface SavedDashboardPanelMap {
@@ -203,4 +205,6 @@ export interface DashboardAppServices {
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  spacesService?: SpacesPluginStart;
+  screenshotModeService?: ScreenshotModePluginStart;
 }

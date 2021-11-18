@@ -25,7 +25,7 @@ import { createApmServerRoute } from '../create_apm_server_route';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
 
 const customLinkTransactionRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/custom_links/transaction',
+  endpoint: 'GET /internal/apm/settings/custom_links/transaction',
   options: { tags: ['access:apm'] },
   params: t.partial({
     query: filterOptionsRt,
@@ -41,7 +41,7 @@ const customLinkTransactionRoute = createApmServerRoute({
 });
 
 const listCustomLinksRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/custom_links',
+  endpoint: 'GET /internal/apm/settings/custom_links',
   options: { tags: ['access:apm'] },
   params: t.partial({
     query: filterOptionsRt,
@@ -63,7 +63,7 @@ const listCustomLinksRoute = createApmServerRoute({
 });
 
 const createCustomLinkRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/settings/custom_links',
+  endpoint: 'POST /internal/apm/settings/custom_links',
   params: t.type({
     body: payloadRt,
   }),
@@ -86,7 +86,7 @@ const createCustomLinkRoute = createApmServerRoute({
 });
 
 const updateCustomLinkRoute = createApmServerRoute({
-  endpoint: 'PUT /api/apm/settings/custom_links/{id}',
+  endpoint: 'PUT /internal/apm/settings/custom_links/{id}',
   params: t.type({
     path: t.type({
       id: t.string,
@@ -116,7 +116,7 @@ const updateCustomLinkRoute = createApmServerRoute({
 });
 
 const deleteCustomLinkRoute = createApmServerRoute({
-  endpoint: 'DELETE /api/apm/settings/custom_links/{id}',
+  endpoint: 'DELETE /internal/apm/settings/custom_links/{id}',
   params: t.type({
     path: t.type({
       id: t.string,

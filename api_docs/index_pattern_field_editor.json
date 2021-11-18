@@ -327,9 +327,9 @@
             "signature": [
               "{ indexPattern: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -404,9 +404,9 @@
             "signature": [
               "{ indexPattern: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -425,9 +425,9 @@
             "signature": [
               "((field: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPatternField",
                 "text": "IndexPatternField"
               },
@@ -445,9 +445,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "data",
+                    "pluginId": "dataViews",
                     "scope": "common",
-                    "docId": "kibDataIndexPatternsPluginApi",
+                    "docId": "kibDataViewsPluginApi",
                     "section": "def-common.IndexPatternField",
                     "text": "IndexPatternField"
                   }

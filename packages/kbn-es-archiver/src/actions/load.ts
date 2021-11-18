@@ -40,6 +40,7 @@ export async function loadAction({
   inputDir,
   skipExisting,
   useCreate,
+  docsOnly,
   client,
   log,
   kbnClient,
@@ -47,6 +48,7 @@ export async function loadAction({
   inputDir: string;
   skipExisting: boolean;
   useCreate: boolean;
+  docsOnly?: boolean;
   client: KibanaClient;
   log: ToolingLog;
   kbnClient: KbnClient;
@@ -76,7 +78,7 @@ export async function loadAction({
 
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, log }),
+    createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
     createIndexDocRecordsStream(client, stats, progress, useCreate),
   ]);
 

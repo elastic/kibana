@@ -36,9 +36,6 @@ interface MonitoringSetupPluginDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
-
-const HASH_CHANGE = 'hashchange';
-
 export class MonitoringPlugin
   implements
     Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies>
@@ -88,11 +85,9 @@ export class MonitoringPlugin
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const { AngularApp } = await import('./angular');
         const externalConfig = this.getExternalConfig();
         const deps: MonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
-          kibanaLegacy: pluginsStart.kibanaLegacy,
           element: params.element,
           core: coreStart,
           data: pluginsStart.data,
@@ -112,7 +107,6 @@ export class MonitoringPlugin
           isCloud: deps.isCloud,
           pluginInitializerContext: deps.pluginInitializerContext,
           externalConfig: deps.externalConfig,
-          kibanaLegacy: deps.kibanaLegacy,
           triggersActionsUi: deps.triggersActionsUi,
           usageCollection: deps.usageCollection,
           appMountParameters: deps.appMountParameters,
@@ -120,26 +114,8 @@ export class MonitoringPlugin
 
         const config = Object.fromEntries(externalConfig);
         setConfig(config);
-        if (config.renderReactApp) {
-          const { renderApp } = await import('./application');
-          return renderApp(coreStart, pluginsStart, params, config);
-        } else {
-          const monitoringApp = new AngularApp(deps);
-          const removeHistoryListener = params.history.listen((location) => {
-            if (location.pathname === '' && location.hash === '') {
-              monitoringApp.applyScope();
-            }
-          });
-
-          const removeHashChange = this.setInitialTimefilter(deps);
-          return () => {
-            if (removeHashChange) {
-              removeHashChange();
-            }
-            removeHistoryListener();
-            monitoringApp.destroy();
-          };
-        }
+        const { renderApp } = await import('./application');
+        return renderApp(coreStart, pluginsStart, params, config);
       },
     };
 
@@ -150,28 +126,6 @@ export class MonitoringPlugin
 
   public stop() {}
 
-  private setInitialTimefilter({ data }: MonitoringStartPluginDependencies) {
-    const { timefilter } = data.query.timefilter;
-    const { pause: pauseByDefault } = timefilter.getRefreshIntervalDefaults();
-    if (pauseByDefault) {
-      return;
-    }
-    /**
-     * We can't use timefilter.getRefreshIntervalUpdate$ last value,
-     * since it's not a BehaviorSubject. This means we need to wait for
-     * hash change because of angular's applyAsync
-     */
-    const onHashChange = () => {
-      const { value, pause } = timefilter.getRefreshInterval();
-      if (!value && pause) {
-        window.removeEventListener(HASH_CHANGE, onHashChange);
-        timefilter.setRefreshInterval({ value: 10000, pause: false });
-      }
-    };
-    window.addEventListener(HASH_CHANGE, onHashChange, false);
-    return () => window.removeEventListener(HASH_CHANGE, onHashChange);
-  }
-
   private getExternalConfig() {
     const monitoring = this.initializerContext.config.get();
     return [
@@ -179,7 +133,6 @@ export class MonitoringPlugin
       ['showLicenseExpiration', monitoring.ui.show_license_expiration],
       ['showCgroupMetricsElasticsearch', monitoring.ui.container.elasticsearch.enabled],
       ['showCgroupMetricsLogstash', monitoring.ui.container.logstash.enabled],
-      ['renderReactApp', monitoring.ui.render_react_app],
     ];
   }
 

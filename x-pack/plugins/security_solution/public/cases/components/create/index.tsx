@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPanel } from '@elastic/eui';
 
 import { getCaseDetailsUrl, getCaseUrl } from '../../../common/components/link_to';
 import { useKibana } from '../../../common/lib/kibana';
@@ -40,25 +39,21 @@ export const Create = React.memo(() => {
     [navigateToApp, search]
   );
 
-  return (
-    <EuiPanel hasBorder>
-      {cases.getCreateCase({
-        onCancel: handleSetIsCancel,
-        onSuccess,
-        timelineIntegration: {
-          editor_plugins: {
-            parsingPlugin: timelineMarkdownPlugin.parser,
-            processingPluginRenderer: timelineMarkdownPlugin.renderer,
-            uiPlugin: timelineMarkdownPlugin.plugin,
-          },
-          hooks: {
-            useInsertTimeline,
-          },
-        },
-        owner: [APP_ID],
-      })}
-    </EuiPanel>
-  );
+  return cases.getCreateCase({
+    onCancel: handleSetIsCancel,
+    onSuccess,
+    timelineIntegration: {
+      editor_plugins: {
+        parsingPlugin: timelineMarkdownPlugin.parser,
+        processingPluginRenderer: timelineMarkdownPlugin.renderer,
+        uiPlugin: timelineMarkdownPlugin.plugin,
+      },
+      hooks: {
+        useInsertTimeline,
+      },
+    },
+    owner: [APP_ID],
+  });
 });
 
 Create.displayName = 'Create';

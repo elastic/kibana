@@ -212,9 +212,10 @@ export default ({ getService }: FtrProviderContext) => {
       const signalsOpen = await getOpenSignals(supertest, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(7);
     });
+
     describe('with non-value list exception', () => {
       afterEach(async () => {
-        await deleteAllExceptions(es);
+        await deleteAllExceptions(supertest);
       });
       it('generates no signals when an exception is added for an ML rule', async () => {
         const createdRule = await createRuleWithExceptionEntries(supertest, testRule, [
@@ -239,7 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteListsIndex(supertest);
-        await deleteAllExceptions(es);
+        await deleteAllExceptions(supertest);
       });
 
       it('generates no signals when a value list exception is added for an ML rule', async () => {

@@ -7,11 +7,15 @@
  */
 
 import { resolve, sep } from 'path';
+import { CiStatsReporter } from '@kbn/dev-utils/ci_stats_reporter';
+
+import { log } from '../utils/log';
 import { spawnStreaming } from '../utils/child_process';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { getNonBazelProjectsOnly, topologicallyBatchProjects } from '../utils/projects';
 import { ICommand } from './';
 import { readYarnLock } from '../utils/yarn_lock';
+import { sortPackageJson } from '../utils/sort_package_json';
 import { validateDependencies } from '../utils/validate_dependencies';
 import {
   ensureYarnIntegrityFileExists,
@@ -25,8 +29,8 @@ export const BootstrapCommand: ICommand = {
   name: 'bootstrap',
 
   reportTiming: {
-    group: 'bootstrap',
-    id: 'overall time',
+    group: 'scripts/kbn bootstrap',
+    id: 'total',
   },
 
   async run(projects, projectGraph, { options, kbn, rootPath }) {
@@ -34,6 +38,8 @@ export const BootstrapCommand: ICommand = {
     const batchedNonBazelProjects = topologicallyBatchProjects(nonBazelProjectsOnly, projectGraph);
     const kibanaProjectPath = projects.get('kibana')?.path || '';
     const runOffline = options?.offline === true;
+    const reporter = CiStatsReporter.fromEnv(log);
+    const timings = [];
 
     // Force install is set in case a flag is passed or
     // if the `.yarn-integrity` file is not found which
@@ -58,11 +64,23 @@ export const BootstrapCommand: ICommand = {
     // That way non bazel projects could depend on bazel projects but not the other way around
     // That is only intended during the migration process while non Bazel projects are not removed at all.
     //
+
     if (forceInstall) {
+      const forceInstallStartTime = Date.now();
       await runBazel(['run', '@nodejs//:yarn'], runOffline);
+      timings.push({
+        id: 'force install dependencies',
+        ms: Date.now() - forceInstallStartTime,
+      });
     }
 
+    // build packages
+    const packageStartTime = Date.now();
     await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
+    timings.push({
+      id: 'build packages',
+      ms: Date.now() - packageStartTime,
+    });
 
     // Install monorepo npm dependencies outside of the Bazel managed ones
     for (const batch of batchedNonBazelProjects) {
@@ -90,6 +108,8 @@ export const BootstrapCommand: ICommand = {
       }
     }
 
+    await sortPackageJson(kbn);
+
     const yarnLock = await readYarnLock(kbn);
 
     if (options.validate) {
@@ -113,15 +133,25 @@ export const BootstrapCommand: ICommand = {
       { prefix: '[vscode]', debug: false }
     );
 
-    // Build typescript references
     await spawnStreaming(
       process.execPath,
-      ['scripts/build_ts_refs', '--ignore-type-failures', '--info'],
+      ['scripts/build_ts_refs', '--ignore-type-failures'],
       {
         cwd: kbn.getAbsolute(),
         env: process.env,
       },
       { prefix: '[ts refs]', debug: false }
     );
+
+    // send timings
+    await reporter.timings({
+      upstreamBranch: kbn.kibanaProject.json.branch,
+      // prevent loading @kbn/utils by passing null
+      kibanaUuid: kbn.getUuid() || null,
+      timings: timings.map((t) => ({
+        group: 'scripts/kbn bootstrap',
+        ...t,
+      })),
+    });
   },
 };

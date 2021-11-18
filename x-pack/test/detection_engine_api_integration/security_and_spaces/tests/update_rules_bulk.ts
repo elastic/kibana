@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { FullResponseSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -20,6 +21,7 @@ import {
   getSimpleRuleUpdate,
   createRule,
   getSimpleRule,
+  createLegacyRuleAction,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -92,6 +94,124 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
         expect(bodyToCompare1).to.eql(outputRule1);
         expect(bodyToCompare2).to.eql(outputRule2);
+      });
+
+      it('should update two rule properties of name using the two rules rule_id and migrate actions', async () => {
+        const connector = await supertest
+          .post(`/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'My action',
+            connector_type_id: '.slack',
+            secrets: {
+              webhookUrl: 'http://localhost:1234',
+            },
+          });
+        const action1 = {
+          group: 'default',
+          id: connector.body.id,
+          action_type_id: connector.body.connector_type_id,
+          params: {
+            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+        };
+        const [rule1, rule2] = await Promise.all([
+          createRule(supertest, { ...getSimpleRule('rule-1'), actions: [action1] }),
+          createRule(supertest, { ...getSimpleRule('rule-2'), actions: [action1] }),
+        ]);
+        await Promise.all([
+          createLegacyRuleAction(supertest, rule1.id, connector.body.id),
+          createLegacyRuleAction(supertest, rule2.id, connector.body.id),
+        ]);
+
+        const updatedRule1 = getSimpleRuleUpdate('rule-1');
+        updatedRule1.name = 'some other name';
+        updatedRule1.actions = [action1];
+        updatedRule1.throttle = '1m';
+
+        const updatedRule2 = getSimpleRuleUpdate('rule-2');
+        updatedRule2.name = 'some other name';
+        updatedRule2.actions = [action1];
+        updatedRule2.throttle = '1m';
+
+        // update both rule names
+        const { body }: { body: FullResponseSchema[] } = await supertest
+          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .set('kbn-xsrf', 'true')
+          .send([updatedRule1, updatedRule2])
+          .expect(200);
+
+        body.forEach((response) => {
+          const outputRule = getSimpleRuleOutput(response.rule_id);
+          outputRule.name = 'some other name';
+          outputRule.version = 2;
+          outputRule.actions = [
+            {
+              action_type_id: '.slack',
+              group: 'default',
+              id: connector.body.id,
+              params: {
+                message:
+                  'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+            },
+          ];
+          outputRule.throttle = '1m';
+          const bodyToCompare = removeServerGeneratedProperties(response);
+          expect(bodyToCompare).to.eql(outputRule);
+        });
+      });
+
+      it('should update two rule properties of name using the two rules rule_id and remove actions', async () => {
+        const connector = await supertest
+          .post(`/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'My action',
+            connector_type_id: '.slack',
+            secrets: {
+              webhookUrl: 'http://localhost:1234',
+            },
+          });
+        const action1 = {
+          group: 'default',
+          id: connector.body.id,
+          action_type_id: connector.body.connector_type_id,
+          params: {
+            message: 'message',
+          },
+        };
+        const [rule1, rule2] = await Promise.all([
+          createRule(supertest, { ...getSimpleRule('rule-1'), actions: [action1] }),
+          createRule(supertest, { ...getSimpleRule('rule-2'), actions: [action1] }),
+        ]);
+        await Promise.all([
+          createLegacyRuleAction(supertest, rule1.id, connector.body.id),
+          createLegacyRuleAction(supertest, rule2.id, connector.body.id),
+        ]);
+
+        const updatedRule1 = getSimpleRuleUpdate('rule-1');
+        updatedRule1.name = 'some other name';
+
+        const updatedRule2 = getSimpleRuleUpdate('rule-2');
+        updatedRule2.name = 'some other name';
+
+        // update both rule names
+        const { body }: { body: FullResponseSchema[] } = await supertest
+          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .set('kbn-xsrf', 'true')
+          .send([updatedRule1, updatedRule2])
+          .expect(200);
+
+        body.forEach((response) => {
+          const outputRule = getSimpleRuleOutput(response.rule_id);
+          outputRule.name = 'some other name';
+          outputRule.version = 2;
+          outputRule.actions = [];
+          outputRule.throttle = 'no_actions';
+          const bodyToCompare = removeServerGeneratedProperties(response);
+          expect(bodyToCompare).to.eql(outputRule);
+        });
       });
 
       it('should update a single rule property of name using an id', async () => {

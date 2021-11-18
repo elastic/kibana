@@ -17,7 +17,7 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 import { getTransaction } from '../lib/transactions/get_transaction';
 
 const tracesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/traces',
+  endpoint: 'GET /internal/apm/traces',
   params: t.type({
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
@@ -25,21 +25,23 @@ const tracesRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { environment, kuery } = params.query;
+    const { environment, kuery, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
+      start,
+      end,
     });
 
     return getTopTransactionGroupList(
-      { environment, kuery, searchAggregatedTransactions },
+      { environment, kuery, searchAggregatedTransactions, start, end },
       setup
     );
   },
 });
 
 const tracesByIdRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/traces/{traceId}',
+  endpoint: 'GET /internal/apm/traces/{traceId}',
   params: t.type({
     path: t.type({
       traceId: t.string,
@@ -50,14 +52,15 @@ const tracesByIdRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-
     const { traceId } = params.path;
-    return getTraceItems(traceId, setup);
+    const { start, end } = params.query;
+
+    return getTraceItems(traceId, setup, start, end);
   },
 });
 
 const rootTransactionByTraceIdRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/traces/{traceId}/root_transaction',
+  endpoint: 'GET /internal/apm/traces/{traceId}/root_transaction',
   params: t.type({
     path: t.type({
       traceId: t.string,
@@ -73,7 +76,7 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
 });
 
 const transactionByIdRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/transactions/{transactionId}',
+  endpoint: 'GET /internal/apm/transactions/{transactionId}',
   params: t.type({
     path: t.type({
       transactionId: t.string,
@@ -84,7 +87,9 @@ const transactionByIdRoute = createApmServerRoute({
     const { params } = resources;
     const { transactionId } = params.path;
     const setup = await setupRequest(resources);
-    return { transaction: await getTransaction({ transactionId, setup }) };
+    return {
+      transaction: await getTransaction({ transactionId, setup }),
+    };
   },
 });
 

@@ -672,6 +672,22 @@ exports[`Flyout should render import step 1`] = `
 
 exports[`Flyout summary should display summary when import is complete 1`] = `
 <ImportSummary
+  allowedTypes={
+    Array [
+      Object {
+        "displayName": "search",
+        "hidden": false,
+        "name": "search",
+        "namespaceType": "single",
+      },
+      Object {
+        "displayName": "index-pattern",
+        "hidden": false,
+        "name": "index-pattern",
+        "namespaceType": "single",
+      },
+    ]
+  }
   basePath={
     BasePath {
       "basePath": "",

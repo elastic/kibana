@@ -7,7 +7,7 @@
  */
 
 import { Position } from '@elastic/charts';
-import Color from 'color';
+import chroma from 'chroma-js';
 
 import { FtrService } from '../ftr_provider_context';
 
@@ -23,6 +23,7 @@ export class VisualizeChartPageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly header = this.ctx.getPageObject('header');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -180,17 +181,17 @@ export class VisualizeChartPageObject extends FtrService {
     return items.some(({ color: c }) => c === color);
   }
 
-  public async doesSelectedLegendColorExistForPie(color: string) {
+  public async doesSelectedLegendColorExistForPie(matchingColor: string) {
     if (await this.isNewLibraryChart(pieChartSelector)) {
+      const hexMatchingColor = chroma(matchingColor).hex().toUpperCase();
       const slices =
         (await this.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ?? [];
-      return slices.some(({ color: c }) => {
-        const rgbColor = new Color(color).rgb().toString();
-        return c === rgbColor;
+      return slices.some(({ color }) => {
+        return hexMatchingColor === chroma(color).hex().toUpperCase();
       });
     }
 
-    return await this.testSubjects.exists(`legendSelectedColor-${color}`);
+    return await this.testSubjects.exists(`legendSelectedColor-${matchingColor}`);
   }
 
   public async expectError() {
@@ -218,6 +219,7 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   public async waitForVisualizationRenderingStabilized() {
+    await this.header.waitUntilLoadingHasFinished();
     // assuming rendering is done when data-rendering-count is constant within 1000 ms
     await this.retry.waitFor('rendering count to stabilize', async () => {
       const firstCount = await this.getVisualizationRenderingCount();

@@ -406,8 +406,8 @@ export class AggConfigs {
                     .map(([filter, field]) => ({
                       range: {
                         [field]: {
-                          gte: moment(filter?.range[field].gte).subtract(shift).toISOString(),
-                          lte: moment(filter?.range[field].lte).subtract(shift).toISOString(),
+                          gte: moment(filter?.query.range[field].gte).subtract(shift).toISOString(),
+                          lte: moment(filter?.query.range[field].lte).subtract(shift).toISOString(),
                         },
                       },
                     })),

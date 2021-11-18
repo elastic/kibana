@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  ASSETS_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -47,8 +48,12 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         app: [PLUGIN_ID, 'kibana'],
         catalogue: [PLUGIN_ID],
         savedObject: {
-          all: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-          read: [PACKAGES_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE],
+          all: [
+            PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            ASSETS_SAVED_OBJECT_TYPE,
+            AGENT_POLICY_SAVED_OBJECT_TYPE,
+          ],
+          read: [PACKAGES_SAVED_OBJECT_TYPE],
         },
         ui: ['write'],
       },
@@ -129,6 +134,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
             groupType: 'mutually_exclusive',
             privileges: [
               {
+                api: [`${PLUGIN_ID}-writeSavedQueries`, `${PLUGIN_ID}-readSavedQueries`],
                 id: 'saved_queries_all',
                 includeIn: 'all',
                 name: 'All',
@@ -139,6 +145,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 ui: ['writeSavedQueries', 'readSavedQueries'],
               },
               {
+                api: [`${PLUGIN_ID}-readSavedQueries`],
                 id: 'saved_queries_read',
                 includeIn: 'read',
                 name: 'Read',
@@ -153,21 +160,24 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         ],
       },
       {
-        // TODO: Rename it to "Packs" as part of https://github.com/elastic/kibana/pull/107345
-        name: i18n.translate('xpack.osquery.features.scheduledQueryGroupsSubFeatureName', {
-          defaultMessage: 'Scheduled query groups',
+        name: i18n.translate('xpack.osquery.features.packsSubFeatureName', {
+          defaultMessage: 'Packs',
         }),
         privilegeGroups: [
           {
             groupType: 'mutually_exclusive',
             privileges: [
               {
-                api: [`${PLUGIN_ID}-writePacks`],
+                api: [`${PLUGIN_ID}-writePacks`, `${PLUGIN_ID}-readPacks`],
                 id: 'packs_all',
                 includeIn: 'all',
                 name: 'All',
                 savedObject: {
-                  all: [packSavedObjectType],
+                  all: [
+                    PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+                    ASSETS_SAVED_OBJECT_TYPE,
+                    packSavedObjectType,
+                  ],
                   read: [],
                 },
                 ui: ['writePacks', 'readPacks'],
@@ -221,7 +231,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       security: plugins.security,
     };
 
-    initSavedObjects(core.savedObjects, osqueryContext);
+    initSavedObjects(core.savedObjects);
     initUsageCollectors({
       core,
       osqueryContext,
