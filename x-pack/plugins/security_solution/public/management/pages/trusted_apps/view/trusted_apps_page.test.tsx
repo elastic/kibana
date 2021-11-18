@@ -36,6 +36,7 @@ import { resolvePathVariables } from '../../../../common/utils/resolve_path_vari
 import { licenseService } from '../../../../common/hooks/use_license';
 import { trustedAppsPageHttpApiMocks } from '../test_utils/mocks';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL } from '../../../../../../../../../../../../private/var/tmp/_bazel_ptavares/a4a237a05d507fc23e0818d3647eedfe/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-securitysolution-list-constants';
 
 // TODO: remove this mock when feature flag is removed
 jest.mock('../../../../common/hooks/use_experimental_features');
@@ -295,55 +296,36 @@ describe('When on the Trusted Apps Page', () => {
 
             expect(lastCallToPut[0]).toEqual('/api/exception_lists/items');
 
-            expect(JSON.parse(lastCallToPut[1].body as string)).toEqual(
-              {
-                _version: '3o9za',
-                name: 'Generated Exception (3xnng)',
-                description: 'created by ExceptionListItemGenerator',
-                entries: [
-                  {
-                    field: 'process.hash.md5',
-                    operator: 'included',
-                    type: 'match',
-                    value: '1234234659af249ddf3e40864e9fb241',
-                  },
-                  {
-                    field: 'process.executable.caseless',
-                    operator: 'included',
-                    type: 'match',
-                    value: '/one/two/three',
-                  },
-                ],
-                os_types: ['windows'],
-                tags: [
-                  'policy:ddf6570b-9175-4a6d-b288-61a09771c647',
-                  'policy:b8e616ae-44fc-4be7-846c-ce8fa5c082dd',
-                ],
-                id: '05b5e350-0cad-4dc3-a61d-6e6796b0af39',
-                comments: [],
-                item_id: '2d95bec3-b48f-4db7-9622-a2b061cc031d',
-                meta: {},
-                namespace_type: 'agnostic',
-                type: 'simple',
-              }
-              //   {
-              //   name: 'Generated Exception (3xnng)',
-              //   os: 'windows',
-              //   entries: [
-              //     {
-              //       field: 'process.executable.caseless',
-              //       value: 'one/two',
-              //       operator: 'included',
-              //       type: 'match',
-              //     },
-              //   ],
-              //   description: 'created by ExceptionListItemGenerator',
-              //   effectScope: {
-              //     type: 'global',
-              //   },
-              //   version: 'abc123',
-              // }
-            );
+            expect(JSON.parse(lastCallToPut[1].body as string)).toEqual({
+              _version: '3o9za',
+              name: 'Generated Exception (3xnng)',
+              description: 'created by ExceptionListItemGenerator',
+              entries: [
+                {
+                  field: 'process.hash.md5',
+                  operator: 'included',
+                  type: 'match',
+                  value: '1234234659af249ddf3e40864e9fb241',
+                },
+                {
+                  field: 'process.executable.caseless',
+                  operator: 'included',
+                  type: 'match',
+                  value: '/one/two/three',
+                },
+              ],
+              os_types: ['windows'],
+              tags: [
+                'policy:ddf6570b-9175-4a6d-b288-61a09771c647',
+                'policy:b8e616ae-44fc-4be7-846c-ce8fa5c082dd',
+              ],
+              id: '05b5e350-0cad-4dc3-a61d-6e6796b0af39',
+              comments: [],
+              item_id: '2d95bec3-b48f-4db7-9622-a2b061cc031d',
+              meta: {},
+              namespace_type: 'agnostic',
+              type: 'simple',
+            });
           });
         });
       });
@@ -400,7 +382,15 @@ describe('When on the Trusted Apps Page', () => {
         it('should retrieve trusted app via API using url `id`', async () => {
           renderResult = await renderAndWaitForGetApi();
 
-          expect(coreStart.http.get).toHaveBeenCalledWith(TRUSTED_APP_GET_URI);
+          expect(coreStart.http.get.mock.calls).toContainEqual([
+            EXCEPTION_LIST_ITEM_URL,
+            {
+              query: {
+                item_id: '9999-edit-8888',
+                namespace_type: 'agnostic',
+              },
+            },
+          ]);
 
           expect(
             (
@@ -408,7 +398,7 @@ describe('When on the Trusted Apps Page', () => {
                 'addTrustedAppFlyout-createForm-nameTextField'
               ) as HTMLInputElement
             ).value
-          ).toEqual('one app for edit');
+          ).toEqual('Generated Exception (u6kh2)');
         });
 
         it('should redirect to list and show toast message if `id` is missing from URL', async () => {
@@ -426,14 +416,8 @@ describe('When on the Trusted Apps Page', () => {
 
         it('should redirect to list and show toast message on API error for GET of `id`', async () => {
           // Mock the API GET for the trusted application
-          const priorMockImplementation = coreStart.http.get.getMockImplementation();
-          coreStart.http.get.mockImplementation(async (...args) => {
-            if ('string' === typeof args[0] && args[0] === TRUSTED_APP_GET_URI) {
-              throw new Error('test: api error response');
-            }
-            if (priorMockImplementation) {
-              return priorMockImplementation(...args);
-            }
+          mockedApis.responseProvider.trustedApp.mockImplementation(() => {
+            throw new Error('test: api error response');
           });
 
           await renderAndWaitForGetApi();
@@ -497,6 +481,14 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     it('should preserve other URL search params', async () => {
+      const createListResponse =
+        mockedApis.responseProvider.trustedAppsList.getMockImplementation()!;
+      mockedApis.responseProvider.trustedAppsList.mockImplementation((...args) => {
+        const response = createListResponse(...args);
+        response.total = 100; // Trigger the UI to show pagination
+        return response;
+      });
+
       reactTestingLibrary.act(() => {
         history.push('/administration/trusted_apps?page_index=2&page_size=20');
       });
@@ -582,16 +574,24 @@ describe('When on the Trusted Apps Page', () => {
           // Mock the http.post() call and expose `resolveHttpPost()` method so that
           // we can control when the API call response is returned, which will allow us
           // to test the UI behaviours while the API call is in flight
-          coreStart.http.post.mockImplementation(
-            // @ts-expect-error TS2345
-            async (_, options: HttpFetchOptions) => {
-              return new Promise((resolve, reject) => {
-                httpPostBody = options.body as string;
-                resolveHttpPost = resolve;
-                rejectHttpPost = reject;
-              });
-            }
+          mockedApis.responseProvider.trustedAppCreate.mockDelay.mockReturnValue(
+            new Promise((resolve, reject) => {
+              resolveHttpPost = resolve;
+              rejectHttpPost = reject;
+            })
           );
+
+          // FIXME: cleanup
+          // coreStart.http.post.mockImplementation(
+          // // @ts-expect-error TS2345
+          // async (_, options: HttpFetchOptions) => {
+          //   return new Promise((resolve, reject) => {
+          //     httpPostBody = options.body as string;
+          //     resolveHttpPost = resolve;
+          //     rejectHttpPost = reject;
+          //   });
+          // }
+          // );
 
           renderResult = await renderAndClickAddButton();
           await fillInCreateForm();

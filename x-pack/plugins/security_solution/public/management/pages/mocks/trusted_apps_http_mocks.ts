@@ -16,6 +16,7 @@ import {
   FindExceptionListItemSchema,
   UpdateExceptionListItemSchema,
   ReadExceptionListItemSchema,
+  CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   httpHandlerMockFactory,
@@ -127,3 +128,36 @@ export const trustedAppsGetOneHttpMocks =
       },
     },
   ]);
+
+export type TrustedAppPostHttpMocksInterface = ResponseProvidersInterface<{
+  trustedAppCreate: (options: HttpFetchOptionsWithPath) => ExceptionListItemSchema;
+}>;
+/**
+ * HTTP mocks that support updating a single Trusted Apps
+ */
+export const trustedAppPostHttpMocks = httpHandlerMockFactory<TrustedAppPostHttpMocksInterface>([
+  {
+    id: 'trustedAppCreate',
+    path: EXCEPTION_LIST_ITEM_URL,
+    method: 'post',
+    handler: ({ body, path }): ExceptionListItemSchema => {
+      const updatedExceptionItem = JSON.parse(
+        body as string
+      ) as Required<CreateExceptionListItemSchema>;
+      const response: ExceptionListItemSchema = {
+        ...updatedExceptionItem,
+        id: path.split('/').pop() ?? 'unknown-id',
+        comments: [],
+        created_at: '2021-10-12T16:02:55.856Z',
+        created_by: 'elastic',
+        updated_at: '2021-10-13T16:02:55.856Z',
+        updated_by: 'elastic',
+        list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        _version: 'abc',
+        tie_breaker_id: '1111',
+      };
+
+      return response;
+    },
+  },
+]);
