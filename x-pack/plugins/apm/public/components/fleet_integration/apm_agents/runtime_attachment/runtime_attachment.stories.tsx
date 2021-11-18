@@ -7,7 +7,7 @@
 
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
-import { RuntimeAttachment } from './runtime_attachment';
+import { RuntimeAttachment } from '.';
 
 const stories: Meta<{}> = {
   title: 'fleet/RuntimeAttachment',
