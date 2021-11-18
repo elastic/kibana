@@ -424,10 +424,12 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     } as GeoJsonWithMeta;
   }
 
+  // TODO rename to getMvtSourceLayerName
   getLayerName(): string {
     return ES_MVT_AGGS_LAYER_NAME;
   }
 
+  // TODO rename to getMvtUrlTemplateWithMeta
   async getUrlTemplateWithMeta(
     searchFilters: VectorSourceRequestMeta
   ): Promise<ITiledSingleLayerMvtParams> {

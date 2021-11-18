@@ -111,11 +111,7 @@ export class HeatmapLayer extends AbstractLayer {
       return false;
     }
 
-    return (
-      mbSource.tiles?.[0] !== sourceData.urlTemplate ||
-      mbSource.minzoom !== sourceData.minSourceZoom ||
-      mbSource.maxzoom !== sourceData.maxSourceZoom
-    );
+    return mbSource.tiles?.[0] !== sourceData.urlTemplate;
   }
 
   syncLayerWithMB(mbMap: MbMap) {
