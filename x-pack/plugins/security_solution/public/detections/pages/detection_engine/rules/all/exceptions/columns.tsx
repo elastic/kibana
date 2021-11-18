@@ -60,28 +60,29 @@ export const getAllExceptionListsColumns = (
     dataType: 'string',
     width: '30%',
     render: (rules: ExceptionListInfo['rules']) => {
-      const createRuleHref = (id: string) => formatUrl(getRuleDetailsUrl(id));
-
       const renderItem = <T extends ExceptionListInfo['rules'][number]>(
         { id, name }: T,
         index: number,
         items: T[]
-      ) => (
-        <EuiToolTip content={name} anchorClassName="eui-textTruncate">
-          <SpacedLinkAnchor
-            key={id}
-            data-test-subj="rule-name"
-            onClick={(ev: { preventDefault: () => void }) => {
-              ev.preventDefault();
-              navigateToUrl(createRuleHref(id));
-            }}
-            href={createRuleHref(id)}
-          >
-            {name}
-            {index !== items.length - 1 && ','}
-          </SpacedLinkAnchor>
-        </EuiToolTip>
-      );
+      ) => {
+        const ruleHref = formatUrl(getRuleDetailsUrl(id));
+        return (
+          <EuiToolTip content={name} anchorClassName="eui-textTruncate">
+            <SpacedLinkAnchor
+              key={id}
+              data-test-subj="rule-name"
+              onClick={(ev: { preventDefault: () => void }) => {
+                ev.preventDefault();
+                navigateToUrl(ruleHref);
+              }}
+              href={ruleHref}
+            >
+              {name}
+              {index !== items.length - 1 && ','}
+            </SpacedLinkAnchor>
+          </EuiToolTip>
+        );
+      };
 
       return (
         <PopoverItems
