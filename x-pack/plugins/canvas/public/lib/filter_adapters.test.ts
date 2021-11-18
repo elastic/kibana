@@ -13,7 +13,6 @@ import {
   tranformObjectToArgs,
 } from './filter_adapters';
 
-
 describe('adaptCanvasFilter', () => {
   const filterAST: ExpressionFunctionAST = {
     type: 'function',
