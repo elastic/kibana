@@ -23,7 +23,13 @@ export function emsRasterTileToEmsVectorTile({ attributes }) {
     return attributes;
   }
 
-  const layerList = JSON.parse(attributes.layerListJSON);
+  let layerList = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layer) => {
     if (isTileLayer(layer) && isEmsTileSource(layer)) {
       // Just need to switch layer type to migrate TILE layer to VECTOR_TILE layer

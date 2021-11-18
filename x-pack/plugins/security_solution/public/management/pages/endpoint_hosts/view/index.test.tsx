@@ -7,6 +7,7 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EndpointList } from './index';
 import '../../../../common/mock/match_media';
 
@@ -50,7 +51,10 @@ import {
   TRANSFORM_STATES,
 } from '../../../../../common/constants';
 import { TransformStats } from '../types';
-import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
+import {
+  metadataTransformPrefix,
+  METADATA_UNITED_TRANSFORM,
+} from '../../../../../common/endpoint/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -130,7 +134,7 @@ jest.mock('../../../../common/hooks/use_license');
 
 describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
-  const { act, screen, fireEvent } = reactTestingLibrary;
+  const { act, screen, fireEvent, waitFor } = reactTestingLibrary;
 
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
@@ -882,16 +886,14 @@ describe('when on the endpoint list page', () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const hostNameLinks = renderResult.getAllByTestId('hostnameCellLink');
-        reactTestingLibrary.fireEvent.click(hostNameLinks[0]);
+        userEvent.click(hostNameLinks[0]);
       });
 
       afterEach(reactTestingLibrary.cleanup);
 
       it('should show the endpoint details flyout', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
+        userEvent.click(activityLogTab);
         await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
@@ -902,9 +904,7 @@ describe('when on the endpoint list page', () => {
 
       it('should display log accurately', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
+        userEvent.click(activityLogTab);
         await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
@@ -917,9 +917,7 @@ describe('when on the endpoint list page', () => {
 
       it('should display log accurately with endpoint responses', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
+        userEvent.click(activityLogTab);
         await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged(
@@ -936,9 +934,7 @@ describe('when on the endpoint list page', () => {
 
       it('should display empty state when API call has failed', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
+        userEvent.click(activityLogTab);
         await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('failed', getMockData());
@@ -949,9 +945,7 @@ describe('when on the endpoint list page', () => {
 
       it('should not display empty state when no log data', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
+        userEvent.click(activityLogTab);
         await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('success', {
@@ -974,7 +968,12 @@ describe('when on the endpoint list page', () => {
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
           history.push(
-            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+            getEndpointDetailsPath({
+              page_index: '0',
+              page_size: '10',
+              name: 'endpointActivityLog',
+              selected_endpoint: '1',
+            })
           );
         });
         const changedUrlAction = await userChangedUrlChecker;
@@ -993,7 +992,12 @@ describe('when on the endpoint list page', () => {
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
           history.push(
-            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+            getEndpointDetailsPath({
+              page_index: '0',
+              page_size: '10',
+              name: 'endpointActivityLog',
+              selected_endpoint: '1',
+            })
           );
         });
         const changedUrlAction = await userChangedUrlChecker;
@@ -1015,11 +1019,54 @@ describe('when on the endpoint list page', () => {
         expect(activityLogCallout).not.toBeNull();
       });
 
+      it('should not display scroll trigger when showing callout message', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            getEndpointDetailsPath({
+              page_index: '0',
+              page_size: '10',
+              name: 'endpointActivityLog',
+              selected_endpoint: '1',
+            })
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
+            data: [],
+          });
+        });
+
+        const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
+        expect(activityLogCallout).not.toBeNull();
+        // scroll to the bottom by pressing down arrow key
+        // and keep it pressed
+        userEvent.keyboard('ArrowDown>');
+        // end scrolling after 1s
+        await waitFor(() => {});
+        userEvent.keyboard('/ArrowDown');
+        expect(await renderResult.queryByTestId('activityLogLoadMoreTrigger')).toBeNull();
+      });
+
       it('should correctly display non-empty comments only for actions', async () => {
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
           history.push(
-            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+            getEndpointDetailsPath({
+              page_index: '0',
+              page_size: '10',
+              name: 'endpointActivityLog',
+              selected_endpoint: '1',
+            })
           );
         });
         const changedUrlAction = await userChangedUrlChecker;
@@ -1081,6 +1128,11 @@ describe('when on the endpoint list page', () => {
         expect(
           (await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutTitle')).textContent
         ).toBe('Policy Response');
+      });
+
+      it('should display timestamp', () => {
+        const timestamp = renderResult.queryByTestId('endpointDetailsPolicyResponseTimestamp');
+        expect(timestamp).not.toBeNull();
       });
 
       it('should show a configuration section for each protection', async () => {
@@ -1456,6 +1508,24 @@ describe('when on the endpoint list page', () => {
       render();
       const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
       expect(banner).toBeInTheDocument();
+    });
+
+    it('displays correct transform id when in failed state', async () => {
+      const transforms: TransformStats[] = [
+        {
+          id: `${metadataTransformPrefix}-0.20.0`,
+          state: TRANSFORM_STATES.STARTED,
+        } as TransformStats,
+        {
+          id: `${METADATA_UNITED_TRANSFORM}-1.2.1`,
+          state: TRANSFORM_STATES.FAILED,
+        } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      render();
+      const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).not.toHaveTextContent(transforms[0].id);
+      expect(banner).toHaveTextContent(transforms[1].id);
     });
   });
 });

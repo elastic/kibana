@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import {
@@ -204,6 +204,16 @@ export function PieComponent(
     } else if (categoryDisplay === 'inside') {
       // Prevent links from showing
       config.linkLabel = { maxCount: 0 };
+    } else {
+      // if it contains any slice below 2% reduce the ratio
+      // first step: sum it up the overall sum
+      const overallSum = firstTable.rows.reduce((sum, row) => sum + row[metric!], 0);
+      const slices = firstTable.rows.map((row) => row[metric!] / overallSum);
+      const smallSlices = slices.filter((value) => value < 0.02).length;
+      if (smallSlices) {
+        // shrink up to 20% to give some room for the linked values
+        config.outerSizeRatio = 1 / (1 + Math.min(smallSlices * 0.05, 0.2));
+      }
     }
   }
   const metricColumn = firstTable.columns.find((c) => c.id === metric)!;
@@ -213,13 +223,6 @@ export function PieComponent(
       pattern: `0,0.[${'0'.repeat(percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}]%`,
     },
   });
-
-  const [isReady, setIsReady] = useState(false);
-  // It takes a cycle for the chart to render. This prevents
-  // reporting from printing a blank chart placeholder.
-  useEffect(() => {
-    setIsReady(true);
-  }, []);
 
   const hasNegative = firstTable.rows.some((row) => {
     const value = row[metricColumn.id];
@@ -237,11 +240,7 @@ export function PieComponent(
 
   if (isEmpty) {
     return (
-      <VisualizationContainer
-        reportTitle={props.args.title}
-        reportDescription={props.args.description}
-        className="lnsPieExpression__container"
-      >
+      <VisualizationContainer className="lnsPieExpression__container">
         <EmptyPlaceholder icon={LensIconChartDonut} />
       </VisualizationContainer>
     );
@@ -268,12 +267,7 @@ export function PieComponent(
   };
 
   return (
-    <VisualizationContainer
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-      className="lnsPieExpression__container"
-      isReady={isReady}
-    >
+    <VisualizationContainer className="lnsPieExpression__container">
       <Chart>
         <Settings
           tooltip={{ boundary: document.getElementById('app-fixed-viewport') ?? undefined }}

@@ -50,7 +50,7 @@ export const useWorkpad = (
         setResolveInfo({ aliasId, outcome, id: workpadId });
 
         // If it's an alias match, we know we are going to redirect so don't even dispatch that we got the workpad
-        if (outcome !== 'aliasMatch') {
+        if (storedWorkpad.id !== workpadId && outcome !== 'aliasMatch') {
           workpad.aliasId = aliasId;
 
           dispatch(setAssets(assets));
@@ -61,7 +61,7 @@ export const useWorkpad = (
         setError(e as Error | string);
       }
     })();
-  }, [workpadId, dispatch, setError, loadPages, workpadResolve]);
+  }, [workpadId, dispatch, setError, loadPages, workpadResolve, storedWorkpad.id]);
 
   useEffect(() => {
     // If the resolved info is not for the current workpad id, bail out
