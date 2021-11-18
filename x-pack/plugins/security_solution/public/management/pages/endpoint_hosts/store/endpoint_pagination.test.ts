@@ -27,7 +27,7 @@ import {
 } from '../../../../common/store/test_utils';
 import { getEndpointListPath } from '../../../common/routing';
 
-jest.mock('../../../services/policy/ingest', () => ({
+jest.mock('../../policy/store/services/ingest', () => ({
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({}),
 }));

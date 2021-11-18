@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { GetPackagesResponse } from '../../../../../fleet/common';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { GetPolicyListResponse } from '../../pages/policy/types';
-import { INGEST_API_EPM_PACKAGES, INGEST_API_PACKAGE_POLICIES } from './ingest';
+import { INGEST_API_EPM_PACKAGES, INGEST_API_PACKAGE_POLICIES } from './services/ingest';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import { GetPolicyListResponse } from '../types';
+import { GetPackagesResponse } from '../../../../../../fleet/common';
 
 const generator = new EndpointDocGenerator('policy-list');
 

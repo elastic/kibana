@@ -53,6 +53,12 @@ import {
   TransformStats,
   TransformStatsResponse,
 } from '../types';
+import {
+  sendGetEndpointSpecificPackagePolicies,
+  sendGetEndpointSecurityPackage,
+  sendGetAgentPolicyList,
+  sendGetFleetAgentsWithEndpoint,
+} from '../../policy/store/services/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import {
   ENDPOINT_ACTION_LOG_ROUTE,
@@ -75,12 +81,6 @@ import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { getIsInvalidDateRange } from '../utils';
 import { METADATA_TRANSFORM_STATS_URL } from '../../../../../common/constants';
-import {
-  sendGetAgentPolicyList,
-  sendGetEndpointSecurityPackage,
-  sendGetEndpointSpecificPackagePolicies,
-  sendGetFleetAgentsWithEndpoint,
-} from '../../../services/policy/ingest';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 

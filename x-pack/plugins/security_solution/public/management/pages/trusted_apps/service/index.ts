@@ -35,9 +35,9 @@ import {
 } from '../../../../../common/endpoint/types';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
+import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/services/ingest';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { isGlobalEffectScope } from '../state/type_guards';
-import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policy/ingest';
 
 export interface TrustedAppsService {
   getTrustedApp(params: GetOneTrustedAppRequestParams): Promise<GetOneTrustedAppResponse>;

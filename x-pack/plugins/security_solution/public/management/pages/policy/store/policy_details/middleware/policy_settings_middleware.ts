@@ -7,11 +7,6 @@
 
 import { IHttpFetchError } from 'kibana/public';
 import {
-  sendGetFleetAgentStatusForPolicy,
-  sendGetPackagePolicy,
-  sendPutPackagePolicy,
-} from '../../../../../services/policy/ingest';
-import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
 } from '../../../../../../../common/endpoint/models/policy_config';
@@ -23,6 +18,11 @@ import {
   policyDetailsForUpdate,
   needsToRefresh,
 } from '../selectors/policy_settings_selectors';
+import {
+  sendGetPackagePolicy,
+  sendGetFleetAgentStatusForPolicy,
+  sendPutPackagePolicy,
+} from '../../services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 
