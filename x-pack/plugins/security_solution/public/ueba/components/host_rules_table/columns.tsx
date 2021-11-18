@@ -24,7 +24,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
     field: `node.${HostRulesFields.ruleName}`,
     name: i18n.NAME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (ruleName) => {
       if (ruleName != null && ruleName.length > 0) {
         const id = escapeDataProviderId(`ueba-table-ruleName-${ruleName}`);
@@ -63,7 +63,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
     field: `node.${HostRulesFields.ruleType}`,
     name: i18n.RULE_TYPE,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (ruleType) => {
       if (ruleType != null && ruleType.length > 0) {
         const id = escapeDataProviderId(`ueba-table-ruleType-${ruleType}`);
@@ -102,7 +102,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
     field: `node.${HostRulesFields.riskScore}`,
     name: i18n.RISK_SCORE,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (riskScore) => {
       if (riskScore != null) {
         const id = escapeDataProviderId(`ueba-table-riskScore-${riskScore}`);
@@ -141,7 +141,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
     field: `node.${HostRulesFields.hits}`,
     name: i18n.HITS,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (hits) => {
       if (hits != null) {
