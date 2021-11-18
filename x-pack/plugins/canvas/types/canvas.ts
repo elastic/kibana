@@ -6,6 +6,7 @@
  */
 
 import { ElementPosition } from './elements';
+import { FilterField } from './filters';
 
 export interface CanvasAsset {
   '@created': string;
@@ -42,6 +43,10 @@ export interface CanvasVariable {
   name: string;
   value: boolean | number | string;
   type: 'boolean' | 'number' | 'string';
+}
+
+export interface Sidebar {
+  groupFiltersByOption?: FilterField;
 }
 
 export interface CanvasWorkpad {

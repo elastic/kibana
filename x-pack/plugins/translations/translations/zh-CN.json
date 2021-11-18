@@ -8178,7 +8178,6 @@
     "xpack.canvas.workpadConfig.pageSizeBadgeOnClickAriaLabel": "将页面大小设置为 {sizeName}",
     "xpack.canvas.workpadConfig.swapDimensionsAriaLabel": "交换页面的宽和高",
     "xpack.canvas.workpadConfig.swapDimensionsTooltip": "交换宽高",
-    "xpack.canvas.workpadConfig.title": "Workpad 设置",
     "xpack.canvas.workpadConfig.USLetterButtonLabel": "美国信函",
     "xpack.canvas.workpadConfig.widthLabel": "宽",
     "xpack.canvas.workpadCreate.createButtonLabel": "创建 Workpad",
