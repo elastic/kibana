@@ -18,7 +18,7 @@ import {
   SavedObjectsFindResult,
 } from 'kibana/server';
 
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
+import { nodeBuilder } from '@kbn/es-query';
 
 import {
   AssociationType,

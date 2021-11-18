@@ -6,7 +6,7 @@
  */
 
 import { remove, uniq } from 'lodash';
-import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
+import { nodeBuilder, KueryNode } from '@kbn/es-query';
 import { OWNER_FIELD } from '../../common';
 
 export const getOwnersFilter = (

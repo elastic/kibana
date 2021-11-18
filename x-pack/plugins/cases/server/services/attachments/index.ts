@@ -12,7 +12,7 @@ import {
   SavedObjectsUpdateOptions,
 } from 'kibana/server';
 
-import { KueryNode } from '../../../../../../src/plugins/data/common';
+import type { KueryNode } from '@kbn/es-query';
 import {
   AttributesTypeAlerts,
   CASE_COMMENT_SAVED_OBJECT,
