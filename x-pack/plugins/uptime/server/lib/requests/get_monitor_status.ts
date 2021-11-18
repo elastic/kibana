@@ -47,7 +47,6 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
 > = async ({ uptimeEsClient, filters, locations, numTimes, timespanRange, timestampRange }) => {
   let afterKey: AfterKey;
 
-  const STATUS = 'down';
   let monitors: any = [];
   do {
     // today this value is hardcoded. In the future we may support
@@ -57,8 +56,15 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
         bool: {
           filter: [
             {
-              term: {
-                'monitor.status': STATUS,
+              exists: {
+                field: 'summary',
+              },
+            },
+            {
+              range: {
+                'summary.down': {
+                  gt: '0',
+                },
               },
             },
             {

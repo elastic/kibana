@@ -61,6 +61,11 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
         bool: {
           filter: [
             {
+              exists: {
+                field: 'summary',
+              },
+            },
+            {
               range: {
                 '@timestamp': {
                   gte,
