@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { ToolbarPopover } from '../../shared_components';
 import type { VisualizationToolbarProps } from '../../types';
 import type { DatatableVisualizationState } from '../visualization';
@@ -64,14 +64,21 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           })}
           display="columnCompressedSwitch"
         >
-          <EuiSwitch
-            compressed
-            data-test-subj="lens-table-pagination-switch"
-            label=""
-            showLabel={false}
-            checked={Boolean(state.paging?.enabled)}
-            onChange={onTogglePagination}
-          />
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.table.visualOptionsPaginateTableTooltip', {
+              defaultMessage: 'Pagination is hidden if there are less than 10 items',
+            })}
+            position="right"
+          >
+            <EuiSwitch
+              compressed
+              data-test-subj="lens-table-pagination-switch"
+              label=""
+              showLabel={false}
+              checked={Boolean(state.paging?.enabled)}
+              onChange={onTogglePagination}
+            />
+          </EuiToolTip>
         </EuiFormRow>
       </ToolbarPopover>
     </EuiFlexGroup>
