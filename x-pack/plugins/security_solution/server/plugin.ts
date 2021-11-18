@@ -64,8 +64,6 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
-import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
-import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
 import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -88,8 +86,9 @@ import type {
   SecuritySolutionPluginStart,
   PluginInitializerContext,
 } from './plugin_contract';
+import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 
-export { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
+export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
@@ -131,14 +130,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
-    const { pluginContext, config, logger, appClientFactory } = this;
+    const { appClientFactory, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
     this.kibanaIndex = core.savedObjects.getKibanaIndex();
-
-    appClientFactory.setup({
-      getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
-      config,
-    });
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
@@ -245,7 +239,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleDataService,
       logger,
       ruleDataClient,
-      ruleOptions
+      ruleOptions,
+      core.getStartServices
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
@@ -308,6 +303,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     core.getStartServices().then(([_, depsStart]) => {
+      appClientFactory.setup({
+        getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
+        config,
+      });
+
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
         endpointContext
@@ -339,7 +339,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger, appClientFactory } = this;
+    const { config, logger } = this;
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
@@ -405,9 +405,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         plugins.fleet?.agentService!,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.agentPolicyService!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        plugins.fleet?.packagePolicyService!,
         logger
       ),
-      appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
       config: this.config,

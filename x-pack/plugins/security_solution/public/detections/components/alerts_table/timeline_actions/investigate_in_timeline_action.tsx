@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { Ecs } from '../../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { ActionIconItem } from '../../../../timelines/components/timeline/body/actions/action_icon_item';
 
 import {
@@ -19,7 +18,6 @@ import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 
 interface InvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
-  nonEcsRowData?: TimelineNonEcsData[];
   ariaLabel?: string;
   alertIds?: string[];
   buttonType?: 'text' | 'icon';
@@ -30,13 +28,11 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
   alertIds,
   ecsRowData,
-  nonEcsRowData,
   buttonType,
   onInvestigateInTimelineAlertClick,
 }) => {
   const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
     ecsRowData,
-    nonEcsRowData,
     alertIds,
     onInvestigateInTimelineAlertClick,
   });

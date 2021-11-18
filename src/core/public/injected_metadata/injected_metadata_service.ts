@@ -8,6 +8,7 @@
 
 import { get } from 'lodash';
 import { deepFreeze } from '@kbn/std';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import {
   EnvironmentMode,
@@ -44,6 +45,10 @@ export interface InjectedMetadataParams {
     };
     vars: {
       [key: string]: unknown;
+    };
+    theme: {
+      darkMode: boolean;
+      version: ThemeVersion;
     };
     env: {
       mode: Readonly<EnvironmentMode>;
@@ -134,6 +139,10 @@ export class InjectedMetadataService {
       getKibanaBranch: () => {
         return this.state.branch;
       },
+
+      getTheme: () => {
+        return this.state.theme;
+      },
     };
   }
 }
@@ -155,6 +164,10 @@ export interface InjectedMetadataSetup {
   };
   getExternalUrlConfig: () => {
     policy: IExternalUrlPolicy[];
+  };
+  getTheme: () => {
+    darkMode: boolean;
+    version: ThemeVersion;
   };
   /**
    * An array of frontend plugins in topological order.

@@ -23,7 +23,6 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "eui_theme_vars/package.json",
   "package.json",
   "README.md"
 ]
@@ -47,6 +46,7 @@ RUNTIME_DEPS = [
   "@npm//moment-timezone",
   "@npm//moment",
   "@npm//raw-loader",
+  "@npm//react-ace",
   "@npm//react-dom",
   "@npm//react-intl",
   "@npm//react-is",

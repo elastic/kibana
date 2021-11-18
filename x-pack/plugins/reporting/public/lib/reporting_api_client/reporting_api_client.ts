@@ -10,12 +10,14 @@ import { stringify } from 'query-string';
 import rison from 'rison-node';
 import type { HttpFetchQuery } from 'src/core/public';
 import { HttpSetup, IUiSettingsClient } from 'src/core/public';
+import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
   API_GENERATE_IMMEDIATE,
   API_LIST_URL,
   API_MIGRATE_ILM_POLICY_URL,
+  getRedirectAppPath,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
 import {
@@ -75,6 +77,19 @@ export class ReportingAPIClient implements IReportingAPI {
     private kibanaVersion: string
   ) {
     this.http = http;
+  }
+
+  public getKibanaAppHref(job: Job): string {
+    const searchParams = stringify({ jobId: job.id });
+
+    const path = buildKibanaPath({
+      basePath: this.http.basePath.serverBasePath,
+      spaceId: job.spaceId,
+      appPath: getRedirectAppPath(),
+    });
+
+    const href = `${path}?${searchParams}`;
+    return href;
   }
 
   public getReportURL(jobId: string) {

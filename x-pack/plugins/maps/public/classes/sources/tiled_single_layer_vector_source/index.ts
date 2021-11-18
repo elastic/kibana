@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ITiledSingleLayerVectorSource } from './tiled_single_layer_vector_source';
+export type { ITiledSingleLayerVectorSource } from './tiled_single_layer_vector_source';

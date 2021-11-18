@@ -49,7 +49,7 @@ interface VisualizeCapabilities {
   show: boolean;
 }
 
-interface TopNavConfigParams {
+export interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
   openInspector: () => void;
@@ -243,18 +243,17 @@ export const getTopNavConfig = (
 
   const allowByValue = dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
   const saveButtonLabel =
-    embeddableId || (!savedVis.id && allowByValue && originatingApp)
+    !savedVis.id && allowByValue && originatingApp
       ? i18n.translate('visualize.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
-      : originatingApp && (embeddableId || savedVis.id)
+      : originatingApp && savedVis.id
       ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
           defaultMessage: 'Save as',
         })
       : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
           defaultMessage: 'Save',
         });
-
   const showSaveAndReturn = originatingApp && (savedVis?.id || allowByValue);
 
   const showSaveButton =
@@ -293,7 +292,7 @@ export const getTopNavConfig = (
       }),
       testId: 'shareTopNavButton',
       run: (anchorElement) => {
-        if (share && !embeddableId) {
+        if (share) {
           const currentState = stateContainer.getState();
           const searchParams = parse(history.location.search);
           const params: VisualizeLocatorParams = {
@@ -336,8 +335,8 @@ export const getTopNavConfig = (
           });
         }
       },
-      // disable the Share button if no action specified
-      disableButton: !share || !!embeddableId,
+      // disable the Share button if no action specified and fot byValue visualizations
+      disableButton: !share || Boolean(!savedVis.id && allowByValue && originatingApp),
     },
     ...(originatingApp
       ? [

@@ -7,14 +7,14 @@
  */
 
 export { getFieldByName, findIndexPatternById } from './utils';
+export type { FieldDescriptor } from './fetcher';
 export {
   IndexPatternsFetcher,
-  FieldDescriptor,
   shouldReadFieldFromDocValues,
   mergeCapabilitiesWithFields,
   getCapabilitiesForRollupIndices,
 } from './fetcher';
-export { IndexPatternsServiceStart } from './types';
+export type { IndexPatternsServiceStart } from './types';
 
 import { PluginInitializerContext } from 'src/core/server';
 import { DataViewsServerPlugin } from './plugin';
@@ -30,8 +30,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DataViewsServerPlugin(initializerContext);
 }
 
-export {
-  DataViewsServerPlugin as Plugin,
+export type {
   DataViewsServerPluginSetup as PluginSetup,
   DataViewsServerPluginStart as PluginStart,
 };
+export { DataViewsServerPlugin as Plugin };

@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
-import { VectorLayer } from '../../layers/vector_layer';
+import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 // @ts-ignore
 import { ESPewPewSource, sourceTitle } from './es_pew_pew_source';
 import { VectorStyle } from '../../styles/vector/vector_style';
@@ -22,9 +22,9 @@ import {
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/descriptor_types';
-import { Point2PointLayerIcon } from '../../layers/icons/point_2_point_layer_icon';
+import { Point2PointLayerIcon } from '../../layers/wizards/icons/point_2_point_layer_icon';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
@@ -40,7 +40,7 @@ export const point2PointLayerWizardConfig: LayerWizard = {
       }
 
       const defaultDynamicProperties = getDefaultDynamicProperties();
-      const layerDescriptor = VectorLayer.createDescriptor({
+      const layerDescriptor = GeoJsonVectorLayer.createDescriptor({
         sourceDescriptor: ESPewPewSource.createDescriptor(sourceConfig),
         style: VectorStyle.createDescriptor({
           [VECTOR_STYLES.LINE_COLOR]: {

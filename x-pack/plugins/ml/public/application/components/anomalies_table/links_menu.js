@@ -28,7 +28,7 @@ import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import { getIndexPatternIdFromName } from '../../util/index_utils';
+import { getDataViewIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 /*
@@ -258,18 +258,18 @@ class LinksMenuUI extends Component {
     };
 
     const createAndOpenUrl = (index, categorizationFieldType) => {
-      // Find the ID of the data view with a title attribute which matches the
-      // index configured in the datafeed. If a Kibana data view has not been created
-      // for this index, then the user will see a warning message on the Discover tab advising
-      // them that no matching data view has been configured.
-      const indexPatternId = getIndexPatternIdFromName(index) || index;
-
       // Get the definition of the category and use the terms or regex to view the
       // matching events in the Kibana Discover tab depending on whether the
       // categorization field is of mapping type text (preferred) or keyword.
       ml.results
         .getCategoryDefinition(record.job_id, categoryId)
-        .then((resp) => {
+        .then(async (resp) => {
+          // Find the ID of the data view with a title attribute which matches the
+          // index configured in the datafeed. If a Kibana data view has not been created
+          // for this index, then the user will see a warning message on the Discover tab advising
+          // them that no matching data view has been configured.
+          const dataViewId = (await getDataViewIdFromName(index)) ?? index;
+
           let query = null;
           // Build query using categorization regex (if keyword type) or terms (if text type).
           // Check for terms or regex in case categoryId represents an anomaly from the absence of the
@@ -313,7 +313,7 @@ class LinksMenuUI extends Component {
           });
 
           const appStateProps = {
-            index: indexPatternId,
+            index: dataViewId,
             filters: [],
           };
           if (query !== null) {

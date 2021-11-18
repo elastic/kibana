@@ -16,7 +16,7 @@ import {
   EuiIconTip,
   EuiTitle,
 } from '@elastic/eui';
-import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as lightEuiTheme } from '@kbn/ui-shared-deps-src/theme';
 import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
 import { assign, fill } from 'lodash';
 import { formatMillisForDisplay } from '../../../lib/execution_duration_utils';
@@ -82,19 +82,35 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
             />
             <BarSeries
               id="executionDuration"
+              name={i18n.translate(
+                'xpack.triggersActionsUI.sections.executionDurationChart.durationLabel',
+                {
+                  defaultMessage: `Duration`,
+                }
+              )}
               xScaleType="linear"
               yScaleType="linear"
               xAccessor={0}
               yAccessors={[1]}
               data={paddedExecutionDurations.map((val, ndx) => [ndx, val])}
+              minBarHeight={2}
             />
             <LineSeries
               id="rule_duration_avg"
+              name={i18n.translate(
+                'xpack.triggersActionsUI.sections.executionDurationChart.avgDurationLabel',
+                {
+                  defaultMessage: `Avg Duration`,
+                }
+              )}
               xScaleType="linear"
               yScaleType="linear"
               xAccessor={0}
               yAccessors={[1]}
-              data={paddedExecutionDurations.map((val, ndx) => [ndx, executionDuration.average])}
+              data={paddedExecutionDurations.map((val, ndx) => [
+                ndx,
+                val ? executionDuration.average : null,
+              ])}
               curve={CurveType.CURVE_NATURAL}
             />
             <Axis id="left-axis" position="left" tickFormat={(d) => formatMillisForDisplay(d)} />
@@ -125,7 +141,7 @@ export function padOrTruncateDurations(values: number[], desiredSize: number) {
   if (values.length === desiredSize) {
     return values;
   } else if (values.length < desiredSize) {
-    return assign(fill(new Array(desiredSize), 0), values);
+    return assign(fill(new Array(desiredSize), null), values);
   } else {
     // oldest durations are at the start of the array, so take the last {desiredSize} values
     return values.slice(-desiredSize);

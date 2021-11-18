@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { GeoJsonImporter, GeoJsonPreview, GEOJSON_FILE_TYPES } from './geojson_importer';
+export type { GeoJsonPreview } from './geojson_importer';
+export { GeoJsonImporter, GEOJSON_FILE_TYPES } from './geojson_importer';

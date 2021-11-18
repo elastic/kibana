@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { RouterMock, RequestMock } from './router_mock';
+export type { RequestMock } from './router_mock';
+export { RouterMock } from './router_mock';
 
 export { routeDependencies } from './route_dependencies';
