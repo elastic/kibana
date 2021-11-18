@@ -183,6 +183,47 @@ export default ({ getService }: FtrProviderContext) => {
           it('Displays a View rule details link', async () => {
             await observability.alerts.common.getAlertsFlyoutViewRuleDetailsLinkOrFail();
           });
+
+          it('Displays a pagination control', async () => {
+            await observability.alerts.common.getAlertsFlyoutPaginationOrFail();
+          });
+
+          it('Pagination control loads previous and next alerts', async () => {
+            const currentReason = await (
+              await observability.alerts.common.getAlertsFlyoutReason()
+            ).getVisibleText();
+            expect(currentReason).to.be(
+              'Failed transactions rate is greater than 5.0% (current value is 31%) for elastic-co-frontend'
+            );
+
+            await (await observability.alerts.common.getAlertsFlyoutPaginationNextButton()).click();
+
+            let nextReason;
+            await retry.waitFor('next alert loaded', async () => {
+              nextReason = await (
+                await observability.alerts.common.getAlertsFlyoutReason()
+              ).getVisibleText();
+              return nextReason !== currentReason;
+            });
+            expect(nextReason).to.be(
+              'Failed transactions rate is greater than 5.0% (current value is 10%) for opbeans-java'
+            );
+
+            await (
+              await observability.alerts.common.getAlertsFlyoutPaginationPreviousButton()
+            ).click();
+
+            let previousReason;
+            await retry.waitFor('previous alert loaded', async () => {
+              previousReason = await (
+                await observability.alerts.common.getAlertsFlyoutReason()
+              ).getVisibleText();
+              return previousReason !== nextReason;
+            });
+            expect(previousReason).to.be(
+              'Failed transactions rate is greater than 5.0% (current value is 31%) for elastic-co-frontend'
+            );
+          });
         });
       });
 

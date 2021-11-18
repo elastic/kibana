@@ -163,7 +163,9 @@ export function AlertsFlyout({
           <h4>{translations.alertsFlyout.reasonTitle}</h4>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="s">{alertData.reason}</EuiText>
+        <EuiText size="s" data-test-subj="alertsFlyoutReason">
+          {alertData.reason}
+        </EuiText>
         <EuiSpacer size="s" />
         {!!linkToRule && (
           <EuiLink href={linkToRule} data-test-subj="viewRuleDetailsFlyout">

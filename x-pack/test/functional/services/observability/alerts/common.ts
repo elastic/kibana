@@ -20,6 +20,7 @@ const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
+const ALERTS_FLYOUT_PAGINATION_SELECTOR = 'alertsFlyoutPagination';
 
 const ACTION_COLUMN_INDEX = 1;
 
@@ -145,6 +146,10 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.find('alertsFlyoutTitle');
   };
 
+  const getAlertsFlyoutReason = async () => {
+    return await testSubjects.find('alertsFlyoutReason');
+  };
+
   const closeAlertsFlyout = async () => {
     return await flyoutService.close(ALERTS_FLYOUT_SELECTOR);
   };
@@ -155,6 +160,20 @@ export function ObservabilityAlertsCommonProvider({
 
   const getAlertsFlyoutViewRuleDetailsLinkOrFail = async () => {
     return await testSubjects.existOrFail('viewRuleDetailsFlyout');
+  };
+
+  const getAlertsFlyoutPaginationOrFail = async () => {
+    return await testSubjects.existOrFail(ALERTS_FLYOUT_PAGINATION_SELECTOR);
+  };
+
+  const getAlertsFlyoutPaginationNextButton = async () => {
+    const paginationControl = await testSubjects.find(ALERTS_FLYOUT_PAGINATION_SELECTOR);
+    return await testSubjects.findDescendant('pagination-button-next', paginationControl);
+  };
+
+  const getAlertsFlyoutPaginationPreviousButton = async () => {
+    const paginationControl = await testSubjects.find(ALERTS_FLYOUT_PAGINATION_SELECTOR);
+    return await testSubjects.findDescendant('pagination-button-previous', paginationControl);
   };
 
   const getAlertsFlyoutDescriptionListTitles = async (): Promise<WebElementWrapper[]> => {
@@ -252,6 +271,7 @@ export function ObservabilityAlertsCommonProvider({
     getAlertsFlyoutDescriptionListTitles,
     getAlertsFlyoutOrFail,
     getAlertsFlyoutTitle,
+    getAlertsFlyoutReason,
     getAlertsFlyoutViewInAppButtonOrFail,
     getFilterForValueButton,
     getNoDataPageOrFail,
@@ -276,5 +296,8 @@ export function ObservabilityAlertsCommonProvider({
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
+    getAlertsFlyoutPaginationOrFail,
+    getAlertsFlyoutPaginationNextButton,
+    getAlertsFlyoutPaginationPreviousButton,
   };
 }
