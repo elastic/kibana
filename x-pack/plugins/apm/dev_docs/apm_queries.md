@@ -1,7 +1,17 @@
-# Data model
+### Table of Contents
+ - [Transactions](#transactions)
+ - [System metrics](#system-metrics)
+ - [Transaction breakdown metrics](#transaction-breakdown-metrics)
+ - [Span breakdown metrics](#span-breakdown-metrics)
+ - [Service destination metrics](#service-destination-metrics)
+ - [Common filters](#common-filters)
+
+---
+
+### Data model
 Elastic APM agents capture different types of information from within their instrumented applications. These are known as events, and can be spans, transactions, errors, or metrics. You can find more information [here](https://www.elastic.co/guide/en/apm/get-started/current/apm-data-model.html).
 
-# Running examples
+### Running examples
 You can run the example queries on the [edge cluster](https://edge-oblt.elastic.dev/) or any another cluster that contains APM data.
 
 # Transactions
@@ -307,7 +317,7 @@ The above example is overly simplified. In reality [we do a bit more](https://gi
 
 
 
-# Transaction breakdown metrics (`transaction_breakdown`)
+# Transaction breakdown metrics
 
 A pre-aggregations of transaction documents where `transaction.breakdown.count` is the number of original transactions.
 
@@ -327,7 +337,7 @@ Noteworthy fields: `transaction.name`, `transaction.type`
 }
 ```
 
-# Span breakdown metrics (`span_breakdown`)
+# Span breakdown metrics
 
 A pre-aggregations of span documents where `span.self_time.count` is the number of original spans. Measures the "self-time" for a span type, and optional subtype, within a transaction group. 
 
@@ -482,7 +492,7 @@ GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 }
 ```
 
-## Common filters
+# Common filters
 
 Most Elasticsearch queries will need to have one or more filters. There are a couple of reasons for adding filters:
 

@@ -10,7 +10,7 @@ import {
   AggregationsTopHitsAggregate,
   AggregationsValueAggregate,
   SearchResponse,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PackagePolicyServiceInterface } from '../../../fleet/server';
 import { getRouteMetric } from '../routes/usage';
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../src/core/server';

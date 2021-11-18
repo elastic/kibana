@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -55,12 +55,12 @@ export function getStoredAnnotations({
 
     try {
       const response: ESSearchResponse<ESAnnotation, { body: typeof body }> =
-        await (unwrapEsResponse(
+        (await unwrapEsResponse(
           client.search({
             index: annotationsClient.index,
             body,
           })
-        ) as any);
+        )) as any;
 
       return response.hits.hits.map((hit) => {
         return {
@@ -75,7 +75,7 @@ export function getStoredAnnotations({
       // so we should handle this error gracefully
       if (
         error instanceof WrappedElasticsearchClientError &&
-        error.originalError instanceof ResponseError
+        error.originalError instanceof errors.ResponseError
       ) {
         const type = error.originalError.body.error.type;
 

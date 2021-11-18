@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { HttpStart, NotificationsStart } from 'src/core/public';
 
@@ -21,12 +21,12 @@ export const getEnabledScriptingLanguages = (
   http: HttpStart,
   toasts: NotificationsStart['toasts']
 ) =>
-  http.get('/api/kibana/scripts/languages').catch(() => {
+  http.get<estypes.ScriptLanguage[]>('/api/kibana/scripts/languages').catch(() => {
     toasts.addDanger(
       i18n.translate('indexPatternManagement.scriptingLanguages.errorFetchingToastDescription', {
         defaultMessage: 'Error getting available scripting languages from Elasticsearch',
       })
     );
 
-    return [];
+    return [] as estypes.ScriptLanguage[];
   });

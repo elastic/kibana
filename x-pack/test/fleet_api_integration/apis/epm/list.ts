@@ -9,10 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
   // use function () {} and not () => {} here
@@ -53,6 +55,13 @@ export default function (providerContext: FtrProviderContext) {
         const listResponse = await fetchLimitedPackageList();
 
         expect(listResponse.response).to.eql(['endpoint']);
+      });
+
+      it('allows user with only read permission to access', async () => {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages')
+          .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+          .expect(200);
       });
     });
   });

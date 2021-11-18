@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { SIGNALS_ID } from '@kbn/securitysolution-rules';
+
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
-import { SIGNALS_ID } from '../../../common/constants';
 import { isElasticRule } from './index';
 import {
   AlertsAggregationResponse,
@@ -188,8 +189,8 @@ export const getDetectionRuleMetrics = async (
   let rulesUsage: DetectionRulesTypeUsage = initialDetectionRulesUsage;
   const ruleSearchOptions: RuleSearchParams = {
     body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
-    filterPath: [],
-    ignoreUnavailable: true,
+    filter_path: [],
+    ignore_unavailable: true,
     index: kibanaIndex,
     size: MAX_RESULTS_WINDOW,
   };

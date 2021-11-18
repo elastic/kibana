@@ -382,7 +382,7 @@ export const INVITATION_PENDING_LABEL = i18n.translate(
 
 export const ROLE_MODAL_TEXT = i18n.translate('xpack.enterpriseSearch.roleMapping.roleModalText', {
   defaultMessage:
-    'Removing a role mapping revokes access to any user corresponding to the mapping attributes, but may not take effect immediately for SAML-governed roles. Users with an active SAML session will retain access until it expires.',
+    'Removing a role mapping could revoke access to the currently logged-in user. Before proceeding, verify that the currently logged-in user has the appropriate access level via a different role mapping to avoid undesired behavior. This action may not take effect immediately for SAML-governed roles. Users with an active SAML session will retain access until it expires.',
 });
 
 export const USER_MODAL_TITLE = (username: string) =>
@@ -448,3 +448,25 @@ export const SMTP_CALLOUT_LABEL = i18n.translate(
 export const SMTP_LINK_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.smtpLinkLabel', {
   defaultMessage: 'SMTP configuration is provided',
 });
+
+export const KIBANA_ACCESS_WARNING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.kibanaAccessWarningTitle',
+  {
+    defaultMessage: 'Kibana access warning',
+  }
+);
+
+export const KIBANA_ACCESS_WARNING_ERROR_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.kibanaAccessWarningErrorMessage',
+  {
+    defaultMessage:
+      'This Elasticsearch user does not have an Enterprise Search role in Elasticsearch. They may not have access to Kibana.',
+  }
+);
+
+export const KIBANA_ACCESS_WARNING_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.kibanaAccessWarningDescription',
+  {
+    defaultMessage: 'Consider giving them the "enterprise-search-user" role.',
+  }
+);

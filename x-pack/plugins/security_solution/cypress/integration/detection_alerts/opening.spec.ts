@@ -6,7 +6,12 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import { ALERTS_COUNT, SELECTED_ALERTS, TAKE_ACTION_POPOVER_BTN } from '../../screens/alerts';
+import {
+  ALERTS_COUNT,
+  SELECTED_ALERTS,
+  TAKE_ACTION_POPOVER_BTN,
+  ALERT_COUNT_TABLE_FIRST_ROW_COUNT,
+} from '../../screens/alerts';
 
 import {
   closeAlerts,
@@ -74,6 +79,10 @@ describe('Opening alerts', () => {
 
             const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
             cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+            cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+              'have.text',
+              `${expectedNumberOfAlerts}`
+            );
 
             goToOpenedAlerts();
             waitForAlerts();
@@ -81,6 +90,10 @@ describe('Opening alerts', () => {
             cy.get(ALERTS_COUNT).should(
               'have.text',
               `${numberOfOpenedAlerts + numberOfAlertsToBeOpened} alerts`.toString()
+            );
+            cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+              'have.text',
+              `${numberOfOpenedAlerts + numberOfAlertsToBeOpened}`
             );
           });
       });

@@ -7,6 +7,7 @@
 
 import { PatchRulesOptions } from './types';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
@@ -15,6 +16,7 @@ export const getPatchRulesOptionsMock = (isRuleRegistryEnabled: boolean): PatchR
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
   spaceId: 'default',
   ruleStatusClient: ruleExecutionLogClientMock.create(),
   anomalyThreshold: undefined,
@@ -68,6 +70,7 @@ export const getPatchMlRulesOptionsMock = (isRuleRegistryEnabled: boolean): Patc
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
   spaceId: 'default',
   ruleStatusClient: ruleExecutionLogClientMock.create(),
   anomalyThreshold: 55,

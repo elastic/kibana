@@ -5,64 +5,84 @@
  * 2.0.
  */
 
-import { IEventLogService } from '../../../../../../event_log/server';
+import { sum } from 'lodash';
+import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
+import { IEventLogClient, IEventLogService } from '../../../../../../event_log/server';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { IRuleStatusSOAttributes } from '../../rules/types';
+import { SavedObjectsAdapter } from '../saved_objects_adapter/saved_objects_adapter';
 import {
   FindBulkExecutionLogArgs,
   FindExecutionLogArgs,
+  GetCurrentStatusArgs,
+  GetCurrentStatusBulkArgs,
+  GetCurrentStatusBulkResult,
+  GetLastFailuresArgs,
   IRuleExecutionLogClient,
   LogExecutionMetricsArgs,
   LogStatusChangeArgs,
-  UpdateExecutionLogArgs,
 } from '../types';
 import { EventLogClient } from './event_log_client';
 
+const MAX_LAST_FAILURES = 5;
+
 export class EventLogAdapter implements IRuleExecutionLogClient {
   private eventLogClient: EventLogClient;
+  /**
+   * @deprecated Saved objects adapter is used during the transition period while the event log doesn't support all features needed to implement the execution log.
+   * We use savedObjectsAdapter to write/read the latest rule execution status and eventLogClient to read/write historical execution data.
+   * We can remove savedObjectsAdapter as soon as the event log supports all methods that we need (find, findBulk).
+   */
+  private savedObjectsAdapter: IRuleExecutionLogClient;
 
-  constructor(eventLogService: IEventLogService) {
-    this.eventLogClient = new EventLogClient(eventLogService);
+  constructor(
+    eventLogService: IEventLogService,
+    eventLogClient: IEventLogClient | undefined,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
+    this.eventLogClient = new EventLogClient(eventLogService, eventLogClient);
+    this.savedObjectsAdapter = new SavedObjectsAdapter(savedObjectsClient);
   }
 
-  public async find({ ruleId, logsCount = 1, spaceId }: FindExecutionLogArgs) {
-    return []; // TODO Implement
+  /** @deprecated */
+  public async find(args: FindExecutionLogArgs) {
+    return this.savedObjectsAdapter.find(args);
   }
 
-  public async findBulk({ ruleIds, logsCount = 1, spaceId }: FindBulkExecutionLogArgs) {
-    return {}; // TODO Implement
+  /** @deprecated */
+  public async findBulk(args: FindBulkExecutionLogArgs) {
+    return this.savedObjectsAdapter.findBulk(args);
   }
 
-  public async update({
-    attributes,
-    executionId,
-    spaceId,
-    ruleName,
-    ruleType,
-  }: UpdateExecutionLogArgs) {
-    // execution events are immutable, so we just log a status change instead of updating previous
-    if (attributes.status) {
-      this.eventLogClient.logStatusChange({
-        executionId,
-        ruleName,
-        ruleType,
-        ruleId: attributes.alertId,
-        newStatus: attributes.status,
-        spaceId,
-      });
-    }
+  public getLastFailures(args: GetLastFailuresArgs): Promise<IRuleStatusSOAttributes[]> {
+    const { ruleId } = args;
+    return this.eventLogClient.getLastStatusChanges({
+      ruleId,
+      count: MAX_LAST_FAILURES,
+      includeStatuses: [RuleExecutionStatus.failed],
+    });
   }
 
-  public async delete(id: string) {
-    // execution events are immutable, nothing to do here
+  public getCurrentStatus(
+    args: GetCurrentStatusArgs
+  ): Promise<IRuleStatusSOAttributes | undefined> {
+    return this.savedObjectsAdapter.getCurrentStatus(args);
   }
 
-  public async logExecutionMetrics({
-    executionId,
-    ruleId,
-    spaceId,
-    ruleType,
-    ruleName,
-    metrics,
-  }: LogExecutionMetricsArgs) {
+  public getCurrentStatusBulk(args: GetCurrentStatusBulkArgs): Promise<GetCurrentStatusBulkResult> {
+    return this.savedObjectsAdapter.getCurrentStatusBulk(args);
+  }
+
+  public async deleteCurrentStatus(ruleId: string): Promise<void> {
+    await this.savedObjectsAdapter.deleteCurrentStatus(ruleId);
+
+    // EventLog execution events are immutable, nothing to do here
+  }
+
+  public async logExecutionMetrics(args: LogExecutionMetricsArgs) {
+    const { executionId, ruleId, spaceId, ruleType, ruleName, metrics } = args;
+    await this.savedObjectsAdapter.logExecutionMetrics(args);
+
     this.eventLogClient.logExecutionMetrics({
       executionId,
       ruleId,
@@ -71,19 +91,21 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
       spaceId,
       metrics: {
         executionGapDuration: metrics.executionGap?.asSeconds(),
-        totalIndexingDuration: metrics.indexingDurations?.reduce(
-          (acc, cur) => acc + Number(cur),
-          0
-        ),
-        totalSearchDuration: metrics.searchDurations?.reduce((acc, cur) => acc + Number(cur), 0),
+        totalIndexingDuration: metrics.indexingDurations
+          ? sum(metrics.indexingDurations.map(Number))
+          : undefined,
+        totalSearchDuration: metrics.searchDurations
+          ? sum(metrics.searchDurations.map(Number))
+          : undefined,
       },
     });
   }
 
   public async logStatusChange(args: LogStatusChangeArgs) {
+    await this.savedObjectsAdapter.logStatusChange(args);
+
     if (args.metrics) {
-      // TODO: Await here?
-      this.logExecutionMetrics({
+      await this.logExecutionMetrics({
         executionId: args.executionId,
         ruleId: args.ruleId,
         ruleName: args.ruleName,

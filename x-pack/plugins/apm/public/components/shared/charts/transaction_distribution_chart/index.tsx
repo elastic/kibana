@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import type { HistogramItem } from '../../../../../common/search_strategies/types';
+import type { HistogramItem } from '../../../../../common/correlations/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -51,6 +51,7 @@ interface TransactionDistributionChartProps {
   markerValue: number;
   markerPercentile: number;
   onChartSelection?: BrushEndListener;
+  palette?: string[];
   selection?: [number, number];
   status: FETCH_STATUS;
 }
@@ -77,13 +78,10 @@ const CHART_PLACEHOLDER_VALUE = 0.0001;
 // Elastic charts will show any lone bin (i.e. a populated bin followed by empty bin)
 // as a circular marker instead of a bar
 // This provides a workaround by making the next bin not empty
+// TODO Find a way to get rid of this workaround since it alters original values of the data.
 export const replaceHistogramDotsWithBars = (histogramItems: HistogramItem[]) =>
   histogramItems.reduce((histogramItem, _, i) => {
-    if (
-      histogramItem[i - 1]?.doc_count > 0 &&
-      histogramItem[i - 1]?.doc_count !== CHART_PLACEHOLDER_VALUE &&
-      histogramItem[i].doc_count === 0
-    ) {
+    if (histogramItem[i].doc_count === 0) {
       histogramItem[i].doc_count = CHART_PLACEHOLDER_VALUE;
     }
     return histogramItem;
@@ -102,16 +100,16 @@ export function TransactionDistributionChart({
   markerValue,
   markerPercentile,
   onChartSelection,
+  palette,
   selection,
   status,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
 
-  const areaSeriesColors = [
+  const areaSeriesColors = palette ?? [
     euiTheme.eui.euiColorVis1,
     euiTheme.eui.euiColorVis2,
-    euiTheme.eui.euiColorVis5,
   ];
 
   const annotationsDataValues: LineAnnotationDatum[] = [
@@ -134,9 +132,9 @@ export function TransactionDistributionChart({
     Math.max(
       ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
     ) ?? 0;
-  const yTicks = Math.ceil(Math.log10(yMax));
+  const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
   const yAxisDomain = {
-    min: 0.9,
+    min: 0.5,
     max: Math.pow(10, yTicks),
   };
 
@@ -171,7 +169,7 @@ export function TransactionDistributionChart({
               },
               areaSeriesStyle: {
                 line: {
-                  visible: false,
+                  visible: true,
                 },
               },
               axes: {
@@ -186,7 +184,7 @@ export function TransactionDistributionChart({
                 },
               },
             }}
-            showLegend
+            showLegend={true}
             legendPosition={Position.Bottom}
             onBrushEnd={onChartSelection}
           />
@@ -238,7 +236,10 @@ export function TransactionDistributionChart({
           />
           <Axis
             id="x-axis"
-            title=""
+            title={i18n.translate(
+              'xpack.apm.transactionDistribution.chart.latencyLabel',
+              { defaultMessage: 'Latency' }
+            )}
             position={Position.Bottom}
             tickFormat={xAxisTickFormat}
             gridLine={{ visible: false }}
@@ -248,7 +249,7 @@ export function TransactionDistributionChart({
             domain={yAxisDomain}
             title={i18n.translate(
               'xpack.apm.transactionDistribution.chart.numberOfTransactionsLabel',
-              { defaultMessage: '# transactions' }
+              { defaultMessage: 'Transactions' }
             )}
             position={Position.Left}
             ticks={yTicks}

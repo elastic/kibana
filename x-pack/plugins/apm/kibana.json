@@ -8,11 +8,11 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
-    "apmOss",
     "data",
     "embeddable",
     "features",
     "infra",
+    "inspector",
     "licensing",
     "observability",
     "ruleRegistry",

@@ -6,7 +6,7 @@
  */
 
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { PercentileRange } from './index';
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
 }
 
 export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
-  const { urlParams, uxUiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useLegacyUrlParams();
   const { start, end, searchTerm } = urlParams;
   const { min: minP, max: maxP } = percentileRange ?? {};
 
@@ -24,7 +24,7 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
     (callApmApi) => {
       if (start && end && field && value) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/page-load-distribution/breakdown',
+          endpoint: 'GET /internal/apm/ux/page-load-distribution/breakdown',
           params: {
             query: {
               start,

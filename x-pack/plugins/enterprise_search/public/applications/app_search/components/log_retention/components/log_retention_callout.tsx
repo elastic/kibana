@@ -19,12 +19,14 @@ import { AppLogic } from '../../../app_logic';
 import { SETTINGS_PATH } from '../../../routes';
 import { ANALYTICS_TITLE } from '../../analytics';
 import { API_LOGS_TITLE } from '../../api_logs';
+import { CRAWLER_TITLE } from '../../crawler';
 
 import { LogRetentionLogic, LogRetentionOptions, renderLogRetentionDate } from '../index';
 
 const TITLE_MAP = {
   [LogRetentionOptions.Analytics]: ANALYTICS_TITLE,
   [LogRetentionOptions.API]: API_LOGS_TITLE,
+  [LogRetentionOptions.Crawler]: CRAWLER_TITLE,
 };
 
 interface Props {

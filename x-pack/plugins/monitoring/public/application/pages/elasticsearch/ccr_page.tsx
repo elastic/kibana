@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ElasticsearchTemplate } from './elasticsearch_template';
@@ -13,12 +13,12 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { Ccr } from '../../../components/elasticsearch/ccr';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { ELASTICSEARCH_SYSTEM_ID, RULE_CCR_READ_EXCEPTIONS } from '../../../../common/constants';
-
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 interface SetupModeProps {
   setupMode: any;
   flyoutComponent: any;
@@ -27,6 +27,7 @@ interface SetupModeProps {
 
 export const ElasticsearchCcrPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const { services } = useKibana<{ data: any }>();
 
   const clusterUuid = globalState.cluster_uuid;
@@ -36,6 +37,14 @@ export const ElasticsearchCcrPage: React.FC<ComponentProps> = ({ clusters }) => 
   const ccs = globalState.ccs;
   const [data, setData] = useState({} as any);
   const [alerts, setAlerts] = useState<AlertsByName>({});
+
+  useEffect(() => {
+    if (cluster) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inElasticsearch: true,
+      });
+    }
+  }, [cluster, generateBreadcrumbs]);
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.ccr.title', {
     defaultMessage: 'Elasticsearch - Ccr',

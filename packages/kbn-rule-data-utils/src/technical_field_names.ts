@@ -17,6 +17,7 @@ const CONSUMERS = `${KIBANA_NAMESPACE}.consumers` as const;
 const ECS_VERSION = 'ecs.version' as const;
 const EVENT_ACTION = 'event.action' as const;
 const EVENT_KIND = 'event.kind' as const;
+const EVENT_MODULE = 'event.module' as const;
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
 const TAGS = 'tags' as const;
 const TIMESTAMP = '@timestamp' as const;
@@ -89,6 +90,7 @@ const fields = {
   ECS_VERSION,
   EVENT_KIND,
   EVENT_ACTION,
+  EVENT_MODULE,
   TAGS,
   TIMESTAMP,
   ALERT_ACTION_GROUP,
@@ -192,6 +194,7 @@ export {
   ECS_VERSION,
   EVENT_ACTION,
   EVENT_KIND,
+  EVENT_MODULE,
   KIBANA_NAMESPACE,
   ALERT_RULE_UUID,
   ALERT_RULE_CATEGORY,

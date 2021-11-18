@@ -12,97 +12,59 @@ import {
   mockKibanaValues,
 } from '../../../../../__mocks__/kea_logic';
 
-import { set } from 'lodash/fp';
-
 import '../../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { CurationSuggestion } from '../../types';
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
+import { HydratedCurationSuggestion } from '../../types';
 
 import { CurationSuggestionLogic } from './curation_suggestion_logic';
 
 const DEFAULT_VALUES = {
   dataLoading: true,
   suggestion: null,
-  suggestedPromotedDocuments: [],
-  curation: null,
 };
 
-const suggestion: CurationSuggestion = {
+const suggestion: HydratedCurationSuggestion = {
   query: 'foo',
   updated_at: '2021-07-08T14:35:50Z',
-  promoted: ['1', '2', '3'],
-  status: 'pending',
-  operation: 'create',
-};
-
-const curation = {
-  id: 'cur-6155e69c7a2f2e4f756303fd',
-  queries: ['foo'],
   promoted: [
     {
-      id: '5',
+      id: '1',
+    },
+    {
+      id: '2',
+    },
+    {
+      id: '3',
     },
   ],
-  hidden: [],
-  last_updated: 'September 30, 2021 at 04:32PM',
-  organic: [],
-};
-
-const suggestedPromotedDocuments = [
-  {
-    id: {
-      raw: '1',
-    },
-    _meta: {
-      id: '1',
-      engine: 'some-engine',
-    },
-  },
-  {
-    id: {
-      raw: '2',
-    },
-    _meta: {
-      id: '2',
-      engine: 'some-engine',
-    },
-  },
-  {
-    id: {
-      raw: '3',
-    },
-    _meta: {
-      id: '3',
-      engine: 'some-engine',
-    },
-  },
-];
-
-const MOCK_RESPONSE = {
-  meta: {
-    page: {
-      current: 1,
-      size: 10,
-      total_results: 1,
-      total_pages: 1,
-    },
-  },
-  results: [suggestion],
-};
-
-const MOCK_DOCUMENTS_RESPONSE = {
-  results: [
-    {
-      id: {
-        raw: '2',
+  status: 'pending',
+  operation: 'create',
+  curation: {
+    id: 'cur-6155e69c7a2f2e4f756303fd',
+    queries: ['foo'],
+    promoted: [
+      {
+        id: '5',
       },
-      _meta: {
-        id: '2',
-        engine: 'some-engine',
+    ],
+    hidden: [],
+    last_updated: 'September 30, 2021 at 04:32PM',
+    organic: [
+      {
+        id: {
+          raw: '1',
+        },
+        _meta: {
+          id: '1',
+          engine: 'some-engine',
+        },
       },
-    },
+    ],
+  },
+  organic: [
     {
       id: {
         raw: '1',
@@ -112,7 +74,78 @@ const MOCK_DOCUMENTS_RESPONSE = {
         engine: 'some-engine',
       },
     },
+    {
+      id: {
+        raw: '2',
+      },
+      _meta: {
+        id: '2',
+        engine: 'some-engine',
+      },
+    },
   ],
+};
+
+const MOCK_RESPONSE = {
+  query: 'foo',
+  status: 'pending',
+  updated_at: '2021-07-08T14:35:50Z',
+  operation: 'create',
+  suggestion: {
+    promoted: [
+      {
+        id: '1',
+      },
+      {
+        id: '2',
+      },
+      {
+        id: '3',
+      },
+    ],
+    organic: [
+      {
+        id: {
+          raw: '1',
+        },
+        _meta: {
+          id: '1',
+          engine: 'some-engine',
+        },
+      },
+      {
+        id: {
+          raw: '2',
+        },
+        _meta: {
+          id: '2',
+          engine: 'some-engine',
+        },
+      },
+    ],
+  },
+  curation: {
+    id: 'cur-6155e69c7a2f2e4f756303fd',
+    queries: ['foo'],
+    promoted: [
+      {
+        id: '5',
+      },
+    ],
+    hidden: [],
+    last_updated: 'September 30, 2021 at 04:32PM',
+    organic: [
+      {
+        id: {
+          raw: '1',
+        },
+        _meta: {
+          id: '1',
+          engine: 'some-engine',
+        },
+      },
+    ],
+  },
 };
 
 describe('CurationSuggestionLogic', () => {
@@ -148,20 +181,6 @@ describe('CurationSuggestionLogic', () => {
     });
   };
 
-  const itHandlesErrors = (httpMethod: any, callback: () => void) => {
-    it('handles errors', async () => {
-      httpMethod.mockReturnValueOnce(Promise.reject('error'));
-      mountLogic({
-        suggestion,
-      });
-
-      callback();
-      await nextTick();
-
-      expect(flashAPIErrors).toHaveBeenCalledWith('error');
-    });
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -177,14 +196,10 @@ describe('CurationSuggestionLogic', () => {
         mountLogic();
         CurationSuggestionLogic.actions.onSuggestionLoaded({
           suggestion,
-          suggestedPromotedDocuments,
-          curation,
         });
         expect(CurationSuggestionLogic.values).toEqual({
           ...DEFAULT_VALUES,
           suggestion,
-          suggestedPromotedDocuments,
-          curation,
           dataLoading: false,
         });
       });
@@ -205,85 +220,7 @@ describe('CurationSuggestionLogic', () => {
       });
 
       it('should make API calls to fetch data and trigger onSuggestionLoaded', async () => {
-        http.post.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
-        http.post.mockReturnValueOnce(Promise.resolve(MOCK_DOCUMENTS_RESPONSE));
-        mountLogic();
-        jest.spyOn(CurationSuggestionLogic.actions, 'onSuggestionLoaded');
-
-        CurationSuggestionLogic.actions.loadSuggestion();
-        await nextTick();
-
-        expect(http.post).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions/foo-query',
-          {
-            body: JSON.stringify({
-              page: {
-                current: 1,
-                size: 1,
-              },
-              filters: {
-                status: ['pending'],
-                type: 'curation',
-              },
-            }),
-          }
-        );
-
-        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/search', {
-          query: { query: '' },
-          body: JSON.stringify({
-            page: {
-              size: 100,
-            },
-            filters: {
-              // The results of the first API call are used to make the second http call for document details
-              id: MOCK_RESPONSE.results[0].promoted,
-            },
-          }),
-        });
-
-        expect(CurationSuggestionLogic.actions.onSuggestionLoaded).toHaveBeenCalledWith({
-          suggestion: {
-            query: 'foo',
-            updated_at: '2021-07-08T14:35:50Z',
-            promoted: ['1', '2', '3'],
-            status: 'pending',
-            operation: 'create',
-          },
-          // Note that these were re-ordered to match the 'promoted' list above, and since document
-          // 3 was not found it is not included in this list
-          suggestedPromotedDocuments: [
-            {
-              id: {
-                raw: '1',
-              },
-              _meta: {
-                id: '1',
-                engine: 'some-engine',
-              },
-            },
-            {
-              id: {
-                raw: '2',
-              },
-              _meta: {
-                id: '2',
-                engine: 'some-engine',
-              },
-            },
-          ],
-          curation: null,
-        });
-      });
-
-      it('will also fetch curation details if the suggestion has a curation_id', async () => {
-        http.post.mockReturnValueOnce(
-          Promise.resolve(
-            set('results[0].curation_id', 'cur-6155e69c7a2f2e4f756303fd', MOCK_RESPONSE)
-          )
-        );
-        http.post.mockReturnValueOnce(Promise.resolve(MOCK_DOCUMENTS_RESPONSE));
-        http.get.mockReturnValueOnce(Promise.resolve(curation));
+        http.get.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
         mountLogic();
         jest.spyOn(CurationSuggestionLogic.actions, 'onSuggestionLoaded');
 
@@ -291,14 +228,16 @@ describe('CurationSuggestionLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/curations/cur-6155e69c7a2f2e4f756303fd',
-          { query: { skip_record_analytics: 'true' } }
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions/foo-query',
+          {
+            query: {
+              type: 'curation',
+            },
+          }
         );
 
         expect(CurationSuggestionLogic.actions.onSuggestionLoaded).toHaveBeenCalledWith({
-          suggestion: expect.any(Object),
-          suggestedPromotedDocuments: expect.any(Object),
-          curation,
+          suggestion,
         });
       });
 
@@ -306,7 +245,12 @@ describe('CurationSuggestionLogic', () => {
       // the back button, etc. The suggestion still exists, it's just not in a "pending" state
       // so we can show it.ga
       it('will redirect if the suggestion is not found', async () => {
-        http.post.mockReturnValueOnce(Promise.resolve(set('results', [], MOCK_RESPONSE)));
+        http.get.mockReturnValueOnce(
+          Promise.reject({
+            response: { status: 404 },
+          })
+        );
+
         mountLogic();
         CurationSuggestionLogic.actions.loadSuggestion();
         await nextTick();
@@ -314,7 +258,7 @@ describe('CurationSuggestionLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
       });
 
-      itHandlesErrors(http.post, () => {
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         CurationSuggestionLogic.actions.loadSuggestion();
       });
     });
@@ -340,7 +284,7 @@ describe('CurationSuggestionLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify([
               {
@@ -357,7 +301,44 @@ describe('CurationSuggestionLogic', () => {
         );
       });
 
-      itHandlesErrors(http.put, () => {
+      describe('when a suggestion is a "delete" suggestion', () => {
+        const deleteSuggestion = {
+          ...suggestion,
+          operation: 'delete',
+          promoted: [],
+          curation_id: 'cur-6155e69c7a2f2e4f756303fd',
+        };
+
+        it('will show a confirm message before applying, and redirect a user back to the curations page, rather than the curation details page', async () => {
+          jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
+          http.put.mockReturnValueOnce(
+            Promise.resolve({
+              results: [{ ...suggestion, status: 'accepted', curation_id: undefined }],
+            })
+          );
+          mountLogic({
+            suggestion: deleteSuggestion,
+          });
+          CurationSuggestionLogic.actions.acceptSuggestion();
+          await nextTick();
+
+          expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
+        });
+
+        it('will do nothing if the user does not confirm', async () => {
+          jest.spyOn(global, 'confirm').mockReturnValueOnce(false);
+          mountLogic({
+            suggestion: deleteSuggestion,
+          });
+          CurationSuggestionLogic.actions.acceptSuggestion();
+          await nextTick();
+          expect(http.put).not.toHaveBeenCalled();
+          expect(navigateToUrl).not.toHaveBeenCalled();
+        });
+      });
+
+      itShowsServerErrorAsFlashMessage(http.put, () => {
+        jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
         CurationSuggestionLogic.actions.acceptSuggestion();
       });
 
@@ -387,7 +368,7 @@ describe('CurationSuggestionLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify([
               {
@@ -404,7 +385,44 @@ describe('CurationSuggestionLogic', () => {
         );
       });
 
-      itHandlesErrors(http.put, () => {
+      describe('when a suggestion is a "delete" suggestion', () => {
+        const deleteSuggestion = {
+          ...suggestion,
+          operation: 'delete',
+          promoted: [],
+          curation_id: 'cur-6155e69c7a2f2e4f756303fd',
+        };
+
+        it('will show a confirm message before applying, and redirect a user back to the curations page, rather than the curation details page', async () => {
+          jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
+          http.put.mockReturnValueOnce(
+            Promise.resolve({
+              results: [{ ...suggestion, status: 'accepted', curation_id: undefined }],
+            })
+          );
+          mountLogic({
+            suggestion: deleteSuggestion,
+          });
+          CurationSuggestionLogic.actions.acceptAndAutomateSuggestion();
+          await nextTick();
+
+          expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
+        });
+
+        it('will do nothing if the user does not confirm', async () => {
+          jest.spyOn(global, 'confirm').mockReturnValueOnce(false);
+          mountLogic({
+            suggestion: deleteSuggestion,
+          });
+          CurationSuggestionLogic.actions.acceptAndAutomateSuggestion();
+          await nextTick();
+          expect(http.put).not.toHaveBeenCalled();
+          expect(navigateToUrl).not.toHaveBeenCalled();
+        });
+      });
+
+      itShowsServerErrorAsFlashMessage(http.put, () => {
+        jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
         CurationSuggestionLogic.actions.acceptAndAutomateSuggestion();
       });
 
@@ -434,7 +452,7 @@ describe('CurationSuggestionLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify([
               {
@@ -449,7 +467,7 @@ describe('CurationSuggestionLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
       });
 
-      itHandlesErrors(http.put, () => {
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         CurationSuggestionLogic.actions.rejectSuggestion();
       });
 
@@ -479,7 +497,7 @@ describe('CurationSuggestionLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify([
               {
@@ -494,7 +512,7 @@ describe('CurationSuggestionLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
       });
 
-      itHandlesErrors(http.put, () => {
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         CurationSuggestionLogic.actions.rejectAndDisableSuggestion();
       });
 

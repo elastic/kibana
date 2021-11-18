@@ -6,10 +6,8 @@
  */
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import { SavedObject } from 'src/core/types';
 import { getMergeStrategy } from './source_fields_merging/strategies';
 import {
-  AlertAttributes,
   SignalSourceHit,
   SignalHit,
   Signal,
@@ -25,22 +23,23 @@ import { EqlSequence } from '../../../../common/detection_engine/types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
 import type { ConfigType } from '../../../config';
 import { BuildReasonMessage } from './reason_formatters';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 
 /**
  * Formats the search_after result for insertion into the signals index. We first create a
  * "best effort" merged "fields" with the "_source" object, then build the signal object,
  * then the event object, and finally we strip away any additional temporary data that was added
  * such as the "threshold_result".
- * @param ruleSO The rule saved object to build overrides
- * @param executionId Unique id representing a specific rule execution
+ * @param completeRule The rule  object to build overrides
  * @param doc The SignalSourceHit with "_source", "fields", and additional data such as "threshold_result"
+ * @param executionId Unique id representing a specific rule execution
  * @param mergeStrategy Specific merge strategy for building alert from source/fields
  * @param ignoreFields Array of fields that should be ignored and never merged
  * @param buildReasonMessage Function for building reason message string
  * @returns The body that can be added to a bulk call for inserting the signal.
  */
 export const buildBulkBody = (
-  ruleSO: SavedObject<AlertAttributes>,
+  completeRule: CompleteRule<RuleParams>,
   doc: SignalSourceHit,
   executionId: string,
   mergeStrategy: ConfigType['alertMergeStrategy'],
@@ -48,7 +47,7 @@ export const buildBulkBody = (
   buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
-  const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
+  const rule = buildRuleWithOverrides(completeRule, mergedDoc._source ?? {});
   const timestamp = new Date().toISOString();
   const reason = buildReasonMessage({ mergedDoc, rule });
   const signal: Signal = {
@@ -89,7 +88,7 @@ export const buildBulkBody = (
  * one signal for each event in the sequence, and a "shell" signal that ties them all together. All N+1 signals
  * share the same signal.group.id to make it easy to query them.
  * @param sequence The raw ES documents that make up the sequence
- * @param ruleSO SavedObject representing the rule that found the sequence
+ * @param completeRule rule object representing the rule that found the sequence
  * @param outputIndex Index to write the resulting signals to
  * @param mergeStrategy Specific merge strategy for building alert from source/fields
  * @param ignoreFields Array of fields that should be ignored and never merged
@@ -97,7 +96,7 @@ export const buildBulkBody = (
  */
 export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
-  ruleSO: SavedObject<AlertAttributes>,
+  completeRule: CompleteRule<RuleParams>,
   outputIndex: string,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   ignoreFields: ConfigType['alertIgnoreFields'],
@@ -107,7 +106,7 @@ export const buildSignalGroupFromSequence = (
     sequence.events.map((event) => {
       const signal = buildSignalFromEvent(
         event,
-        ruleSO,
+        completeRule,
         false,
         mergeStrategy,
         ignoreFields,
@@ -121,7 +120,7 @@ export const buildSignalGroupFromSequence = (
 
   if (
     wrappedBuildingBlocks.some((block) =>
-      block._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleSO.id)
+      block._source.signal?.ancestors.some((ancestor) => ancestor.rule === completeRule.alertId)
     )
   ) {
     return [];
@@ -131,7 +130,7 @@ export const buildSignalGroupFromSequence = (
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
   const sequenceSignal = wrapSignal(
-    buildSignalFromSequence(wrappedBuildingBlocks, ruleSO, buildReasonMessage),
+    buildSignalFromSequence(wrappedBuildingBlocks, completeRule, buildReasonMessage),
     outputIndex
   );
   wrappedBuildingBlocks.forEach((block, idx) => {
@@ -148,10 +147,10 @@ export const buildSignalGroupFromSequence = (
 
 export const buildSignalFromSequence = (
   events: WrappedSignalHit[],
-  ruleSO: SavedObject<AlertAttributes>,
+  completeRule: CompleteRule<RuleParams>,
   buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
-  const rule = buildRuleWithoutOverrides(ruleSO);
+  const rule = buildRuleWithoutOverrides(completeRule);
   const timestamp = new Date().toISOString();
   const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
   const reason = buildReasonMessage({ rule, mergedDoc: mergedEvents as SignalSourceHit });
@@ -175,7 +174,7 @@ export const buildSignalFromSequence = (
 
 export const buildSignalFromEvent = (
   event: BaseSignalHit,
-  ruleSO: SavedObject<AlertAttributes>,
+  completeRule: CompleteRule<RuleParams>,
   applyOverrides: boolean,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   ignoreFields: ConfigType['alertIgnoreFields'],
@@ -183,8 +182,8 @@ export const buildSignalFromEvent = (
 ): SignalHit => {
   const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event, ignoreFields });
   const rule = applyOverrides
-    ? buildRuleWithOverrides(ruleSO, mergedEvent._source ?? {})
-    : buildRuleWithoutOverrides(ruleSO);
+    ? buildRuleWithOverrides(completeRule, mergedEvent._source ?? {})
+    : buildRuleWithoutOverrides(completeRule);
   const timestamp = new Date().toISOString();
   const reason = buildReasonMessage({ mergedDoc: mergedEvent, rule });
   const signal: Signal = {

@@ -57,6 +57,14 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
         policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message =
           DefaultPolicyRuleNotificationMessage;
       }
+      if (policyItem.inputs[0].config.policy.value.mac.popup.memory_protection.message === '') {
+        policyItem.inputs[0].config.policy.value.mac.popup.memory_protection.message =
+          DefaultPolicyRuleNotificationMessage;
+      }
+      if (policyItem.inputs[0].config.policy.value.linux.popup.memory_protection.message === '') {
+        policyItem.inputs[0].config.policy.value.linux.popup.memory_protection.message =
+          DefaultPolicyRuleNotificationMessage;
+      }
       if (
         policyItem.inputs[0].config.policy.value.windows.popup.behavior_protection.message === ''
       ) {

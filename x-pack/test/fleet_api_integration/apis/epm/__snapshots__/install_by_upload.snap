@@ -167,7 +167,6 @@ Object {
   "data_streams": Array [
     Object {
       "dataset": "apache.access",
-      "ingest_pipeline": "default",
       "package": "apache",
       "path": "access",
       "release": "experimental",
@@ -199,7 +198,6 @@ Object {
     },
     Object {
       "dataset": "apache.status",
-      "ingest_pipeline": "default",
       "package": "apache",
       "path": "status",
       "release": "experimental",
@@ -236,7 +234,6 @@ Object {
     },
     Object {
       "dataset": "apache.error",
-      "ingest_pipeline": "default",
       "package": "apache",
       "path": "error",
       "release": "experimental",
@@ -331,11 +328,11 @@ Object {
       "install_version": "0.1.4",
       "installed_es": Array [
         Object {
-          "id": "logs-apache.access-0.1.4",
+          "id": "logs-apache.access-0.1.4-default",
           "type": "ingest_pipeline",
         },
         Object {
-          "id": "logs-apache.error-0.1.4",
+          "id": "logs-apache.error-0.1.4-default",
           "type": "ingest_pipeline",
         },
         Object {
@@ -449,7 +446,6 @@ Object {
           "type": "search",
         },
       ],
-      "internal": false,
       "keep_policies_up_to_date": false,
       "name": "apache",
       "package_assets": Array [

@@ -40,6 +40,12 @@ const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
+jest.mock('../../../common/hooks/use_resolve_conflict', () => {
+  return {
+    useResolveConflict: jest.fn().mockImplementation(() => null),
+  };
+});
+
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
@@ -53,7 +59,7 @@ jest.mock('../../../common/containers/sourcerer', () => {
 
   return {
     ...originalModule,
-    useSourcererScope: jest.fn().mockReturnValue({
+    useSourcererDataView: jest.fn().mockReturnValue({
       browserFields: mockBrowserFields,
       docValueFields: mockDocValueFields,
       loading: false,

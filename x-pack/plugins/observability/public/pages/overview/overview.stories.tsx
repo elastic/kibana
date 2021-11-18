@@ -36,22 +36,25 @@ function unregisterAll() {
   unregisterDataHandler({ appName: 'synthetics' });
 }
 
-const sampleAPMIndices = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  'apm_oss.transactionIndices': 'apm-*',
-} as ApmIndicesConfig;
+const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
 const withCore = makeDecorator({
   name: 'withCore',
   parameterName: 'core',
-  wrapper: (storyFn, context, { options }) => {
+  wrapper: (storyFn, context, { options: { theme, ...options } }) => {
     unregisterAll();
 
     const KibanaReactContext = createKibanaReactContext({
       application: { getUrlForApp: () => '' },
-      chrome: { docTitle: { change: () => {} } },
+      chrome: {
+        docTitle: {
+          change: () => {},
+        },
+      },
       uiSettings: { get: () => [] },
-      usageCollection: { reportUiCounter: () => {} },
+      usageCollection: {
+        reportUiCounter: () => {},
+      },
     } as unknown as Partial<CoreStart>);
 
     return (
@@ -69,7 +72,12 @@ const withCore = makeDecorator({
               plugins: {
                 data: {
                   query: {
-                    timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+                    timefilter: {
+                      timefilter: {
+                        setTime: () => {},
+                        getTime: () => ({}),
+                      },
+                    },
                   },
                 },
               } as unknown as ObservabilityPublicPluginsStart,

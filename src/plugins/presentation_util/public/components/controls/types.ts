@@ -7,63 +7,42 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { Query, TimeRange } from '../../../../data/public';
-import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '../../../../embeddable/public';
+import { DataView } from '../../../../data_views/public';
+import { ControlInput } from '../../../common/controls/types';
+import { EmbeddableFactory, EmbeddableOutput, IEmbeddable } from '../../../../embeddable/public';
 
-export type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
-export type ControlStyle = 'twoLine' | 'oneLine';
-
-/**
- * Control embeddable types
- */
-export type InputControlFactory = EmbeddableFactory<
-  InputControlInput,
-  InputControlOutput,
-  InputControlEmbeddable
->;
-
-export interface ControlTypeRegistry {
-  [key: string]: InputControlFactory;
+export interface CommonControlOutput {
+  filters?: Filter[];
+  dataViews?: DataView[];
 }
 
-export type InputControlInput = EmbeddableInput & {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  twoLineLayout?: boolean;
-};
+export type ControlOutput = EmbeddableOutput & CommonControlOutput;
 
-export type InputControlOutput = EmbeddableOutput & {
-  filters?: Filter[];
-};
+export type ControlFactory = EmbeddableFactory<ControlInput, ControlOutput, ControlEmbeddable>;
 
-export type InputControlEmbeddable<
-  TInputControlEmbeddableInput extends InputControlInput = InputControlInput,
-  TInputControlEmbeddableOutput extends InputControlOutput = InputControlOutput
-> = IEmbeddable<TInputControlEmbeddableInput, TInputControlEmbeddableOutput>;
+export type ControlEmbeddable<
+  TControlEmbeddableInput extends ControlInput = ControlInput,
+  TControlEmbeddableOutput extends ControlOutput = ControlOutput
+> = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput>;
 
 /**
  * Control embeddable editor types
  */
-export interface IEditableControlFactory<T extends InputControlInput = InputControlInput> {
-  getControlEditor?: GetControlEditorComponent<T>;
+export interface IEditableControlFactory<T extends ControlInput = ControlInput> {
+  controlEditorComponent?: (props: ControlEditorProps<T>) => JSX.Element;
+  presaveTransformFunction?: (
+    newState: Partial<T>,
+    embeddable?: ControlEmbeddable<T>
+  ) => Partial<T>;
 }
-
-export type GetControlEditorComponent<T extends InputControlInput = InputControlInput> = (
-  props: GetControlEditorComponentProps<T>
-) => ControlEditorComponent;
-export interface GetControlEditorComponentProps<T extends InputControlInput = InputControlInput> {
-  onChange: (partial: Partial<T>) => void;
+export interface ControlEditorProps<T extends ControlInput = ControlInput> {
   initialInput?: Partial<T>;
-}
-
-export type ControlEditorComponent = (props: ControlEditorProps) => JSX.Element;
-
-export interface ControlEditorProps {
+  onChange: (partial: Partial<T>) => void;
   setValidState: (valid: boolean) => void;
+  setDefaultTitle: (defaultTitle: string) => void;
 }
+
+/**
+ * Re-export control types from common
+ */
+export * from '../../../common/controls/types';

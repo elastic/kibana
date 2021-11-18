@@ -8,7 +8,7 @@
 import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
-import { blockedWindow } from './__mocks__/syncronization.mock';
+import { blockedWindow } from './__mocks__/synchronization.mock';
 
 import React from 'react';
 
@@ -21,14 +21,14 @@ import { ObjectsAndAssets } from './objects_and_assets';
 describe('ObjectsAndAssets', () => {
   const setThumbnailsChecked = jest.fn();
   const setContentExtractionChecked = jest.fn();
-  const updateSyncSettings = jest.fn();
+  const updateObjectsAndAssetsSettings = jest.fn();
   const resetSyncSettings = jest.fn();
   const contentSource = fullContentSources[0];
 
   const mockActions = {
     setThumbnailsChecked,
     setContentExtractionChecked,
-    updateSyncSettings,
+    updateObjectsAndAssetsSettings,
     resetSyncSettings,
   };
   const mockValues = {

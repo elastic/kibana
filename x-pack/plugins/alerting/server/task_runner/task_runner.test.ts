@@ -107,7 +107,8 @@ describe('Task Runner', () => {
     ruleTypeRegistry,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
-    maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
+    maxEphemeralActionsPerAlert: 10,
+    cancelAlertsOnRuleTimeout: true,
   };
 
   function testAgainstEphemeralSupport(
@@ -285,7 +286,7 @@ describe('Task Runner', () => {
     expect(call.services).toBeTruthy();
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(2);
+    expect(logger.debug).toHaveBeenCalledTimes(3);
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -345,6 +346,7 @@ describe('Task Runner', () => {
       {
         executionStatus: {
           error: null,
+          lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
           status: 'ok',
         },
@@ -438,7 +440,7 @@ describe('Task Runner', () => {
     `);
 
         const logger = customTaskRunnerFactoryInitializerParams.logger;
-        expect(logger.debug).toHaveBeenCalledTimes(3);
+        expect(logger.debug).toHaveBeenCalledTimes(4);
         expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
@@ -668,7 +670,7 @@ describe('Task Runner', () => {
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(4);
+    expect(logger.debug).toHaveBeenCalledTimes(5);
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -882,7 +884,7 @@ describe('Task Runner', () => {
         expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
         const logger = customTaskRunnerFactoryInitializerParams.logger;
-        expect(logger.debug).toHaveBeenCalledTimes(4);
+        expect(logger.debug).toHaveBeenCalledTimes(5);
         expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
@@ -1435,7 +1437,6 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
-                "action_subgroup": undefined,
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -1601,7 +1602,7 @@ describe('Task Runner', () => {
         `);
 
         const logger = customTaskRunnerFactoryInitializerParams.logger;
-        expect(logger.debug).toHaveBeenCalledTimes(4);
+        expect(logger.debug).toHaveBeenCalledTimes(5);
         expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
@@ -1746,7 +1747,6 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "recovered",
-                "action_subgroup": undefined,
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -1787,7 +1787,6 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
-                "action_subgroup": undefined,
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -4573,7 +4572,7 @@ describe('Task Runner', () => {
     expect(call.services).toBeTruthy();
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(2);
+    expect(logger.debug).toHaveBeenCalledTimes(3);
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -4633,6 +4632,7 @@ describe('Task Runner', () => {
       {
         executionStatus: {
           error: null,
+          lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
           status: 'ok',
         },

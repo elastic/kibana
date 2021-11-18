@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/api/types';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  ALERT_ORIGINAL_TIME,
   ALERT_RULE_THRESHOLD_FIELD,
-} from '../../rule_types/field_maps/field_names';
+  ALERT_ORIGINAL_TIME,
+} from '../../../../../common/field_maps/field_names';
 
 import { SimpleHit, ThresholdSignalHistory } from '../types';
 import { getThresholdTermsHash, isWrappedRACAlert, isWrappedSignalHit } from '../utils';

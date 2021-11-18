@@ -233,6 +233,50 @@ describe('The metric threshold alert type', () => {
       );
       expect(stateResult3.groups).toEqual(expect.arrayContaining(['a', 'b']));
     });
+
+    const executeWithFilter = (
+      comparator: Comparator,
+      threshold: number[],
+      filterQuery: string,
+      metric?: string,
+      state?: any
+    ) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          groupBy: ['something'],
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator,
+              threshold,
+              metric: metric ?? baseNonCountCriterion.metric,
+            },
+          ],
+        },
+        state: state ?? mockOptions.state.wrapped,
+      });
+    test('persists previous groups that go missing, until the filterQuery param changes', async () => {
+      const stateResult1 = await executeWithFilter(Comparator.GT, [0.75], 'query', 'test.metric.2');
+      expect(stateResult1.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      const stateResult2 = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        'query',
+        'test.metric.1',
+        stateResult1
+      );
+      expect(stateResult2.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      const stateResult3 = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        'different query',
+        'test.metric.1',
+        stateResult2
+      );
+      expect(stateResult3.groups).toEqual(expect.arrayContaining(['a', 'b']));
+    });
   });
 
   describe('querying with multiple criteria', () => {
@@ -670,7 +714,6 @@ describe('The metric threshold alert type', () => {
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
-  enabled: true,
   inventory: {
     compositeSize: 2000,
   },

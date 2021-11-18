@@ -15,18 +15,18 @@ export function CheckingSettings({ checkMessage }) {
   const message = checkMessage || (
     <FormattedMessage
       id="xpack.monitoring.noData.defaultLoadingMessage"
-      defaultMessage="Loading, please wait"
+      defaultMessage="Loading, please wait..."
     />
   );
   return (
     <Fragment>
       <LookingFor />
       <EuiHorizontalRule size="half" />
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{message}...</EuiFlexItem>
+        <EuiFlexItem grow={false}>{message}</EuiFlexItem>
       </EuiFlexGroup>
     </Fragment>
   );

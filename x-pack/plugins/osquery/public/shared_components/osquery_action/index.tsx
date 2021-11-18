@@ -127,7 +127,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     );
   }
 
-  return <LiveQuery agentId={agentId} />;
+  return <LiveQuery formType="simple" agentId={agentId} />;
 };
 
 export const OsqueryAction = React.memo(OsqueryActionComponent);

@@ -7,13 +7,15 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 
-import { ApplicationStart, ChromeStart, ScopedHistory } from 'src/core/public';
+import { ApplicationStart, ChromeStart, ScopedHistory, CoreTheme } from 'src/core/public';
 
 import { DevToolApp } from './dev_tool';
 
@@ -21,6 +23,7 @@ interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
   updateRoute: (newRoute: string) => void;
+  theme$: Observable<CoreTheme>;
 }
 
 interface MountedDevToolDescriptor {
@@ -29,7 +32,7 @@ interface MountedDevToolDescriptor {
   unmountHandler: () => void;
 }
 
-function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapperProps) {
+function DevToolsWrapper({ devTools, activeDevTool, updateRoute, theme$ }: DevToolsWrapperProps) {
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
 
   useEffect(
@@ -43,21 +46,22 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
 
   return (
     <main className="devApp">
-      <EuiTabs>
+      <EuiTabs style={{ paddingLeft: euiThemeVars.euiSizeS }} size="l">
         {devTools.map((currentDevTool) => (
-          <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
-            <EuiTab
-              disabled={currentDevTool.isDisabled()}
-              isSelected={currentDevTool === activeDevTool}
-              onClick={() => {
-                if (!currentDevTool.isDisabled()) {
-                  updateRoute(`/${currentDevTool.id}`);
-                }
-              }}
-            >
-              {currentDevTool.title}
-            </EuiTab>
-          </EuiToolTip>
+          <EuiTab
+            key={currentDevTool.id}
+            disabled={currentDevTool.isDisabled()}
+            isSelected={currentDevTool === activeDevTool}
+            onClick={() => {
+              if (!currentDevTool.isDisabled()) {
+                updateRoute(`/${currentDevTool.id}`);
+              }
+            }}
+          >
+            <EuiToolTip content={currentDevTool.tooltipContent}>
+              <span>{currentDevTool.title}</span>
+            </EuiToolTip>
+          </EuiTab>
         ))}
       </EuiTabs>
       <div
@@ -82,6 +86,7 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
               setHeaderActionMenu: () => undefined,
               // TODO: adapt to use Core's ScopedHistory
               history: {} as any,
+              theme$,
             };
 
             const unmountHandler = await activeDevTool.mount(params);
@@ -146,6 +151,7 @@ export function renderApp(
   application: ApplicationStart,
   chrome: ChromeStart,
   history: ScopedHistory,
+  theme$: Observable<CoreTheme>,
   devTools: readonly DevToolApp[]
 ) {
   if (redirectOnMissingCapabilities(application)) {
@@ -173,6 +179,7 @@ export function renderApp(
                     updateRoute={props.history.push}
                     activeDevTool={devTool}
                     devTools={devTools}
+                    theme$={theme$}
                   />
                 )}
               />

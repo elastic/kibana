@@ -52,7 +52,7 @@ import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expre
 import {
   onActiveDataChange,
   useLensDispatch,
-  updateVisualizationState,
+  editVisualizationAction,
   updateDatasourceState,
   setSaveable,
   useLensSelector,
@@ -151,9 +151,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? [
         {
           shortMessage: '',
-          longMessage: i18n.translate('xpack.lens.indexPattern.missingIndexPattern', {
+          longMessage: i18n.translate('xpack.lens.indexPattern.missingDataView', {
             defaultMessage:
-              'The {count, plural, one {index pattern} other {index patterns}} ({count, plural, one {id} other {ids}}: {indexpatterns}) cannot be found',
+              'The {count, plural, one {data view} other {data views}} ({count, plural, one {id} other {ids}}: {indexpatterns}) cannot be found',
             values: {
               count: missingIndexPatterns.length,
               indexpatterns: missingIndexPatterns.join(', '),
@@ -224,14 +224,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   ]);
 
   const expressionExists = Boolean(expression);
-  const hasLoaded = Boolean(
-    activeVisualization && visualization.state && datasourceMap && datasourceStates
-  );
   useEffect(() => {
-    if (hasLoaded) {
-      dispatchLens(setSaveable(expressionExists));
-    }
-  }, [hasLoaded, expressionExists, dispatchLens]);
+    dispatchLens(setSaveable(expressionExists));
+  }, [expressionExists, dispatchLens]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
@@ -251,9 +246,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
         dispatchLens(
-          updateVisualizationState({
+          editVisualizationAction({
             visualizationId: activeVisualization.id,
-            updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
+            event,
           })
         );
       }
@@ -569,8 +564,8 @@ export const VisualizationWrapper = ({
                     })}
                     data-test-subj="configuration-failure-reconfigure-indexpatterns"
                   >
-                    {i18n.translate('xpack.lens.editorFrame.indexPatternReconfigure', {
-                      defaultMessage: `Recreate it in the index pattern management page`,
+                    {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {
+                      defaultMessage: `Recreate it in the data view management page`,
                     })}
                   </a>
                 </RedirectAppLinks>
@@ -580,8 +575,8 @@ export const VisualizationWrapper = ({
               <>
                 <p className="eui-textBreakWord" data-test-subj="missing-refs-failure">
                   <FormattedMessage
-                    id="xpack.lens.editorFrame.indexPatternNotFound"
-                    defaultMessage="Index pattern not found"
+                    id="xpack.lens.editorFrame.dataViewNotFound"
+                    defaultMessage="Data view not found"
                   />
                 </p>
                 <p className="eui-textBreakWord lnsSelectableErrorMessage">

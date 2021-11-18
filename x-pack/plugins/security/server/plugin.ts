@@ -6,7 +6,6 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { TypeOf } from '@kbn/config-schema';
@@ -27,13 +26,12 @@ import type {
 import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import type { SecurityLicense } from '../common/licensing';
+import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
-import type { AuthenticatedUser, PrivilegeDeprecationsService } from '../common/model';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuditServiceSetup } from './audit';
-import { AuditService, SecurityAuditLogger } from './audit';
+import { AuditService } from './audit';
 import type {
   AuthenticationServiceStart,
   InternalAuthenticationServiceStart,
@@ -43,7 +41,7 @@ import type { AuthorizationServiceSetup, AuthorizationServiceSetupInternal } fro
 import { AuthorizationService } from './authorization';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
-import { getPrivilegeDeprecationsService } from './deprecations';
+import { getPrivilegeDeprecationsService, registerKibanaUserRoleDeprecation } from './deprecations';
 import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
@@ -204,6 +202,7 @@ export class SecurityPlugin
     core: CoreSetup<PluginStartDependencies>,
     { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
   ) {
+    this.kibanaIndexName = core.savedObjects.getKibanaIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
       map((rawConfig) =>
         createConfig(rawConfig, this.initializerContext.logger.get('config'), {
@@ -211,12 +210,8 @@ export class SecurityPlugin
         })
       )
     );
-    this.configSubscription = combineLatest([
-      config$,
-      this.initializerContext.config.legacy.globalConfig$,
-    ]).subscribe(([config, { kibana }]) => {
+    this.configSubscription = config$.subscribe((config) => {
       this.config = config;
-      this.kibanaIndexName = kibana.index;
     });
 
     const config = this.getConfig();
@@ -283,12 +278,13 @@ export class SecurityPlugin
     });
 
     setupSavedObjects({
-      legacyAuditLogger: new SecurityAuditLogger(this.auditSetup.getLogger()),
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getSpacesService: () => spaces?.spacesService,
     });
+
+    this.registerDeprecations(core, license);
 
     defineRoutes({
       router: core.http.createRouter(),
@@ -310,7 +306,6 @@ export class SecurityPlugin
     return Object.freeze<SecurityPluginSetup>({
       audit: {
         asScoped: this.auditSetup.asScoped,
-        getLogger: this.auditSetup.getLogger,
       },
       authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
       authz: {
@@ -358,7 +353,6 @@ export class SecurityPlugin
       config,
       featureUsageService: this.featureUsageServiceStart,
       http: core.http,
-      legacyAuditLogger: new SecurityAuditLogger(this.auditSetup!.getLogger()),
       loggers: this.initializerContext.logger,
       session,
     });
@@ -413,5 +407,15 @@ export class SecurityPlugin
     this.auditService.stop();
     this.authorizationService.stop();
     this.sessionManagementService.stop();
+  }
+
+  private registerDeprecations(core: CoreSetup, license: SecurityLicense) {
+    const logger = this.logger.get('deprecations');
+    registerKibanaUserRoleDeprecation({
+      deprecationsService: core.deprecations,
+      license,
+      logger,
+      packageInfo: this.initializerContext.env.packageInfo,
+    });
   }
 }

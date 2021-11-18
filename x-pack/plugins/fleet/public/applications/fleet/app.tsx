@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from 'kibana/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,7 +25,7 @@ import {
 } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
-import { PackageInstallProvider, useUrlModal } from '../integrations/hooks';
+import { PackageInstallProvider } from '../integrations/hooks';
 
 import {
   ConfigContext,
@@ -37,7 +37,7 @@ import {
   useStartServices,
   UIExtensionsContext,
 } from './hooks';
-import { Error, Loading, SettingFlyout, FleetSetupLoading } from './components';
+import { Error, Loading, FleetSetupLoading } from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
@@ -45,8 +45,10 @@ import { DefaultLayout, DefaultPageTitle, WithoutHeaderLayout, WithHeaderLayout 
 import { AgentPolicyApp } from './sections/agent_policy';
 import { DataStreamApp } from './sections/data_stream';
 import { AgentsApp } from './sections/agents';
+import { MissingESRequirementsPage } from './sections/agents/agent_requirements_page';
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
+import { SettingsApp } from './sections/settings';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -70,6 +72,53 @@ const Panel = styled(EuiPanel)`
   margin-right: auto;
   margin-left: auto;
 `;
+
+const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ error }) => {
+  if (error === 'MISSING_SECURITY') {
+    return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
+  }
+
+  if (error === 'MISSING_SUPERUSER_ROLE') {
+    return (
+      <Panel>
+        <EuiEmptyPrompt
+          iconType="securityApp"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.fleet.permissionDeniedErrorTitle"
+                defaultMessage="Permission denied"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.permissionDeniedErrorMessage"
+                defaultMessage="You are not authorized to access Fleet. Fleet requires {roleName} privileges."
+                values={{ roleName: <EuiCode>superuser</EuiCode> }}
+              />
+            </p>
+          }
+        />
+      </Panel>
+    );
+  }
+
+  return (
+    <Error
+      title={
+        <FormattedMessage
+          id="xpack.fleet.permissionsRequestErrorMessageTitle"
+          defaultMessage="Unable to check permissions"
+        />
+      }
+      error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
+        defaultMessage: 'There was a problem checking Fleet permissions',
+      })}
+    />
+  );
+});
 
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
@@ -121,58 +170,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   if (isPermissionsLoading || permissionsError) {
     return (
       <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
-        {isPermissionsLoading ? (
-          <Loading />
-        ) : permissionsError === 'REQUEST_ERROR' ? (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.fleet.permissionsRequestErrorMessageTitle"
-                defaultMessage="Unable to check permissions"
-              />
-            }
-            error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
-              defaultMessage: 'There was a problem checking Fleet permissions',
-            })}
-          />
-        ) : (
-          <Panel>
-            <EuiEmptyPrompt
-              iconType="securityApp"
-              title={
-                <h2>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.fleet.permissionDeniedErrorTitle"
-                      defaultMessage="Permission denied"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.securityRequiredErrorTitle"
-                      defaultMessage="Security is not enabled"
-                    />
-                  )}
-                </h2>
-              }
-              body={
-                <p>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.fleet.permissionDeniedErrorMessage"
-                      defaultMessage="You are not authorized to access Fleet. Fleet requires {roleName} privileges."
-                      values={{ roleName: <EuiCode>superuser</EuiCode> }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.securityRequiredErrorMessage"
-                      defaultMessage="You must enable security in Kibana and Elasticsearch to use Fleet."
-                    />
-                  )}
-                </p>
-              }
-            />
-          </Panel>
-        )}
+        {isPermissionsLoading ? <Loading /> : <PermissionsError error={permissionsError!} />}
       </ErrorLayout>
     );
   }
@@ -247,7 +245,6 @@ export const FleetAppContext: React.FC<{
 
 const FleetTopNav = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
-    const { getModalHref } = useUrlModal();
     const services = useStartServices();
 
     const { TopNavMenu } = services.navigation.ui;
@@ -259,14 +256,6 @@ const FleetTopNav = memo(
         }),
         iconType: 'popout',
         run: () => window.open(FEEDBACK_URL),
-      },
-
-      {
-        label: i18n.translate('xpack.fleet.appNavigation.settingsButton', {
-          defaultMessage: 'Fleet settings',
-        }),
-        iconType: 'gear',
-        run: () => services.application.navigateToUrl(getModalHref('settings')),
       },
     ];
     return (
@@ -281,21 +270,9 @@ const FleetTopNav = memo(
 
 export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
-    const { modal, setModal } = useUrlModal();
-
     return (
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
-
-        {modal === 'settings' && (
-          <EuiPortal>
-            <SettingFlyout
-              onClose={() => {
-                setModal(null);
-              }}
-            />
-          </EuiPortal>
-        )}
 
         <Switch>
           <Route path={FLEET_ROUTING_PATHS.agents}>
@@ -309,6 +286,10 @@ export const AppRoutes = memo(
           </Route>
           <Route path={FLEET_ROUTING_PATHS.data_streams}>
             <DataStreamApp />
+          </Route>
+
+          <Route path={FLEET_ROUTING_PATHS.settings}>
+            <SettingsApp />
           </Route>
 
           {/* TODO: Move this route to the Integrations app */}

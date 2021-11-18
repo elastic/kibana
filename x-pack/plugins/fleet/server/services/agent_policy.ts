@@ -13,12 +13,14 @@ import type {
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 
+import { safeDump } from 'js-yaml';
+
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
+  AGENTS_PREFIX,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../constants';
 import type {
@@ -41,6 +43,12 @@ import type {
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
 
+import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
+
+import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
+
+import { elasticAgentManifest } from './elastic_agent_manifest';
+
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
@@ -49,7 +57,6 @@ import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
-
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
 class AgentPolicyService {
@@ -403,12 +410,16 @@ class AgentPolicyService {
       options
     );
 
-    // Copy all package policies
+    // Copy all package policies and append (copy) to their names
     if (baseAgentPolicy.package_policies.length) {
       const newPackagePolicies = (baseAgentPolicy.package_policies as PackagePolicy[]).map(
         (packagePolicy: PackagePolicy) => {
           const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
-          return newPackagePolicy;
+          const updatedPackagePolicy = {
+            ...newPackagePolicy,
+            name: `${packagePolicy.name} (copy)`,
+          };
+          return updatedPackagePolicy;
         }
       );
       await packagePolicyService.bulkCreate(
@@ -615,7 +626,7 @@ class AgentPolicyService {
       showInactive: false,
       perPage: 0,
       page: 1,
-      kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${id}`,
+      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
     });
 
     if (total > 0) {
@@ -661,7 +672,7 @@ class AgentPolicyService {
   ) {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
-    const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+    const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
 
     if (!defaultOutputId) {
       return;
@@ -715,6 +726,40 @@ class AgentPolicyService {
     }
 
     return res.body.hits.hits[0]._source;
+  }
+
+  public async getFullAgentConfigMap(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    options?: { standalone: boolean }
+  ): Promise<string | null> {
+    const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
+    if (fullAgentPolicy) {
+      const fullAgentConfigMap: FullAgentConfigMap = {
+        apiVersion: 'v1',
+        kind: 'ConfigMap',
+        metadata: {
+          name: 'agent-node-datastreams',
+          namespace: 'kube-system',
+          labels: {
+            'k8s-app': 'elastic-agent',
+          },
+        },
+        data: {
+          'agent.yml': fullAgentPolicy,
+        },
+      };
+
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
+      const updateManifestVersion = elasticAgentManifest.replace(
+        'VERSION',
+        appContextService.getKibanaVersion()
+      );
+      const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
+      return [fixedAgentYML, updateManifestVersion].join('\n');
+    } else {
+      return '';
+    }
   }
 
   public async getFullAgentPolicy(

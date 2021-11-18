@@ -14,12 +14,10 @@ import {
 
 describe('data telemetry collection tasks', () => {
   const indices = {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.errorIndices': 'apm-8.0.0-error',
-    'apm_oss.metricsIndices': 'apm-8.0.0-metric',
-    'apm_oss.spanIndices': 'apm-8.0.0-span',
-    'apm_oss.transactionIndices': 'apm-8.0.0-transaction',
-    /* eslint-enable @typescript-eslint/naming-convention */
+    error: 'apm-8.0.0-error',
+    metric: 'apm-8.0.0-metric',
+    span: 'apm-8.0.0-span',
+    transaction: 'apm-8.0.0-transaction',
   } as ApmIndicesConfig;
 
   describe('environments', () => {

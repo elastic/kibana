@@ -41,6 +41,13 @@ export const DATA_FRAME_ANALYTICS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   href: '/data_frame_analytics',
 });
 
+export const TRAINED_MODELS: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.trainedModelsLabel', {
+    defaultMessage: 'Trained Models',
+  }),
+  href: '/trained_models',
+});
+
 export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.datavisualizerBreadcrumbLabel', {
     defaultMessage: 'Data Visualizer',
@@ -74,6 +81,7 @@ const breadcrumbs = {
   SETTINGS_BREADCRUMB,
   ANOMALY_DETECTION_BREADCRUMB,
   DATA_FRAME_ANALYTICS_BREADCRUMB,
+  TRAINED_MODELS,
   DATA_VISUALIZER_BREADCRUMB,
   CREATE_JOB_BREADCRUMB,
   CALENDAR_MANAGEMENT_BREADCRUMB,

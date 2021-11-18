@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import {
@@ -33,6 +34,7 @@ export interface UseTimelineEventsDetailsProps {
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
+  runtimeMappings: MappingRuntimeFields;
   skip: boolean;
 }
 
@@ -41,8 +43,9 @@ export const useTimelineEventsDetails = ({
   docValueFields,
   indexName,
   eventId,
+  runtimeMappings,
   skip,
-}: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData']] => {
+}: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData'], object | undefined] => {
   const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
@@ -54,6 +57,8 @@ export const useTimelineEventsDetails = ({
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] =
     useState<EventsArgs['detailsData']>(null);
+
+  const [rawEventData, setRawEventData] = useState<object | undefined>(undefined);
 
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
@@ -78,6 +83,7 @@ export const useTimelineEventsDetails = ({
               if (isCompleteResponse(response)) {
                 setLoading(false);
                 setTimelineDetailsResponse(response.data || []);
+                setRawEventData(response.rawResponse.hits.hits[0]);
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
@@ -109,13 +115,14 @@ export const useTimelineEventsDetails = ({
         indexName,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
+        runtimeMappings,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [docValueFields, entityType, eventId, indexName]);
+  }, [docValueFields, entityType, eventId, indexName, runtimeMappings]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);
@@ -125,5 +132,5 @@ export const useTimelineEventsDetails = ({
     };
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
-  return [loading, timelineDetailsResponse];
+  return [loading, timelineDetailsResponse, rawEventData];
 };

@@ -39,6 +39,8 @@ import {
   StepDetailPageRightSideItem,
 } from './pages/synthetics/step_detail_page';
 import { UptimePageTemplateComponent } from './apps/uptime_page_template';
+import { apiService } from './state/api/utils';
+import { useInspectorContext } from '../../observability/public';
 
 interface RouteProps {
   path: string;
@@ -178,6 +180,10 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 };
 
 export const PageRouter: FC = () => {
+  const { addInspectorRequest } = useInspectorContext();
+
+  apiService.addInspectorRequest = addInspectorRequest;
+
   return (
     <Switch>
       {Routes.map(

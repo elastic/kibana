@@ -32,8 +32,8 @@
             "pluginId": "@kbn/monaco",
             "scope": "common",
             "docId": "kibKbnMonacoPluginApi",
-            "section": "def-common.LangModule",
-            "text": "LangModule"
+            "section": "def-common.LangModuleType",
+            "text": "LangModuleType"
           },
           ") => void"
         ],
@@ -52,8 +52,8 @@
                 "pluginId": "@kbn/monaco",
                 "scope": "common",
                 "docId": "kibKbnMonacoPluginApi",
-                "section": "def-common.LangModule",
-                "text": "LangModule"
+                "section": "def-common.LangModuleType",
+                "text": "LangModuleType"
               }
             ],
             "path": "packages/kbn-monaco/src/helpers.ts",
@@ -68,26 +68,26 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/monaco",
-        "id": "def-common.CompleteLangModule",
+        "id": "def-common.CompleteLangModuleType",
         "type": "Interface",
         "tags": [],
-        "label": "CompleteLangModule",
+        "label": "CompleteLangModuleType",
         "description": [],
         "signature": [
           {
             "pluginId": "@kbn/monaco",
             "scope": "common",
             "docId": "kibKbnMonacoPluginApi",
-            "section": "def-common.CompleteLangModule",
-            "text": "CompleteLangModule"
+            "section": "def-common.CompleteLangModuleType",
+            "text": "CompleteLangModuleType"
           },
           " extends ",
           {
             "pluginId": "@kbn/monaco",
             "scope": "common",
             "docId": "kibKbnMonacoPluginApi",
-            "section": "def-common.LangModule",
-            "text": "LangModule"
+            "section": "def-common.LangModuleType",
+            "text": "LangModuleType"
           }
         ],
         "path": "packages/kbn-monaco/src/types.ts",
@@ -95,7 +95,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.CompleteLangModule.languageConfiguration",
+            "id": "def-common.CompleteLangModuleType.languageConfiguration",
             "type": "Object",
             "tags": [],
             "label": "languageConfiguration",
@@ -109,7 +109,7 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.CompleteLangModule.getSuggestionProvider",
+            "id": "def-common.CompleteLangModuleType.getSuggestionProvider",
             "type": "Object",
             "tags": [],
             "label": "getSuggestionProvider",
@@ -122,7 +122,7 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.CompleteLangModule.getSyntaxErrors",
+            "id": "def-common.CompleteLangModuleType.getSyntaxErrors",
             "type": "Object",
             "tags": [],
             "label": "getSyntaxErrors",
@@ -138,17 +138,17 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
-        "id": "def-common.LangModule",
+        "id": "def-common.LangModuleType",
         "type": "Interface",
         "tags": [],
-        "label": "LangModule",
+        "label": "LangModuleType",
         "description": [],
         "path": "packages/kbn-monaco/src/types.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.LangModule.ID",
+            "id": "def-common.LangModuleType.ID",
             "type": "string",
             "tags": [],
             "label": "ID",
@@ -158,7 +158,7 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.LangModule.lexerRules",
+            "id": "def-common.LangModuleType.lexerRules",
             "type": "Object",
             "tags": [],
             "label": "lexerRules",
@@ -172,7 +172,7 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.LangModule.languageConfiguration",
+            "id": "def-common.LangModuleType.languageConfiguration",
             "type": "Object",
             "tags": [],
             "label": "languageConfiguration",
@@ -186,7 +186,7 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.LangModule.getSuggestionProvider",
+            "id": "def-common.LangModuleType.getSuggestionProvider",
             "type": "Object",
             "tags": [],
             "label": "getSuggestionProvider",
@@ -199,7 +199,7 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.LangModule.getSyntaxErrors",
+            "id": "def-common.LangModuleType.getSyntaxErrors",
             "type": "Object",
             "tags": [],
             "label": "getSyntaxErrors",
@@ -245,10 +245,136 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.PainlessCompletionItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "PainlessCompletionItem",
+        "description": [],
+        "path": "packages/kbn-monaco/src/painless/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.PainlessCompletionItem.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "packages/kbn-monaco/src/painless/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.PainlessCompletionItem.kind",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "kind",
+            "description": [],
+            "signature": [
+              "\"keyword\" | \"type\" | \"field\" | \"property\" | \"method\" | \"class\" | \"constructor\""
+            ],
+            "path": "packages/kbn-monaco/src/painless/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.PainlessCompletionItem.documentation",
+            "type": "string",
+            "tags": [],
+            "label": "documentation",
+            "description": [],
+            "path": "packages/kbn-monaco/src/painless/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.PainlessCompletionItem.insertText",
+            "type": "string",
+            "tags": [],
+            "label": "insertText",
+            "description": [],
+            "path": "packages/kbn-monaco/src/painless/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.PainlessCompletionItem.insertTextAsSnippet",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "insertTextAsSnippet",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-monaco/src/painless/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.PainlessCompletionResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "PainlessCompletionResult",
+        "description": [],
+        "path": "packages/kbn-monaco/src/painless/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.PainlessCompletionResult.isIncomplete",
+            "type": "boolean",
+            "tags": [],
+            "label": "isIncomplete",
+            "description": [],
+            "path": "packages/kbn-monaco/src/painless/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.PainlessCompletionResult.suggestions",
+            "type": "Array",
+            "tags": [],
+            "label": "suggestions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.PainlessCompletionItem",
+                "text": "PainlessCompletionItem"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-monaco/src/painless/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.PainlessCompletionKind",
+        "type": "Type",
+        "tags": [],
+        "label": "PainlessCompletionKind",
+        "description": [],
+        "signature": [
+          "\"keyword\" | \"type\" | \"field\" | \"property\" | \"method\" | \"class\" | \"constructor\""
+        ],
+        "path": "packages/kbn-monaco/src/painless/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/monaco",
         "id": "def-common.PainlessContext",

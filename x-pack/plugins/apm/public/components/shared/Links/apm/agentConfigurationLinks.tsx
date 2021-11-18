@@ -7,14 +7,14 @@
 
 import { IBasePath } from 'kibana/public';
 import { AgentConfigurationIntake } from '../../../../../common/agent_configuration/configuration_types';
-import { getAPMHref } from './APMLink';
+import { getLegacyApmHref } from './APMLink';
 
 export function editAgentConfigurationHref(
   configService: AgentConfigurationIntake['service'],
   search: string,
   basePath: IBasePath
 ) {
-  return getAPMHref({
+  return getLegacyApmHref({
     basePath,
     path: '/settings/agent-configuration/edit',
     search,

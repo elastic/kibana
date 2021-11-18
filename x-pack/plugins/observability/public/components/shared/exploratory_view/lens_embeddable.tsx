@@ -8,69 +8,53 @@
 import { i18n } from '@kbn/i18n';
 import React, { Dispatch, SetStateAction, useCallback } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '../../../../../lens/public';
+import { useUiTracker } from '../../../hooks/use_track_metric';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ReportViewType, SeriesUrl } from './types';
-import { ReportTypes } from './configurations/constants';
+import { useExpViewTimeRange } from './hooks/use_time_range';
+import { parseRelativeDate } from './components/date_range_picker';
+import { trackTelemetryOnLoad } from './utils/telemetry';
+import type { ChartTimeRange } from './header/last_updated';
 
 interface Props {
   lensAttributes: TypedLensByValueInput['attributes'];
-  setLastUpdated: Dispatch<SetStateAction<number | undefined>>;
+  setChartTimeRangeContext: Dispatch<SetStateAction<ChartTimeRange | undefined>>;
 }
-export const combineTimeRanges = (
-  reportType: ReportViewType,
-  allSeries: SeriesUrl[],
-  firstSeries?: SeriesUrl
-) => {
-  let to: string = '';
-  let from: string = '';
-
-  if (reportType === ReportTypes.KPI) {
-    return firstSeries?.time;
-  }
-
-  allSeries.forEach((series) => {
-    if (
-      series.dataType &&
-      series.selectedMetricField &&
-      !isEmpty(series.reportDefinitions) &&
-      series.time
-    ) {
-      const seriesTo = new Date(series.time.to);
-      const seriesFrom = new Date(series.time.from);
-      if (!to || seriesTo > new Date(to)) {
-        to = series.time.to;
-      }
-      if (!from || seriesFrom < new Date(from)) {
-        from = series.time.from;
-      }
-    }
-  });
-
-  return { to, from };
-};
 
 export function LensEmbeddable(props: Props) {
-  const { lensAttributes, setLastUpdated } = props;
-
+  const { lensAttributes, setChartTimeRangeContext } = props;
   const {
     services: { lens, notifications },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const LensComponent = lens?.EmbeddableComponent;
 
-  const { firstSeries, setSeries, allSeries, reportType } = useSeriesStorage();
+  const { firstSeries, setSeries, reportType, lastRefresh } = useSeriesStorage();
 
   const firstSeriesId = 0;
 
-  const timeRange = firstSeries ? combineTimeRanges(reportType, allSeries, firstSeries) : null;
+  const timeRange = useExpViewTimeRange();
 
-  const onLensLoad = useCallback(() => {
-    setLastUpdated(Date.now());
-  }, [setLastUpdated]);
+  const trackEvent = useUiTracker();
+
+  const onLensLoad = useCallback(
+    (isLoading) => {
+      const timeLoaded = Date.now();
+
+      setChartTimeRangeContext({
+        lastUpdated: timeLoaded,
+        to: parseRelativeDate(timeRange?.to || '').valueOf(),
+        from: parseRelativeDate(timeRange?.from || '').valueOf(),
+      });
+
+      if (!isLoading) {
+        trackTelemetryOnLoad(trackEvent, lastRefresh, timeLoaded);
+      }
+    },
+    [setChartTimeRangeContext, timeRange, lastRefresh, trackEvent]
+  );
 
   const onBrushEnd = useCallback(
     ({ range }: { range: number[] }) => {
@@ -93,7 +77,7 @@ export function LensEmbeddable(props: Props) {
     [reportType, setSeries, firstSeries, notifications?.toasts]
   );
 
-  if (timeRange === null || !firstSeries) {
+  if (!timeRange || !lensAttributes) {
     return null;
   }
 

@@ -36,12 +36,12 @@ const packages: Package[] = [
     extractMethod: 'gunzip',
     archives: {
       'darwin-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/darwin-x64-83.gz',
-        sha256: 'ef49febcba972b488727ce329ea9d2b57590bb44001ed494f2aa1397c0ebc32b',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/darwin-x64-93.gz',
+        sha256: 'a267c6202d86d08170eb4a833acf81d83660ce33e8981fcd5b7f6e0310961d56',
       },
       'linux-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/linux-x64-83.gz',
-        sha256: '160217dd83eb7093b758e905ce09cb45182864c7df858bf2525a68924a23c509',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/linux-x64-93.gz',
+        sha256: 'e0ca5d6527fe7ec0fe98b6960c47b66a5bb2823c3bebb3bf4ed4d58eed3d23c5',
       },
 
       // ARM build is currently done manually as Github Actions used in upstream project
@@ -55,12 +55,16 @@ const packages: Package[] = [
       // * gzip -c build/Release/re2.node > linux-arm64-83.gz
       // * upload to kibana-ci-proxy-cache bucket
       'linux-arm64': {
-        url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/linux-arm64-83.gz',
-        sha256: '114505c60dbf57ad30556937ac5f49213c6676ad79d92706b96949d3a63f53b4',
+        url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/linux-arm64-93.gz',
+        sha256: '7a786e0b75985e5aafdefa9af55cad8e85e69a3326f16d8c63d21d6b5b3bff1b',
+      },
+      'darwin-arm64': {
+        url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/darwin-arm64-93.gz',
+        sha256: '28b540cdddf13578f1bd28a03e29ffdc26a7f00ec859c369987b8d51ec6357c8',
       },
       'win32-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/win32-x64-83.gz',
-        sha256: '92ad420a6bfcedeb58dadf807a2f2901b05251d1edd3950051699929eda23073',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/win32-x64-93.gz',
+        sha256: '37245ceb59a086b5e7e9de8746a3cdf148c383be9ae2580f92baea90d0d39947',
       },
     },
   },
@@ -100,7 +104,8 @@ async function patchModule(
     log,
     url: archive.url,
     destination: downloadPath,
-    sha256: archive.sha256,
+    shaChecksum: archive.sha256,
+    shaAlgorithm: 'sha256',
     retries: 3,
   });
   switch (pkg.extractMethod) {

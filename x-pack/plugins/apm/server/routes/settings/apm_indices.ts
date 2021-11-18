@@ -6,13 +6,14 @@
  */
 
 import * as t from 'io-ts';
-import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
-import { createApmServerRoute } from '../create_apm_server_route';
+import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   getApmIndices,
   getApmIndexSettings,
 } from '../../lib/settings/apm_indices/get_apm_indices';
 import { saveApmIndices } from '../../lib/settings/apm_indices/save_apm_indices';
+import { APMConfig } from '../..';
 
 // get list of apm indices and values
 const apmIndexSettingsRoute = createApmServerRoute({
@@ -37,6 +38,10 @@ const apmIndicesRoute = createApmServerRoute({
   },
 });
 
+type SaveApmIndicesBodySchema = {
+  [Property in keyof APMConfig['indices']]: t.StringC;
+};
+
 // save ui indices
 const saveApmIndicesRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/settings/apm-indices/save',
@@ -45,15 +50,13 @@ const saveApmIndicesRoute = createApmServerRoute({
   },
   params: t.type({
     body: t.partial({
-      /* eslint-disable @typescript-eslint/naming-convention */
-      'apm_oss.sourcemapIndices': t.string,
-      'apm_oss.errorIndices': t.string,
-      'apm_oss.onboardingIndices': t.string,
-      'apm_oss.spanIndices': t.string,
-      'apm_oss.transactionIndices': t.string,
-      'apm_oss.metricsIndices': t.string,
-      /* eslint-enable @typescript-eslint/naming-convention */
-    }),
+      sourcemap: t.string,
+      error: t.string,
+      onboarding: t.string,
+      span: t.string,
+      transaction: t.string,
+      metric: t.string,
+    } as SaveApmIndicesBodySchema),
   }),
   handler: async (resources) => {
     const { params, context } = resources;

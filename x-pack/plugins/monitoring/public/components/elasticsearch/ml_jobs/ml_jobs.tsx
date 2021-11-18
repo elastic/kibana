@@ -31,7 +31,7 @@ import { ClusterStatus } from '../cluster_status';
 interface Props {
   clusterStatus: boolean;
   jobs: MLJobs;
-  onTableChange: () => void;
+  onTableChange: (props: any) => void;
   sorting: EuiTableSortingType<string>;
   pagination: Pagination;
 }

@@ -35,6 +35,23 @@ jest.mock('../../lib/alert_api', () => ({
   })),
 }));
 
+jest.mock('./alert_errors', () => ({
+  getAlertActionErrors: jest.fn().mockImplementation(() => {
+    return [];
+  }),
+  getAlertErrors: jest.fn().mockImplementation(() => ({
+    alertParamsErrors: {},
+    alertBaseErrors: {},
+    alertErrors: {
+      name: new Array<string>(),
+      interval: new Array<string>(),
+      alertTypeId: new Array<string>(),
+      actionConnectors: new Array<string>(),
+    },
+  })),
+  isValidAlert: jest.fn(),
+}));
+
 jest.mock('../../../common/lib/health_api', () => ({
   triggersActionsUiHealth: jest.fn(() => ({ isAlertsAvailable: true })),
 }));
@@ -47,7 +64,7 @@ describe('alert_edit', () => {
     mockedCoreSetup = coreMock.createSetup();
   });
 
-  async function setup() {
+  async function setup(initialAlertFields = {}) {
     const [
       {
         application: { capabilities },
@@ -154,6 +171,7 @@ describe('alert_edit', () => {
         status: 'unknown',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
+      ...initialAlertFields,
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
@@ -188,7 +206,11 @@ describe('alert_edit', () => {
   });
 
   it('displays a toast message on save for server errors', async () => {
-    await setup();
+    const { isValidAlert } = jest.requireMock('./alert_errors');
+    (isValidAlert as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+    await setup({ name: undefined });
 
     await act(async () => {
       wrapper.find('[data-test-subj="saveEditedAlertButton"]').first().simulate('click');
@@ -196,5 +218,13 @@ describe('alert_edit', () => {
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
       'Fail message'
     );
+  });
+
+  it('should pass in the server alert type into `getAlertErrors`', async () => {
+    const { getAlertErrors } = jest.requireMock('./alert_errors');
+    await setup();
+    const lastCall = getAlertErrors.mock.calls[getAlertErrors.mock.calls.length - 1];
+    expect(lastCall[2]).toBeDefined();
+    expect(lastCall[2].id).toBe('my-alert-type');
   });
 });

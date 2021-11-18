@@ -15,7 +15,7 @@ import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/p
 import { SeriesUrl } from '../types';
 import { ReportTypes } from '../configurations/constants';
 
-export const parseAbsoluteDate = (date: string, options = {}) => {
+export const parseRelativeDate = (date: string, options = {}) => {
   return DateMath.parse(date, options)!;
 };
 export function DateRangePicker({ seriesId, series }: { seriesId: number; series: SeriesUrl }) {
@@ -27,12 +27,12 @@ export function DateRangePicker({ seriesId, series }: { seriesId: number; series
 
   const { from: mainFrom, to: mainTo } = firstSeries!.time;
 
-  const startDate = parseAbsoluteDate(seriesFrom ?? mainFrom)!;
-  const endDate = parseAbsoluteDate(seriesTo ?? mainTo, { roundUp: true })!;
+  const startDate = parseRelativeDate(seriesFrom ?? mainFrom)!;
+  const endDate = parseRelativeDate(seriesTo ?? mainTo, { roundUp: true })!;
 
   const getTotalDuration = () => {
-    const mainStartDate = parseAbsoluteDate(mainFrom)!;
-    const mainEndDate = parseAbsoluteDate(mainTo, { roundUp: true })!;
+    const mainStartDate = parseRelativeDate(mainFrom)!;
+    const mainEndDate = parseRelativeDate(mainTo, { roundUp: true })!;
     return mainEndDate.diff(mainStartDate, 'millisecond');
   };
 
@@ -79,8 +79,10 @@ export function DateRangePicker({ seriesId, series }: { seriesId: number; series
   return (
     <EuiDatePickerRange
       fullWidth
+      isCustom
       startDateControl={
         <EuiDatePicker
+          fullWidth
           selected={startDate}
           onChange={onStartChange}
           startDate={startDate}
@@ -91,11 +93,13 @@ export function DateRangePicker({ seriesId, series }: { seriesId: number; series
           })}
           dateFormat={dateFormat.replace('ss.SSS', 'ss')}
           showTimeSelect
-          popoverPlacement="left"
+          popoverPlacement="right"
         />
       }
       endDateControl={
         <EuiDatePicker
+          fullWidth
+          showIcon={false}
           selected={endDate}
           onChange={onEndChange}
           startDate={startDate}
@@ -106,7 +110,7 @@ export function DateRangePicker({ seriesId, series }: { seriesId: number; series
           })}
           dateFormat={dateFormat.replace('ss.SSS', 'ss')}
           showTimeSelect
-          popoverPlacement="left"
+          popoverPlacement="right"
         />
       }
     />

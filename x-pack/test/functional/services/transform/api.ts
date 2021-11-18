@@ -32,12 +32,12 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
   return {
     async createIndices(indices: string) {
       log.debug(`Creating indices: '${indices}'...`);
-      if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === true) {
+      if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
         log.debug(`Indices '${indices}' already exist. Nothing to create.`);
         return;
       }
 
-      const createResponse = (await es.indices.create({ index: indices })).body;
+      const createResponse = await es.indices.create({ index: indices });
       expect(createResponse)
         .to.have.property('acknowledged')
         .eql(true, 'Response for create request indices should be acknowledged.');
@@ -47,16 +47,14 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteIndices(indices: string, skipWaitForIndicesNotToExist?: boolean) {
       log.debug(`Deleting indices: '${indices}'...`);
-      if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === false) {
+      if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === false) {
         log.debug(`Indices '${indices}' don't exist. Nothing to delete.`);
         return;
       }
 
-      const deleteResponse = (
-        await es.indices.delete({
-          index: indices,
-        })
-      ).body;
+      const deleteResponse = await es.indices.delete({
+        index: indices,
+      });
       expect(deleteResponse)
         .to.have.property('acknowledged')
         .eql(true, 'Response for delete request should be acknowledged');
@@ -72,7 +70,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async waitForIndicesToExist(indices: string, errorMsg?: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === true) {
+        if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
           return true;
         } else {
           throw new Error(errorMsg || `indices '${indices}' should exist`);
@@ -82,7 +80,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async waitForIndicesNotToExist(indices: string, errorMsg?: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === false) {
+        if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === false) {
           return true;
         } else {
           throw new Error(errorMsg || `indices '${indices}' should not exist`);

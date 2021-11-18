@@ -94,7 +94,7 @@ export const BarChartBaseComponent = ({
             yAccessors={yAccessors}
             timeZone={timeZone}
             splitSeriesAccessors={splitSeriesAccessors}
-            data={series.value!}
+            data={series.value ?? []}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             color={series.color ? series.color : undefined}
           />

@@ -16,10 +16,10 @@ import { LatencyAggregationType } from '../../../common/latency_aggregation_type
 import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { calculateThroughput } from '../helpers/calculate_throughput';
 import {
   getLatencyAggregation,
@@ -57,9 +57,9 @@ export async function getServiceTransactionGroups({
   end: number;
 }) {
   const { apmEventClient, config } = setup;
-  const bucketSize = config['xpack.apm.ui.transactionGroupBucketSize'];
+  const bucketSize = config.ui.transactionGroupBucketSize;
 
-  const field = getTransactionDurationFieldForAggregatedTransactions(
+  const field = getTransactionDurationFieldForTransactions(
     searchAggregatedTransactions
   );
 
@@ -68,9 +68,7 @@ export async function getServiceTransactionGroups({
     {
       apm: {
         events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
+          getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
       body: {
@@ -80,7 +78,7 @@ export async function getServiceTransactionGroups({
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
-              ...getDocumentTypeFilterForAggregatedTransactions(
+              ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
               ...rangeQuery(start, end),

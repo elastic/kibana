@@ -138,7 +138,7 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/kibana/${instance}`;
     if (services.http?.fetch && clusterUuid) {
-      const response = await services.http?.fetch(url, {
+      const response = await services.http?.fetch<{ kibanaSummary: { name: string } }>(url, {
         method: 'POST',
         body: JSON.stringify({
           ccs,
@@ -164,13 +164,8 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
   }, [ccs, clusterUuid, instance, services.data?.query.timefilter.timefilter, services.http]);
 
   return (
-    <PageTemplate
-      title={title}
-      pageTitle={pageTitle}
-      getPageData={getPageData}
-      data-test-subj="kibanaInstancePage"
-    >
-      <div data-test-subj="monitoringKibanaInstanceApp">
+    <PageTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
+      <div data-test-subj="kibanaInstancePage">
         <KibanaInstance data={data} alerts={alerts} />
       </div>
     </PageTemplate>

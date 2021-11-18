@@ -50,6 +50,11 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
+  [Fields.ALERT_RISK_SCORE]: {
+    type: 'float',
+    array: false,
+    required: false,
+  },
   [Fields.ALERT_WORKFLOW_STATUS]: {
     type: 'keyword',
     array: false,

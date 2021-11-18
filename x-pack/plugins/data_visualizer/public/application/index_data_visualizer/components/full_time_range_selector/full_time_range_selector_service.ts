@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Query, TimefilterContract } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';

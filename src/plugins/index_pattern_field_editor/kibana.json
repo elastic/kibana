@@ -5,7 +5,7 @@
   "ui": true,
   "requiredPlugins": ["data"],
   "optionalPlugins": ["usageCollection"],
-  "requiredBundles": ["kibanaReact", "esUiShared", "usageCollection", "fieldFormats"],
+  "requiredBundles": ["kibanaReact", "esUiShared", "fieldFormats"],
   "owner": {
     "name": "App Services",
     "githubTeam": "kibana-app-services"

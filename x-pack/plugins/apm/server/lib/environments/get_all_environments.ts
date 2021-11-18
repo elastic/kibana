@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { termQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../helpers/setup_request';
 import {
@@ -12,7 +13,7 @@ import {
   SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getProcessorEventForTransactions } from '../helpers/transactions';
 
 /**
  * This is used for getting *all* environments, and does not filter by range.
@@ -37,17 +38,10 @@ export async function getAllEnvironments({
 
   const { apmEventClient } = setup;
 
-  // omit filter for service.name if "All" option is selected
-  const serviceNameFilter = serviceName
-    ? [{ term: { [SERVICE_NAME]: serviceName } }]
-    : [];
-
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],
@@ -59,7 +53,7 @@ export async function getAllEnvironments({
       size: 0,
       query: {
         bool: {
-          filter: [...serviceNameFilter],
+          filter: [...termQuery(SERVICE_NAME, serviceName)],
         },
       },
       aggs: {

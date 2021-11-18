@@ -5,15 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
+import { of } from 'rxjs';
+
+const mockUseEffect = useEffect;
+const mockOf = of;
 
 const EDITOR_ID = 'testEditor';
-
-jest.mock('@elastic/eui/lib/services/accessibility', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -45,6 +43,7 @@ jest.mock('@elastic/eui', () => {
 
 jest.mock('@kbn/monaco', () => {
   const original = jest.requireActual('@kbn/monaco');
+  const originalMonaco = original.monaco;
 
   return {
     ...original,
@@ -54,7 +53,25 @@ jest.mock('@kbn/monaco', () => {
       getSyntaxErrors: () => ({
         [EDITOR_ID]: [],
       }),
+      validation$() {
+        return mockOf({ isValid: true, isValidating: false, errors: [] });
+      },
     },
+    monaco: {
+      ...originalMonaco,
+      editor: {
+        ...originalMonaco.editor,
+        setModelMarkers() {},
+      },
+    },
+  };
+});
+
+jest.mock('react-use/lib/useDebounce', () => {
+  return (cb: () => void, ms: number, deps: any[]) => {
+    mockUseEffect(() => {
+      cb();
+    }, deps);
   };
 });
 
@@ -66,15 +83,19 @@ jest.mock('../../../../kibana_react/public', () => {
    * with the uiSettings passed down. Let's use a simple <input /> in our tests.
    */
   const CodeEditorMock = (props: any) => {
-    // Forward our deterministic ID to the consumer
-    // We need below for the PainlessLang.getSyntaxErrors mock
-    props.editorDidMount({
-      getModel() {
-        return {
-          id: EDITOR_ID,
-        };
-      },
-    });
+    const { editorDidMount } = props;
+
+    mockUseEffect(() => {
+      // Forward our deterministic ID to the consumer
+      // We need below for the PainlessLang.getSyntaxErrors mock
+      editorDidMount({
+        getModel() {
+          return {
+            id: EDITOR_ID,
+          };
+        },
+      });
+    }, [editorDidMount]);
 
     return (
       <input

@@ -18,6 +18,7 @@ import { EditTransformFlyout } from '../edit_transform_flyout';
 import { useEditAction } from '../action_edit';
 import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction } from '../action_stop';
+import { useCreateAlertRuleAction } from '../action_create_alert';
 
 export const useActions = ({
   forceDisable,
@@ -35,6 +36,7 @@ export const useActions = ({
   const editAction = useEditAction(forceDisable, transformNodes);
   const startAction = useStartAction(forceDisable, transformNodes);
   const stopAction = useStopAction(forceDisable);
+  const createAlertRuleAction = useCreateAlertRuleAction(forceDisable);
 
   return {
     modals: (
@@ -52,6 +54,7 @@ export const useActions = ({
     ),
     actions: [
       discoverAction.action,
+      createAlertRuleAction.action,
       startAction.action,
       stopAction.action,
       editAction.action,

@@ -136,6 +136,7 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
   ElasticsearchConfigPreboot,
+  ElasticsearchErrorDetails,
 } from './elasticsearch';
 
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
@@ -387,7 +388,10 @@ export { EventLoopDelaysMonitor } from './metrics';
 
 export type { I18nServiceSetup } from './i18n';
 export type {
+  BaseDeprecationDetails,
   DeprecationsDetails,
+  ConfigDeprecationDetails,
+  FeatureDeprecationDetails,
   RegisterDeprecationsConfig,
   GetDeprecationsContext,
   DeprecationsServiceSetup,

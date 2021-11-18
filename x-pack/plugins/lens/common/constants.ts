@@ -17,7 +17,10 @@ export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const BASE_API_URL = '/api/lens';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
 
-export const layerTypes: Record<string, LayerType> = { DATA: 'data', THRESHOLD: 'threshold' };
+export const layerTypes: Record<string, LayerType> = {
+  DATA: 'data',
+  REFERENCELINE: 'referenceLine',
+};
 
 export function getBasePath() {
   return `#/`;

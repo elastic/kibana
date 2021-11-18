@@ -69,7 +69,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.uptime.link', {
         defaultMessage: 'Install Heartbeat',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
+      href: core.http.basePath.prepend('/app/integrations/detail/synthetics/overview'),
     },
     {
       id: 'ux',

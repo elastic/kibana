@@ -20,9 +20,6 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 
 [cols="2*<"]
 |===
-| `xpack.fleet.enabled` {ess-icon}
-  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-  Set to `true` (default) to enable {fleet}. 
 | `xpack.fleet.agents.enabled` {ess-icon}
   | Set to `true` (default) to enable {fleet}. 
 |===

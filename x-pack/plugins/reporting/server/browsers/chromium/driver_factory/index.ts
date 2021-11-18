@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import { getDataPath } from '@kbn/utils';
 import del from 'del';
+import apm from 'elastic-apm-node';
 import fs from 'fs';
 import path from 'path';
 import puppeteer from 'puppeteer';
@@ -23,32 +23,19 @@ import { LevelLogger } from '../../../lib';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
-import { Metrics, getMetrics } from './metrics';
-
-// Puppeteer type definitions do not match the documentation.
-// See https://pptr.dev/#?product=Puppeteer&version=v8.0.0&show=api-puppeteerlaunchoptions
-interface ReportingLaunchOptions extends puppeteer.LaunchOptions {
-  userDataDir?: string;
-  ignoreHTTPSErrors?: boolean;
-  args?: string[];
-}
-
-declare module 'puppeteer' {
-  function launch(options: ReportingLaunchOptions): Promise<puppeteer.Browser>;
-}
+import { getMetrics } from './metrics';
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
-type ViewportConfig = CaptureConfig['viewport'];
 
 export class HeadlessChromiumDriverFactory {
   private binaryPath: string;
   private captureConfig: CaptureConfig;
   private browserConfig: BrowserConfig;
   private userDataDir: string;
-  private getChromiumArgs: (viewport: ViewportConfig) => string[];
+  private getChromiumArgs: () => string[];
   private core: ReportingCore;
 
-  constructor(core: ReportingCore, binaryPath: string, logger: LevelLogger) {
+  constructor(core: ReportingCore, binaryPath: string, private logger: LevelLogger) {
     this.core = core;
     this.binaryPath = binaryPath;
     const config = core.getConfig();
@@ -60,10 +47,9 @@ export class HeadlessChromiumDriverFactory {
     }
 
     this.userDataDir = fs.mkdtempSync(path.join(getDataPath(), 'chromium-'));
-    this.getChromiumArgs = (viewport: ViewportConfig) =>
+    this.getChromiumArgs = () =>
       args({
         userDataDir: this.userDataDir,
-        viewport,
         disableSandbox: this.browserConfig.disableSandbox,
         proxy: this.browserConfig.proxy,
       });
@@ -75,21 +61,18 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone?: string },
-    pLogger: LevelLogger
+    { browserTimezone }: { browserTimezone?: string },
+    pLogger = this.logger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     // FIXME: 'create' is deprecated
     return Rx.Observable.create(async (observer: InnerSubscriber<unknown, unknown>) => {
       const logger = pLogger.clone(['browser-driver']);
       logger.info(`Creating browser page driver`);
 
-      const chromiumArgs = this.getChromiumArgs(viewport);
+      const chromiumArgs = this.getChromiumArgs();
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
-      let browser: puppeteer.Browser;
-      let page: puppeteer.Page;
-      let devTools: puppeteer.CDPSession | undefined;
-      let startMetrics: Metrics | undefined;
+      let browser: puppeteer.Browser | null = null;
 
       try {
         browser = await puppeteer.launch({
@@ -103,29 +86,28 @@ export class HeadlessChromiumDriverFactory {
             TZ: browserTimezone,
           },
         });
-
-        page = await browser.newPage();
-        devTools = await page.target().createCDPSession();
-
-        await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
-        startMetrics = await devTools.send('Performance.getMetrics');
-
-        // Log version info for debugging / maintenance
-        const versionInfo = await devTools.send('Browser.getVersion');
-        logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
-
-        await page.emulateTimezone(browserTimezone);
-
-        // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
-        // All waitFor methods have their own timeout config passed in to them
-        page.setDefaultTimeout(durationToNumber(this.captureConfig.timeouts.openUrl));
-
-        logger.debug(`Browser page driver created`);
       } catch (err) {
-        observer.error(new Error(`Error spawning Chromium browser!`));
-        observer.error(err);
-        throw err;
+        observer.error(new Error(`Error spawning Chromium browser! ${err}`));
+        return;
       }
+
+      const page = await browser.newPage();
+      const devTools = await page.target().createCDPSession();
+
+      await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
+      const startMetrics = await devTools.send('Performance.getMetrics');
+
+      // Log version info for debugging / maintenance
+      const versionInfo = await devTools.send('Browser.getVersion');
+      logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
+
+      await page.emulateTimezone(browserTimezone);
+
+      // Set the default timeout for all navigation methods to the openUrl timeout
+      // All waitFor methods have their own timeout config passed in to them
+      page.setDefaultTimeout(durationToNumber(this.captureConfig.timeouts.openUrl));
+
+      logger.debug(`Browser page driver created`);
 
       const childProcess = {
         async kill() {
@@ -148,7 +130,7 @@ export class HeadlessChromiumDriverFactory {
           }
 
           try {
-            await browser.close();
+            await browser?.close();
           } catch (err) {
             // do not throw
             logger.error(err);

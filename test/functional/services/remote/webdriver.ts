@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map, takeUntil, catchError } from 'rxjs/operators';
+import { mergeMap, map, takeUntil, catchError, ignoreElements } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/dev-utils';
 import chromeDriver from 'chromedriver';
@@ -53,6 +53,8 @@ const chromiumUserPrefs = {
   },
 };
 
+const sleep$ = (ms: number) => Rx.timer(ms).pipe(ignoreElements());
+
 /**
  * Best we can tell WebDriver locks up sometimes when we send too many
  * commands at once, sometimes... It causes random lockups where we never
@@ -71,6 +73,60 @@ export interface BrowserConfig {
   acceptInsecureCerts: boolean;
 }
 
+function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean) {
+  const options = browserType === Browsers.Chrome ? new chrome.Options() : new edge.Options();
+
+  options.addArguments(
+    // Disables the sandbox for all process types that are normally sandboxed.
+    'no-sandbox',
+    // Launches URL in new browser window.
+    'new-window',
+    // By default, file:// URIs cannot read other file:// URIs. This is an override for developers who need the old behavior for testing.
+    'allow-file-access-from-files',
+    // Use fake device for Media Stream to replace actual camera and microphone.
+    'use-fake-device-for-media-stream',
+    // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
+    'use-fake-ui-for-media-stream'
+  );
+
+  if (process.platform === 'linux') {
+    // The /dev/shm partition is too small in certain VM environments, causing
+    // Chrome to fail or crash. Use this flag to work-around this issue
+    // (a temporary directory will always be used to create anonymous shared memory files).
+    options.addArguments('disable-dev-shm-usage');
+  }
+
+  if (headlessBrowser === '1') {
+    // Use --disable-gpu to avoid an error from a missing Mesa library, as per
+    // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
+    options.headless();
+    options.addArguments('disable-gpu');
+  }
+
+  if (certValidation === '0') {
+    options.addArguments('ignore-certificate-errors');
+  }
+
+  if (remoteDebug === '1') {
+    // Visit chrome://inspect in chrome to remotely view/debug
+    options.headless();
+    options.addArguments('disable-gpu', 'remote-debugging-port=9222');
+  }
+
+  if (browserBinaryPath) {
+    options.setChromeBinaryPath(browserBinaryPath);
+  }
+
+  const prefs = new logging.Preferences();
+  prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
+  options.setUserPreferences(chromiumUserPrefs);
+  options.setLoggingPrefs(prefs);
+  options.set('unexpectedAlertBehaviour', 'accept');
+  options.setAcceptInsecureCerts(acceptInsecureCerts);
+
+  return options;
+}
+
 let attemptCounter = 0;
 let edgePaths: { driverPath: string | undefined; browserPath: string | undefined };
 async function attemptToCreateCommand(
@@ -86,55 +142,10 @@ async function attemptToCreateCommand(
   const buildDriverInstance = async () => {
     switch (browserType) {
       case 'chrome': {
-        const chromeOptions = new chrome.Options();
-        chromeOptions.addArguments(
-          // Disables the sandbox for all process types that are normally sandboxed.
-          'no-sandbox',
-          // Launches URL in new browser window.
-          'new-window',
-          // By default, file:// URIs cannot read other file:// URIs. This is an override for developers who need the old behavior for testing.
-          'allow-file-access-from-files',
-          // Use fake device for Media Stream to replace actual camera and microphone.
-          'use-fake-device-for-media-stream',
-          // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
-          'use-fake-ui-for-media-stream'
-        );
-
-        if (process.platform === 'linux') {
-          // The /dev/shm partition is too small in certain VM environments, causing
-          // Chrome to fail or crash. Use this flag to work-around this issue
-          // (a temporary directory will always be used to create anonymous shared memory files).
-          chromeOptions.addArguments('disable-dev-shm-usage');
-        }
-
-        if (headlessBrowser === '1') {
-          // Use --disable-gpu to avoid an error from a missing Mesa library, as per
-          // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-          chromeOptions.headless();
-          chromeOptions.addArguments('disable-gpu');
-        }
-
-        if (certValidation === '0') {
-          chromeOptions.addArguments('ignore-certificate-errors');
-        }
-
-        if (remoteDebug === '1') {
-          // Visit chrome://inspect in chrome to remotely view/debug
-          chromeOptions.headless();
-          chromeOptions.addArguments('disable-gpu', 'remote-debugging-port=9222');
-        }
-
-        if (browserBinaryPath) {
-          chromeOptions.setChromeBinaryPath(browserBinaryPath);
-        }
-
-        const prefs = new logging.Preferences();
-        prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
-        chromeOptions.setUserPreferences(chromiumUserPrefs);
-        chromeOptions.setLoggingPrefs(prefs);
-        chromeOptions.set('unexpectedAlertBehaviour', 'accept');
-        chromeOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
-
+        const chromeOptions = initChromiumOptions(
+          browserType,
+          config.acceptInsecureCerts
+        ) as chrome.Options;
         let session;
         if (remoteSessionUrl) {
           session = await new Builder()
@@ -169,19 +180,10 @@ async function attemptToCreateCommand(
 
       case 'msedge': {
         if (edgePaths && edgePaths.browserPath && edgePaths.driverPath) {
-          const edgeOptions = new edge.Options();
-          if (headlessBrowser === '1') {
-            // @ts-ignore internal modules are not typed
-            edgeOptions.headless();
-          }
-          // @ts-ignore internal modules are not typed
-          edgeOptions.setEdgeChromium(true);
-          // @ts-ignore internal modules are not typed
-          edgeOptions.setBinaryPath(edgePaths.browserPath);
-          const options = edgeOptions.get('ms:edgeOptions');
-          // overriding options to include preferences
-          Object.assign(options, { prefs: chromiumUserPrefs });
-          edgeOptions.set('ms:edgeOptions', options);
+          const edgeOptions = initChromiumOptions(
+            browserType,
+            config.acceptInsecureCerts
+          ) as edge.Options;
           const session = await new Builder()
             .forBrowser('MicrosoftEdge')
             .setEdgeOptions(edgeOptions)
@@ -331,6 +333,7 @@ export async function initWebDriver(
     edgePaths = await installDriver();
   }
 
+  let attempt = 1;
   return await Rx.race(
     Rx.timer(2 * MINUTE).pipe(
       map(() => {
@@ -355,8 +358,14 @@ export async function initWebDriver(
       catchError((error, resubscribe) => {
         log.warning('Failure while creating webdriver instance');
         log.warning(error);
-        log.warning('...retrying...');
-        return resubscribe;
+
+        if (attempt > 5) {
+          throw new Error('out of retry attempts');
+        }
+
+        attempt += 1;
+        log.warning('...retrying in 15 seconds...');
+        return Rx.concat(sleep$(15000), resubscribe);
       })
     )
   ).toPromise();

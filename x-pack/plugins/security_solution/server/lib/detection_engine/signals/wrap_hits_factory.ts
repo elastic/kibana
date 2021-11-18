@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { SearchAfterAndBulkCreateParams, WrapHits, WrappedSignalHit } from './types';
+import { WrapHits, WrappedSignalHit } from './types';
 import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { filterDuplicateSignals } from './filter_duplicate_signals';
 import type { ConfigType } from '../../../config';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 
 export const wrapHitsFactory =
   ({
-    ruleSO,
+    completeRule,
     executionId,
     signalsIndex,
     mergeStrategy,
     ignoreFields,
   }: {
-    ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+    completeRule: CompleteRule<RuleParams>;
     executionId: string;
     signalsIndex: string;
     mergeStrategy: ConfigType['alertMergeStrategy'];
@@ -29,14 +30,9 @@ export const wrapHitsFactory =
     const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
       {
         _index: signalsIndex,
-        _id: generateId(
-          doc._index,
-          doc._id,
-          String(doc._version),
-          ruleSO.attributes.params.ruleId ?? ''
-        ),
+        _id: generateId(doc._index, doc._id, String(doc._version), completeRule.alertId ?? ''),
         _source: buildBulkBody(
-          ruleSO,
+          completeRule,
           doc,
           executionId,
           mergeStrategy,
@@ -46,5 +42,5 @@ export const wrapHitsFactory =
       },
     ]);
 
-    return filterDuplicateSignals(ruleSO.id, wrappedDocs, false);
+    return filterDuplicateSignals(completeRule.alertId, wrappedDocs, false);
   };

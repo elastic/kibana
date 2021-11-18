@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
+import { Unit } from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '../../../../../alerting/server';
 import {
@@ -26,21 +27,32 @@ import {
   metricActionVariableDescription,
   thresholdActionVariableDescription,
 } from '../common/messages';
+import {
+  SnapshotMetricTypeKeys,
+  SnapshotMetricType,
+  InventoryItemType,
+} from '../../../../common/inventory_models/types';
+import {
+  SNAPSHOT_CUSTOM_AGGREGATIONS,
+  SnapshotCustomAggregation,
+} from '../../../../common/http_api/snapshot_api';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
-  comparator: oneOfLiterals(Object.values(Comparator)),
-  timeUnit: schema.string(),
+  comparator: oneOfLiterals(Object.values(Comparator)) as Type<Comparator>,
+  timeUnit: schema.string() as Type<Unit>,
   timeSize: schema.number(),
-  metric: schema.string(),
+  metric: oneOfLiterals(Object.keys(SnapshotMetricTypeKeys)) as Type<SnapshotMetricType>,
   warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
-  warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
+  warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))) as Type<
+    Comparator | undefined
+  >,
   customMetric: schema.maybe(
     schema.object({
       type: schema.literal('custom'),
       id: schema.string(),
       field: schema.string(),
-      aggregation: schema.string(),
+      aggregation: oneOfLiterals(SNAPSHOT_CUSTOM_AGGREGATIONS) as Type<SnapshotCustomAggregation>,
       label: schema.maybe(schema.string()),
     })
   ),
@@ -59,7 +71,7 @@ export async function registerMetricInventoryThresholdAlertType(
       params: schema.object(
         {
           criteria: schema.arrayOf(condition),
-          nodeType: schema.string(),
+          nodeType: schema.string() as Type<InventoryItemType>,
           filterQuery: schema.maybe(
             schema.string({ validate: validateIsStringElasticsearchJSONFilter })
           ),

@@ -24,12 +24,12 @@ export function kafkaLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'kafkaLogs',
     name: i18n.translate('home.tutorials.kafkaLogs.nameTitle', {
-      defaultMessage: 'Kafka logs',
+      defaultMessage: 'Kafka Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.kafkaLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs created by Kafka.',
+      defaultMessage: 'Collect and parse logs from Kafka servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kafkaLogs.longDescription', {
       defaultMessage:

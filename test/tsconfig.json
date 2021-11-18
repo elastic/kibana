@@ -53,6 +53,7 @@
     { "path": "../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../src/plugins/index_pattern_management/tsconfig.json" },
     { "path": "../src/plugins/visualize/tsconfig.json" },
+    { "path": "interactive_setup_api_integration/fixtures/test_endpoints/tsconfig.json" },
     { "path": "plugin_functional/plugins/core_app_status/tsconfig.json" },
     { "path": "plugin_functional/plugins/core_provider_plugin/tsconfig.json" },
     { "path": "server_integration/__fixtures__/plugins/status_plugin_a/tsconfig.json" },

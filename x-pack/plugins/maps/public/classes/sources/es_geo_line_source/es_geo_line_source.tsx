@@ -23,7 +23,7 @@ import {
   ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequest } from '../../util/data_request';
 import { registerSource } from '../source_registry';
@@ -85,7 +85,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   constructor(descriptor: Partial<ESGeoLineSourceDescriptor>, inspectorAdapters?: Adapters) {
     const sourceDescriptor = ESGeoLineSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters, true);
+    super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
 
@@ -123,9 +123,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         value: geoLineTitle,
       },
       {
-        label: i18n.translate('xpack.maps.source.esGeoLine.indexPatternLabel', {
-          defaultMessage: 'Index pattern',
-        }),
+        label: getDataViewLabel(),
         value: indexPatternTitle,
       },
       {
@@ -142,7 +140,6 @@ export class ESGeoLineSource extends AbstractESAggSource {
       fieldName: this._descriptor.splitField,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
-      canReadFromGeoJson: true,
     });
   }
 
@@ -321,7 +318,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     };
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest) {
+  getSourceStatus(sourceDataRequest?: DataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     const meta = sourceDataRequest
       ? (sourceDataRequest.getMeta() as ESGeoLineSourceResponseMeta)

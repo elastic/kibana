@@ -746,14 +746,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/components/controls.tsx"
               },
               {
@@ -771,6 +763,14 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/timeseriesexplorer/components/timeseriesexplorer_no_jobs_found/timeseriesexplorer_no_jobs_found.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
               },
               {
                 "plugin": "ml",
@@ -1912,7 +1912,15 @@
           "section": "def-server.SerializableRecord",
           "text": "SerializableRecord"
         },
-        ">): void; }"
+        ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.AnonymousAccessServiceContract",
+          "text": "AnonymousAccessServiceContract"
+        },
+        ") => void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
@@ -2226,6 +2234,107 @@
     "interfaces": [
       {
         "parentPluginId": "share",
+        "id": "def-common.AnonymousAccessServiceContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymousAccessServiceContract",
+        "description": [
+          "\nThe contract that is used to check anonymous access for the purposes of sharing public links. The implementation is intended to be\nprovided by the security plugin."
+        ],
+        "path": "src/plugins/share/common/anonymous_access/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessServiceContract.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [
+              "\nThis function returns the current state of anonymous access."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.AnonymousAccessState",
+                "text": "AnonymousAccessState"
+              },
+              ">"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessServiceContract.getCapabilities",
+            "type": "Function",
+            "tags": [],
+            "label": "getCapabilities",
+            "description": [
+              "\nThis function returns the capabilities of the anonymous access user."
+            ],
+            "signature": [
+              "() => Promise<",
+              "Capabilities",
+              ">"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-common.AnonymousAccessState",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymousAccessState",
+        "description": [
+          "\nThe state of anonymous access."
+        ],
+        "path": "src/plugins/share/common/anonymous_access/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessState.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [
+              "\nWhether anonymous access is enabled or not."
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessState.accessURLParameters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessURLParameters",
+            "description": [
+              "\nIf anonymous access is enabled, this reflects what URL parameters need to be added to a Kibana link to make it publicly accessible.\nNote that if anonymous access is the only authentication method, this will be null."
+            ],
+            "signature": [
+              "Record<string, string> | null"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
         "id": "def-common.LocatorDefinition",
         "type": "Interface",
         "tags": [],
@@ -2458,14 +2567,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/components/controls.tsx"
               },
               {
@@ -2483,6 +2584,14 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/timeseriesexplorer/components/timeseriesexplorer_no_jobs_found/timeseriesexplorer_no_jobs_found.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
               },
               {
                 "plugin": "ml",

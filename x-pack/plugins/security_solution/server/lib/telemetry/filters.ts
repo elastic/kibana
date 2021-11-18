@@ -14,6 +14,7 @@ export interface AllowlistFields {
 // Allow list process fields within events.  This includes "process" and "Target.process".'
 const allowlistProcessFields: AllowlistFields = {
   args: true,
+  entity_id: true,
   name: true,
   executable: true,
   code_signature: true,
@@ -30,6 +31,9 @@ const allowlistProcessFields: AllowlistFields = {
     dll: true,
     malware_signature: true,
     memory_region: true,
+    real: {
+      entity_id: true,
+    },
     token: {
       integrity_level_name: true,
     },
@@ -49,6 +53,7 @@ const allowlistBaseEventFields: AllowlistFields = {
       original_file_name: true,
     },
   },
+  dns: true,
   event: true,
   file: {
     extension: true,
@@ -62,6 +67,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     hash: true,
     Ext: {
       code_signature: true,
+      header_bytes: true,
       header_data: true,
       malware_classification: true,
       malware_signature: true,
@@ -100,6 +106,7 @@ const allowlistBaseEventFields: AllowlistFields = {
 // blindly. Object contents means that we only copy the fields that appear explicitly in
 // the sub-object.
 export const allowlistEventFields: AllowlistFields = {
+  _id: true,
   '@timestamp': true,
   agent: true,
   Endpoint: true,
@@ -135,6 +142,7 @@ export const exceptionListEventFields: AllowlistFields = {
   name: true,
   os_types: true,
   rule_version: true,
+  scope: true,
 };
 
 /**

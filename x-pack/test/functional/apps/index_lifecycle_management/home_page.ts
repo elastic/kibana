@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const policyName = 'testPolicy1';
+const repoName = 'test';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexLifecycleManagement']);
@@ -16,14 +17,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const esClient = getService('es');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/114473 and https://github.com/elastic/kibana/issues/114474
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     before(async () => {
+      await esClient.snapshot.createRepository({
+        name: repoName,
+        body: {
+          type: 'fs',
+          settings: {
+            // use one of the values defined in path.repo in test/functional/config.js
+            location: '/tmp/',
+          },
+        },
+        verify: false,
+      });
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });
     after(async () => {
-      // @ts-expect-error @elastic/elasticsearch DeleteSnapshotLifecycleRequest.policy_id is required
-      await esClient.ilm.deleteLifecycle({ policy: policyName });
+      await esClient.snapshot.deleteRepository({ name: repoName });
+      await esClient.ilm.deleteLifecycle({ name: policyName });
     });
 
     it('Loads the app', async () => {
@@ -42,6 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         coldEnabled: true,
         frozenEnabled: true,
         deleteEnabled: true,
+        snapshotRepository: repoName,
       });
 
       await retry.waitFor('navigation back to home page.', async () => {
