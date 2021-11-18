@@ -389,7 +389,7 @@ A custom image to use in the footer of the PDF.
 ==== Rollup
 
 [horizontal]
-[[rollups-enabledataviews]]`rollups:enableDataViews`::
+[[rollups-enableindexpatterns]]`rollups:enableIndexPatterns`::
 Enables the creation of data views that capture rollup indices, which in
 turn enables visualizations based on rollup data. Refresh the page to apply the
 changes.

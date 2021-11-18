@@ -8,8 +8,9 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { memo } from 'react';
 import { PackageCustomExtensionComponentProps } from '../../../../../../../../fleet/public';
-import { FleetTrustedAppsCardWrapper } from './components/fleet_trusted_apps_card_wrapper';
 import { FleetEventFiltersCard } from './components/fleet_event_filters_card';
+import { FleetHostIsolationExceptionsCard } from './components/fleet_host_isolation_exceptions_card';
+import { FleetTrustedAppsCardWrapper } from './components/fleet_trusted_apps_card_wrapper';
 
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   (props) => {
@@ -18,6 +19,8 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
         <FleetTrustedAppsCardWrapper {...props} />
         <EuiSpacer />
         <FleetEventFiltersCard {...props} />
+        <EuiSpacer />
+        <FleetHostIsolationExceptionsCard {...props} />
       </div>
     );
   }
