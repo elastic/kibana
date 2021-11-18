@@ -8,7 +8,6 @@
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 import type { Installation, PackageInfo } from '../../common';
-import { AUTO_UPDATE_PACKAGES } from '../../common';
 
 import { shouldUpgradePolicies, upgradeManagedPackagePolicies } from './managed_package_policies';
 import { packagePolicyService } from './package_policy';
