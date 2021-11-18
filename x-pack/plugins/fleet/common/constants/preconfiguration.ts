@@ -72,6 +72,8 @@ export const AUTO_UPDATE_PACKAGES = autoUpdatePackages.map((name) => ({
   version: PRECONFIGURATION_LATEST_KEYWORD,
 }));
 
+export const MANAGED_PACKAGES = [...DEFAULT_PACKAGES, ...AUTO_UPDATE_PACKAGES];
+
 export interface PreconfigurationError {
   package?: { name: string; version: string };
   agentPolicy?: { name: string };

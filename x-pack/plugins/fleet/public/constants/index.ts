@@ -21,6 +21,7 @@ export {
   // Preconfiguration
   AUTO_UPDATE_PACKAGES,
   DEFAULT_PACKAGES,
+  MANAGED_PACKAGES,
 } from '../../common/constants';
 
 export * from './page_paths';
