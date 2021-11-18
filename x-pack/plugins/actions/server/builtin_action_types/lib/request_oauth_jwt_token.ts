@@ -11,6 +11,8 @@ import { request } from '../lib/axios_utils';
 import { Logger } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
+// This is a standard for JSON Web Token (JWT) Profile
+// for OAuth 2.0 Client Authentication and Authorization Grants https://datatracker.ietf.org/doc/html/rfc7523#section-8.1
 export const OAUTH_JWT_BEARER_GRANT_TYPE = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
 
 export interface OAuthJWTTokenResponse {
