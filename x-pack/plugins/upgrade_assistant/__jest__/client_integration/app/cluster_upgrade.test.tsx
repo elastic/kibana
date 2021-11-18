@@ -36,6 +36,11 @@ describe('Cluster upgrade', () => {
     });
   });
 
+  // The way we detect if we are currently upgrading or if the upgrade has been completed is if
+  // we ever get back a 426 error in *any* API response that UA makes. For that reason we can
+  // just mock one of the APIs that are being called from the overview page to return an error
+  // in order to trigger these interstitial states. In this case we're going to mock the
+  // `es deprecations` response.
   describe('when cluster is in the process of a rolling upgrade', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, {
