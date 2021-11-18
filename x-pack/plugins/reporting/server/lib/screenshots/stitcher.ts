@@ -10,12 +10,11 @@ import { ScreenshotClip } from 'puppeteer';
 
 interface ScreenshotStitcherConstructorOpts {
   outputClip: ScreenshotClip;
-  zoom: number;
 }
 
 export class ScreenshotStitcher {
   private clip: ScreenshotClip;
-  private rowPixelMax = 100;
+  private rowPixelMax = 400; // ES payloads should be about 100k
 
   constructor(opts: ScreenshotStitcherConstructorOpts) {
     this.clip = opts.outputClip;
@@ -40,18 +39,20 @@ export class ScreenshotStitcher {
 
     return Rx.from(
       (function* (): Generator<ScreenshotClip> {
-        for (let row = 0; row < rows; ++row) {
-          for (let column = 0; column < columns; ++column) {
-            const dimensions = {
-              x: column % 2 === 0 ? clip.x : clip.x + clip.width / 2, // alternate left and right row
-              y: row * max + clip.y,
-              width: clip.width / 2,
-              height: row === rows - 1 ? clip.height - row * max : max,
-            };
-            console.log({ row, column });
-            console.log(JSON.stringify({ dimensions }));
+        let y = 0;
+        const x = clip.x;
+        const halfW = Math.ceil(clip.width / 2);
 
-            yield dimensions;
+        for (let row = 0; row < rows; ++row) {
+          const rowHeight = row === rows - 1 ? clip.height - row * max : max;
+          y = row * max + clip.y;
+          for (let clipId = 0; clipId < columns; ++clipId) {
+            yield {
+              y,
+              x: clipId % 2 === 0 ? x : x + halfW, // left side or right side
+              width: halfW,
+              height: rowHeight,
+            };
           }
         }
       })()

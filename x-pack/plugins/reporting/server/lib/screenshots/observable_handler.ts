@@ -6,6 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { ScreenshotClip } from 'puppeteer';
 import * as Rx from 'rxjs';
 import { catchError, mergeMap, switchMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import { Writable } from 'stream';
@@ -184,27 +185,28 @@ export class ScreenshotObservableHandler {
           const { timeRange, error: setupError } = page;
           const { boundingClientRect, scroll } = element.position;
 
-          this.logger.info(`streaming screenshots`);
-
-          const stitcher = new ScreenshotStitcher({
-            outputClip: {
-              x: boundingClientRect.left + scroll.x,
-              y: boundingClientRect.top + scroll.y,
-              height: boundingClientRect.height,
-              width: boundingClientRect.width,
-            },
-            zoom: 2, // FIXME: use config
-          });
-
-          const endTrace = startTrace('get_screenshots', 'read');
-
           let byteLength = 0;
           let screenshotCount = 0;
+
+          this.logger.info(`streaming screenshots`);
+
+          const dimensions = {
+            x: boundingClientRect.left + scroll.x,
+            y: boundingClientRect.top + scroll.y,
+            height: boundingClientRect.height,
+            width: boundingClientRect.width,
+          };
+          this.logger.debug(`Creating screenshot stream with: ${dimensionsAsString(dimensions)}`);
+          const stitcher = new ScreenshotStitcher({ outputClip: dimensions });
+
+          const endTrace = startTrace('get_screenshots', 'read');
 
           await stitcher
             .getClips$()
             .pipe(
               switchMap(async (clip) => {
+                this.logger.debug(`Capturing screenshot at ${dimensionsAsString(clip)}`);
+
                 let data: Buffer | undefined;
                 try {
                   data = await this.driver.screenshot(clip);
@@ -215,7 +217,7 @@ export class ScreenshotObservableHandler {
                   throw new Error(`Unable to capture screenshot: ${err}`);
                 }
 
-                this.logger.info(`Writing screenshot clip of ${data.byteLength} bytes.`); // FIXME: log progress count
+                this.logger.info(`Writing partial screenshot with ${data.byteLength} bytes.`);
                 stream.write(data);
 
                 byteLength += data.byteLength;
@@ -273,3 +275,12 @@ const getDefaultViewPort = () => ({
   width: DEFAULT_SCREENSHOT_CLIP_WIDTH,
   zoom: 1,
 });
+
+const dimensionsAsString = (dimensions: ScreenshotClip) => {
+  return [
+    `x:${dimensions.x}`,
+    `y:${dimensions.y}`,
+    `w:${dimensions.width}`,
+    `h:${dimensions.height}`,
+  ].toString();
+};
