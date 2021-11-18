@@ -1891,8 +1891,6 @@ describe('Authenticator', () => {
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
-
-
     it('redirects to login form if session does not exist and provider name is invalid', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { provider: 'foo' } });
       mockOptions.session.get.mockResolvedValue(null);
