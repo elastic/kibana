@@ -200,11 +200,6 @@ export interface AlertWithLegacyId<Params extends AlertTypeParams = never> exten
   legacyId: string | null;
 }
 
-export type SanitizedAlertWithLegacyId<Params extends AlertTypeParams = never> = Omit<
-  AlertWithLegacyId<Params>,
-  'apiKey'
->;
-
 export type PartialAlertWithLegacyId<Params extends AlertTypeParams = never> = Pick<
   AlertWithLegacyId<Params>,
   'id'

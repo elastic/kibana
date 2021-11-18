@@ -39,6 +39,7 @@ import {
   SanitizedAlertWithLegacyId,
   PartialAlertWithLegacyId,
   RawAlertInstance,
+  ResolvedSanitizedAlertWithLegacyId,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -454,7 +455,7 @@ export class RulesClient {
   }: {
     id: string;
     includeLegacyId?: boolean;
-  }): Promise<ResolvedSanitizedRule<Params>> {
+  }): Promise<ResolvedSanitizedRule<Params> | ResolvedSanitizedAlertWithLegacyId<Params>> {
     const { saved_object: result, ...resolveResponse } =
       await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
     try {

@@ -30,7 +30,7 @@ import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedAlert, ResolvedSanitizedAlertWithLegacyId } from '../../../../../alerting/common';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -283,17 +283,17 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 };
 
 export const internalRuleToAPIResponse = (
-  rule: SanitizedAlert<RuleParams> | ResolvedSanitizedRule<RuleParams>,
+  rule: SanitizedAlert<RuleParams> | ResolvedSanitizedAlertWithLegacyId<RuleParams>,
   ruleStatus?: IRuleStatusSOAttributes,
   legacyRuleActions?: LegacyRuleActions | null
 ): FullResponseSchema => {
   const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
-  const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
-    (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
+  const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedAlertWithLegacyId<RuleParams> =>
+    (obj as ResolvedSanitizedAlertWithLegacyId<RuleParams>).outcome != null;
   return {
     // saved object properties
     outcome: isResolvedRule(rule) ? rule.outcome : undefined,
-    legacyId: isResolvedRule(rule) ? rule.legacyId : undefined,
+    legacyId: isResolvedRule(rule) && rule.legacyId != null ? rule.legacyId : undefined,
     alias_target_id: isResolvedRule(rule) ? rule.alias_target_id : undefined,
     // Alerting framework params
     id: rule.id,

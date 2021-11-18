@@ -79,12 +79,20 @@ export interface Alert<Params extends AlertTypeParams = never> {
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
-  legacyId?: string;
 }
 
 export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
 export type ResolvedSanitizedRule<Params extends AlertTypeParams = never> = SanitizedAlert<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;
+export interface AlertWithLegacyId<Params extends AlertTypeParams = never> extends Alert<Params> {
+  legacyId: string | null;
+}
+export type SanitizedAlertWithLegacyId<Params extends AlertTypeParams = never> = Omit<
+  AlertWithLegacyId<Params>,
+  'apiKey'
+>;
+export type ResolvedSanitizedAlertWithLegacyId<Params extends AlertTypeParams = never> =
+  SanitizedAlertWithLegacyId<Params> & Omit<SavedObjectsResolveResponse, 'saved_object'>;
 
 export type SanitizedRuleConfig = Pick<
   SanitizedAlert,
