@@ -26,7 +26,7 @@ describe('ElasticsearchService', () => {
   let service: ElasticsearchService;
   let mockElasticsearchPreboot: ReturnType<typeof elasticsearchServiceMock.createPreboot>;
   beforeEach(() => {
-    service = new ElasticsearchService(loggingSystemMock.createLogger());
+    service = new ElasticsearchService(loggingSystemMock.createLogger(), '8.0.0');
     mockElasticsearchPreboot = elasticsearchServiceMock.createPreboot();
   });
 
@@ -62,6 +62,18 @@ describe('ElasticsearchService', () => {
           statusCode: 200,
           body: {},
           headers: { 'x-elastic-product': 'Elasticsearch' },
+        })
+      );
+      mockAuthenticateClient.asInternalUser.nodes.info.mockResolvedValue(
+        interactiveSetupMock.createApiResponse({
+          statusCode: 200,
+          body: {
+            nodes: [
+              {
+                version: '8.0.0',
+              },
+            ],
+          } as any,
         })
       );
 
@@ -383,6 +395,51 @@ describe('ElasticsearchService', () => {
         expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
       });
 
+      it('fails if version is incompatible', async () => {
+        const mockEnrollScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockEnrollScopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({
+            statusCode: 200,
+            body: {
+              token: { name: 'some-name', value: 'some-value' },
+              http_ca: '\n\nsome weird-ca_with\n content\n\n',
+            },
+          })
+        );
+        mockEnrollClient.asScoped.mockReturnValue(mockEnrollScopedClusterClient);
+
+        mockAuthenticateClient.asInternalUser.security.authenticate.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: {} as any })
+        );
+
+        mockAuthenticateClient.asInternalUser.nodes.info.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({
+            statusCode: 200,
+            body: {
+              nodes: [
+                {
+                  version: '7.0.0',
+                },
+              ],
+            } as any,
+          })
+        );
+
+        await expect(
+          setupContract.enroll({
+            apiKey: 'apiKey',
+            hosts: ['host1', 'host2'],
+            caFingerprint: 'DE:AD:BE:EF',
+          })
+        ).rejects.toMatchInlineSnapshot(
+          `[CompatibilityError: This version of Kibana (v8.0.0) is incompatible with the following Elasticsearch nodes in your cluster: v7.0.0 @ undefined (undefined)]`
+        );
+
+        // Check that we properly closed all clients.
+        expect(mockEnrollClient.close).toHaveBeenCalledTimes(1);
+        expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
+      });
+
       it('iterates through all provided hosts until find an accessible one', async () => {
         mockElasticsearchPreboot.createClient.mockClear();
 
@@ -510,6 +567,33 @@ some weird+ca/with
         await expect(
           setupContract.authenticate({ host: 'http://localhost:9200' })
         ).rejects.toMatchInlineSnapshot(`[ConnectionError: some-message]`);
+        expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
+      });
+
+      it('fails if version is incompatible', async () => {
+        mockAuthenticateClient.asInternalUser.ping.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
+        );
+
+        mockAuthenticateClient.asInternalUser.nodes.info.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({
+            statusCode: 200,
+            body: {
+              nodes: [
+                {
+                  version: '7.0.0',
+                },
+              ],
+            } as any,
+          })
+        );
+
+        await expect(
+          setupContract.authenticate({ host: 'http://localhost:9200' })
+        ).rejects.toMatchInlineSnapshot(
+          `[CompatibilityError: This version of Kibana (v8.0.0) is incompatible with the following Elasticsearch nodes in your cluster: v7.0.0 @ undefined (undefined)]`
+        );
+        expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('succeeds if ping call succeeds', async () => {
@@ -520,6 +604,7 @@ some weird+ca/with
         await expect(
           setupContract.authenticate({ host: 'http://localhost:9200' })
         ).resolves.toEqual(undefined);
+        expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -535,6 +620,7 @@ some weird+ca/with
         await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[ConnectionError: some-message]`
         );
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('fails if host is not supported', async () => {
@@ -546,6 +632,7 @@ some weird+ca/with
         await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[ProductNotSupportedError: The client noticed that the server is not Elasticsearch and we do not support this unknown product.]`
         );
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('fails if host is not Elasticsearch', async () => {
@@ -559,6 +646,7 @@ some weird+ca/with
         await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[Error: Host did not respond with valid Elastic product header.]`
         );
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('succeeds if host does not require authentication', async () => {
@@ -570,6 +658,7 @@ some weird+ca/with
           authRequired: false,
           certificateChain: undefined,
         });
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('succeeds if host requires authentication', async () => {
@@ -583,6 +672,7 @@ some weird+ca/with
           authRequired: true,
           certificateChain: undefined,
         });
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('succeeds if host requires SSL', async () => {
@@ -616,6 +706,7 @@ some weird+ca/with
           port: 9200,
           rejectUnauthorized: false,
         });
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('fails if peer certificate cannot be fetched', async () => {
@@ -636,6 +727,7 @@ some weird+ca/with
         await expect(setupContract.ping('https://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[Error: some-message]`
         );
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
     });
   });

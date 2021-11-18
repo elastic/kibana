@@ -13,6 +13,7 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDefinitionParams } from '.';
 import {
   ElasticsearchConnectionStatus,
+  ERROR_COMPATIBILITY_FAILURE,
   ERROR_CONFIGURE_FAILURE,
   ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
   ERROR_KIBANA_CONFIG_FAILURE,
@@ -20,7 +21,7 @@ import {
   ERROR_OUTSIDE_PREBOOT_STAGE,
 } from '../../common';
 import type { AuthenticateParameters } from '../elasticsearch_service';
-import { ElasticsearchService } from '../elasticsearch_service';
+import { CompatibilityError, ElasticsearchService } from '../elasticsearch_service';
 import type { WriteConfigParameters } from '../kibana_config_writer';
 
 export function defineConfigureRoute({
@@ -121,7 +122,19 @@ export function defineConfigureRoute({
 
       try {
         await elasticsearch.authenticate(configToWrite);
-      } catch {
+      } catch (error) {
+        if (error instanceof CompatibilityError) {
+          return response.badRequest({
+            body: {
+              message: 'Failed to configure due to version incompatibility.',
+              attributes: {
+                type: ERROR_COMPATIBILITY_FAILURE,
+                elasticsearchVersion: error.elasticsearchVersion,
+                kibanaVersion: error.kibanaVersion,
+              },
+            },
+          });
+        }
         // For security reasons, we shouldn't leak to the user whether Elasticsearch node couldn't process enrollment
         // request or we just couldn't connect to any of the provided hosts.
         return response.customError({
