@@ -14,31 +14,33 @@ After upgrading from {stack} version \<=7.15 to >= 7.16, you must complete the f
 
 * Install [Elastic for Security Operations (SecOps)] https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f from the {sn} Store.
 * Create a {sn} integration user and assign it the appropriate roles.
-* Create a Cross-Origin Resource Sharing (CORS) rule in {sn}.
+* Create a Cross-Origin Resource Sharing (CORS) rule.
 
 *Create a {sn} integration user*
 
 To ensure authenticated communication between Elastic and {sn}, create a {sn} integration user and assign it the appropriate roles. 
 
-. In your {sn} instance, go to *System Security -> Users*.
+. In your {sn} instance, go to *System Security -> Users and Groups -> Users*.
 . Click *New*.
-. Complete the form.
+. Complete the form, then right-click on the menu bar and click *Save*.
+. Go to the *Roles* tab and click *Edit*.
 . Assign the integration user the following roles: 
 * `import_set_loader`
 * `import_transformer`
 * `personalize_choices`
 * `sn_si.basic`
 * `x_elas2_sir_int.integration_user`
-. Click *Submit* to create the user.
+. Click *Save*.
 
 *Create a  rule*
 
 A  rule is required for communication between Elastic and {sn}. To create a CORS rule:
 
-. In your {sn} instance, go to *System Web Services -> CORS Rules*.
+. In your {sn} instance, go to *System Web Services -> REST -> CORS Rules*.
 . Click *New*.
-. Configure the rule settings to use the Elastic SIR API and the Kibana URL:
-* *REST API*: Choose `Elastic SIR API [x_elas2_sir_int/elastic_api]`.
+. Configure the rule as follows:
+* *Name*: Name the rule.
+* *REST API*: Set the rule to use the Elastic ITSM API by choosing `Elastic ITSM API [x_elas2_inc_int/elastic_api]`.
 * *Domain*: Enter the Kibana URL.
 . Go to the *HTTP methods* tab and select *GET*.
 . Click *Submit* to create the rule.
