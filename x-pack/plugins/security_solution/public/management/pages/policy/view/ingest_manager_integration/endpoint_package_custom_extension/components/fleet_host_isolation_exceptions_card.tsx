@@ -116,7 +116,7 @@ export const FleetHostIsolationExceptionsCard = memo<PackageCustomExtensionCompo
               >
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.fleetCustomExtension.hostIsolationExceptionsSummary.manageLabel"
-                  defaultMessage="Manage host isolation exceptions"
+                  defaultMessage="Manage"
                 />
               </LinkWithIcon>
             </>

@@ -96,7 +96,7 @@ describe('Fleet host isolation exceptions card filters card', () => {
     getHostIsolationExceptionSummaryMock.mockReturnValueOnce(promise);
     const component = await renderComponent();
     expect(component.getByText('Host isolation exceptions')).not.toBeNull();
-    expect(component.getByText('Manage host isolation exceptions')).not.toBeNull();
+    expect(component.getByText('Manage')).not.toBeNull();
   });
   it('should render an error toast when api call fails', async () => {
     expect(addDanger).toBeCalledTimes(0);
@@ -104,7 +104,7 @@ describe('Fleet host isolation exceptions card filters card', () => {
     getHostIsolationExceptionSummaryMock.mockReturnValueOnce(promise);
     const component = await renderComponent();
     expect(component.getByText('Host isolation exceptions')).not.toBeNull();
-    expect(component.getByText('Manage host isolation exceptions')).not.toBeNull();
+    expect(component.getByText('Manage')).not.toBeNull();
     await reactTestingLibrary.waitFor(() => expect(addDanger).toBeCalledTimes(1));
   });
 });

@@ -60,7 +60,7 @@ export const FleetTrustedAppsCardWrapper = memo<PackageCustomExtensionComponentP
         >
           <FormattedMessage
             id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
-            defaultMessage="Manage trusted applications"
+            defaultMessage="Manage"
           />
         </LinkWithIcon>
       ),
