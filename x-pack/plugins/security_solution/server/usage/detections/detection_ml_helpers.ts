@@ -11,9 +11,6 @@ import { isJobStarted } from '../../../common/machine_learning/helpers';
 import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
 import { DetectionsMetric, MlJobMetric, MlJobsUsage, MlJobUsage } from './types';
 
-/**
- * Default ml job usage count
- */
 export const initialMlJobsUsage: MlJobsUsage = {
   custom: {
     enabled: 0,
@@ -66,7 +63,7 @@ export const updateMlJobsUsage = (jobMetric: DetectionsMetric, usage: MlJobsUsag
 
 export const getMlJobMetrics = async (
   ml: MlPluginSetup | undefined,
-  savedObjectClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract
 ): Promise<MlJobUsage> => {
   let jobsUsage: MlJobsUsage = initialMlJobsUsage;
 
@@ -74,9 +71,9 @@ export const getMlJobMetrics = async (
     try {
       const fakeRequest = { headers: {} } as KibanaRequest;
 
-      const modules = await ml.modulesProvider(fakeRequest, savedObjectClient).listModules();
+      const modules = await ml.modulesProvider(fakeRequest, soClient).listModules();
       const moduleJobs = modules.flatMap((module) => module.jobs);
-      const jobs = await ml.jobServiceProvider(fakeRequest, savedObjectClient).jobsSummary();
+      const jobs = await ml.jobServiceProvider(fakeRequest, soClient).jobsSummary();
 
       jobsUsage = jobs.filter(isSecurityJob).reduce((usage, job) => {
         const isElastic = moduleJobs.some((moduleJob) => moduleJob.id === job.id);
@@ -87,18 +84,16 @@ export const getMlJobMetrics = async (
 
       const jobsType = 'security';
       const securityJobStats = await ml
-        .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
+        .anomalyDetectorsProvider(fakeRequest, soClient)
         .jobStats(jobsType);
 
-      const jobDetails = await ml
-        .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
-        .jobs(jobsType);
+      const jobDetails = await ml.anomalyDetectorsProvider(fakeRequest, soClient).jobs(jobsType);
 
       const jobDetailsCache = new Map<string, Job>();
       jobDetails.jobs.forEach((detail) => jobDetailsCache.set(detail.job_id, detail));
 
       const datafeedStats = await ml
-        .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
+        .anomalyDetectorsProvider(fakeRequest, soClient)
         .datafeedStats();
 
       const datafeedStatsCache = new Map<string, DatafeedStats>();

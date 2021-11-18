@@ -7,19 +7,16 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import { MlPluginSetup } from '../../../../ml/server';
-import { getMlJobMetrics, initialMlJobsUsage } from './detection_ml_helpers';
 import { DetectionMetrics } from './types';
+import { getMlJobMetrics, initialMlJobsUsage } from './detection_ml_helpers';
 
 export const fetchDetectionsMetrics = async (
   soClient: SavedObjectsClientContract,
   mlClient: MlPluginSetup | undefined
 ): Promise<DetectionMetrics> => {
-  const [mlJobMetrics] = await Promise.allSettled([getMlJobMetrics(mlClient, soClient)]);
+  const mlJobMetrics = await getMlJobMetrics(mlClient, soClient);
 
   return {
-    ml_jobs:
-      mlJobMetrics.status === 'fulfilled'
-        ? mlJobMetrics.value
-        : { ml_job_metrics: [], ml_job_usage: initialMlJobsUsage },
+    ml_jobs: mlJobMetrics ? mlJobMetrics : { ml_job_metrics: [], ml_job_usage: initialMlJobsUsage },
   };
 };

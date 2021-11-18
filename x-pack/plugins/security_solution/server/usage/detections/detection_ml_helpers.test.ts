@@ -7,9 +7,9 @@
 
 import { initialMlJobsUsage, updateMlJobsUsage } from './detection_ml_helpers';
 
-describe('Security Machine Learning usage metrics', () => {
+describe('Security ML Usage Metrics', () => {
   describe('Updates metrics with job information', () => {
-    it('Should update ML total for elastic rules', async () => {
+    it('Should update ML total for elastic jobs', async () => {
       const initialUsage = initialMlJobsUsage;
       const isElastic = true;
       const isEnabled = true;
@@ -30,7 +30,7 @@ describe('Security Machine Learning usage metrics', () => {
       );
     });
 
-    it('Should update ML total for custom rules', async () => {
+    it('Should update ML total for custom jobs', async () => {
       const initialUsage = initialMlJobsUsage;
       const isElastic = false;
       const isEnabled = true;
@@ -51,7 +51,7 @@ describe('Security Machine Learning usage metrics', () => {
       );
     });
 
-    it('Should update ML total for both elastic and custom rules', async () => {
+    it('Should update ML total for both elastic and custom jobs', async () => {
       const initialUsage = initialMlJobsUsage;
 
       let updatedUsage = updateMlJobsUsage({ isElastic: true, isEnabled: true }, initialUsage);

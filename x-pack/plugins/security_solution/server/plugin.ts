@@ -159,7 +159,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     initUsageCollectors({
-      core,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
     });
