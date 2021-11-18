@@ -9,7 +9,10 @@
 export { ElasticsearchService } from './elasticsearch_service';
 export { config, configSchema } from './elasticsearch_config';
 export { ElasticsearchConfig } from './elasticsearch_config';
-export type { NodesVersionCompatibility } from './version_check/ensure_es_version';
+export type {
+  NodesVersionCompatibility,
+  PollEsNodesVersionOptions,
+} from './version_check/ensure_es_version';
 export type {
   ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,

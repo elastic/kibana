@@ -137,6 +137,7 @@ export type {
   DeleteDocumentResponse,
   ElasticsearchConfigPreboot,
   ElasticsearchErrorDetails,
+  PollEsNodesVersionOptions,
 } from './elasticsearch';
 
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
