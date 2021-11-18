@@ -6,7 +6,7 @@
  */
 
 import {
-  CELL,
+  CORRELATION_EVENT_TABLE_CELL,
   DATA_PROVIDERS,
   DATE_PICKER_END,
   DATE_PICKER_START,
@@ -17,8 +17,10 @@ import {
   NOTE_DESCRIPTION,
   NOTE_PREVIEW,
   NOTES_TAB_BUTTON,
+  PINNED_EVENT_TABLE_CELL,
   PINNED_TAB_BUTTON,
   PROCESS_KPI,
+  QUERY_EVENT_TABLE_CELL,
   SOURCE_IP_KPI,
   TIMELINE_CORRELATION_TAB,
   TIMELINE_CORRELATION_INPUT,
@@ -54,7 +56,7 @@ const username = 'elastic';
 const timelineDetails = {
   dateStart: 'Oct 11, 2020 @ 00:00:00.000',
   dateEnd: 'Oct 11, 2030 @ 17:13:15.851',
-  queryTab: 'Query2',
+  queryTab: 'Query4',
   correlationTab: 'Correlation',
   analyzerTab: 'Analyzer',
   notesTab: 'Notes2',
@@ -62,7 +64,7 @@ const timelineDetails = {
 };
 
 const detectionAlert = {
-  timestamp: 'Oct 7, 2021 @ 11:14:10.888',
+  timestamp: 'Nov 17, 2021 @ 09:36:25.499',
   message: '—',
   eventCategory: 'file',
   eventAction: 'initial_scan',
@@ -73,7 +75,7 @@ const detectionAlert = {
 };
 
 const event = {
-  timestamp: 'Oct 6, 2021 @ 17:09:29.438',
+  timestamp: 'Nov 4, 2021 @ 11:09:29.438',
   message: '—',
   eventCategory: 'file',
   eventAction: 'initial_scan',
@@ -98,7 +100,7 @@ describe('Import timeline after upgrade', () => {
     cy.readFile(`cypress/fixtures/${timeline}`).then((file) => {
       const timelineJson = JSON.parse(file);
       const regex = new RegExp(
-        `\\S${timelineJson.globalNotes[0].createdBy}added a note\\d* \\w* ago${timelineJson.globalNotes[0].createdBy} added a note${timelineJson.globalNotes[0].note}`
+        `\\S${timelineJson.globalNotes[0].createdBy}added a note\\S*\\s?(\\S*)?\\s?(\\S*)?${timelineJson.globalNotes[0].createdBy} added a note${timelineJson.globalNotes[0].note}`
       );
 
       cy.get(TIMELINE_NAME).should('have.text', timelineJson.title);
@@ -147,30 +149,31 @@ describe('Import timeline after upgrade', () => {
       cy.get(NOTES_TAB_BUTTON).should('have.text', timelineDetails.notesTab);
       cy.get(PINNED_TAB_BUTTON).should('have.text', timelineDetails.pinnedTab);
 
-      cy.get(CELL).eq(0).should('contain', detectionAlert.timestamp);
-      cy.get(CELL).eq(1).should('contain', detectionAlert.message);
-      cy.get(CELL).eq(2).should('contain', detectionAlert.eventCategory);
-      cy.get(CELL).eq(3).should('contain', detectionAlert.eventAction);
-      cy.get(CELL).eq(4).should('contain', detectionAlert.hostName);
-      cy.get(CELL).eq(5).should('contain', detectionAlert.sourceIp);
-      cy.get(CELL).eq(6).should('contain', detectionAlert.destinationIp);
-      cy.get(CELL).eq(7).should('contain', detectionAlert.userName);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(0).should('contain', detectionAlert.timestamp);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(1).should('contain', detectionAlert.message);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(2).should('contain', detectionAlert.eventCategory);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(3).should('contain', detectionAlert.eventAction);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(4).should('contain', detectionAlert.hostName);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(5).should('contain', detectionAlert.sourceIp);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(6).should('contain', detectionAlert.destinationIp);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(7).should('contain', detectionAlert.userName);
 
-      cy.get(CELL).eq(8).should('contain', event.timestamp);
-      cy.get(CELL).eq(9).should('contain', event.message);
-      cy.get(CELL).eq(10).should('contain', event.eventCategory);
-      cy.get(CELL).eq(11).should('contain', event.eventAction);
-      cy.get(CELL).eq(12).should('contain', event.hostName);
-      cy.get(CELL).eq(13).should('contain', event.sourceIp);
-      cy.get(CELL).eq(14).should('contain', event.destinationIp);
-      cy.get(CELL).eq(15).should('contain', event.userName);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(8).should('contain', event.timestamp);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(9).should('contain', event.message);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(10).should('contain', event.eventCategory);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(11).should('contain', event.eventAction);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(12).should('contain', event.hostName);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(13).should('contain', event.sourceIp);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(14).should('contain', event.destinationIp);
+      cy.get(QUERY_EVENT_TABLE_CELL).eq(15).should('contain', event.userName);
     });
   });
 
-  it('Displays the correct timeline details inside the query tab', () => {
+  it('Displays the correct timeline details inside the correlation tab', () => {
     goToCorrelationTab();
 
     cy.get(TIMELINE_CORRELATION_INPUT).should('be.empty');
+    cy.get(CORRELATION_EVENT_TABLE_CELL).should('not.exist');
   });
 
   it('Displays the correct timeline details inside the notes tab', () => {
@@ -179,27 +182,27 @@ describe('Import timeline after upgrade', () => {
     cy.readFile(`cypress/fixtures/${timeline}`).then((file) => {
       const timelineJson = JSON.parse(file);
       const descriptionRegex = new RegExp(
-        `\\S${username}added description\\d* \\w* ago${timelineJson.description}`
+        `\\S${username}added description\\S*\\s?(\\S*)?\\s?(\\S*)?${timelineJson.description}`
       );
       const noteRegex = new RegExp(
-        `\\S${timelineJson.globalNotes[0].createdBy}added a note\\d* \\w* ago${timelineJson.globalNotes[0].createdBy} added a note${timelineJson.globalNotes[0].note}`
+        `\\S${timelineJson.globalNotes[0].createdBy}added a note\\S*\\s?(\\S*)?\\s?(\\S*)?${timelineJson.globalNotes[0].createdBy} added a note${timelineJson.globalNotes[0].note}`
       );
 
       cy.get(NOTE_DESCRIPTION).invoke('text').should('match', descriptionRegex);
-      cy.get(NOTE_PREVIEW).invoke('text').should('match', noteRegex);
+      cy.get(NOTE_PREVIEW).last().invoke('text').should('match', noteRegex);
     });
   });
 
   it('Displays the correct timeline details inside the pinned tab', () => {
     goToPinnedTab();
 
-    cy.get(CELL).eq(0).should('contain', detectionAlert.timestamp);
-    cy.get(CELL).eq(1).should('contain', detectionAlert.message);
-    cy.get(CELL).eq(2).should('contain', detectionAlert.eventCategory);
-    cy.get(CELL).eq(3).should('contain', detectionAlert.eventAction);
-    cy.get(CELL).eq(4).should('contain', detectionAlert.hostName);
-    cy.get(CELL).eq(5).should('contain', detectionAlert.sourceIp);
-    cy.get(CELL).eq(6).should('contain', detectionAlert.destinationIp);
-    cy.get(CELL).eq(7).should('contain', detectionAlert.userName);
+    cy.get(PINNED_EVENT_TABLE_CELL).eq(0).should('contain', detectionAlert.timestamp);
+    cy.get(PINNED_EVENT_TABLE_CELL).eq(1).should('contain', detectionAlert.message);
+    cy.get(PINNED_EVENT_TABLE_CELL).eq(2).should('contain', detectionAlert.eventCategory);
+    cy.get(PINNED_EVENT_TABLE_CELL).eq(3).should('contain', detectionAlert.eventAction);
+    cy.get(PINNED_EVENT_TABLE_CELL).eq(4).should('contain', detectionAlert.hostName);
+    cy.get(PINNED_EVENT_TABLE_CELL).eq(5).should('contain', detectionAlert.sourceIp);
+    cy.get(PINNED_EVENT_TABLE_CELL).eq(6).should('contain', detectionAlert.destinationIp);
+    cy.get(PINNED_EVENT_TABLE_CELL).eq(7).should('contain', detectionAlert.userName);
   });
 });

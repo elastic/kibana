@@ -141,7 +141,7 @@ PUT kibana_sample_data_logs/_settings
 ----------------------------------
 
 . Open the main menu, and click *Discover*.
-. Set the index pattern to *kibana_sample_data_logs*.
+. Set the data view to *kibana_sample_data_logs*.
 . Open the <<set-time-filter, time filter>>, and set the time range to the last 30 days.
 . Scan through the list of *Available fields* until you find the `csa.GEOID` field. You can also search for the field by name.
 . Click image:images/reverse-geocoding-tutorial/add-icon.png[Add icon] to toggle the field into the document table.
@@ -162,10 +162,10 @@ Now that our web traffic contains CSA region identifiers, you'll visualize CSA r
 . Click *Choropleth*.
 . For *Boundaries source*: 
 .. Select *Points, lines, and polygons from Elasticsearch*.
-.. Set *Index pattern* to *csa*.
+.. Set *Data view* to *csa*.
 .. Set *Join field* to *GEOID*.
 . For *Statistics source*:
-.. Set *Index pattern* to *kibana_sample_data_logs*.
+.. Set *Data view* to *kibana_sample_data_logs*.
 .. Set *Join field* to *csa.GEOID.keyword*.
 . Click *Add layer*.
 . Scroll to *Layer Style* and Set *Label* to *Fixed*.

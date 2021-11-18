@@ -41,6 +41,5 @@ export renderApp = ({ element, history, onAppLeave }: AppMountParameters) => {
    });
    return renderApp({ element, history });
 }
-
 ```
 

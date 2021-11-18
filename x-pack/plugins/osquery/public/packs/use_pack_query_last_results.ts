@@ -7,21 +7,21 @@
 
 import { useQuery } from 'react-query';
 import moment from 'moment-timezone';
-import { IndexPattern } from '../../../../../src/plugins/data/common';
+import { DataView, SortDirection } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
 
 interface UsePackQueryLastResultsProps {
   actionId: string;
   agentIds?: string[];
   interval: number;
-  logsIndexPattern?: IndexPattern;
+  logsDataView?: DataView;
   skip?: boolean;
 }
 
 export const usePackQueryLastResults = ({
   actionId,
   interval,
-  logsIndexPattern,
+  logsDataView,
   skip = false,
 }: UsePackQueryLastResultsProps) => {
   const data = useKibana().services.data;
@@ -30,8 +30,9 @@ export const usePackQueryLastResults = ({
     ['scheduledQueryLastResults', { actionId }],
     async () => {
       const lastResultsSearchSource = await data.search.searchSource.create({
-        index: logsIndexPattern,
+        index: logsDataView,
         size: 1,
+        sort: { '@timestamp': SortDirection.desc },
         query: {
           // @ts-expect-error update types
           bool: {
@@ -51,7 +52,7 @@ export const usePackQueryLastResults = ({
 
       if (timestamp) {
         const aggsSearchSource = await data.search.searchSource.create({
-          index: logsIndexPattern,
+          index: logsDataView,
           size: 1,
           aggs: {
             unique_agents: { cardinality: { field: 'agent.id' } },
@@ -92,7 +93,7 @@ export const usePackQueryLastResults = ({
     },
     {
       keepPreviousData: true,
-      enabled: !!(!skip && actionId && interval && logsIndexPattern),
+      enabled: !!(!skip && actionId && interval && logsDataView),
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     }

@@ -12,7 +12,7 @@ import * as namedArg from './named_arg';
 import * as wildcard from './wildcard';
 import { NodeTypes } from './types';
 
-export { NodeTypes };
+export type { NodeTypes };
 export { nodeBuilder } from './node_builder';
 
 /**

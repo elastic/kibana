@@ -150,7 +150,6 @@ describe('Logs UI Observability Homepage Functions', () => {
               type: 'index_pattern',
               indexPatternId: 'test-index-pattern',
             },
-            fields: { timestamp: '@timestamp', tiebreaker: '_doc' },
           },
         },
       } as GetLogSourceConfigurationSuccessResponsePayload);

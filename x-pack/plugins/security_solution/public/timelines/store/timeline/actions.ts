@@ -6,8 +6,8 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+import type { Filter } from '@kbn/es-query';
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
   DataProviderType,
@@ -193,10 +193,11 @@ export const setExcludedRowRendererIds = actionCreator<{
   excludedRowRendererIds: RowRendererId[];
 }>('SET_TIMELINE_EXCLUDED_ROW_RENDERER_IDS');
 
-export const updateIndexNames = actionCreator<{
+export const updateDataView = actionCreator<{
   id: string;
+  dataViewId: string;
   indexNames: string[];
-}>('UPDATE_INDEXES_NAME');
+}>('UPDATE_DATA_VIEW');
 
 export const setActiveTabTimeline = actionCreator<{
   id: string;

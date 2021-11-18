@@ -33,8 +33,8 @@ import { getSafePaletteParams } from './utils';
 import type { CustomPaletteParams } from '../../common';
 import { layerTypes } from '../../common';
 
-const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
-  defaultMessage: 'Heatmap',
+const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
+  defaultMessage: 'Magnitude',
 });
 
 interface HeatmapVisualizationDeps {
@@ -105,8 +105,9 @@ export const getHeatmapVisualization = ({
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
         defaultMessage: 'Heatmap',
       }),
-      groupLabel: groupLabelForBar,
+      groupLabel: groupLabelForHeatmap,
       showExperimentalBadge: true,
+      sortPriority: 1,
     },
   ],
 

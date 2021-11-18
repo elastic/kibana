@@ -13,6 +13,7 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getEndpointListPath } from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
+import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '../../../../../../fleet/common';
 
 jest.mock('./policy_forms/components/policy_form_layout');
 
@@ -80,7 +81,7 @@ describe('Policy Details', () => {
         const [path] = args;
         if (typeof path === 'string') {
           // GET datasouce
-          if (path === '/api/fleet/package_policies/1') {
+          if (path === `${PACKAGE_POLICY_API_ROOT}/1`) {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
               item: policyPackagePolicy,
@@ -89,7 +90,7 @@ describe('Policy Details', () => {
           }
 
           // GET Agent status for agent policy
-          if (path === '/api/fleet/agent-status') {
+          if (path === `${AGENT_API_ROUTES.STATUS_PATTERN}`) {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
               results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },

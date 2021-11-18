@@ -144,6 +144,20 @@ export const useColumns = (
       sortable: true,
       truncateText: true,
       scope: 'row',
+      render: (transformId, item) => {
+        if (item.config?._meta?.managed !== true) return transformId;
+        return (
+          <>
+            {transformId}
+            &nbsp;
+            <EuiBadge color="hollow" data-test-subj="transformListRowIsManagedBadge">
+              {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
+                defaultMessage: 'Managed',
+              })}
+            </EuiBadge>
+          </>
+        );
+      },
     },
     {
       id: 'alertRule',

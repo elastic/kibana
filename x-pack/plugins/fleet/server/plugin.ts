@@ -20,7 +20,7 @@ import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
 
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
@@ -40,8 +40,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
@@ -82,10 +80,10 @@ import {
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
 import { RouterWrappers } from './routes/security';
-import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
+import { setupFleet } from './services/setup';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -131,8 +129,6 @@ const allSavedObjectTypes = [
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 ];
 
@@ -335,15 +331,24 @@ export class FleetPlugin
     });
     licenseService.start(this.licensing$);
 
-    const fleetServerSetup = startFleetServerSetup();
-
     this.telemetryEventsSender.start(plugins.telemetry, core);
 
+    const logger = appContextService.getLogger();
+
+    const fleetSetupPromise = (async () => {
+      try {
+        await setupFleet(
+          new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+          core.elasticsearch.client.asInternalUser
+        );
+      } catch (error) {
+        logger.warn('Fleet setup failed');
+        logger.warn(error);
+      }
+    })();
+
     return {
-      fleetSetupCompleted: () =>
-        new Promise<void>((resolve) => {
-          Promise.all([fleetServerSetup]).finally(() => resolve());
-        }),
+      fleetSetupCompleted: () => fleetSetupPromise,
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
         getInstallation,

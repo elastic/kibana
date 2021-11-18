@@ -24,20 +24,21 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('export_rules', () => {
     describe('exporting rules', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
-        await createRule(supertest, getSimpleRule());
+        await createRule(supertest, log, getSimpleRule());
 
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -49,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export a single rule with a rule_id', async () => {
-        await createRule(supertest, getSimpleRule());
+        await createRule(supertest, log, getSimpleRule());
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -65,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export a exported count with a single rule_id', async () => {
-        await createRule(supertest, getSimpleRule());
+        await createRule(supertest, log, getSimpleRule());
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -79,6 +80,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(bodySplitAndParsed).to.eql({
           exported_exception_list_count: 0,
           exported_exception_list_item_count: 0,
+          exported_count: 1,
           exported_rules_count: 1,
           missing_exception_list_item_count: 0,
           missing_exception_list_items: [],
@@ -90,8 +92,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should export exactly two rules given two rules', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
-        await createRule(supertest, getSimpleRule('rule-2'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-2'));
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -144,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [action1, action2],
         };
 
-        await createRule(supertest, rule1);
+        await createRule(supertest, log, rule1);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -189,8 +191,8 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [action],
         };
 
-        await createRule(supertest, rule1);
-        await createRule(supertest, rule2);
+        await createRule(supertest, log, rule1);
+        await createRule(supertest, log, rule2);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -232,7 +234,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200);
 
           // create a rule without actions
-          const rule = await createRule(supertest, getSimpleRule('rule-1'));
+          const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
 
           // attach the legacy notification
           await supertest
@@ -300,7 +302,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200);
 
           // create a rule without actions
-          const rule = await createRule(supertest, getSimpleRule('rule-1'));
+          const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
 
           // attach the legacy notification with actions
           await supertest
@@ -386,8 +388,8 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200);
 
           // create 2 rules without actions
-          const rule1 = await createRule(supertest, getSimpleRule('rule-1'));
-          const rule2 = await createRule(supertest, getSimpleRule('rule-2'));
+          const rule1 = await createRule(supertest, log, getSimpleRule('rule-1'));
+          const rule2 = await createRule(supertest, log, getSimpleRule('rule-2'));
 
           // attach the legacy notification with actions to the first rule
           await supertest

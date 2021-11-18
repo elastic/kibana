@@ -23,6 +23,7 @@ export * from './entry_match';
 export * from './entry_match_any';
 export * from './entry_match_wildcard';
 export * from './entry_nested';
+export * from './exception_export_details';
 export * from './exception_list';
 export * from './exception_list_item_type';
 export * from './filter';
