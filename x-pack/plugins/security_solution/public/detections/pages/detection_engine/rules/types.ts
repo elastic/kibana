@@ -15,9 +15,9 @@ import {
   SeverityMapping,
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Filter } from '@kbn/es-query';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { AlertAction } from '../../../../../../alerting/common';
-import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import { FieldValueThreshold } from '../../../components/rules/threshold_input';

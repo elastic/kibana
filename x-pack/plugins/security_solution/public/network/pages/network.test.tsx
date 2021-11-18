@@ -10,7 +10,7 @@ import React from 'react';
 import { Router } from 'react-router-dom';
 import { waitFor } from '@testing-library/react';
 import '../../common/mock/match_media';
-import { Filter } from '../../../../../../src/plugins/data/common/es_query';
+import type { Filter } from '@kbn/es-query';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import {
   TestProviders,

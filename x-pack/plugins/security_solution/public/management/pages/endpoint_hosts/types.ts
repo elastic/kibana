@@ -6,7 +6,7 @@
  */
 
 import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import {
   ActivityLog,
   HostInfo,

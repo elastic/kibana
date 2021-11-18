@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { Filter, Query } from '@kbn/es-query';
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { CONSTANTS } from '../../url_state/constants';
 import { SourcererUrlState } from '../../../store/sourcerer/model';
 import { TimelineUrl } from '../../../../timelines/store/timeline/model';
-import { Filter, Query } from '../../../../../../../../src/plugins/data/public';
 
 import { SecuritySolutionTabNavigationProps } from '../types';
 import { SiemRouteType } from '../../../utils/route/types';

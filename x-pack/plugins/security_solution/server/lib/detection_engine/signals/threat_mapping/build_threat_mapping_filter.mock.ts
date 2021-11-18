@@ -6,7 +6,8 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Filter } from 'src/plugins/data/common';
+
+import type { Filter } from '@kbn/es-query';
 
 import { ThreatListDoc, ThreatListItem } from './types';
 

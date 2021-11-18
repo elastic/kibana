@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '../../../../../../src/plugins/data/common';
+import { FilterStateStore } from '@kbn/es-query';
 
 import {
   TimelineId,

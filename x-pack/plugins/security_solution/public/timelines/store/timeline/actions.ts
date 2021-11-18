@@ -6,8 +6,8 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+import type { Filter } from '@kbn/es-query';
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
   DataProviderType,

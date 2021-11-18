@@ -13,13 +13,14 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
+import { Filter, buildEsQuery, Query } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { Filter, esQuery, Query } from '../../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { defaultLegendColors } from '../../../../common/components/matrix_histogram/utils';
@@ -214,12 +215,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         if (combinedQueries != null) {
           converted = parseCombinedQueries(combinedQueries);
         } else {
-          converted = esQuery.buildEsQuery(
+          converted = buildEsQuery(
             undefined,
             query != null ? [query] : [],
             filters?.filter((f) => f.meta.disabled === false) ?? [],
             {
-              ...esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              ...getEsQueryConfig(kibana.services.uiSettings),
               dateFormatTZ: undefined,
             }
           );

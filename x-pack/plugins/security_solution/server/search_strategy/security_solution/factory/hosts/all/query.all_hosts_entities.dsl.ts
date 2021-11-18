@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import type { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import {
   Direction,
   HostsRequestOptions,

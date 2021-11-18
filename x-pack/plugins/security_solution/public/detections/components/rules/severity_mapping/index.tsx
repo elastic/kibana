@@ -29,7 +29,7 @@ import {
   AutocompleteFieldMatchComponent,
 } from '@kbn/securitysolution-autocomplete';
 
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { SeverityOptionItem } from '../step_about_rule/data';

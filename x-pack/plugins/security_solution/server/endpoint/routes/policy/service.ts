@@ -14,7 +14,7 @@ import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/en
 import { INITIAL_POLICY_ID } from './index';
 import { Agent } from '../../../../../fleet/common/types/models';
 import { EndpointAppContext } from '../../types';
-import { ISearchRequestParams } from '../../../../../../../src/plugins/data/common';
+import type { ISearchRequestParams } from '../../../../../../../src/plugins/data/common';
 
 export const getESQueryPolicyResponseByAgentID = (
   agentID: string,

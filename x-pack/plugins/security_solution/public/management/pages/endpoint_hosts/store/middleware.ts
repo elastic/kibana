@@ -9,7 +9,7 @@ import { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
 
 import { CoreStart, HttpStart } from 'kibana/public';
-import { DataViewBase, Query } from '@kbn/es-query';
+import type { DataViewBase, Query } from '@kbn/es-query';
 import {
   ActivityLog,
   GetHostPolicyResponse,

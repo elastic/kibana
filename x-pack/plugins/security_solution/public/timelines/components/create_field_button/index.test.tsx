@@ -15,7 +15,7 @@ import {
 
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import { DataView } from '../../../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../../../src/plugins/data/common';
 import { TimelineId } from '../../../../common';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

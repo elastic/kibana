@@ -14,7 +14,8 @@ import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
 import { mockIndexPattern, TestProviders } from '../../../../common/mock';
 import { QueryBar } from '../../../../common/components/query_bar';
-import { esFilters, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { FilterStateStore } from '@kbn/es-query';
+import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
 
@@ -44,7 +45,7 @@ describe('Timeline QueryBar ', () => {
   test('check if we format the appropriate props to QueryBar', () => {
     const filters = [
       {
-        $state: { store: esFilters.FilterStateStore.APP_STATE },
+        $state: { store: FilterStateStore.APP_STATE },
         meta: {
           alias: null,
           controlledBy: TIMELINE_FILTER_DROP_AREA,
@@ -58,7 +59,7 @@ describe('Timeline QueryBar ', () => {
         query: { match: { 'event.category': { query: 'file', type: 'phrase' } } },
       },
       {
-        $state: { store: esFilters.FilterStateStore.APP_STATE },
+        $state: { store: FilterStateStore.APP_STATE },
         meta: {
           alias: null,
           controlledBy: undefined,

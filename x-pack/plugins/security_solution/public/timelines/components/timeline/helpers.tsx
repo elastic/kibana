@@ -8,7 +8,7 @@
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
-import { DataViewBase, EsQueryConfig, Filter, Query } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import {
   handleSkipFocus,
   elementOrChildrenHasFocus,

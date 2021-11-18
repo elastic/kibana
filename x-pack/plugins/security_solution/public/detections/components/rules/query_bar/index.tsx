@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { FilterManager, SavedQuery } from '../../../../../../../../src/plugins/data/public';
 
 import { BrowserFields } from '../../../../common/containers/source';

@@ -23,7 +23,7 @@ import { convertToBuildEsQuery } from '../../../../common/lib/keury';
 import { inputsSelectors } from '../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { OverviewEmpty } from '../../../../overview/components/overview_empty';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useNetworkDetails } from '../../../../network/containers/details';
 import { networkModel } from '../../../../network/store';
@@ -100,7 +100,7 @@ export const ExpandableNetworkDetails = ({
 
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(uiSettings),
+    config: getEsQueryConfig(uiSettings),
     indexPattern,
     queries: [query],
     filters,

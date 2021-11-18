@@ -6,7 +6,7 @@
  */
 
 import { FactoryQueryTypes } from '../..';
-import {
+import type {
   IEsSearchRequest,
   IEsSearchResponse,
 } from '../../../../../../../../src/plugins/data/common';

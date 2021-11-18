@@ -7,7 +7,7 @@
 
 import { head } from 'lodash/fp';
 import React from 'react';
-import { Filter } from '../../../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 
 import { ColumnHeaderOptions } from '../../../../../../common';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
