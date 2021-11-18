@@ -22,7 +22,7 @@ import {
 } from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 
-import { DOCS_PREFIX } from '../../routes';
+import { SECURITY_DOCS_URL } from '../../routes';
 import { AppSearchPageTemplate } from '../layout';
 
 import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING } from './constants';
@@ -30,7 +30,7 @@ import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
 import { User } from './user';
 
-const ROLES_DOCS_LINK = `${DOCS_PREFIX}/security-and-users.html`;
+const ROLES_DOCS_LINK = SECURITY_DOCS_URL;
 
 export const RoleMappings: React.FC = () => {
   const {

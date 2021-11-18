@@ -13,9 +13,11 @@ describe('DocLinks', () => {
       DOC_LINK_VERSION: '',
       ELASTIC_WEBSITE_URL: 'https://elastic.co/',
       links: {
+        appSearch: {
+          base: 'http://elastic.app.search',
+        },
         enterpriseSearch: {
           base: 'http://elastic.enterprise.search',
-          appSearchBase: 'http://elastic.app.search',
         },
         workplaceSearch: {
           base: 'http://elastic.workplace.search',

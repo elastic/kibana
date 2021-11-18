@@ -77,36 +77,58 @@ export class DocLinksService {
           auditdModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-auditd.html`,
           systemModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-system.html`,
         },
+        appSearch: {
+          apiRef: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/api-reference.html`,
+          apiClients: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/api-clients.html`,
+          apiKeys: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/authentication.html#authentication-api-keys`,
+          authentication: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/authentication.html`,
+          base: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}`,
+          crawlRules: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/crawl-web-content.html#crawl-web-content-manage-crawl-rules`,
+          curations: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/curations-guide.html`,
+          duplicateDocuments: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/web-crawler-reference.html#web-crawler-reference-content-deduplication`,
+          entryPoints: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/crawl-web-content.html#crawl-web-content-manage-entry-points`,
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/index.html`,
+          indexingDocuments: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/indexing-documents-guide.html`,
+          indexingDocumentsSchema: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/indexing-documents-guide.html#indexing-documents-guide-schema`,
+          logSettings: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/logs.html`,
+          metaEngines: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/meta-engines-guide.html`,
+          precisionTuning: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/precision-tuning.html`,
+          relevanceTuning: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/relevance-tuning-guide.html`,
+          resultSettings: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/result-settings-guide.html`,
+          searchUI: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/reference-ui-guide.html`,
+          security: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/security-and-users.html`,
+          webCrawler: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/web-crawler.html`,
+          webCrawlerEventLogs: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/view-web-crawler-events-logs.html`,
+        },
         enterpriseSearch: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}`,
-          appSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}`,
           licenseManagement: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}license-management.html`,
         },
         workplaceSearch: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}`,
-          box: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-box-connector.html`,
-          confluenceCloud: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-confluence-cloud-connector.html`,
-          confluenceServer: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-confluence-server-connector.html`,
-          customSources: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-custom-api-sources.html`,
-          customSourcePermissions: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-custom-api-sources.html#custom-api-source-document-level-access-control`,
-          documentPermissions: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-sources-document-permissions.html`,
-          dropbox: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-dropbox-connector.html`,
-          externalIdentities: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-external-identities-api.html`,
-          gitHub: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-github-connector.html`,
-          gmail: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-gmail-connector.html`,
-          googleDrive: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-google-drive-connector.html`,
-          indexingSchedule: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-customizing-indexing-rules.html#_indexing_schedule`,
-          jiraCloud: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-jira-cloud-connector.html`,
-          jiraServer: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-jira-server-connector.html`,
-          oneDrive: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-onedrive-connector.html`,
-          permissions: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-permissions.html#organizational-sources-private-sources`,
-          salesforce: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-salesforce-connector.html`,
-          security: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-security.html`,
-          serviceNow: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-servicenow-connector.html`,
-          sharePoint: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-sharepoint-online-connector.html`,
-          slack: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-slack-connector.html`,
-          synch: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-customizing-indexing-rules.html`,
-          zendesk: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}workplace-search-zendesk-connector.html`,
+          box: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-box-connector.html`,
+          confluenceCloud: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-confluence-cloud-connector.html`,
+          confluenceServer: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-confluence-server-connector.html`,
+          customSources: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-custom-api-sources.html`,
+          customSourcePermissions: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-custom-api-sources.html#custom-api-source-document-level-access-control`,
+          documentPermissions: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-sources-document-permissions.html`,
+          dropbox: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-dropbox-connector.html`,
+          externalIdentities: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-external-identities-api.html`,
+          gitHub: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-github-connector.html`,
+          gmail: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-gmail-connector.html`,
+          googleDrive: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-google-drive-connector.html`,
+          indexingSchedule: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-customizing-indexing-rules.html#_indexing_schedule`,
+          jiraCloud: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-jira-cloud-connector.html`,
+          jiraServer: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-jira-server-connector.html`,
+          oneDrive: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-onedrive-connector.html`,
+          permissions: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-permissions.html#organizational-sources-private-sources`,
+          salesforce: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-salesforce-connector.html`,
+          security: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-security.html`,
+          serviceNow: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-servicenow-connector.html`,
+          sharePoint: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-sharepoint-online-connector.html`,
+          slack: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-slack-connector.html`,
+          synch: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-customizing-indexing-rules.html`,
+          zendesk: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/workplace-search-zendesk-connector.html`,
         },
         metricbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
@@ -606,10 +628,32 @@ export interface DocLinksStart {
       readonly install: string;
       readonly start: string;
     };
+    readonly appSearch: {
+      readonly apiRef: string;
+      readonly apiClients: string;
+      readonly apiKeys: string;
+      readonly authentication: string;
+      readonly base: string;
+      readonly crawlRules: string;
+      readonly curations: string;
+      readonly duplicateDocuments: string;
+      readonly entryPoints: string;
+      readonly guide: string;
+      readonly indexingDocuments: string;
+      readonly indexingDocumentsSchema: string;
+      readonly logSettings: string;
+      readonly metaEngines: string;
+      readonly precisionTuning: string;
+      readonly relevanceTuning: string;
+      readonly resultSettings: string;
+      readonly searchUI: string;
+      readonly security: string;
+      readonly webCrawler: string;
+      readonly webCrawlerEventLogs: string;
+    };
     readonly enterpriseSearch: {
       readonly base: string;
       readonly licenseManagement: string;
-      readonly appSearchBase: string;
     };
     readonly workplaceSearch: {
       readonly base: string;
