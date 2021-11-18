@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiTabs,
   EuiTab,
+  EuiAccordion,
 } from '@elastic/eui';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
@@ -127,10 +128,10 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
               {selectedProcess.events.map((event) => {
                 const flattenedSelectedProcess = flattenJSON(event);
                 return (
-                  <>
-                    <EuiTitle size="xs">
-                      <span>{flattenedSelectedProcess['event.action']}</span>
-                    </EuiTitle>
+                  <EuiAccordion
+                    id={flattenedSelectedProcess['event.action']}
+                    buttonContent={flattenedSelectedProcess['event.action']}
+                  >
                     <EuiDescriptionList
                       type="column"
                       compressed
@@ -140,7 +141,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
                       }))}
                     />
                     <EuiSpacer />
-                  </>
+                  </EuiAccordion>
                 );
               })}
               <EuiSpacer size="xxl" />
