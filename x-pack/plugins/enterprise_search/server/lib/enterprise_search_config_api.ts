@@ -68,6 +68,8 @@ export const callEnterpriseSearchConfigAPI = async ({
     warnMismatchedVersions(data?.version?.number, log);
 
     return {
+      enterpriseSearchVersion: data?.version?.number,
+      kibanaVersion: kibanaPackageJson.version,
       access: {
         hasAppSearchAccess: !!data?.current_user?.access?.app_search,
         hasWorkplaceSearchAccess: !!data?.current_user?.access?.workplace_search,

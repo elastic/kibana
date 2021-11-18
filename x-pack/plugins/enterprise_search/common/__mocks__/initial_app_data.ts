@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const DEFAULT_INITIAL_APP_DATA = {
+import { InitialAppData } from '../types';
+
+export const DEFAULT_INITIAL_APP_DATA: InitialAppData = {
   readOnlyMode: false,
   searchOAuth: {
     clientId: 'someUID',
