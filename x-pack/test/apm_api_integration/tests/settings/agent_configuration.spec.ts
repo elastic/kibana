@@ -10,7 +10,7 @@ import { inspect } from 'util';
 import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
 import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_configuration/configuration_types';
-import { AgentConfigSearchParams } from '../../../../plugins/apm/server/routes/settings/agent_configuration';
+import { AgentConfigSearchParams } from '../../../../plugins/apm/server/routes/settings/agent_configuration/route';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
