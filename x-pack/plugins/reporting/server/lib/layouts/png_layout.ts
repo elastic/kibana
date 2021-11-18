@@ -15,7 +15,7 @@ import { Layout } from './layout';
 // FIXME: should be based on config
 const ZOOM: number = 2;
 
-export class PngLayout extends Layout implements LayoutInstance {
+export class PngLayout extends Layout implements LayoutInstance<PngLayout> {
   public readonly selectors: LayoutSelectorDictionary;
   public readonly groupCount = 1;
   public readonly height: number;

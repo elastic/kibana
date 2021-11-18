@@ -9,7 +9,8 @@ import apm from 'elastic-apm-node';
 import { ScreenshotClip } from 'puppeteer';
 import * as Rx from 'rxjs';
 import { catchError, mergeMap, switchMap, switchMapTo, timeoutWith } from 'rxjs/operators';
-import { ContentStream, startTrace } from '..';
+import { Writable } from 'stream';
+import { startTrace } from '..';
 import { numberToDuration } from '../../../common/schema_utils';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
@@ -171,7 +172,7 @@ export class ScreenshotObservableHandler {
       );
   }
 
-  public streamScreenshots(stream: ContentStream) {
+  public streamScreenshots(stream: Writable) {
     return (withRenderComplete: Rx.Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
         mergeMap(async (page: PageSetupResults): Promise<ScreenshotResults> => {
