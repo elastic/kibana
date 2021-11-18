@@ -16,7 +16,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('lens app', () => {
     before(async () => {
       log.debug('Starting lens before method');
-      await browser.setWindowSize(1280, 800);
+      await browser.setWindowSize(1280, 1200);
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/lens/basic');
       await kibanaServer.importExport.load(
