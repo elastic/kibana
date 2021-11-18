@@ -3,7 +3,7 @@
 == Rule types
 
 A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the Elastic Stack and rules registered by one of the {kib} apps.
-You can create most rules types in <<create-and-manage-rules,Stack Management > Rules and Connectors>>. For information on creating security rules, refer to Create a detection rule.
+You can create most rules types in <<create-and-manage-rules,Stack Management > Rules and Connectors>>. For information on creating security rules, refer to {security-guide}/rules-ui-create.html[Create a detection rule].
 
 [NOTE]
 ==============================================
