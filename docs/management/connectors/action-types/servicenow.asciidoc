@@ -10,7 +10,7 @@ The {sn} ITSM connector uses the https://docs.servicenow.com/bundle/orlando-appl
 [float]
 [[servicenow-itsm-connector-prerequisites]]
 ==== Prerequisites
-After upgrading to 7.16, you must complete the following within your {sn} instance before creating a new {sn} ITSM connector or <<servicenow-itsm-connector-update, updating an existing one>>:
+After upgrading from {stack} version \<=7.15 to >= 7.16, you must complete the following within your {sn} instance before creating a new {sn} ITSM connector or <<servicenow-itsm-connector-update, updating an existing one>>:
 
 * Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/7148dbc91bf1f450ced060a7234bcb88[Elastic for ITSM] from the {sn} Store.
 * Create a {sn} integration user and assign it the appropriate roles.
@@ -18,9 +18,9 @@ After upgrading to 7.16, you must complete the following within your {sn} instan
 
 *Create a {sn} integration user*
 
-To ensure authenticated communication between Elastic and {sn}, create a {sn} integration user and assign it the appropriate roles. 
+To ensure authenticated communication between Elastic and {sn}, create a {sn} integration user and assign it the appropriate roles.
 
-. Go to *System Security -> Users*.
+. In your {sn} instance, go to *System Security -> Users*.
 . Click *New*.
 . Complete the form.
 . Assign the integration user the following roles: 
@@ -34,19 +34,19 @@ To ensure authenticated communication between Elastic and {sn}, create a {sn} in
 
 A CORS rule is required for communication between Elastic and {sn}. To create a CORS rule:
 
-. Go to *System Web Services -> CORS Rules*.
+. In your {sn} instance, go to *System Web Services -> CORS Rules*.
 . Click *New*.
 . Configure the rule settings to use the Elastic ITSM API and the Kibana URL:
 * *REST API*: Choose `Elastic ITSM API [x_elas2_inc_int/elastic_api]`.
 * *Domain*: Enter the Kibana URL.
-. Go to the *HTTP methods* tab and select *GET*. This chooses the GET HTTP method.
+. Go to the *HTTP methods* tab and select *GET*.
 . Click *Submit* to create the rule.
 
 [float]
 [[servicenow-itsm-connector-update]]
 ==== Update a deprecated {sn} ITSM connector
 
-{sn} ITSM connectors created in {stack} version <=7.15 are marked as deprecated after you upgrade to >=7.16. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
+{sn} ITSM connectors created in {stack} version \<=7.15 are marked as deprecated after you upgrade to >=7.16. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
@@ -103,7 +103,7 @@ Config defines information for the connector type.
 `apiUrl`:: An address that corresponds to *URL*.
 `usesTableApi`:: A boolean that indicates if the connector uses the Table API or the Import Set API.
 
-Note: If `usesTableApi` is set to false, the Elastic application should be installed in {sn}.
+NOTE: If `usesTableApi` is set to false, the Elastic application should be installed in {sn}.
 
 Secrets defines sensitive information for the connector type.
 

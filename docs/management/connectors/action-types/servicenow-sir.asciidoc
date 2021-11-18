@@ -10,17 +10,17 @@ The {sn} SecOps connector uses the https://docs.servicenow.com/bundle/orlando-ap
 [float]
 [[servicenow-sir-connector-prerequisites]]
 ==== Prerequisites
-After upgrading to 7.16, you must complete the following within your {sn} instance before creating a new {sn} SecOps connector or <<servicenow-sir-connector-update, updating an existing one>>:
+After upgrading from {stack} version \<=7.15 to >= 7.16, you must complete the following within your {sn} instance before creating a new {sn} SecOps connector or <<servicenow-sir-connector-update, updating an existing one>>:
 
 * Install [Elastic for Security Operations (SecOps)] https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f from the {sn} Store.
 * Create a {sn} integration user and assign it the appropriate roles.
-* Create a Cross-Origin Resource Sharing () rule in {sn}.
+* Create a Cross-Origin Resource Sharing (CORS) rule in {sn}.
 
 *Create a {sn} integration user*
 
 To ensure authenticated communication between Elastic and {sn}, create a {sn} integration user and assign it the appropriate roles. 
 
-. Go to *System Security -> Users*.
+. In your {sn} instance, go to *System Security -> Users*.
 . Click *New*.
 . Complete the form.
 . Assign the integration user the following roles: 
@@ -35,12 +35,12 @@ To ensure authenticated communication between Elastic and {sn}, create a {sn} in
 
 A  rule is required for communication between Elastic and {sn}. To create a CORS rule:
 
-. Go to *System Web Services -> CORS Rules*.
+. In your {sn} instance, go to *System Web Services -> CORS Rules*.
 . Click *New*.
 . Configure the rule settings to use the Elastic SIR API and the Kibana URL:
 * *REST API*: Choose `Elastic SIR API [x_elas2_sir_int/elastic_api]`.
 * *Domain*: Enter the Kibana URL.
-. Go to the *HTTP methods* tab and select *GET*. This chooses the GET HTTP method.
+. Go to the *HTTP methods* tab and select *GET*. 
 . Click *Submit* to create the rule.
 
 [float]
@@ -104,7 +104,7 @@ Config defines information for the connector type.
 `apiUrl`:: An address that corresponds to *URL*.
 `usesTableApi`:: A boolean that indicates if the connector uses the Table API or the Import Set API.
 
-Note: If `usesTableApi` is set to false the Elastic application should be installed in {sn}.
+NOTE: If `usesTableApi` is set to false the Elastic application should be installed in {sn}.
 
 Secrets defines sensitive information for the connector type.
 
