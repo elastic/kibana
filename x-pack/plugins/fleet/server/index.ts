@@ -17,7 +17,6 @@ import {
 
 import { FleetPlugin } from './plugin';
 
-export { default as apm } from 'elastic-apm-node';
 export type {
   AgentService,
   ESIndexPatternService,

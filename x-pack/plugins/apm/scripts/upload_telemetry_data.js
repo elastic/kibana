@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-const { optimizeTsConfig } = require('./optimize-tsconfig/optimize');
+// compile typescript on the fly
+// eslint-disable-next-line import/no-extraneous-dependencies
+require('@kbn/optimizer').registerNodeAutoTranspilation();
 
-optimizeTsConfig().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+require('./upload_telemetry_data/index.ts');

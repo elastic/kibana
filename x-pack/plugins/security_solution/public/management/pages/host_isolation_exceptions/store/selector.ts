@@ -93,9 +93,6 @@ export const showDeleteModal: HostIsolationExceptionsSelector<boolean> = createS
   }
 );
 
-export const getItemToDelete: HostIsolationExceptionsSelector<StoreState['deletion']['item']> =
-  createSelector(getDeletionState, ({ item }) => item);
-
 export const isDeletionInProgress: HostIsolationExceptionsSelector<boolean> = createSelector(
   getDeletionState,
   ({ status }) => {

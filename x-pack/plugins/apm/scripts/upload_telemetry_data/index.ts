@@ -17,12 +17,12 @@ import { argv } from 'yargs';
 import { Logger } from 'kibana/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
-import { downloadTelemetryTemplate } from '../shared/download-telemetry-template';
+import { downloadTelemetryTemplate } from '../shared/download_telemetry_template';
 import { mergeApmTelemetryMapping } from '../../common/apm_telemetry';
-import { generateSampleDocuments } from './generate-sample-documents';
-import { readKibanaConfig } from '../shared/read-kibana-config';
-import { getHttpAuth } from '../shared/get-http-auth';
-import { createOrUpdateIndex } from '../shared/create-or-update-index';
+import { generateSampleDocuments } from './generate_sample_documents';
+import { readKibanaConfig } from '../shared/read_kibana_config';
+import { getHttpAuth } from '../shared/get_http_auth';
+import { createOrUpdateIndex } from '../shared/create_or_update_index';
 import { getEsClient } from '../shared/get_es_client';
 
 async function uploadData() {

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-const { unoptimizeTsConfig } = require('./optimize-tsconfig/unoptimize');
+import { i18n } from '@kbn/i18n';
 
-unoptimizeTsConfig().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+export const CREATE_FIELD = i18n.translate(
+  'xpack.securitySolution.fieldBrowser.createFieldButton',
+  {
+    defaultMessage: 'Create field',
+  }
+);
