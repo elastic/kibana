@@ -40,6 +40,7 @@ const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
+  useLegacyTimeAxis: false,
 });
 
 describe('xy_visualization', () => {
@@ -781,13 +782,12 @@ describe('xy_visualization', () => {
         const state = getStateWithBaseReferenceLine();
         state.layers[0].accessors = [];
         state.layers[1].yConfig = undefined;
-
         expect(
           xyVisualization.getConfiguration({
             state: getStateWithBaseReferenceLine(),
             frame,
             layerId: 'referenceLine',
-          }).supportStaticValue
+          }).groups[0].supportStaticValue
         ).toBeTruthy();
       });
 

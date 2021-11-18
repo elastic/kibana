@@ -55,7 +55,7 @@ export interface ProcessSelf extends ProcessFields {
 }
 
 export interface ProcessEvent {
-  '@timestamp': string;
+  '@timestamp': Date;
   event: {
     kind: EventKind;
     category: string;
@@ -80,8 +80,29 @@ export interface ProcessEvent {
     };
   };
   process: ProcessSelf;
-
-  // TODO: alerts? output? file_descriptors?
+  kibana?: {
+    alert: {
+      uuid: string;
+      reason: string;
+      workflow_status: string;
+      status: string;
+      original_time: Date;
+      original_event: {
+        action: string;
+      },
+      rule: {
+        category: string;
+        consumer: string;
+        description: string;
+        enabled: boolean;
+        name: string;
+        query: string;
+        risk_score: number;
+        severity: string;
+        uuid: string;
+      }
+    }
+  }
 }
 
 export interface Process {
@@ -93,6 +114,7 @@ export interface Process {
   searchMatched: string | null; // either false, or set to searchQuery
   hasOutput(): boolean;
   hasAlerts(): boolean;
+  getAlerts(): ProcessEvent[];
   hasExec(): boolean;
   getOutput(): string;
   getDetails(): ProcessEvent;
@@ -124,6 +146,10 @@ class ProcessImpl implements Process {
   hasAlerts() {
     return !!this.events.find(({ event }) => event.kind === EventKind.signal);
   }
+  
+  getAlerts() {
+    return this.events.filter(({ event }) => event.kind === EventKind.signal);
+  }
 
   hasExec() {
     return !!this.events.find(({ event }) => event.action === EventAction.exec);
@@ -138,6 +164,10 @@ class ProcessImpl implements Process {
       [EventAction.exec, EventAction.fork].includes(event.action)
     );
 
+    if (execsForks.length === 0) {
+      debugger;
+    }
+    
     return execsForks[execsForks.length - 1];
   }
 
@@ -175,8 +205,19 @@ export const useProcessTree = ({
   searchQuery,
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
+  // we add a fake session leader event, sourced from wide event data.
+  // this is because we might not always have a session leader event
+  // especially if we are paging in reverse from deep within a large session
+  const fakeLeaderEvent = forward.find(event => event.event.kind === EventKind.event);
+  const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
+  
+  if (fakeLeaderEvent) {
+    fakeLeaderEvent.process = { ...fakeLeaderEvent.process, ...fakeLeaderEvent.process.entry};
+    sessionLeaderProcess.events.push(fakeLeaderEvent);
+  }
+
   const initializedProcessMap: ProcessMap = {
-    [sessionEntityId]: new ProcessImpl(sessionEntityId),
+    [sessionEntityId]: sessionLeaderProcess, 
   };
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);
@@ -197,13 +238,6 @@ export const useProcessTree = ({
 
       process.events.push(event);
     });
-
-    if (processMap[sessionEntityId].events.length === 0) {
-      processMap[sessionEntityId].events.push({
-        ...events[0],
-        ...events[0].process.entry,
-      });
-    }
   };
 
   const buildProcessTree = (events: ProcessEvent[], backwardDirection: boolean = false) => {

@@ -13,8 +13,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('machine learning', function () {
     describe('', function () {
-      this.tags('ciGroup3');
-
       before(async () => {
         await ml.securityCommon.createMlRoles();
         await ml.securityCommon.createMlUsers();
@@ -47,12 +45,19 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         await ml.testResources.resetKibanaTimeZone();
       });
 
-      loadTestFile(require.resolve('./permissions'));
-      loadTestFile(require.resolve('./pages'));
-      loadTestFile(require.resolve('./anomaly_detection'));
-      loadTestFile(require.resolve('./data_visualizer'));
-      loadTestFile(require.resolve('./data_frame_analytics'));
-      loadTestFile(require.resolve('./model_management'));
+      describe('', function () {
+        this.tags('ciGroup15');
+        loadTestFile(require.resolve('./permissions'));
+        loadTestFile(require.resolve('./pages'));
+        loadTestFile(require.resolve('./data_visualizer'));
+        loadTestFile(require.resolve('./data_frame_analytics'));
+        loadTestFile(require.resolve('./model_management'));
+      });
+
+      describe('', function () {
+        this.tags('ciGroup26');
+        loadTestFile(require.resolve('./anomaly_detection'));
+      });
     });
 
     describe('', function () {

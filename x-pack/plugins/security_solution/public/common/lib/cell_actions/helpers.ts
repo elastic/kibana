@@ -35,6 +35,7 @@ export const COLUMNS_WITH_LINKS = [
   {
     columnId: SIGNAL_RULE_NAME_FIELD_NAME,
     label: i18n.VIEW_RULE_DETAILS,
+    linkField: 'signal.rule.id',
   },
   ...PORT_NAMES.map((p) => ({
     columnId: p,
@@ -59,7 +60,8 @@ export const COLUMNS_WITH_LINKS = [
 ];
 
 export const getLink = (cId?: string, fieldType?: string, linkField?: string) =>
-  cId &&
   COLUMNS_WITH_LINKS.find(
-    (c) => c.columnId === cId || (c.fieldType && fieldType === c.fieldType && linkField != null)
+    (c) =>
+      (cId && c.columnId === cId) ||
+      (c.fieldType && fieldType === c.fieldType && (linkField != null || c.linkField !== undefined))
   );
