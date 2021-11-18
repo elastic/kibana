@@ -41,7 +41,7 @@ export function getSwitchIndexPatternAppState(
     // set default timefield sorting when there was no new sorting
     nextSort = [[nextIndexPattern.timeFieldName, sortDirection]];
   } else if (
-    nextIndexPattern.timeFieldName &&
+    nextIndexPattern.isTimeBased() &&
     nextSort.length !== 0 &&
     nextSort[0][0] === currentIndexPattern.timeFieldName
   ) {
