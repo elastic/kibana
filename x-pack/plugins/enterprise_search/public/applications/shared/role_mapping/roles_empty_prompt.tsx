@@ -41,7 +41,7 @@ export const RolesEmptyPrompt: React.FC<Props> = ({ onEnable, docsLink, productN
   );
 
   useEffect(() => {
-    security.authc
+    security?.authc
       .getCurrentUser()
       .then(setCurrentUser)
       .catch(() => {
