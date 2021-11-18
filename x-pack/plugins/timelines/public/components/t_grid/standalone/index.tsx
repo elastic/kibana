@@ -320,7 +320,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         indexNames,
         itemsPerPage: itemsPerPageStore,
         itemsPerPageOptions,
-        showCheckboxes: true,
+        showCheckboxes: leadingControlColumns[0].showCheckboxes ?? true,
       })
     );
     dispatch(
