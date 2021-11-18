@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { ExpressionsServiceStart } from '../../../../../src/plugins/expressions/public';
-
-export type CanvasExpressionsService = ExpressionsServiceStart;
+export { CanvasExpressionsService } from './kibana/expressions';

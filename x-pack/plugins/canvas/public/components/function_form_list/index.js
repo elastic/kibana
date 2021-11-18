@@ -8,7 +8,7 @@
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
 import { toExpression } from '@kbn/interpreter/common';
-import { interpretAst } from '../../lib/run_interpreter';
+import { pluginServices } from '../../services';
 import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';
 import { FunctionFormList as Component } from './function_form_list';
 
@@ -48,7 +48,8 @@ const functionFormItems = withProps((props) => {
           args: argType.arguments,
           argType: argType.function,
           argTypeDef: argTypeDef,
-          argResolver: (argAst) => interpretAst(argAst, prevContext),
+          argResolver: (argAst) =>
+            pluginServices.getServices().expressions.interpretAst(argAst, prevContext),
           contextExpression: getExpression(prevContext),
           expressionIndex: i, // preserve the index in the AST
           nextArgType: nextArg && nextArg.function,
