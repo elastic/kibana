@@ -46,7 +46,7 @@ const columns: Array<EuiBasicTableColumn<CrawlEvent>> = [
     name: i18n.translate(
       'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.crawlType',
       {
-        defaultMessage: 'Crawl Type',
+        defaultMessage: 'Crawl type',
       }
     ),
     render: (_, event: CrawlEvent) => <CrawlEventTypeBadge event={event} />,

@@ -65,7 +65,7 @@ describe('CrawlRequestsTable', () => {
     });
 
     it('renders a type column', () => {
-      expect(tableContent).toContain('Crawl Type');
+      expect(tableContent).toContain('Crawl type');
       expect(tableContent).toContain('Full');
     });
 
