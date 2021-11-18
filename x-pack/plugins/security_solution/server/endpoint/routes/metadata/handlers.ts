@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/elasticsearch';
-import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import { TypeOf } from '@kbn/config-schema';
 import {
   IKibanaResponse,
@@ -26,12 +23,8 @@ import {
 } from '../../../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
-import {
-  getESQueryHostMetadataByID,
-  getPagingProperties,
-  kibanaRequestToMetadataListESQuery,
-} from './query_builders';
-import { Agent, PackagePolicy } from '../../../../../fleet/common/types/models';
+import { getPagingProperties, kibanaRequestToMetadataListESQuery } from './query_builders';
+import { PackagePolicy } from '../../../../../fleet/common/types/models';
 import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
@@ -39,11 +32,8 @@ import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { getAllEndpointPackagePolicies } from './support/endpoint_package_policies';
 import { findAgentIdsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { catchAndWrapError, fleetAgentStatusToEndpointHostStatus } from '../../utils';
-import {
-  queryResponseToHostListResult,
-  queryResponseToHostResult,
-} from './support/query_strategies';
+import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
+import { queryResponseToHostListResult } from './support/query_strategies';
 import { EndpointError, NotFoundError } from '../../errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
 
