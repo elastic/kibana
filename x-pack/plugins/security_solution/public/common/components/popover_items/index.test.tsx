@@ -31,26 +31,41 @@ const renderHelper = (props: Partial<PopoverItemsProps<unknown>> = {}) =>
   );
 
 describe('Component PopoverItems', () => {
-  it('shoud render only 2 first items as configured and popup button', () => {
+  it('shoud render only 2 first items in display and rest in popup', async () => {
     renderHelper({ numberOfItemsToDisplay: 2 });
     mockTags.slice(0, 2).forEach((tag) => {
       expect(screen.getByText(tag)).toBeInTheDocument();
     });
+
+    // items not rendered yet
     mockTags.slice(2).forEach((tag) => {
       expect(screen.queryByText(tag)).toBeNull();
     });
-    expect(screen.getByRole('button', { name: 'show mocks' })).toBeInTheDocument();
+
+    screen.getByRole('button', { name: 'show mocks' }).click();
+    expect(await screen.findByTestId('tags-display-popover-wrapper')).toBeInTheDocument();
+
+    // items rendered in popup
+    mockTags.slice(2).forEach((tag) => {
+      expect(screen.getByText(tag)).toBeInTheDocument();
+    });
   });
 
-  it('shoud render popover button without displayed items but with popup button', () => {
+  it('shoud render popover button and items in popover without popover title', () => {
     renderHelper();
     mockTags.forEach((tag) => {
       expect(screen.queryByText(tag)).toBeNull();
     });
-    expect(screen.getByRole('button', { name: 'show mocks' })).toBeInTheDocument();
+    screen.getByRole('button', { name: 'show mocks' }).click();
+
+    mockTags.forEach((tag) => {
+      expect(screen.queryByText(tag)).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('tags-display-popover-title')).toBeNull();
   });
 
-  it('shoud open popup on button click and render all tags with popover title', async () => {
+  it('shoud render popover title', async () => {
     renderHelper({ popoverTitle: 'Tags popover title' });
 
     screen.getByRole('button', { name: 'show mocks' }).click();
@@ -59,21 +74,5 @@ describe('Component PopoverItems', () => {
     expect(screen.getByTestId('tags-display-popover-title')).toHaveTextContent(
       'Tags popover title'
     );
-
-    mockTags.forEach((tag) => {
-      expect(screen.queryByText(tag)).toBeInTheDocument();
-    });
-  });
-
-  it('shoud open popup on button click and render all tags without popover title', async () => {
-    renderHelper();
-    screen.getByRole('button', { name: 'show mocks' }).click();
-
-    expect(await screen.findByTestId('tags-display-popover-wrapper')).toBeInTheDocument();
-    expect(screen.queryByTestId('tags-display-popover-title')).toBeNull();
-
-    mockTags.forEach((tag) => {
-      expect(screen.queryByText(tag)).toBeInTheDocument();
-    });
   });
 });

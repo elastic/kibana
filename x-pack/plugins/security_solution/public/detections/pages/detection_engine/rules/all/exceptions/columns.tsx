@@ -68,18 +68,20 @@ export const getAllExceptionListsColumns = (
         const ruleHref = formatUrl(getRuleDetailsUrl(id));
         return (
           <EuiToolTip content={name} anchorClassName="eui-textTruncate">
-            <SpacedLinkAnchor
-              key={id}
-              data-test-subj="rule-name"
-              onClick={(ev: { preventDefault: () => void }) => {
-                ev.preventDefault();
-                navigateToUrl(ruleHref);
-              }}
-              href={ruleHref}
-            >
-              {name}
-              {index !== items.length - 1 && ','}
-            </SpacedLinkAnchor>
+            <>
+              <SpacedLinkAnchor
+                key={id}
+                data-test-subj="rule-name"
+                onClick={(ev: { preventDefault: () => void }) => {
+                  ev.preventDefault();
+                  navigateToUrl(ruleHref);
+                }}
+                href={ruleHref}
+              >
+                {name}
+                {index !== items.length - 1 && ','}
+              </SpacedLinkAnchor>
+            </>
           </EuiToolTip>
         );
       };

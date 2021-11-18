@@ -103,7 +103,7 @@ const PopoverItemsComponent = <T extends unknown>({
           </EuiPopoverTitle>
         ) : null}
         <PopoverWrapper data-test-subj={`${dataTestPrefix}-display-popover-wrapper`}>
-          <OverflowList items={items} />
+          <OverflowList items={items.slice(numberOfItemsToDisplay)} />
         </PopoverWrapper>
       </EuiPopover>
     </PopoverItemsWrapper>
