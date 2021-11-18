@@ -15,7 +15,7 @@ import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-import { DOCS_PREFIX } from '../../routes';
+import { NATIVE_AUTH_DOCS_URL, STANDARD_AUTH_DOCS_URL } from '../../routes';
 
 import GettingStarted from './assets/getting_started.png';
 
@@ -23,8 +23,8 @@ export const SetupGuide: React.FC = () => (
   <SetupGuideLayout
     productName={APP_SEARCH_PLUGIN.NAME}
     productEuiIcon="logoAppSearch"
-    standardAuthLink={`${DOCS_PREFIX}/security-and-users.html#app-search-self-managed-security-and-user-management-standard`}
-    elasticsearchNativeAuthLink={`${DOCS_PREFIX}/security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm`}
+    standardAuthLink={STANDARD_AUTH_DOCS_URL}
+    elasticsearchNativeAuthLink={NATIVE_AUTH_DOCS_URL}
   >
     <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
     <SendTelemetry action="viewed" metric="setup_guide" />

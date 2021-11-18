@@ -8,8 +8,6 @@
 import { DocLinksStart } from 'kibana/public';
 
 class DocLinks {
-  public enterpriseSearchBase: string;
-  public appSearchBase: string;
   public appSearchApis: string;
   public appSearchApiClients: string;
   public appSearchApiKeys: string;
@@ -23,16 +21,19 @@ class DocLinks {
   public appSearchIndexingDocsSchema: string;
   public appSearchLogSettings: string;
   public appSearchMetaEngines: string;
+  public appSearchNativeAuth: string;
   public appSearchPrecision: string;
   public appSearchRelevance: string;
   public appSearchResultSettings: string;
   public appSearchSearchUI: string;
   public appSearchSecurity: string;
+  public appSearchStandardAuth: string;
+  public appSearchSynonyms: string;
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
-  public cloudBase: string;
+  public cloudIndexManagement: string;
+  public enterpriseSearchConfig: string;
   public licenseManagement: string;
-  public workplaceSearchBase: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
   public workplaceSearchConfluenceServer: string;
@@ -41,12 +42,14 @@ class DocLinks {
   public workplaceSearchDocumentPermissions: string;
   public workplaceSearchDropbox: string;
   public workplaceSearchExternalIdentities: string;
+  public workplaceSearchGettingStarted: string;
   public workplaceSearchGitHub: string;
   public workplaceSearchGmail: string;
   public workplaceSearchGoogleDrive: string;
   public workplaceSearchIndexingSchedule: string;
   public workplaceSearchJiraCloud: string;
   public workplaceSearchJiraServer: string;
+  public workplaceSearchNativeAuth: string;
   public workplaceSearchOneDrive: string;
   public workplaceSearchPermissions: string;
   public workplaceSearchSalesforce: string;
@@ -54,12 +57,11 @@ class DocLinks {
   public workplaceSearchServiceNow: string;
   public workplaceSearchSharePoint: string;
   public workplaceSearchSlack: string;
+  public workplaceSearchStandardAuth: string;
   public workplaceSearchSynch: string;
   public workplaceSearchZendesk: string;
 
   constructor() {
-    this.enterpriseSearchBase = '';
-    this.appSearchBase = '';
     this.appSearchApis = '';
     this.appSearchApiClients = '';
     this.appSearchApiKeys = '';
@@ -73,16 +75,19 @@ class DocLinks {
     this.appSearchIndexingDocsSchema = '';
     this.appSearchLogSettings = '';
     this.appSearchMetaEngines = '';
+    this.appSearchNativeAuth = '';
     this.appSearchPrecision = '';
     this.appSearchRelevance = '';
     this.appSearchResultSettings = '';
     this.appSearchSearchUI = '';
     this.appSearchSecurity = '';
+    this.appSearchStandardAuth = '';
+    this.appSearchSynonyms = '';
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
-    this.cloudBase = '';
+    this.cloudIndexManagement = '';
+    this.enterpriseSearchConfig = '';
     this.licenseManagement = '';
-    this.workplaceSearchBase = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
     this.workplaceSearchConfluenceServer = '';
@@ -91,12 +96,14 @@ class DocLinks {
     this.workplaceSearchDocumentPermissions = '';
     this.workplaceSearchDropbox = '';
     this.workplaceSearchExternalIdentities = '';
+    this.workplaceSearchGettingStarted = '';
     this.workplaceSearchGitHub = '';
     this.workplaceSearchGmail = '';
     this.workplaceSearchGoogleDrive = '';
     this.workplaceSearchIndexingSchedule = '';
     this.workplaceSearchJiraCloud = '';
     this.workplaceSearchJiraServer = '';
+    this.workplaceSearchNativeAuth = '';
     this.workplaceSearchOneDrive = '';
     this.workplaceSearchPermissions = '';
     this.workplaceSearchSalesforce = '';
@@ -104,12 +111,12 @@ class DocLinks {
     this.workplaceSearchServiceNow = '';
     this.workplaceSearchSharePoint = '';
     this.workplaceSearchSlack = '';
+    this.workplaceSearchStandardAuth = '';
     this.workplaceSearchSynch = '';
     this.workplaceSearchZendesk = '';
   }
 
   public setDocLinks(docLinks: DocLinksStart): void {
-    this.appSearchBase = docLinks.links.appSearch.base;
     this.appSearchApis = docLinks.links.appSearch.apiRef;
     this.appSearchApiClients = docLinks.links.appSearch.apiClients;
     this.appSearchApiKeys = docLinks.links.appSearch.apiKeys;
@@ -123,17 +130,19 @@ class DocLinks {
     this.appSearchIndexingDocsSchema = docLinks.links.appSearch.indexingDocumentsSchema;
     this.appSearchLogSettings = docLinks.links.appSearch.logSettings;
     this.appSearchMetaEngines = docLinks.links.appSearch.metaEngines;
+    this.appSearchNativeAuth = docLinks.links.appSearch.nativeAuth;
     this.appSearchPrecision = docLinks.links.appSearch.precisionTuning;
     this.appSearchRelevance = docLinks.links.appSearch.relevanceTuning;
     this.appSearchResultSettings = docLinks.links.appSearch.resultSettings;
     this.appSearchSearchUI = docLinks.links.appSearch.searchUI;
     this.appSearchSecurity = docLinks.links.appSearch.security;
+    this.appSearchStandardAuth = docLinks.links.appSearch.standardAuth;
+    this.appSearchSynonyms = docLinks.links.appSearch.synonyms;
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
-    this.cloudBase = `${docLinks.ELASTIC_WEBSITE_URL}guide/en/cloud/current`;
+    this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
+    this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
-    this.enterpriseSearchBase = docLinks.links.enterpriseSearch.base;
-    this.workplaceSearchBase = docLinks.links.workplaceSearch.base;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
     this.workplaceSearchConfluenceServer = docLinks.links.workplaceSearch.confluenceServer;
@@ -143,12 +152,14 @@ class DocLinks {
     this.workplaceSearchDocumentPermissions = docLinks.links.workplaceSearch.documentPermissions;
     this.workplaceSearchDropbox = docLinks.links.workplaceSearch.dropbox;
     this.workplaceSearchExternalIdentities = docLinks.links.workplaceSearch.externalIdentities;
+    this.workplaceSearchGettingStarted = docLinks.links.workplaceSearch.gettingStarted;
     this.workplaceSearchGitHub = docLinks.links.workplaceSearch.gitHub;
     this.workplaceSearchGmail = docLinks.links.workplaceSearch.gmail;
     this.workplaceSearchGoogleDrive = docLinks.links.workplaceSearch.googleDrive;
     this.workplaceSearchIndexingSchedule = docLinks.links.workplaceSearch.indexingSchedule;
     this.workplaceSearchJiraCloud = docLinks.links.workplaceSearch.jiraCloud;
     this.workplaceSearchJiraServer = docLinks.links.workplaceSearch.jiraServer;
+    this.workplaceSearchNativeAuth = docLinks.links.workplaceSearch.nativeAuth;
     this.workplaceSearchOneDrive = docLinks.links.workplaceSearch.oneDrive;
     this.workplaceSearchPermissions = docLinks.links.workplaceSearch.permissions;
     this.workplaceSearchSalesforce = docLinks.links.workplaceSearch.salesforce;
@@ -156,6 +167,7 @@ class DocLinks {
     this.workplaceSearchServiceNow = docLinks.links.workplaceSearch.serviceNow;
     this.workplaceSearchSharePoint = docLinks.links.workplaceSearch.sharePoint;
     this.workplaceSearchSlack = docLinks.links.workplaceSearch.slack;
+    this.workplaceSearchStandardAuth = docLinks.links.workplaceSearch.standardAuth;
     this.workplaceSearchSynch = docLinks.links.workplaceSearch.synch;
     this.workplaceSearchZendesk = docLinks.links.workplaceSearch.zendesk;
   }

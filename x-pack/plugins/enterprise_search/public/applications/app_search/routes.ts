@@ -7,7 +7,6 @@
 
 import { docLinks } from '../shared/doc_links';
 
-export const DOCS_PREFIX = docLinks.appSearchBase;
 export const API_DOCS_URL = docLinks.appSearchApis;
 export const API_CLIENTS_DOCS_URL = docLinks.appSearchApiClients;
 export const API_KEYS_DOCS_URL = docLinks.appSearchApiKeys;
@@ -21,11 +20,14 @@ export const INDEXING_DOCS_URL = docLinks.appSearchIndexingDocs;
 export const INDEXING_SCHEMA_DOCS_URL = docLinks.appSearchIndexingDocsSchema;
 export const LOG_SETTINGS_DOCS_URL = docLinks.appSearchLogSettings;
 export const META_ENGINES_DOCS_URL = docLinks.appSearchMetaEngines;
+export const NATIVE_AUTH_DOCS_URL = docLinks.appSearchNativeAuth;
 export const PRECISION_DOCS_URL = docLinks.appSearchPrecision;
 export const RELEVANCE_DOCS_URL = docLinks.appSearchRelevance;
 export const RESULT_SETTINGS_DOCS_URL = docLinks.appSearchResultSettings;
 export const SEARCH_UI_DOCS_URL = docLinks.appSearchSearchUI;
 export const SECURITY_DOCS_URL = docLinks.appSearchSecurity;
+export const STANDARD_AUTH_DOCS_URL = docLinks.appSearchStandardAuth;
+export const SYNONYMS_DOCS_URL = docLinks.appSearchSynonyms;
 export const WEB_CRAWLER_DOCS_URL = docLinks.appSearchWebCrawler;
 export const WEB_CRAWLER_LOG_DOCS_URL = docLinks.appSearchWebCrawlerEventLogs;
 
