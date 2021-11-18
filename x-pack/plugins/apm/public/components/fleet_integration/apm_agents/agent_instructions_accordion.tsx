@@ -206,7 +206,7 @@ export function AgentInstructionsAccordion({
               >
                 <EuiFlexItem grow={false}>Auto-Attachment</EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBetaBadge label="Experimental" />
+                  <EuiBetaBadge label="BETA" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ),

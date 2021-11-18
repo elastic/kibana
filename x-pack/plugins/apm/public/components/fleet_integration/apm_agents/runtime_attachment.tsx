@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DropResult } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiSpacer,
@@ -112,7 +113,7 @@ export function RuntimeAttachment({}: Props) {
       },
     },
   ]);
-  const onDragEnd = ({ source, destination }) => {
+  const onDragEnd = ({ source, destination }: DropResult) => {
     if (source && destination) {
       const items = euiDragDropReorder(list, source.index, destination.index);
 
@@ -122,14 +123,16 @@ export function RuntimeAttachment({}: Props) {
   return (
     <div>
       <EuiCallOut
-        title="This is an experimental feature so please use with caution and never in production environments."
+        title={
+          'You have unsaved changes. Click "Save integration" to sync changes to the integration.'
+        }
         color="warning"
-        iconType="beaker"
+        iconType="iInCircle"
         size="s"
       />
       <EuiSpacer />
       <EuiSwitch
-        label="Runtime attachment"
+        label="Enable runtime attachment"
         checked={true}
         onChange={() => {}}
       />
@@ -141,14 +144,19 @@ export function RuntimeAttachment({}: Props) {
       <EuiText size="s">
         <h3>Discovery rules</h3>
       </EuiText>
-      <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+      <EuiSpacer size="s" />
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="iInCircle" />
+        </EuiFlexItem>
         <EuiFlexItem>
-          <EuiCallOut
-            title="For every running JVM, the discovery rules are evaluated in the order they are provided. The first matching rule determines the outcome. Learn more in the docs."
-            color="euiColorGhost"
-            iconType="iInCircle"
-            size="s"
-          />
+          <EuiText size="s">
+            <p>
+              For every running JVM, the discovery rules are evaluated in the
+              order they are provided. The first matching rule determines the
+              outcome. Learn more in the docs.
+            </p>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType="plusInCircle">Add rule</EuiButton>
@@ -156,11 +164,7 @@ export function RuntimeAttachment({}: Props) {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiDragDropContext onDragEnd={onDragEnd}>
-        <EuiDroppable
-          droppableId="CUSTOM_HANDLE_DROPPABLE_AREA"
-          spacing="m"
-          withPanel
-        >
+        <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="m">
           {list.map(({ content, id }, idx) => (
             <EuiDraggable
               spacing="m"
@@ -170,11 +174,7 @@ export function RuntimeAttachment({}: Props) {
               customDragHandle={true}
             >
               {(provided) => (
-                <EuiPanel
-                  className="custom"
-                  paddingSize="m"
-                  color={content.include ? 'success' : 'danger'}
-                >
+                <EuiPanel paddingSize="m">
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false}>
                       <div
@@ -199,6 +199,19 @@ export function RuntimeAttachment({}: Props) {
           ))}
         </EuiDroppable>
       </EuiDragDropContext>
+      <EuiPanel paddingSize="m" style={{ margin: '0 8px 0 8px' }}>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">Everything else</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="danger">Exclude</EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">All</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </div>
   );
 }
