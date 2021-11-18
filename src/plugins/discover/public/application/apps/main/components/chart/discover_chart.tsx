@@ -35,7 +35,7 @@ export function DiscoverChart({
   services,
   state,
   stateContainer,
-  timefield,
+  isTimeBased,
 }: {
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
@@ -44,7 +44,7 @@ export function DiscoverChart({
   services: DiscoverServices;
   state: AppState;
   stateContainer: GetStateReturn;
-  timefield?: string;
+  isTimeBased: boolean;
 }) {
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
 
@@ -108,7 +108,7 @@ export function DiscoverChart({
               onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>
-          {timefield && (
+          {isTimeBased && (
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
               <EuiPopover
                 id="dscChartOptions"
@@ -135,7 +135,7 @@ export function DiscoverChart({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {timefield && !state.hideChart && (
+      {isTimeBased && !state.hideChart && (
         <EuiFlexItem grow={false}>
           <section
             ref={(element) => (chartRef.current.element = element)}

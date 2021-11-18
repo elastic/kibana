@@ -82,7 +82,7 @@ describe('query_ranges', () => {
           size: 0,
         },
         index: params.index,
-        ignore_throttled: !params.includeFrozen,
+        ignore_throttled: params.includeFrozen ? false : undefined,
         ignore_unavailable: true,
       });
     });

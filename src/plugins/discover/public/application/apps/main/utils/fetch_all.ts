@@ -26,6 +26,7 @@ import { DataPublicPluginStart } from '../../../../../../data/public';
 import { SavedSearchData } from '../services/use_saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
+import { DataViewType } from '../../../../../../data_views/common';
 
 export function fetchAll(
   dataSubjects: SavedSearchData,
@@ -72,16 +73,17 @@ export function fetchAll(
     },
   };
 
+  const isChartVisible =
+    !hideChart && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP;
+
   const all = forkJoin({
     documents: fetchDocuments(dataSubjects, searchSource.createCopy(), subFetchDeps),
-    totalHits:
-      hideChart || !indexPattern.timeFieldName
-        ? fetchTotalHits(dataSubjects, searchSource.createCopy(), subFetchDeps)
-        : of(null),
-    chart:
-      !hideChart && indexPattern.timeFieldName
-        ? fetchChart(dataSubjects, searchSource.createCopy(), subFetchDeps)
-        : of(null),
+    totalHits: !isChartVisible
+      ? fetchTotalHits(dataSubjects, searchSource.createCopy(), subFetchDeps)
+      : of(null),
+    chart: isChartVisible
+      ? fetchChart(dataSubjects, searchSource.createCopy(), subFetchDeps)
+      : of(null),
   });
 
   all.subscribe(
