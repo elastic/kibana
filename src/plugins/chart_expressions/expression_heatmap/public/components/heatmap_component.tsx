@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { FC, useMemo, useState, useCallback } from 'react';
+import uuid from 'uuid/v4';
 import {
   Chart,
   ElementClickListener,
@@ -39,6 +40,10 @@ declare global {
      */
     _echDebugStateFlag?: boolean;
   }
+}
+
+function generateId() {
+  return uuid();
 }
 
 function getStops(
@@ -466,7 +471,7 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
           onBrushEnd={onBrushEnd as BrushEndListener}
         />
         <Heatmap
-          id="heatmap"
+          id={`heatmap-${generateId()}`}
           name={valueColumn.name}
           colorScale={{
             type: 'bands',
