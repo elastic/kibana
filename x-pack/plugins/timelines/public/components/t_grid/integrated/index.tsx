@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
-// @ts-expect-error
-import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils/alerts_as_data_rbac';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -37,7 +35,9 @@ import type {
   RowRenderer,
   AlertStatus,
 } from '../../../../common/types/timeline';
-import { esQuery, DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
@@ -49,8 +49,6 @@ import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
-
-const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -194,7 +192,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
 
   const combinedQueries = buildCombinedQuery({
-    config: esQuery.getEsQueryConfig(uiSettings),
+    config: getEsQueryConfig(uiSettings),
     dataProviders,
     indexPattern,
     browserFields,
@@ -251,7 +249,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const filterQuery = useMemo(
     () =>
       getCombinedFilterQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         browserFields,
         dataProviders,
         filters,
