@@ -97,7 +97,7 @@ describe('getRuleAlertSummaryRoute', () => {
 
     rulesClient.getAlertSummary = jest
       .fn()
-      .mockResolvedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
+      .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -110,6 +110,6 @@ describe('getRuleAlertSummaryRoute', () => {
       ['notFound']
     );
 
-    expect(await handler(context, req, res)).toEqual(undefined);
+    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
   });
 });

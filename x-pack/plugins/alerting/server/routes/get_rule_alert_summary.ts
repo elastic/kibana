@@ -14,7 +14,6 @@ import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
   AlertSummary,
-  ExecutionDuration,
 } from '../types';
 
 const paramSchema = schema.object({
