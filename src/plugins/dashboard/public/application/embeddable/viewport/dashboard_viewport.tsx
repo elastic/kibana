@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { PanelState, ViewMode } from '../../../services/embeddable';
+import { ViewMode } from '../../../services/embeddable';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
@@ -26,7 +26,7 @@ interface State {
   useMargins: boolean;
   title: string;
   description?: string;
-  panels: { [key: string]: PanelState };
+  panelCount: number;
   isEmbeddedExternally?: boolean;
 }
 
@@ -49,7 +49,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     this.state = {
       controlGroupReady: !this.props.controlGroup,
       isFullScreenMode,
-      panels,
+      panelCount: Object.values(panels).length,
       useMargins,
       title,
       isEmbeddedExternally,
@@ -59,15 +59,16 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public componentDidMount() {
     this.mounted = true;
     this.subscription = this.props.container.getInput$().subscribe(() => {
-      const { isFullScreenMode, useMargins, title, description, isEmbeddedExternally } =
+      const { isFullScreenMode, useMargins, title, description, isEmbeddedExternally, panels } =
         this.props.container.getInput();
       if (this.mounted) {
         this.setState({
+          panelCount: Object.values(panels).length,
+          isEmbeddedExternally,
           isFullScreenMode,
           description,
           useMargins,
           title,
-          isEmbeddedExternally,
         });
       }
     });
@@ -95,13 +96,13 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public render() {
     const { container } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
-    const { isEmbeddedExternally, isFullScreenMode, panels, title, description, useMargins } =
+    const { isEmbeddedExternally, isFullScreenMode, panelCount, title, description, useMargins } =
       this.state;
     return (
       <>
         <div className="dshDashboardViewport-controlGroup" ref={this.controlsRoot} />
         <div
-          data-shared-items-count={Object.values(panels).length}
+          data-shared-items-count={panelCount}
           data-shared-items-container
           data-title={title}
           data-description={description}

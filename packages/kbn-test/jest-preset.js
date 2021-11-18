@@ -46,7 +46,15 @@ module.exports = {
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
 
   // Use this configuration option to add custom reporters to Jest
-  reporters: ['default', '@kbn/test/target_node/jest/junit_reporter'],
+  reporters: [
+    'default',
+    [
+      '@kbn/test/target_node/jest/junit_reporter',
+      {
+        rootDirectory: '.',
+      },
+    ],
+  ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [

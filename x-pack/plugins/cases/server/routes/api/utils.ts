@@ -9,18 +9,21 @@ import { Boom, boomify, isBoom } from '@hapi/boom';
 
 import { schema } from '@kbn/config-schema';
 import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
-import { isCaseError } from '../../common';
+import { CaseError, isCaseError, HTTPError, isHTTPError } from '../../common';
 
 /**
  * Transforms an error into the correct format for a kibana response.
  */
-export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
+
+export function wrapError(
+  error: CaseError | Boom | HTTPError | Error
+): CustomHttpResponseOptions<ResponseError> {
   let boom: Boom;
 
   if (isCaseError(error)) {
     boom = error.boomify();
   } else {
-    const options = { statusCode: error.statusCode ?? 500 };
+    const options = { statusCode: isHTTPError(error) ? error.statusCode : 500 };
     boom = isBoom(error) ? error : boomify(error, options);
   }
 

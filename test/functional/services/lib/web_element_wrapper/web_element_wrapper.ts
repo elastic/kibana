@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
@@ -123,7 +123,7 @@ export class WebElementWrapper {
         `finding element '${this.locator.toString()}' again, ${attemptsRemaining - 1} attempts left`
       );
 
-      await delay(200);
+      await setTimeoutAsync(200);
       this._webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, attemptsRemaining - 1);
     }
@@ -242,7 +242,7 @@ export class WebElementWrapper {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
         await this.pressKeys(this.Keys.BACK_SPACE);
-        await delay(100);
+        await setTimeoutAsync(100);
       }
     } else {
       if (this.isChromium) {
@@ -281,7 +281,7 @@ export class WebElementWrapper {
       for (const char of value) {
         await this.retryCall(async function type(wrapper) {
           await wrapper._webElement.sendKeys(char);
-          await delay(100);
+          await setTimeoutAsync(100);
         });
       }
     } else {

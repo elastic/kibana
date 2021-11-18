@@ -26,7 +26,7 @@ interface UserActionMarkdownProps {
   onSaveContent: (content: string) => void;
 }
 
-interface UserActionMarkdownRefObject {
+export interface UserActionMarkdownRefObject {
   setComment: (newComment: string) => void;
 }
 
@@ -78,7 +78,7 @@ export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserAc
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="user-action-save-markdown"
-              color="secondary"
+              color="success"
               fill
               iconType="save"
               onClick={handleSaveAction}

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { cloneDeepWith } from 'lodash';
 import { Key, Origin, WebDriver } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
@@ -305,7 +305,7 @@ class BrowserService extends FtrService {
       to
     );
     // wait for 150ms to make sure the script has run
-    await delay(150);
+    await setTimeoutAsync(150);
   }
 
   /**
