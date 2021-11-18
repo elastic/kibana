@@ -8,7 +8,8 @@
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
 import uuid from 'uuid';
-import { Filter } from '../../../../../../../src/plugins/data/public';
+
+import type { Filter } from '@kbn/es-query';
 
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
