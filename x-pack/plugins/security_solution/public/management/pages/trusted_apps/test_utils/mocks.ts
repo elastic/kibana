@@ -7,6 +7,8 @@
 
 import { composeHttpHandlerMocks } from '../../../../common/mock/endpoint/http_handler_mock_factory';
 import {
+  fleetGetAgentPolicyListHttpMock,
+  FleetGetAgentPolicyListHttpMockInterface,
   fleetGetEndpointPackagePolicyListHttpMock,
   FleetGetEndpointPackagePolicyListHttpMockInterface,
   trustedAppPutHttpMocks,
@@ -20,7 +22,8 @@ import {
 export type TrustedAppsPageHttpApiMocksInterface = TrustedAppsGetListHttpMocksInterface &
   TrustedAppsGetOneHttpMocksInterface &
   TrustedAppPutHttpMocksInterface &
-  FleetGetEndpointPackagePolicyListHttpMockInterface;
+  FleetGetEndpointPackagePolicyListHttpMockInterface &
+  FleetGetAgentPolicyListHttpMockInterface;
 
 /**
  * Provides all http API mocks to support the Trusted apps page
@@ -31,4 +34,5 @@ export const trustedAppsPageHttpApiMocks =
     trustedAppsGetOneHttpMocks,
     trustedAppPutHttpMocks,
     fleetGetEndpointPackagePolicyListHttpMock,
+    fleetGetAgentPolicyListHttpMock,
   ]);

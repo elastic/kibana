@@ -152,6 +152,7 @@ describe('When on the Trusted Apps Page', () => {
         renderResult = await renderWithListData();
 
         await act(async () => {
+          // The 3rd Trusted app to be rendered will be a policy specific one
           (await renderResult.findAllByTestId('trustedAppCard-header-actions-button'))[2].click();
         });
 
@@ -292,26 +293,57 @@ describe('When on the Trusted Apps Page', () => {
               HttpFetchOptions
             ];
 
-            expect(lastCallToPut[0]).toEqual(
-              '/api/endpoint/trusted_apps/2d95bec3-b48f-4db7-9622-a2b061cc031d'
+            expect(lastCallToPut[0]).toEqual('/api/exception_lists/items');
+
+            expect(JSON.parse(lastCallToPut[1].body as string)).toEqual(
+              {
+                _version: '3o9za',
+                name: 'Generated Exception (3xnng)',
+                description: 'created by ExceptionListItemGenerator',
+                entries: [
+                  {
+                    field: 'process.hash.md5',
+                    operator: 'included',
+                    type: 'match',
+                    value: '1234234659af249ddf3e40864e9fb241',
+                  },
+                  {
+                    field: 'process.executable.caseless',
+                    operator: 'included',
+                    type: 'match',
+                    value: '/one/two/three',
+                  },
+                ],
+                os_types: ['windows'],
+                tags: [
+                  'policy:ddf6570b-9175-4a6d-b288-61a09771c647',
+                  'policy:b8e616ae-44fc-4be7-846c-ce8fa5c082dd',
+                ],
+                id: '05b5e350-0cad-4dc3-a61d-6e6796b0af39',
+                comments: [],
+                item_id: '2d95bec3-b48f-4db7-9622-a2b061cc031d',
+                meta: {},
+                namespace_type: 'agnostic',
+                type: 'simple',
+              }
+              //   {
+              //   name: 'Generated Exception (3xnng)',
+              //   os: 'windows',
+              //   entries: [
+              //     {
+              //       field: 'process.executable.caseless',
+              //       value: 'one/two',
+              //       operator: 'included',
+              //       type: 'match',
+              //     },
+              //   ],
+              //   description: 'created by ExceptionListItemGenerator',
+              //   effectScope: {
+              //     type: 'global',
+              //   },
+              //   version: 'abc123',
+              // }
             );
-            expect(JSON.parse(lastCallToPut[1].body as string)).toEqual({
-              name: 'Generated Exception (3xnng)',
-              os: 'windows',
-              entries: [
-                {
-                  field: 'process.executable.caseless',
-                  value: 'one/two',
-                  operator: 'included',
-                  type: 'match',
-                },
-              ],
-              description: 'created by ExceptionListItemGenerator',
-              effectScope: {
-                type: 'global',
-              },
-              version: 'abc123',
-            });
           });
         });
       });

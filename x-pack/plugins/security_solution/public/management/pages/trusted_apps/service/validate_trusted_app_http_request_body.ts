@@ -38,17 +38,19 @@ export const validateTrustedAppHttpRequestBody = async (
       },
     });
 
-    if (agentPoliciesFound.items.length !== policyIds.length) {
-      failedValidations.push(
-        `Invalid policy id(s) [${policyIds
-          .filter(
-            (policyId) =>
-              !agentPoliciesFound.items.find(({ package_policies: packagePolicies }) =>
-                (packagePolicies as string[]).includes(policyId)
-              )
+    if (!agentPoliciesFound.items.length) {
+      failedValidations.push(`Invalid Policy Id(s) [${policyIds.join(', ')}]`);
+    } else {
+      const missingPolicies = policyIds.filter(
+        (policyId) =>
+          !agentPoliciesFound.items.find(({ package_policies: packagePolicies }) =>
+            (packagePolicies as string[]).includes(policyId)
           )
-          .join(', ')}]`
       );
+
+      if (missingPolicies.length) {
+        failedValidations.push(`Invalid Policy Id(s) [${missingPolicies.join(', ')}]`);
+      }
     }
   }
 

@@ -22,6 +22,7 @@ import {
 } from '../../../../../fleet/common';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { GetPolicyListResponse, GetPolicyResponse } from '../policy/types';
+import { FleetAgentPolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_policy_generator';
 
 export type FleetGetPackageListHttpMockInterface = ResponseProvidersInterface<{
   packageList: () => GetPackagesResponse;
@@ -70,6 +71,7 @@ export const fleetGetEndpointPackagePolicyListHttpMock =
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       method: 'get',
       handler: () => {
+        // FIXME: use new FleetPackagePolicyGenerator (#2262)
         const generator = new EndpointDocGenerator('seed');
 
         const items = Array.from({ length: 5 }, (_, index) => {
@@ -99,19 +101,32 @@ export const fleetGetAgentPolicyListHttpMock =
       method: 'get',
       handler: () => {
         const generator = new EndpointDocGenerator('seed');
+        const agentPolicyGenerator = new FleetAgentPolicyGenerator('seed');
         const endpointMetadata = generator.generateHostMetadata();
-        const agentPolicy = generator.generateAgentPolicy();
 
         // Make sure that the Agent policy returned from the API has the Integration Policy ID that
         // the endpoint metadata is using. This is needed especially when testing the Endpoint Details
         // flyout where certain actions might be disabled if we know the endpoint integration policy no
         // longer exists.
-        (agentPolicy.package_policies as string[]).push(
-          endpointMetadata.Endpoint.policy.applied.id
-        );
+        const agentPolicy = agentPolicyGenerator.generate({
+          package_policies: [endpointMetadata.Endpoint.policy.applied.id],
+        });
 
         return {
-          items: [agentPolicy],
+          items: [
+            agentPolicy,
+            // In addition, some of our UI logic looks for the existance of certain Endpoint Integration policies
+            // using the Agents Policy API (normally when checking IDs since query by ids is not supported via API)
+            // so also add the first two package policy IDs that the `fleetGetEndpointPackagePolicyListHttpMock()`
+            // method above creates (which Trusted Apps HTTP mocks also use)
+            // FIXME: remove hard-coded IDs below adn get them from the new FleetPackagePolicyGenerator (#2262)
+            agentPolicyGenerator.generate({
+              package_policies: ['ddf6570b-9175-4a6d-b288-61a09771c647'],
+            }),
+            agentPolicyGenerator.generate({
+              package_policies: ['b8e616ae-44fc-4be7-846c-ce8fa5c082dd'],
+            }),
+          ],
           perPage: 10,
           total: 1,
           page: 1,

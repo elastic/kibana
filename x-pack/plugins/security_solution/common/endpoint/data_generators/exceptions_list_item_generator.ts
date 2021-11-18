@@ -8,6 +8,7 @@
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { BaseDataGenerator } from './base_data_generator';
 import { POLICY_REFERENCE_PREFIX } from '../service/trusted_apps/mapping';
+import { ConditionEntryField } from '../types';
 
 export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
   generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
@@ -19,17 +20,16 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       description: 'created by ExceptionListItemGenerator',
       entries: [
         {
-          entries: [
-            { field: 'nested.field', operator: 'included', type: 'match', value: 'some value' },
-          ],
-          field: 'some.parentField',
-          type: 'nested',
-        },
-        {
-          field: 'some.not.nested.field',
+          field: ConditionEntryField.HASH,
           operator: 'included',
           type: 'match',
-          value: 'some value',
+          value: '1234234659af249ddf3e40864e9fb241',
+        },
+        {
+          field: ConditionEntryField.PATH,
+          operator: 'included',
+          type: 'match',
+          value: '/one/two/three',
         },
       ],
       id: this.seededUUIDv4(),
