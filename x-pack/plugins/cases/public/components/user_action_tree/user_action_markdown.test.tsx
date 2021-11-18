@@ -69,9 +69,9 @@ describe('UserActionMarkdown ', () => {
     wrapper.find(`[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
 
     await waitFor(() => {
-      expect(onSaveContent).not.toHaveBeenCalled();
       expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
     });
+    expect(onSaveContent).not.toHaveBeenCalled();
   });
   it('Cancel button click calls only onChangeEditable', async () => {
     const wrapper = mount(

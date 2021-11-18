@@ -41,7 +41,7 @@ export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserAc
     });
 
     const fieldName = 'content';
-    const { getFields, setFieldValue, submit } = form;
+    const { setFieldValue, submit } = form;
 
     const handleCancelAction = useCallback(() => {
       onChangeEditable(id);
@@ -49,13 +49,12 @@ export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserAc
 
     const handleSaveAction = useCallback(async () => {
       const { isValid, data } = await submit();
-      const fieldData = getFields();
 
-      if (isValid && fieldData.content.value !== content) {
+      if (isValid && data.content !== content) {
         onSaveContent(data.content);
       }
       onChangeEditable(id);
-    }, [content, getFields, id, onChangeEditable, onSaveContent, submit]);
+    }, [content, id, onChangeEditable, onSaveContent, submit]);
 
     const setComment = useCallback(
       (newComment) => {
