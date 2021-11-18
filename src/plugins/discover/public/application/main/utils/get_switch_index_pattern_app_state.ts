@@ -29,16 +29,29 @@ export function getSwitchIndexPatternAppState(
     : currentColumns;
   const columns = nextColumns.length ? nextColumns : [];
 
-  let nextSort = getSortArray(currentSort, nextIndexPattern);
-  const [first, ...restSorting] = nextSort;
-  // replace primary timeFieldName if it was sorted
-  if (nextIndexPattern.timeFieldName && first && first[0] === currentIndexPattern.timeFieldName) {
-    nextSort = [[nextIndexPattern.timeFieldName, sortDirection], ...restSorting];
+  // when switching from an index pattern with timeField to an index pattern without timeField
+  // filter out sorting by timeField in case it is set. index patterns without timeField don't
+  // prepend this field in the table, so in legacy grid you would need to add this column to
+  // remove sorting
+  let nextSort = getSortArray(currentSort, nextIndexPattern).filter((value) => {
+    return nextIndexPattern.timeFieldName || value[0] !== currentIndexPattern.timeFieldName;
+  });
+
+  if (nextIndexPattern.timeFieldName && !nextSort.length) {
+    // set default sorting when it was not changed
+    nextSort = [[nextIndexPattern.timeFieldName, sortDirection]];
+  } else if (
+    nextIndexPattern.timeFieldName &&
+    nextSort.length !== 0 &&
+    nextSort[0][0] === currentIndexPattern.timeFieldName
+  ) {
+    // replace previous data view timeFieldName with a new one
+    nextSort = [[nextIndexPattern.timeFieldName, sortDirection], ...nextSort.slice(1)];
   }
 
   return {
     index: nextIndexPattern.id,
     columns,
-    sort: !nextSort.length ? [[nextIndexPattern.timeFieldName, sortDirection]] : nextSort,
+    sort: nextSort,
   };
 }
