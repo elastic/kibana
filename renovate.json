@@ -18,7 +18,8 @@
   "packageRules": [
     {
       "matchPackagePatterns": [".*"],
-      "enabled": false
+      "enabled": false,
+      "prCreation": "not-pending"
     },
     {
       "groupName": "@elastic/charts",
@@ -60,7 +61,8 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true
+      "enabled": true,
+      "stabilityDays": 7
     },
     {
       "groupName": "polyfills",
@@ -70,7 +72,8 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true
+      "enabled": true,
+      "stabilityDays": 7
     },
     {
       "groupName": "vega related modules",
