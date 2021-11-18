@@ -41,7 +41,7 @@ import { RulesTableAction } from '../../../../containers/detection_engine/rules/
 import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { PopoverTooltip } from './popover_tooltip';
-import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
+import { getCapitalizedRuleStatusText } from '../../../../../../common/detection_engine/utils';
 import {
   APP_UI_ID,
   SecurityPageName,
@@ -194,7 +194,7 @@ export const getColumns = ({
         }
 
         const renderItem = (tag: string, i: number) => (
-          <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj={`tags-popover-item`}>
+          <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tags-popover-item">
             {tag}
           </EuiBadge>
         );
@@ -255,7 +255,7 @@ export const getColumns = ({
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {getRuleStatusText(value) ?? getEmptyTagValue()}
+              {getCapitalizedRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );
@@ -453,7 +453,7 @@ export const getMonitoringColumns = (
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {getRuleStatusText(value) ?? getEmptyTagValue()}
+              {getCapitalizedRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );
