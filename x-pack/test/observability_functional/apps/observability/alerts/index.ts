@@ -198,7 +198,7 @@ export default ({ getService }: FtrProviderContext) => {
 
             await (await observability.alerts.common.getAlertsFlyoutPaginationNextButton()).click();
 
-            let nextReason;
+            let nextReason: string | undefined;
             await retry.waitFor('next alert loaded', async () => {
               nextReason = await (
                 await observability.alerts.common.getAlertsFlyoutReason()
@@ -213,7 +213,7 @@ export default ({ getService }: FtrProviderContext) => {
               await observability.alerts.common.getAlertsFlyoutPaginationPreviousButton()
             ).click();
 
-            let previousReason;
+            let previousReason: string | undefined;
             await retry.waitFor('previous alert loaded', async () => {
               previousReason = await (
                 await observability.alerts.common.getAlertsFlyoutReason()
