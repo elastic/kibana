@@ -19,7 +19,7 @@ import { AlertsDemoServerSetupDeps, BackendLibs } from '../server/types';
 import {
   alertType as alwaysFiringAlert,
   registerAlwaysFiringRuleType,
-} from './alert_types/always_firing';
+} from './rule_types/always_firing';
 import { RAC_EXAMPLE_APP_ID } from '../common/constants';
 import { DEFAULT_APP_CATEGORIES } from '../../../src/core/utils/default_app_categories';
 import { RulesService } from './services';
