@@ -11,11 +11,13 @@ Saved objects can only be imported into the same version, a newer minor on the s
 
 |=======
 | Exporting version | Importing version | Compatible?
-| 6.7.0 | 6.8.1 | Yes
-| 6.8.1 | 7.3.0 | Yes
-| 7.3.0 | 7.11.1 | Yes
-| 7.11.1 | 7.6.0 | No
-| 6.8.1 | 8.0.0 | No
+| 6.7.x | 6.8.x | Yes
+| 6.x.x | 7.x.x | Yes
+| 7.x.x | 8.x.x | Yes
+| 7.1.0| 7.15.x | Yes
+| 7.x.x | 6.x.x | No
+| 7.15.x | 7.1.x | No
+| 6.x.x | 8.x.x | No
 |=======
 
 [[saved-objects-api-import-request]]
