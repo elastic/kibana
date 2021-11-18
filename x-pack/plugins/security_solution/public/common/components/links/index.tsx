@@ -41,7 +41,7 @@ import { SecurityPageName } from '../../../app/types';
 import { getUebaDetailsUrl } from '../link_to/redirect_to_ueba';
 import { LinkButton, LinkAnchor, GenericLinkButton, PortContainer, Comma } from './helpers';
 
-export { LinkButton, LinkAnchor } from './helpers';
+export { LinkButton, LinkAnchor, SpacedLinkAnchor } from './helpers';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
