@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { DatafeedStats, Job, MlPluginSetup } from '../../../../ml/server';
 import { isJobStarted } from '../../../common/machine_learning/helpers';
 import { isSecurityJob } from '../../../common/machine_learning/is_security_job';

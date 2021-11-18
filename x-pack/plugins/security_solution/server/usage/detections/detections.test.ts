@@ -5,39 +5,30 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '../../../../../../src/core/server';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../../../src/core/server/mocks';
-import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import { fetchDetectionsMetrics } from './index';
 import { initialMlJobsUsage } from './detection_ml_helpers';
+import { mlServicesMock } from '../../lib/machine_learning/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import {
   getMockJobSummaryResponse,
   getMockListModulesResponse,
   getMockMlJobDetailsResponse,
   getMockMlJobStatsResponse,
   getMockMlDatafeedStatsResponse,
-  getMockRuleSearchResponse,
-  getMockRuleAlertsResponse,
-  getMockAlertCasesResponse,
 } from './detections.mocks';
 
-const savedObjectsClient = savedObjectsClientMock.create();
+const soClient = savedObjectsClientMock.create();
 
 describe('Detections Usage and Metrics', () => {
-  let esClientMock: jest.Mocked<ElasticsearchClient>;
   let mlMock: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   describe('getDetectionRuleMetrics()', () => {
     beforeEach(() => {
-      esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mlMock = mlServicesMock.createSetupContract();
     });
 
     it('returns zeroed counts if calls are empty', async () => {
-      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
+      const result = await fetchDetectionsMetrics(soClient, mlMock);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -92,223 +83,10 @@ describe('Detections Usage and Metrics', () => {
         })
       );
     });
-
-    it('returns information with rule, alerts and cases', async () => {
-      (esClientMock.search as jest.Mock)
-        .mockReturnValueOnce({ body: getMockRuleSearchResponse() })
-        .mockReturnValue({ body: getMockRuleAlertsResponse(3400) });
-      (savedObjectsClient.find as jest.Mock).mockReturnValue(getMockAlertCasesResponse());
-
-      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          detection_rules: {
-            detection_rule_detail: [
-              {
-                alert_count_daily: 3400,
-                cases_count_total: 1,
-                created_on: '2021-03-23T17:15:59.634Z',
-                elastic_rule: true,
-                enabled: false,
-                rule_id: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
-                rule_name: 'Azure Diagnostic Settings Deletion',
-                rule_type: 'query',
-                rule_version: 4,
-                updated_on: '2021-03-23T17:15:59.634Z',
-              },
-            ],
-            detection_rule_usage: {
-              custom_total: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              elastic_total: {
-                alerts: 3400,
-                cases: 1,
-                disabled: 1,
-                enabled: 0,
-              },
-              eql: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              machine_learning: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              query: {
-                alerts: 3400,
-                cases: 1,
-                disabled: 1,
-                enabled: 0,
-              },
-              threat_match: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              threshold: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-            },
-          },
-          ml_jobs: { ml_job_metrics: [], ml_job_usage: initialMlJobsUsage },
-        })
-      );
-    });
-
-    it('returns information with on non elastic prebuilt rule', async () => {
-      (esClientMock.search as jest.Mock)
-        .mockReturnValueOnce({ body: getMockRuleSearchResponse('not_immutable') })
-        .mockReturnValue({ body: getMockRuleAlertsResponse(800) });
-      (savedObjectsClient.find as jest.Mock).mockReturnValue(getMockAlertCasesResponse());
-
-      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          detection_rules: {
-            detection_rule_detail: [], // *should not* contain custom detection rule details
-            detection_rule_usage: {
-              custom_total: {
-                alerts: 800,
-                cases: 1,
-                disabled: 1,
-                enabled: 0,
-              },
-              elastic_total: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              eql: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              machine_learning: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              query: {
-                alerts: 800,
-                cases: 1,
-                disabled: 1,
-                enabled: 0,
-              },
-              threat_match: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              threshold: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-            },
-          },
-          ml_jobs: { ml_job_metrics: [], ml_job_usage: initialMlJobsUsage },
-        })
-      );
-    });
-
-    it('returns information with rule, no alerts and no cases', async () => {
-      (esClientMock.search as jest.Mock)
-        .mockReturnValueOnce({ body: getMockRuleSearchResponse() })
-        .mockReturnValue({ body: getMockRuleAlertsResponse(0) });
-      (savedObjectsClient.find as jest.Mock).mockReturnValue(getMockAlertCasesResponse());
-
-      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          detection_rules: {
-            detection_rule_detail: [
-              {
-                alert_count_daily: 0,
-                cases_count_total: 1,
-                created_on: '2021-03-23T17:15:59.634Z',
-                elastic_rule: true,
-                enabled: false,
-                rule_id: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
-                rule_name: 'Azure Diagnostic Settings Deletion',
-                rule_type: 'query',
-                rule_version: 4,
-                updated_on: '2021-03-23T17:15:59.634Z',
-              },
-            ],
-            detection_rule_usage: {
-              custom_total: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              elastic_total: {
-                alerts: 0,
-                cases: 1,
-                disabled: 1,
-                enabled: 0,
-              },
-              eql: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              machine_learning: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              query: {
-                alerts: 0,
-                cases: 1,
-                disabled: 1,
-                enabled: 0,
-              },
-              threat_match: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-              threshold: {
-                alerts: 0,
-                cases: 0,
-                disabled: 0,
-                enabled: 0,
-              },
-            },
-          },
-          ml_jobs: { ml_job_metrics: [], ml_job_usage: initialMlJobsUsage },
-        })
-      );
-    });
   });
 
   describe('fetchDetectionsMetrics()', () => {
     beforeEach(() => {
-      esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mlMock = mlServicesMock.createSetupContract();
     });
 
@@ -317,7 +95,7 @@ describe('Detections Usage and Metrics', () => {
         jobs: null,
         jobStats: null,
       } as unknown as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
-      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
+      const result = await fetchDetectionsMetrics(soClient, mlMock);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -347,7 +125,7 @@ describe('Detections Usage and Metrics', () => {
         datafeedStats: mockDatafeedStatsResponse,
       } as unknown as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
 
-      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
+      const result = await fetchDetectionsMetrics(soClient, mlMock);
 
       expect(result).toEqual(
         expect.objectContaining({

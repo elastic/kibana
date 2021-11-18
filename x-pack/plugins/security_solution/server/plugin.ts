@@ -160,8 +160,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUsageCollectors({
       core,
-      kibanaIndex: core.savedObjects.getKibanaIndex(),
-      signalsIndex: config.signalsIndex,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
     });

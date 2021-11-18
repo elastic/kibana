@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
 import { SetupPlugins } from '../plugin';
 
-export type CollectorDependencies = {
-  kibanaIndex: string;
-  signalsIndex: string;
-  core: CoreSetup;
-} & Pick<SetupPlugins, 'ml' | 'usageCollection'>;
+export type CollectorDependencies = {} & Pick<SetupPlugins, 'ml' | 'usageCollection'>;

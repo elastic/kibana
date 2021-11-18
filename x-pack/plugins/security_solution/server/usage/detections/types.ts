@@ -5,66 +5,14 @@
  * 2.0.
  */
 
-interface RuleSearchBody {
-  query: {
-    bool: {
-      filter: {
-        term: { [key: string]: string };
-      };
-    };
-  };
-}
-
-export interface RuleSearchParams {
-  body: RuleSearchBody;
-  filter_path: string[];
-  ignore_unavailable: boolean;
-  index: string;
-  size: number;
-}
-
-export interface RuleSearchResult {
-  alert: {
-    name: string;
-    enabled: boolean;
-    tags: string[];
-    createdAt: string;
-    updatedAt: string;
-    params: DetectionRuleParms;
-  };
-}
-
 export interface DetectionsMetric {
   isElastic: boolean;
   isEnabled: boolean;
 }
 
-interface DetectionRuleParms {
-  ruleId: string;
-  version: string;
-  type: string;
-}
-
 interface FeatureUsage {
   enabled: number;
   disabled: number;
-}
-
-interface FeatureTypeUsage {
-  enabled: number;
-  disabled: number;
-  alerts: number;
-  cases: number;
-}
-
-export interface DetectionRulesTypeUsage {
-  query: FeatureTypeUsage;
-  threshold: FeatureTypeUsage;
-  eql: FeatureTypeUsage;
-  machine_learning: FeatureTypeUsage;
-  threat_match: FeatureTypeUsage;
-  elastic_total: FeatureTypeUsage;
-  custom_total: FeatureTypeUsage;
 }
 
 export interface MlJobsUsage {
@@ -78,7 +26,6 @@ export interface DetectionsUsage {
 
 export interface DetectionMetrics {
   ml_jobs: MlJobUsage;
-  detection_rules: DetectionRuleAdoption;
 }
 
 export interface MlJobDataCount {
@@ -117,46 +64,7 @@ export interface MlJobMetric {
   timing_stats: MlTimingStats;
 }
 
-export interface DetectionRuleMetric {
-  rule_name: string;
-  rule_id: string;
-  rule_type: string;
-  enabled: boolean;
-  elastic_rule: boolean;
-  created_on: string;
-  updated_on: string;
-  alert_count_daily: number;
-  cases_count_total: number;
-}
-
-export interface AlertsAggregationResponse {
-  hits: {
-    total: { value: number };
-  };
-  aggregations: {
-    [aggName: string]: {
-      buckets: Array<{ key: string; doc_count: number }>;
-    };
-  };
-}
-
-export interface CasesSavedObject {
-  associationType: string;
-  type: string;
-  alertId: string;
-  index: string;
-  rule: {
-    id: string;
-    name: string;
-  };
-}
-
 export interface MlJobUsage {
   ml_job_usage: MlJobsUsage;
   ml_job_metrics: MlJobMetric[];
-}
-
-export interface DetectionRuleAdoption {
-  detection_rule_detail: DetectionRuleMetric[];
-  detection_rule_usage: DetectionRulesTypeUsage;
 }
