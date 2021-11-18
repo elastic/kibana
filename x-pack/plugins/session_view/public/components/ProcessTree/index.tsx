@@ -10,6 +10,8 @@ import { useProcessTree, ProcessEvent, Process } from '../../hooks/use_process_t
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 
+const HIDE_ORPHANS = true;
+
 interface ProcessTreeDeps {
   // process.entity_id to act as root node (typically a session (or entry session) leader).
   sessionEntityId: string;
@@ -122,6 +124,21 @@ export const ProcessTree = ({
   // eslint-disable-next-line no-console
   console.log(searchResults);
 
+  const renderOrphans = () => {
+    if (!HIDE_ORPHANS) {
+      return orphans.map((process) => {
+        return (
+          <ProcessTreeNode
+            key={process.id}
+            isOrphan
+            process={process}
+            onProcessSelected={onProcessSelected}
+          />
+        );
+      })
+    }
+  }
+
   return (
     <div ref={scrollerRef} css={styles.scroller}>
       {sessionLeader && (
@@ -131,16 +148,7 @@ export const ProcessTree = ({
           onProcessSelected={onProcessSelected}
         />
       )}
-      {orphans.map((process) => {
-        return (
-          <ProcessTreeNode
-            key={process.id}
-            isOrphan
-            process={process}
-            onProcessSelected={onProcessSelected}
-          />
-        );
-      })}
+      {renderOrphans()}
       <div ref={selectionAreaRef} css={styles.selectionArea} />
     </div>
   );
