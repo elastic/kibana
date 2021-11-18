@@ -64,9 +64,16 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { graphEventId, savedObjectId, timelineType, description } = useDeepEqualSelector((state) =>
+  const {
+    dataViewId: dataViewIdCurrent,
+    indexNames: selectedPatternsCurrent,
+    graphEventId,
+    savedObjectId,
+    timelineType,
+    description,
+  } = useDeepEqualSelector((state) =>
     pick(
-      ['graphEventId', 'savedObjectId', 'timelineType', 'description'],
+      ['indexNames', 'dataViewId', 'graphEventId', 'savedObjectId', 'timelineType', 'description'],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
@@ -87,6 +94,38 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const onDataViewChange = useCallback(() => {
+    if (
+      // initial state will get set on create
+      (dataViewIdCurrent === '' && selectedPatternsCurrent.length === 0) ||
+      // don't update if no change
+      (dataViewIdCurrent === dataViewId &&
+        selectedPatternsCurrent.sort().join() === selectedPatterns.sort().join())
+    ) {
+      return;
+    }
+
+    dispatch(
+      timelineActions.updateDataView({
+        id: timelineId,
+        dataViewId,
+        indexNames: selectedPatterns,
+      })
+    );
+  }, [
+    dataViewId,
+    dataViewIdCurrent,
+    dispatch,
+    selectedPatterns,
+    selectedPatternsCurrent,
+    timelineId,
+  ]);
+
+  useEffect(() => {
+    onDataViewChange();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewId, selectedPatterns]);
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(
