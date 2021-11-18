@@ -10,7 +10,7 @@ import { i18Texts } from '../constants/texts';
 
 type ChangeDocTitleHandler = (newTitle: string | string[]) => void;
 
-class DocTitleService {
+export class DocTitleService {
   private changeDocTitleHandler: ChangeDocTitleHandler = () => {};
 
   public setup(_changeDocTitleHandler: ChangeDocTitleHandler): void {
@@ -29,5 +29,3 @@ class DocTitleService {
     }
   }
 }
-
-export const docTitleService = new DocTitleService();

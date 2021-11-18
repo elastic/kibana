@@ -16,15 +16,21 @@ import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 
 import { ApplicationStart, ChromeStart, ScopedHistory, CoreTheme } from 'src/core/public';
-import { docTitleService, breadcrumbService } from './services';
+import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
+
+export interface AppServices {
+  docTitleService: DocTitleService;
+  breadcrumbService: BreadcrumbService;
+}
 
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
   updateRoute: (newRoute: string) => void;
   theme$: Observable<CoreTheme>;
+  appServices: AppServices;
 }
 
 interface MountedDevToolDescriptor {
@@ -33,7 +39,14 @@ interface MountedDevToolDescriptor {
   unmountHandler: () => void;
 }
 
-function DevToolsWrapper({ devTools, activeDevTool, updateRoute, theme$ }: DevToolsWrapperProps) {
+function DevToolsWrapper({
+  devTools,
+  activeDevTool,
+  updateRoute,
+  theme$,
+  appServices,
+}: DevToolsWrapperProps) {
+  const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
 
   useEffect(
@@ -48,7 +61,7 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute, theme$ }: DevTo
   useEffect(() => {
     docTitleService.setTitle(activeDevTool.title);
     breadcrumbService.setBreadcrumbs(activeDevTool.title);
-  }, [activeDevTool]);
+  }, [activeDevTool, docTitleService, breadcrumbService]);
 
   return (
     <main className="devApp">
@@ -153,15 +166,14 @@ export function renderApp(
   chrome: ChromeStart,
   history: ScopedHistory,
   theme$: Observable<CoreTheme>,
-  devTools: readonly DevToolApp[]
+  devTools: readonly DevToolApp[],
+  appServices: AppServices
 ) {
   if (redirectOnMissingCapabilities(application)) {
     return () => {};
   }
 
   setBadge(application, chrome);
-  docTitleService.setup(chrome.docTitle.change);
-  breadcrumbService.setup(chrome.setBreadcrumbs);
 
   ReactDOM.render(
     <I18nProvider>
@@ -181,6 +193,7 @@ export function renderApp(
                     activeDevTool={devTool}
                     devTools={devTools}
                     theme$={theme$}
+                    appServices={appServices}
                   />
                 )}
               />

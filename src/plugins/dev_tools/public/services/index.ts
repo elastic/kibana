@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { docTitleService } from './doc_title';
-export { breadcrumbService } from './breadcrumb';
+export { DocTitleService } from './doc_title';
+export { BreadcrumbService } from './breadcrumb';

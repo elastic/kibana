@@ -30,5 +30,3 @@ export class BreadcrumbService {
     }
   }
 }
-
-export const breadcrumbService = new BreadcrumbService();
