@@ -874,6 +874,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openPalettePanel(chartType: string) {
       await retry.try(async () => {
         await testSubjects.click(`${chartType}_dynamicColoring_trigger`);
+        // wait for the UI to settle
+        await PageObjects.common.sleep(100);
         await testSubjects.existOrFail('lns-indexPattern-PalettePanelContainer', { timeout: 2500 });
       });
     },
