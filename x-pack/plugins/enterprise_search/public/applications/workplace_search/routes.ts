@@ -32,19 +32,19 @@ export const GMAIL_DOCS_URL = docLinks.workplaceSearchGmail;
 export const GOOGLE_DRIVE_DOCS_URL = docLinks.workplaceSearchGoogleDrive;
 export const JIRA_DOCS_URL = docLinks.workplaceSearchJiraCloud;
 export const JIRA_SERVER_DOCS_URL = docLinks.workplaceSearchJiraServer;
-export const ONEDRIVE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-onedrive-connector.html`;
-export const SALESFORCE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-salesforce-connector.html`;
-export const SERVICENOW_DOCS_URL = `${DOCS_PREFIX}/workplace-search-servicenow-connector.html`;
-export const SHAREPOINT_DOCS_URL = `${DOCS_PREFIX}/workplace-search-sharepoint-online-connector.html`;
-export const SLACK_DOCS_URL = `${DOCS_PREFIX}/workplace-search-slack-connector.html`;
-export const ZENDESK_DOCS_URL = `${DOCS_PREFIX}/workplace-search-zendesk-connector.html`;
-export const CUSTOM_SOURCE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-api-sources.html`;
-export const CUSTOM_API_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-sources-api.html`;
-export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL = `${CUSTOM_SOURCE_DOCS_URL}#custom-api-source-document-level-access-control`;
-export const ENT_SEARCH_LICENSE_MANAGEMENT = `${docLinks.enterpriseSearchBase}/license-management.html`;
-export const SYNCHRONIZATION_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
-export const DIFFERENT_SYNC_TYPES_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#_indexing_schedule`;
-export const OBJECTS_AND_ASSETS_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
+export const ONEDRIVE_DOCS_URL = docLinks.workplaceSearchOneDrive;
+export const SALESFORCE_DOCS_URL = docLinks.workplaceSearchSalesforce;
+export const SERVICENOW_DOCS_URL = docLinks.workplaceSearchServiceNow;
+export const SHAREPOINT_DOCS_URL = docLinks.workplaceSearchSharePoint;
+export const SLACK_DOCS_URL = docLinks.workplaceSearchSlack;
+export const ZENDESK_DOCS_URL = docLinks.workplaceSearchZendesk;
+export const CUSTOM_SOURCE_DOCS_URL = docLinks.workplaceSearchCustomSources;
+export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL =
+  docLinks.workplaceSearchCustomSourcePermissions;
+export const ENT_SEARCH_LICENSE_MANAGEMENT = docLinks.licenseManagement;
+export const SYNCHRONIZATION_DOCS_URL = docLinks.workplaceSearchSynch;
+export const DIFFERENT_SYNC_TYPES_DOCS_URL = docLinks.workplaceSearchIndexingSchedule;
+export const OBJECTS_AND_ASSETS_DOCS_URL = docLinks.workplaceSearchSynch;
 
 export const PERSONAL_PATH = '/p';
 

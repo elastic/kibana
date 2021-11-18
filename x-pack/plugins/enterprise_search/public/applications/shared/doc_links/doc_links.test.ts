@@ -16,7 +16,9 @@ describe('DocLinks', () => {
         enterpriseSearch: {
           base: 'http://elastic.enterprise.search',
           appSearchBase: 'http://elastic.app.search',
-          workplaceSearchBase: 'http://elastic.workplace.search',
+        },
+        workplaceSearch: {
+          base: 'http://elastic.workplace.search',
         },
       },
     };

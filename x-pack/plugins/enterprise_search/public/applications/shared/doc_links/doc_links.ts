@@ -23,9 +23,19 @@ class DocLinks {
   public workplaceSearchGitHub: string;
   public workplaceSearchGmail: string;
   public workplaceSearchGoogleDrive: string;
+  public workplaceSearchIndexingSchedule: string;
   public workplaceSearchJiraCloud: string;
   public workplaceSearchJiraServer: string;
   public workplaceSearchOneDrive: string;
+  public workplaceSearchSalesforce: string;
+  public workplaceSearchServiceNow: string;
+  public workplaceSearchSharePoint: string;
+  public workplaceSearchSlack: string;
+  public workplaceSearchZendesk: string;
+  public workplaceSearchCustomSources: string;
+  public workplaceSearchCustomSourcePermissions: string;
+  public licenseManagement: string;
+  public workplaceSearchSynch: string;
 
   constructor() {
     this.enterpriseSearchBase = '';
@@ -43,34 +53,51 @@ class DocLinks {
     this.workplaceSearchGitHub = '';
     this.workplaceSearchGmail = '';
     this.workplaceSearchGoogleDrive = '';
+    this.workplaceSearchIndexingSchedule = '';
     this.workplaceSearchJiraCloud = '';
     this.workplaceSearchJiraServer = '';
     this.workplaceSearchOneDrive = '';
+    this.workplaceSearchSalesforce = '';
+    this.workplaceSearchServiceNow = '';
+    this.workplaceSearchSharePoint = '';
+    this.workplaceSearchSlack = '';
+    this.workplaceSearchZendesk = '';
+    this.workplaceSearchCustomSources = '';
+    this.workplaceSearchCustomSourcePermissions = '';
+    this.licenseManagement = '';
+    this.workplaceSearchSynch = '';
   }
 
   public setDocLinks(docLinks: DocLinksStart): void {
     this.enterpriseSearchBase = docLinks.links.enterpriseSearch.base;
     this.appSearchBase = docLinks.links.enterpriseSearch.appSearchBase;
-    this.workplaceSearchBase = docLinks.links.enterpriseSearch.workplaceSearchBase;
+    this.workplaceSearchBase = docLinks.links.workplaceSearch.base;
     this.cloudBase = `${docLinks.ELASTIC_WEBSITE_URL}guide/en/cloud/current`;
-    this.workplaceSearchPermissions = docLinks.links.enterpriseSearch.workplaceSearchPermissions;
-    this.workplaceSearchDocumentPermissions =
-      docLinks.links.enterpriseSearch.workplaceSearchDocumentPermissions;
-    this.workplaceSearchExternalIdentities =
-      docLinks.links.enterpriseSearch.workplaceSearchExternalIdentities;
-    this.workplaceSearchSecurity = docLinks.links.enterpriseSearch.workplaceSearchSecurity;
-    this.workplaceSearchBox = docLinks.links.enterpriseSearch.workplaceSearchBox;
-    this.workplaceSearchConfluenceCloud =
-      docLinks.links.enterpriseSearch.workplaceSearchConfluenceCloud;
-    this.workplaceSearchConfluenceServer =
-      docLinks.links.enterpriseSearch.workplaceSearchConfluenceServer;
-    this.workplaceSearchDropbox = docLinks.links.enterpriseSearch.workplaceSearchDropbox;
-    this.workplaceSearchGitHub = docLinks.links.enterpriseSearch.workplaceSearchGitHub;
-    this.workplaceSearchGmail = docLinks.links.enterpriseSearch.workplaceSearchGmail;
-    this.workplaceSearchGoogleDrive = docLinks.links.enterpriseSearch.workplaceSearchGoogleDrive;
-    this.workplaceSearchJiraCloud = docLinks.links.enterpriseSearch.workplaceSearchJiraCloud;
-    this.workplaceSearchJiraServer = docLinks.links.enterpriseSearch.workplaceSearchJiraServer;
-    this.workplaceSearchOneDrive = docLinks.links.enterpriseSearch.workplaceSearchOneDrive;
+    this.workplaceSearchPermissions = docLinks.links.workplaceSearch.permissions;
+    this.workplaceSearchDocumentPermissions = docLinks.links.workplaceSearch.documentPermissions;
+    this.workplaceSearchExternalIdentities = docLinks.links.workplaceSearch.externalIdentities;
+    this.workplaceSearchSecurity = docLinks.links.workplaceSearch.security;
+    this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
+    this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
+    this.workplaceSearchConfluenceServer = docLinks.links.workplaceSearch.confluenceServer;
+    this.workplaceSearchDropbox = docLinks.links.workplaceSearch.dropbox;
+    this.workplaceSearchGitHub = docLinks.links.workplaceSearch.gitHub;
+    this.workplaceSearchGmail = docLinks.links.workplaceSearch.gmail;
+    this.workplaceSearchGoogleDrive = docLinks.links.workplaceSearch.googleDrive;
+    this.workplaceSearchIndexingSchedule = docLinks.links.workplaceSearch.indexingSchedule;
+    this.workplaceSearchJiraCloud = docLinks.links.workplaceSearch.jiraCloud;
+    this.workplaceSearchJiraServer = docLinks.links.workplaceSearch.jiraServer;
+    this.workplaceSearchOneDrive = docLinks.links.workplaceSearch.oneDrive;
+    this.workplaceSearchSalesforce = docLinks.links.workplaceSearch.salesforce;
+    this.workplaceSearchServiceNow = docLinks.links.workplaceSearch.serviceNow;
+    this.workplaceSearchSharePoint = docLinks.links.workplaceSearch.sharePoint;
+    this.workplaceSearchSlack = docLinks.links.workplaceSearch.slack;
+    this.workplaceSearchZendesk = docLinks.links.workplaceSearch.zendesk;
+    this.workplaceSearchCustomSources = docLinks.links.workplaceSearch.customSources;
+    this.workplaceSearchCustomSourcePermissions =
+      docLinks.links.workplaceSearch.customSourcePermissions;
+    this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
+    this.workplaceSearchSynch = docLinks.links.workplaceSearch.synch;
   }
 }
 
