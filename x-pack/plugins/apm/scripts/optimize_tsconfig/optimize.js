@@ -110,7 +110,7 @@ async function optimizeTsConfig() {
   await setIgnoreChanges();
   // eslint-disable-next-line no-console
   console.log(
-    'Created an optimized tsconfig.json for APM. To undo these changes, run `./scripts/unoptimize-tsconfig.js`'
+    'Created an optimized tsconfig.json for APM. To undo these changes, run `./scripts/unoptimize_tsconfig.js`'
   );
 }
 
