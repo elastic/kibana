@@ -25,8 +25,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import 'brace/theme/textmate';
-
 import { SectionError, Error } from '../../../../../shared_imports';
 
 import { useCore, useServices } from '../../../../app_context';

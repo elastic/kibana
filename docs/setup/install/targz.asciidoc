@@ -90,6 +90,8 @@ cd kibana-{version}/ <2>
 
 endif::[]
 
+[[targz-enroll]]
+include::start-es-and-enroll.asciidoc[]
 
 [[targz-running]]
 include::targz-running.asciidoc[]

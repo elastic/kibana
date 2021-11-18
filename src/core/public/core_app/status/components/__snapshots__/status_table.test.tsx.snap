@@ -30,7 +30,7 @@ exports[`StatusTable renders when statuses is provided 1`] = `
           "id": "available",
           "message": "Ready",
           "title": "green",
-          "uiColor": "secondary",
+          "uiColor": "success",
         },
       },
     ]
