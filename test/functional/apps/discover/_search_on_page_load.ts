@@ -78,6 +78,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('refreshDataButton')).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
+        // needs for discover debounce reload, which timeout set to 100 sec
+        await PageObjects.common.sleep(100);
+
         await testSubjects.click('refreshDataButton');
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
