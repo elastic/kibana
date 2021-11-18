@@ -6,4 +6,5 @@
  */
 
 export { MvtVectorLayer } from './mvt_vector_layer';
-export { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
+export { syncMvtSourceData } from './mvt_source_data';
+export type { MvtSourceData } from './mvt_source_data';

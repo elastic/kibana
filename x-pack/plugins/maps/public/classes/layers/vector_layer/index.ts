@@ -15,4 +15,5 @@ export { isVectorLayer, NO_RESULTS_ICON_AND_TOOLTIPCONTENT } from './vector_laye
 
 export { BlendedVectorLayer } from './blended_vector_layer';
 export { GeoJsonVectorLayer } from './geojson_vector_layer';
-export { MvtVectorLayer, MvtSourceData, syncMvtSourceData } from './mvt_vector_layer';
+export { MvtVectorLayer, syncMvtSourceData } from './mvt_vector_layer';
+export type { MvtSourceData } from './mvt_vector_layer';
