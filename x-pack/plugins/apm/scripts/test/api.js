@@ -56,6 +56,6 @@ if (server) {
 const grepArg = grep ? `--grep "${grep}"` : '';
 const cmd = `node ../../../../scripts/${ftrScript} ${grepArg} --config ../../../../test/apm_api_integration/${license}/config.ts`;
 
-console.log(`Running ${cmd}`);
+console.log(`Running: ${cmd}`);
 
 childProcess.execSync(cmd, { cwd: path.join(__dirname), stdio: 'inherit' });

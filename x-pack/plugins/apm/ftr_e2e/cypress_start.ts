@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import { argv } from 'yargs';
-import Url from 'url';
+import url from 'url';
 import cypress from 'cypress';
 import { FtrProviderContext } from './ftr_provider_context';
 import { createApmUsersAndRoles } from '../scripts/create_apm_users_and_roles/create_apm_users_and_roles';
@@ -22,7 +22,7 @@ export async function cypressStart(
 
   const archiveName = 'apm_mappings_only_8.0.0';
 
-  const kibanaUrl = Url.format({
+  const kibanaUrl = url.format({
     protocol: config.get('servers.kibana.protocol'),
     hostname: config.get('servers.kibana.hostname'),
     port: config.get('servers.kibana.port'),
@@ -40,7 +40,7 @@ export async function cypressStart(
     },
   });
 
-  const esNode = Url.format({
+  const esUrl = url.format({
     protocol: config.get('servers.elasticsearch.protocol'),
     port: config.get('servers.elasticsearch.port'),
     hostname: config.get('servers.elasticsearch.hostname'),
@@ -60,7 +60,7 @@ export async function cypressStart(
     config: { baseUrl: kibanaUrl },
     env: {
       KIBANA_URL: kibanaUrl,
-      ES_NODE: esNode,
+      ES_URL: esUrl,
       ES_REQUEST_TIMEOUT: esRequestTimeout,
       TEST_CLOUD: process.env.TEST_CLOUD,
     },

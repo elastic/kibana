@@ -9,7 +9,19 @@
 import { service, timerange, getTransactionMetrics, getSpanDestinationMetrics } from '../..';
 import { getBreakdownMetrics } from '../../lib/utils/get_breakdown_metrics';
 
-export default function ({ from, to }: { from: number; to: number }) {
+export default function ({
+  from,
+  to,
+  serviceName = 'opbeans-go',
+  agentName = 'go',
+  environment = 'production',
+}: {
+  from: number;
+  to: number;
+  serviceName?: string;
+  agentName?: string;
+  environment?: string;
+}) {
   const numServices = 3;
 
   const range = timerange(from, to);
@@ -21,7 +33,9 @@ export default function ({ from, to }: { from: number; to: number }) {
   const failedTimestamps = range.interval('1s').rate(1);
 
   return new Array(numServices).fill(undefined).flatMap((_, index) => {
-    const instance = service(`opbeans-go-${index}`, 'production', 'go').instance('instance');
+    const instance = service(`${serviceName}-${index}`, environment, agentName).instance(
+      'instance'
+    );
 
     const successfulTraceEvents = successfulTimestamps.flatMap((timestamp) =>
       instance

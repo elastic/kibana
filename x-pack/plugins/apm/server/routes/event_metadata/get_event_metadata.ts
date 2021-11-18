@@ -62,5 +62,5 @@ export async function getEventMetadata({
     terminate_after: 1,
   });
 
-  return response.hits.hits[0].fields;
+  return response.hits.hits[0]?.fields;
 }

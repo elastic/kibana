@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import datemath from '@elastic/datemath';
+import url from 'url';
 import yargs from 'yargs/yargs';
 import { cleanWriteTargets } from '../lib/utils/clean_write_targets';
 import { intervalToMs } from './utils/interval_to_ms';
@@ -27,6 +28,10 @@ yargs(process.argv.slice(2))
         .option('target', {
           describe: 'Elasticsearch target, including username/password',
           demandOption: true,
+          string: true,
+        })
+        .option('kibanaUrl', {
+          describe: 'Kibana url',
           string: true,
         })
         .option('from', {
@@ -73,7 +78,7 @@ yargs(process.argv.slice(2))
     async (argv) => {
       const file = String(argv.file || argv._[0]);
 
-      const { target, workers, clean, clientWorkers, batchSize } = argv;
+      const { target, workers, clean, clientWorkers, batchSize, kibanaUrl } = argv;
 
       const { scenario, intervalInMs, bucketSizeInMs, logger, writeTargets, client, logLevel } =
         await getCommonResources({
@@ -108,6 +113,15 @@ yargs(process.argv.slice(2))
           2
         )}`
       );
+
+      if (kibanaUrl) {
+        const kibanaUrlWithoutAuth = url.format(new URL(kibanaUrl), { auth: false });
+        logger.info(
+          `View data at ${kibanaUrlWithoutAuth}/app/apm/services?rangeFrom=${encodeURIComponent(
+            new Date(from).toISOString()
+          )}&rangeTo=${encodeURIComponent(new Date(to).toISOString())}`
+        );
+      }
 
       startHistoricalDataUpload({
         from,

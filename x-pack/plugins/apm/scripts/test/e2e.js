@@ -45,6 +45,11 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'stop tests after the first failure',
   })
+  .option('kibana-install-dir', {
+    default: '',
+    type: 'string',
+    description: 'Path to the Kibana install directory',
+  })
   .help();
 
 const { server, runner, open, grep, bail, kibanaInstallDir } = argv;
@@ -58,10 +63,16 @@ if (server) {
   ftrScript = 'functional_test_runner';
 }
 
-const config = open ? './ftr_config_open.ts' : './ftr_config_run.ts';
+const configArg = open
+  ? '--config ./ftr_config_open.ts'
+  : '--config ./ftr_config_run.ts';
 const grepArg = grep ? `--grep "${grep}"` : '';
 const bailArg = bail ? `--bail` : '';
-const cmd = `node ../../../../scripts/${ftrScript} --config ${config} ${grepArg} ${bailArg} --kibana-install-dir '${kibanaInstallDir}'`;
+const installDirArg = kibanaInstallDir
+  ? `--kibana-install-dir '${kibanaInstallDir}'`
+  : '';
 
-console.log(`Running ${cmd}`);
+const cmd = `node ../../../../scripts/${ftrScript} ${configArg} ${grepArg} ${bailArg} ${installDirArg}`;
+
+console.log(`Running: ${cmd}`);
 childProcess.execSync(cmd, { cwd: e2eDir, stdio: 'inherit' });

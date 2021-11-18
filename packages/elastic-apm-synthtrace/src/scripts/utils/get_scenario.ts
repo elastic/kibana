@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import Path from 'path';
+import path from 'path';
 import { Fields } from '../../lib/entity';
 import { Logger } from '../../lib/utils/create_logger';
 
 export type Scenario = (options: { from: number; to: number }) => Fields[];
 
-export function getScenario({ file, logger }: { file: unknown; logger: Logger }) {
-  const location = Path.join(process.cwd(), String(file));
-
+export function getScenario({ file, logger }: { file: string; logger: Logger }) {
+  const location = path.resolve(file);
   logger.debug(`Loading scenario from ${location}`);
 
   return import(location).then((m) => {

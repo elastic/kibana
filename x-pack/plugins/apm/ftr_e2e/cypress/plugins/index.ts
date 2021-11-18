@@ -30,12 +30,12 @@ const plugin: Cypress.PluginConfig = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
 
-  const node = config.env.ES_NODE;
+  const esUrl = config.env.ES_URL;
   const requestTimeout = config.env.ES_REQUEST_TIMEOUT;
   const isCloud = config.env.TEST_CLOUD;
 
   const client = new Client({
-    node,
+    node: esUrl,
     requestTimeout,
     Connection: HttpConnection,
     ...(isCloud ? { tls: { ca: Fs.readFileSync(CA_CERT_PATH, 'utf-8') } } : {}),
