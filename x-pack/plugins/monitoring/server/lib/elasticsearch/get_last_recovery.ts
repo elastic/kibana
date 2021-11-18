@@ -10,7 +10,7 @@ import _ from 'lodash';
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
 // @ts-ignore
-import { createQuery } from '../create_query';
+import { createNewQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 import {
@@ -19,6 +19,7 @@ import {
   ElasticsearchResponseHit,
 } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 /**
  * Filter out shard activity that we do not care about.
@@ -86,32 +87,54 @@ export function handleMbLastRecoveries(resp: ElasticsearchResponse, start: numbe
   return filtered;
 }
 
-export async function getLastRecovery(req: LegacyRequest, esIndexPattern: string, size: number) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getLastRecovery');
-
+export async function getLastRecovery(req: LegacyRequest, size: number, ccs?: string) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
   const clusterUuid = req.params.clusterUuid;
 
   const metric = ElasticsearchMetric.getMetricFields();
+
+  const datasets = ['index_recovery'];
+  const productType = 'elasticsearch';
+  const indexPattern = getNewIndexPatterns({
+    server: req.server,
+    productType,
+    datasets,
+    ccs,
+  });
+
   const legacyParams = {
-    index: esIndexPattern,
+    index: indexPattern,
     size: 1,
     ignore_unavailable: true,
     body: {
       _source: ['index_recovery.shards'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({ type: 'index_recovery', start, end, clusterUuid, metric }),
+      query: createNewQuery({
+        productType,
+        types: datasets,
+        start,
+        end,
+        clusterUuid,
+        metric,
+      }),
     },
   };
   const mbParams = {
-    index: esIndexPattern,
+    index: indexPattern,
     size,
     ignore_unavailable: true,
     body: {
       _source: ['elasticsearch.index.recovery', '@timestamp'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({ type: 'index_recovery', start, end, clusterUuid, metric }),
+      query: createNewQuery({
+        productType,
+        types: datasets,
+        start,
+        end,
+        clusterUuid,
+        metric,
+      }),
       aggs: {
         max_timestamp: {
           max: {

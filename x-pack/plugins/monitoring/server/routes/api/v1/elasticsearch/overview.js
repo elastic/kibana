@@ -9,11 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getLastRecovery } from '../../../../lib/elasticsearch/get_last_recovery';
-import { getMetrics } from '../../../../lib/details/get_metrics';
+import { getNewMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_overview';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 
@@ -39,7 +38,6 @@ export function esOverviewRoute(server) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
       const filebeatIndexPattern = prefixIndexPattern(
         config,
         config.get('monitoring.ui.logs.index'),
@@ -52,15 +50,15 @@ export function esOverviewRoute(server) {
 
       try {
         const [clusterStats, metrics, shardActivity, logs] = await Promise.all([
-          getClusterStats(req, esIndexPattern, clusterUuid),
-          getMetrics(req, esIndexPattern, metricSet),
-          getLastRecovery(req, esIndexPattern, config.get('monitoring.ui.max_bucket_size')),
+          getClusterStats(req, clusterUuid),
+          getNewMetrics(req, 'elasticsearch', metricSet, ccs),
+          getLastRecovery(req, config.get('monitoring.ui.max_bucket_size'), ccs),
           getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end }),
         ]);
         const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
           req,
-          esIndexPattern,
-          clusterStats
+          clusterStats,
+          ccs
         );
 
         const result = {

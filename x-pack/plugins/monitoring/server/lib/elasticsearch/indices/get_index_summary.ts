@@ -10,11 +10,12 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { checkParam } from '../../error_missing_required';
 // @ts-ignore
-import { createQuery } from '../../create_query';
+import { createNewQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
+import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
 
 export function handleResponse(shardStats: any, indexUuid: string) {
   return (response: ElasticsearchResponse) => {
@@ -64,16 +65,23 @@ export function handleResponse(shardStats: any, indexUuid: string) {
 
 export function getIndexSummary(
   req: LegacyRequest,
-  esIndexPattern: string,
   shardStats: any,
   {
     clusterUuid,
     indexUuid,
     start,
     end,
-  }: { clusterUuid: string; indexUuid: string; start: number; end: number }
+  }: { clusterUuid: string; indexUuid: string; start: number; end: number },
+  ccs?: string
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndexSummary');
+  const datasets = ['index', 'index_stats'];
+  const productType = 'elasticsearch';
+  const indexPatterns = getNewIndexPatterns({
+    datasets,
+    productType,
+    ccs,
+    server: req.server,
+  });
 
   const metric = ElasticsearchMetric.getMetricFields();
   const filters = [
@@ -87,13 +95,14 @@ export function getIndexSummary(
     },
   ];
   const params = {
-    index: esIndexPattern,
+    index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
+      query: createNewQuery({
         types: ['index', 'index_stats'],
+        productType,
         start,
         end,
         clusterUuid,

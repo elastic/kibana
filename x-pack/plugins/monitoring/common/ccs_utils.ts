@@ -66,12 +66,7 @@ export function prefixIndexPattern(
   }
 
   if (!ccsEnabled || !ccs) {
-    return appendMetricbeatIndex(
-      config,
-      indexPattern,
-      ccsEnabled ? ccs : undefined,
-      monitoringIndicesOnly
-    );
+    return indexPattern;
   }
 
   const patterns = indexPattern.split(',');
@@ -79,15 +74,9 @@ export function prefixIndexPattern(
 
   // if a wildcard is used, then we also want to search the local indices
   if (ccs === '*') {
-    return appendMetricbeatIndex(
-      config,
-      `${prefixedPattern},${indexPattern}`,
-      ccs,
-      monitoringIndicesOnly
-    );
+    return `${prefixedPattern},${indexPattern}`;
   }
-
-  return appendMetricbeatIndex(config, prefixedPattern, ccs, monitoringIndicesOnly);
+  return prefixedPattern;
 }
 
 /**

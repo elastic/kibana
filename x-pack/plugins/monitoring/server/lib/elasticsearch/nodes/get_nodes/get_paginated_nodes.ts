@@ -12,7 +12,7 @@ import { filter } from '../../../pagination/filter';
 import { sortNodes } from './sort_nodes';
 // @ts-ignore
 import { paginate } from '../../../pagination/paginate';
-import { getMetrics } from '../../../details/get_metrics';
+import { getNewMetrics } from '../../../details/get_metrics';
 import { LegacyRequest } from '../../../../types';
 
 /**
@@ -41,7 +41,6 @@ interface Node {
 
 export async function getPaginatedNodes(
   req: LegacyRequest,
-  esIndexPattern: string,
   { clusterUuid }: { clusterUuid: string },
   metricSet: string[],
   pagination: { index: number; size: number },
@@ -55,11 +54,12 @@ export async function getPaginatedNodes(
       cluster_state: { nodes: Record<string, Node> };
     };
     nodesShardCount: { nodes: Record<string, { shardCount: number }> };
-  }
+  },
+  ccs?: string
 ) {
   const config = req.server.config();
   const size = Number(config.get('monitoring.ui.max_bucket_size'));
-  const nodes: Node[] = await getNodeIds(req, esIndexPattern, { clusterUuid }, size);
+  const nodes: Node[] = await getNodeIds(req, { clusterUuid }, size, ccs);
 
   // Add `isOnline` and shards from the cluster state and shard stats
   const clusterState = clusterStats?.cluster_state ?? { nodes: {} };
@@ -85,15 +85,17 @@ export async function getPaginatedNodes(
     include: nodes.map((node) => node.uuid),
     size: config.get('monitoring.ui.max_bucket_size'),
   };
-  const metricSeriesData = await getMetrics(
+  const metricSeriesData = await getNewMetrics(
     req,
-    esIndexPattern,
+    'elasticsearch',
     metricSet,
     filters,
     { nodes },
     4,
-    groupBy
+    groupBy,
+    ccs
   );
+
   for (const metricName in metricSeriesData) {
     if (!metricSeriesData.hasOwnProperty(metricName)) {
       continue;

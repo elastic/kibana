@@ -68,7 +68,7 @@ export async function getClustersFromRequest(
     clusters.push(getStandaloneClusterDefinition());
   } else {
     // get clusters with stats and cluster state
-    clusters = await getClustersStats(req, esIndexPattern, clusterUuid);
+    clusters = await getClustersStats(req, clusterUuid);
   }
 
   if (!clusterUuid && !isStandaloneCluster) {

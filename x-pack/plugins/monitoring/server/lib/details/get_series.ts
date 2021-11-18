@@ -11,10 +11,11 @@ import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest, Bucket } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { metrics } from '../metrics';
-import { createQuery } from '../create_query';
+import { createQuery, createNewQuery } from '../create_query';
 import { formatTimestampToDuration } from '../../../common';
 import { NORMALIZED_DERIVATIVE_UNIT, CALCULATE_DURATION_UNTIL } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 type SeriesBucket = Bucket & { metric_mb_deriv?: { normalized_value: number } };
 
@@ -177,6 +178,95 @@ async function fetchSeries(
     ignore_unavailable: true,
     body: {
       query: createQuery({
+        start: adjustedMin,
+        end: Number(max),
+        metric,
+        clusterUuid: req.params.clusterUuid,
+        // TODO: Pass in the UUID as an explicit function parameter
+        uuid: getUuid(req, metric),
+        filters,
+      }),
+      aggs,
+    },
+  };
+
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+  return await callWithRequest(req, 'search', params);
+}
+
+async function fetchNewSeries(
+  req: LegacyRequest,
+  productType: string,
+  metric: Metric,
+  metricOptions: any,
+  groupBy: string | Record<string, any> | null,
+  min: string | number,
+  max: string | number,
+  bucketSize: number,
+  filters: Array<Record<string, any>>,
+  ccs?: string
+) {
+  // if we're using a derivative metric, offset the min (also @see comment on offsetMinForDerivativeMetric function)
+  const adjustedMin = metric.derivative
+    ? offsetMinForDerivativeMetric(Number(min), bucketSize)
+    : Number(min);
+
+  let dateHistogramSubAggs = null;
+  if (metric.getDateHistogramSubAggs) {
+    dateHistogramSubAggs = metric.getDateHistogramSubAggs(metricOptions);
+  } else if (metric.dateHistogramSubAggs) {
+    dateHistogramSubAggs = metric.dateHistogramSubAggs;
+  } else {
+    dateHistogramSubAggs = {
+      metric: {
+        [metric.metricAgg]: {
+          field: metric.field,
+        },
+      },
+      ...createMetricAggs(metric),
+    };
+    if (metric.mbField) {
+      Reflect.set(dateHistogramSubAggs, 'metric_mb', {
+        [metric.metricAgg]: {
+          field: metric.mbField,
+        },
+      });
+    }
+  }
+
+  let aggs: any = {
+    check: {
+      date_histogram: {
+        field: metric.timestampField,
+        fixed_interval: bucketSize + 's',
+      },
+      aggs: {
+        ...dateHistogramSubAggs,
+      },
+    },
+  };
+
+  if (groupBy) {
+    aggs = {
+      groupBy: {
+        terms: groupBy,
+        aggs,
+      },
+    };
+  }
+
+  const indexPatterns = getNewIndexPatterns({
+    server: req.server,
+    productType,
+    ccs,
+  });
+
+  const params = {
+    index: indexPatterns,
+    size: 0,
+    ignore_unavailable: true,
+    body: {
+      query: createNewQuery({
         start: adjustedMin,
         end: Number(max),
         metric,
@@ -356,6 +446,43 @@ export async function getSeries(
     max,
     bucketSize,
     filters
+  );
+
+  return handleSeries(metric, groupBy, min, max, bucketSize, timezone, response);
+}
+
+export async function getNewSeries(
+  req: LegacyRequest,
+  productType: string,
+  metricName: string,
+  metricOptions: Record<string, any>,
+  filters: Array<Record<string, any>>,
+  groupBy: string | Record<string, any> | null,
+  {
+    min,
+    max,
+    bucketSize,
+    timezone,
+  }: { min: string | number; max: string | number; bucketSize: number; timezone: string },
+  ccs?: string
+) {
+  checkParam(productType, 'productType in details/getSeries');
+
+  const metric = metrics[metricName];
+  if (!metric) {
+    throw new Error(`Not a valid metric: ${metricName}`);
+  }
+  const response = await fetchNewSeries(
+    req,
+    productType,
+    metric,
+    metricOptions,
+    groupBy,
+    min,
+    max,
+    bucketSize,
+    filters,
+    ccs
   );
 
   return handleSeries(metric, groupBy, min, max, bucketSize, timezone, response);

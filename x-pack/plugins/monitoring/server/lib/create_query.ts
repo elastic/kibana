@@ -9,7 +9,7 @@ import { defaults } from 'lodash';
 import moment from 'moment';
 import { MissingRequiredError } from './error_missing_required';
 import { standaloneClusterFilter } from './standalone_clusters';
-import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
+import { DS_INDEX_PATTERN_METRICS, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 export interface TimerangeFilter {
   range: {
@@ -90,6 +90,87 @@ export function createQuery(options: {
         ],
       },
     };
+  }
+
+  let clusterUuidFilter;
+  if (clusterUuid && !isFromStandaloneCluster) {
+    clusterUuidFilter = { term: { cluster_uuid: clusterUuid } };
+  }
+
+  let uuidFilter;
+  // options.uuid can be null, for example getting all the clusters
+  if (uuid) {
+    const uuidField = options.metric?.uuidField;
+    if (!uuidField) {
+      throw new MissingRequiredError('options.uuid given but options.metric.uuidField is false');
+    }
+    uuidFilter = { term: { [uuidField]: uuid } };
+  }
+
+  const timestampField = options.metric?.timestampField;
+  if (!timestampField) {
+    throw new MissingRequiredError('metric.timestampField');
+  }
+  const timeRangeFilter = createTimeFilter(options);
+
+  const combinedFilters = [
+    typeFilter,
+    clusterUuidFilter,
+    uuidFilter,
+    timeRangeFilter ?? undefined,
+    ...filters,
+  ];
+
+  if (isFromStandaloneCluster) {
+    combinedFilters.push(standaloneClusterFilter);
+  }
+
+  const query = {
+    bool: {
+      filter: combinedFilters.filter(Boolean),
+    },
+  };
+
+  return query;
+}
+
+export function createNewQuery(options: {
+  productType?: string;
+  types?: string[];
+  dsType?: string;
+  filters?: any[];
+  clusterUuid: string;
+  uuid?: string;
+  start?: number;
+  end?: number;
+  metric?: { uuidField?: string; timestampField: string };
+}) {
+  const {
+    productType,
+    types,
+    clusterUuid,
+    uuid,
+    filters,
+    dsType = DS_INDEX_PATTERN_METRICS,
+  } = defaults(options, {
+    filters: [],
+  });
+  // TODO: improve typing instead of having this
+  // if (types?.length && !productType) throw new Error('types must have a product type');
+
+  const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
+
+  const typeFilter: any = {
+    bool: {
+      should: [{ term: { 'data_stream.type': dsType } }],
+    },
+  };
+  if (types && types.length) {
+    typeFilter.bool.should.push(
+      ...types.map((t) => ({ term: { 'data_stream.name': `${productType}.${t}` } })),
+      ...types.map((t) => ({ term: { type: t } })),
+      ...types.map((t) => ({ term: { 'metricset.name': t } }))
+    );
   }
 
   let clusterUuidFilter;

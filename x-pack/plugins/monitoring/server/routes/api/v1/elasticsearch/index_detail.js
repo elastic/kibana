@@ -9,12 +9,11 @@ import { get } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
-import { getMetrics } from '../../../../lib/details/get_metrics';
+import { getNewMetrics } from '../../../../lib/details/get_metrics';
 import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_index_detail';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs/get_logs';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSet;
@@ -47,7 +46,6 @@ export function esIndexRoute(server) {
         const indexUuid = req.params.id;
         const start = req.payload.timeRange.min;
         const end = req.payload.timeRange.max;
-        const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
         const filebeatIndexPattern = prefixIndexPattern(
           config,
           config.get('monitoring.ui.logs.index'),
@@ -57,23 +55,32 @@ export function esIndexRoute(server) {
         const isAdvanced = req.payload.is_advanced;
         const metricSet = isAdvanced ? metricSetAdvanced : metricSetOverview;
 
-        const cluster = await getClusterStats(req, esIndexPattern, clusterUuid);
+        const cluster = await getClusterStats(req, clusterUuid);
         const showSystemIndices = true; // hardcode to true, because this could be a system index
 
-        const shardStats = await getShardStats(req, esIndexPattern, cluster, {
-          includeNodes: true,
-          includeIndices: true,
-          indexName: indexUuid,
-        });
-        const indexSummary = await getIndexSummary(req, esIndexPattern, shardStats, {
+        const shardStats = await getShardStats(
+          req,
+          cluster,
+          {
+            includeNodes: true,
+            includeIndices: true,
+            indexName: indexUuid,
+          },
+          ccs
+        );
+        const indexSummary = await getIndexSummary(req, shardStats, {
           clusterUuid,
           indexUuid,
           start,
           end,
         });
-        const metrics = await getMetrics(req, esIndexPattern, metricSet, [
-          { term: { 'index_stats.index': indexUuid } },
-        ]);
+        const metrics = await getNewMetrics(
+          req,
+          'elasticsearch',
+          metricSet,
+          [{ term: { 'index_stats.index': indexUuid } }],
+          ccs
+        );
 
         let logs;
         let shardAllocation;
@@ -97,7 +104,7 @@ export function esIndexRoute(server) {
             stateUuid,
             showSystemIndices,
           };
-          const shards = await getShardAllocation(req, esIndexPattern, allocationOptions);
+          const shards = await getShardAllocation(req, allocationOptions, ccs);
 
           logs = await getLogs(config, req, filebeatIndexPattern, {
             clusterUuid,

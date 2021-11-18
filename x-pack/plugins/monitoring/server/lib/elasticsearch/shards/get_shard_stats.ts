@@ -9,7 +9,7 @@ import { get } from 'lodash';
 // @ts-ignore
 import { checkParam } from '../../error_missing_required';
 // @ts-ignore
-import { createQuery } from '../../create_query';
+import { createNewQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 // @ts-ignore
@@ -20,6 +20,7 @@ import { getShardAggs } from './get_shard_stat_aggs';
 import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
 import { LegacyRequest } from '../../../types';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../../common/types/es';
+import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
 
 export function handleResponse(
   resp: ElasticsearchResponse,
@@ -55,11 +56,18 @@ export function handleResponse(
 
 export function getShardStats(
   req: LegacyRequest,
-  esIndexPattern: string,
   cluster: ElasticsearchModifiedSource,
-  { includeNodes = false, includeIndices = false, indexName = null, nodeUuid = null } = {}
+  { includeNodes = false, includeIndices = false, indexName = null, nodeUuid = null } = {},
+  ccs?: string
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
+  const datasets = ['shard', 'shards'];
+  const productType = 'elasticsearch';
+  const indexPatterns = getNewIndexPatterns({
+    server: req.server,
+    productType,
+    ccs,
+    datasets,
+  });
 
   const config = req.server.config();
   const metric = ElasticsearchMetric.getMetricFields();
@@ -94,13 +102,14 @@ export function getShardStats(
     });
   }
   const params = {
-    index: esIndexPattern,
+    index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
+      query: createNewQuery({
         types: ['shard', 'shards'],
+        productType: 'elasticsearch',
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,
         filters,

@@ -13,6 +13,7 @@ import {
   INDEX_PATTERN_LOGSTASH,
   INDEX_PATTERN_BEATS,
   INDEX_ALERTS,
+  DS_INDEX_PATTERN_METRICS,
 } from '../../../common/constants';
 
 export function getIndexPatterns(
@@ -41,6 +42,61 @@ export function getIndexPatterns(
       };
     }, {}),
   };
-
   return indexPatterns;
+}
+
+export function getLegacyIndexPattern({ productType }: { productType: string }) {
+  let indexPattern = '';
+  switch (productType) {
+    case 'elasticsearch':
+      indexPattern = INDEX_PATTERN_ELASTICSEARCH;
+      break;
+    default:
+      throw new Error('invalid product type to create index pattern');
+  }
+  return indexPattern;
+}
+
+// ***** Move out of clusters??
+export function getDsIndexPattern({
+  type = DS_INDEX_PATTERN_METRICS,
+  productType,
+  datasets,
+  namespace = '*',
+}: {
+  type?: string;
+  datasets?: string[];
+  productType: string;
+  namespace?: string;
+}): string {
+  // if there is one dataset, include in the index pattern else use *.
+  // we cannot specify more than one particular dataset in a query because the list
+  // of indices could be too long
+  let datasetsPattern = '';
+  if (datasets) {
+    datasetsPattern = datasets.length === 1 ? `${productType}.${datasets[0]}` : '*';
+  } else {
+    datasetsPattern = `${productType}.*`;
+  }
+  return `${type}-${datasetsPattern}-${namespace}`;
+}
+
+export function getNewIndexPatterns({
+  server,
+  productType,
+  ccs = '*',
+  type = DS_INDEX_PATTERN_METRICS,
+  datasets,
+  namespace = '*',
+}: {
+  server: LegacyServer;
+  productType: string;
+  ccs?: string;
+  type?: string;
+  datasets?: string[];
+  namespace?: string;
+}): string {
+  const dsIndexPattern = getDsIndexPattern({ type, productType, datasets, namespace });
+  const legacyIndexPattern = getLegacyIndexPattern({ productType });
+  return prefixIndexPattern(server.config(), `${legacyIndexPattern},${dsIndexPattern}`, ccs);
 }
