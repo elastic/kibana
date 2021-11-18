@@ -100,5 +100,8 @@ export const translations = {
     viewInAppButtonText: i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {
       defaultMessage: 'View in app',
     }),
+    paginationLabel: i18n.translate('xpack.observability.alertsFlyout.paginationLabel', {
+      defaultMessage: 'Alerts navigation',
+    }),
   },
 };

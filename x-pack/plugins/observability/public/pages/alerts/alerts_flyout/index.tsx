@@ -147,7 +147,8 @@ export function AlertsFlyout({
           <EuiFlexItem grow={false}>
             {showPagination && (
               <EuiPagination
-                aria-label="Yadda yadda"
+                aria-label={translations.alertsFlyout.paginationLabel}
+                data-test-subj="alertsFlyoutPagination"
                 pageCount={totalAlerts}
                 activePage={selectedAlertIndex}
                 onPageClick={onSelectPage}
