@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return nrOfFetches === fetchesNumber;
   };
 
-  describe('usage of discover:searchOnPageLoad', () => {
+  describe.only('usage of discover:searchOnPageLoad', () => {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
