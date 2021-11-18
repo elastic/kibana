@@ -11,9 +11,9 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { asInteger } from '../../../../../common/utils/formatters';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -24,6 +24,7 @@ import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { APMQueryParams } from '../../../shared/Links/url_helpers';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
@@ -49,13 +50,22 @@ const Culprit = euiStyled.div`
 
 type ErrorGroupItem =
   APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>['errorGroups']['error_groups'][0];
+type ErrorGroupDetailedStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 interface Props {
   items: ErrorGroupItem[];
   serviceName: string;
+  periods: ErrorGroupDetailedStatistics;
+  comparisonEnabled?: boolean;
 }
 
-function ErrorGroupList({ items, serviceName }: Props) {
+function ErrorGroupList({
+  items,
+  serviceName,
+  periods,
+  comparisonEnabled,
+}: Props) {
   const { urlParams } = useLegacyUrlParams();
 
   const columns = useMemo(() => {
@@ -167,26 +177,11 @@ function ErrorGroupList({ items, serviceName }: Props) {
           ),
       },
       {
-        name: i18n.translate('xpack.apm.errorsTable.occurrencesColumnLabel', {
-          defaultMessage: 'Occurrences',
+        field: 'lastSeen',
+        sortable: true,
+        name: i18n.translate('xpack.apm.errorsTable.lastSeenColumnLabel', {
+          defaultMessage: 'Last seen',
         }),
-        field: 'occurrenceCount',
-        sortable: true,
-        dataType: 'number',
-        render: (_, { occurrences }) =>
-          occurrences
-            ? numeral(occurrences).format('0.[0]a')
-            : NOT_AVAILABLE_LABEL,
-      },
-      {
-        field: 'latestOccurrenceAt',
-        sortable: true,
-        name: i18n.translate(
-          'xpack.apm.errorsTable.latestOccurrenceColumnLabel',
-          {
-            defaultMessage: 'Latest occurrence',
-          }
-        ),
         align: RIGHT_ALIGNMENT,
         render: (_, { lastSeen }) =>
           lastSeen ? (
@@ -195,8 +190,44 @@ function ErrorGroupList({ items, serviceName }: Props) {
             NOT_AVAILABLE_LABEL
           ),
       },
+      {
+        field: 'occurrenceCount',
+        name: i18n.translate('xpack.apm.errorsTable.occurrencesColumnLabel', {
+          defaultMessage: 'Occurrences',
+        }),
+        sortable: true,
+        dataType: 'number',
+        align: RIGHT_ALIGNMENT,
+        render: (_, { occurrences, groupId }) => {
+          const currentPeriodTimeseries =
+            periods?.currentPeriod?.[groupId]?.timeseries;
+          const previousPeriodTimeseries =
+            periods?.previousPeriod?.[groupId]?.timeseries;
+          return (
+            <SparkPlot
+              color="euiColorVis7"
+              series={currentPeriodTimeseries}
+              valueLabel={i18n.translate(
+                'xpack.apm.serviceOveriew.errorsTableOccurrences',
+                {
+                  defaultMessage: `{occurrencesCount} occ.`,
+                  values: {
+                    occurrencesCount: asInteger(occurrences),
+                  },
+                }
+              )}
+              comparisonSeries={
+                comparisonEnabled ? previousPeriodTimeseries : undefined
+              }
+            />
+          );
+        },
+        // occurrences
+        //   ? numeral(occurrences).format('0.[0]a')
+        //   : NOT_AVAILABLE_LABEL,
+      },
     ] as Array<ITableColumn<ErrorGroupItem>>;
-  }, [serviceName, urlParams]);
+  }, [serviceName, urlParams, periods, comparisonEnabled]);
 
   return (
     <ManagedTable
