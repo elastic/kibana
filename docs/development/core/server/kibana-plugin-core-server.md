@@ -82,7 +82,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [FeatureDeprecationDetails](./kibana-plugin-core-server.featuredeprecationdetails.md) |  |
 |  [GetDeprecationsContext](./kibana-plugin-core-server.getdeprecationscontext.md) |  |
 |  [GetResponse](./kibana-plugin-core-server.getresponse.md) |  |
-|  [Headers](./kibana-plugin-core-server.headers.md) | Http request headers to read. |
+|  [Headers\_2](./kibana-plugin-core-server.headers_2.md) | Http request headers to read. |
 |  [HttpAuth](./kibana-plugin-core-server.httpauth.md) |  |
 |  [HttpResources](./kibana-plugin-core-server.httpresources.md) | HttpResources service is responsible for serving static &amp; dynamic assets for Kibana application via HTTP. Provides API allowing plug-ins to respond with: - a pre-configured HTML page bootstrapping Kibana client app - custom HTML page - custom JS script file. |
 |  [HttpResourcesRenderOptions](./kibana-plugin-core-server.httpresourcesrenderoptions.md) | Allows to configure HTTP response parameters |
@@ -260,7 +260,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HandlerContextType](./kibana-plugin-core-server.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-core-server.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-core-server.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-core-server.handlercontexttype.md)<!-- -->. |
-|  [Headers\_2](./kibana-plugin-core-server.headers_2.md) | Http request headers to read. |
 |  [HttpResourcesRequestHandler](./kibana-plugin-core-server.httpresourcesrequesthandler.md) | Extended version of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) having access to [HttpResourcesServiceToolkit](./kibana-plugin-core-server.httpresourcesservicetoolkit.md) to respond with HTML or JS resources. |
 |  [HttpResourcesResponseOptions](./kibana-plugin-core-server.httpresourcesresponseoptions.md) | HTTP Resources response parameters |
 |  [HttpResponsePayload](./kibana-plugin-core-server.httpresponsepayload.md) | Data send to the client as a response payload. |
