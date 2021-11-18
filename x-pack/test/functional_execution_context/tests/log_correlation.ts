@@ -14,10 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Log Correlation', () => {
     it('Emits "trace.id" into the logs', async () => {
-      const response1 = await supertest
-        .get('/emit_log_with_trace_id')
-        .set('x-opaque-id', 'myheader1');
-
+      const response1 = await supertest.get('/emit_log_with_trace_id');
       expect(response1.body.traceId).to.be.a('string');
 
       const response2 = await supertest.get('/emit_log_with_trace_id');

@@ -59,6 +59,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--logging.loggers[2].name=http.server.response',
         '--logging.loggers[2].level=all',
         `--logging.loggers[2].appenders=${JSON.stringify(['file'])}`,
+
+        '--logging.loggers[3].name=plugins.alertsFixtures',
+        '--logging.loggers[3].level=all',
+        `--logging.loggers[3].appenders=${JSON.stringify(['console'])}`,
       ],
     },
   };

@@ -6,7 +6,7 @@
  */
 import apmAgent from 'elastic-apm-node';
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
 import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../plugins/alerting/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
@@ -25,9 +25,10 @@ export interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  constructor() {}
+  constructor(private readonly ctx: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<FixtureStartDeps>, { features, alerting }: FixtureSetupDeps) {
+    const logger = this.ctx.logger.get();
     features.registerKibanaFeature({
       id: 'alertsFixture',
       name: 'Alerts',
@@ -93,10 +94,16 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
       async (ctx, req, res) => {
-        await ctx.core.elasticsearch.client.asInternalUser.ping();
-
+        logger.info('>>> emit_log_with_trace_id', {
+          // @ts-expect-error
+          started: apmAgent.isStarted(),
+          ...apmAgent.currentTraceIds,
+        });
         // eslint-disable-next-line no-console
         console.log('>>> apmAgent.currentTraceIds', apmAgent.isStarted(), apmAgent.currentTraceIds);
+
+        await ctx.core.elasticsearch.client.asInternalUser.ping();
+
         return res.ok({
           body: {
             traceId: apmAgent.currentTraceIds['trace.id'],
