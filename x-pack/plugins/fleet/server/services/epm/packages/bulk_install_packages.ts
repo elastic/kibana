@@ -102,7 +102,7 @@ export async function bulkInstallPackages({
         result.value.result?.status === 'installed'
     )
   ) {
-    await installIndexPatterns({ savedObjectsClient, esClient, installSource });
+    await installIndexPatterns(savedObjectsClient);
   }
 
   return bulkInstallResults.map((result, index) => {

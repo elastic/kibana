@@ -453,29 +453,20 @@ export async function installPackage(args: InstallPackageParams) {
     throw new Error('installSource is required');
   }
   const logger = appContextService.getLogger();
-  const { savedObjectsClient, esClient, skipPostInstall = false, installSource } = args;
+  const { savedObjectsClient, esClient, skipPostInstall = false } = args;
+
+  if (!skipPostInstall) {
+    await installIndexPatterns(savedObjectsClient);
+  }
 
   if (args.installSource === 'registry') {
     const { pkgkey, force } = args;
-    const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
     logger.debug(`kicking off install of ${pkgkey} from registry`);
     const response = installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
       esClient,
       force,
-    }).then(async (installResult) => {
-      if (skipPostInstall || installResult.error) {
-        return installResult;
-      }
-      logger.debug(`install of ${pkgkey} finished, running post-install`);
-      return installIndexPatterns({
-        savedObjectsClient,
-        esClient,
-        pkgName,
-        pkgVersion,
-        installSource,
-      }).then(() => installResult);
     });
     return response;
   } else if (args.installSource === 'upload') {
@@ -486,16 +477,6 @@ export async function installPackage(args: InstallPackageParams) {
       esClient,
       archiveBuffer,
       contentType,
-    }).then(async (installResult) => {
-      if (skipPostInstall || installResult.error) {
-        return installResult;
-      }
-      logger.debug(`install of uploaded package finished, running post-install`);
-      return installIndexPatterns({
-        savedObjectsClient,
-        esClient,
-        installSource,
-      }).then(() => installResult);
     });
     return response;
   }

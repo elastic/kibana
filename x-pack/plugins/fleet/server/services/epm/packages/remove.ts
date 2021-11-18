@@ -18,7 +18,7 @@ import type {
   Installation,
 } from '../../../types';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
+import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
@@ -65,7 +65,7 @@ export async function removeInstallation(options: {
   // recreate or delete index patterns when a package is uninstalled
   // this must be done after deleting the saved object for the current package otherwise it will retrieve the package
   // from the registry again and reinstall the index patterns
-  await installIndexPatterns({ savedObjectsClient, esClient });
+  await removeUnusedIndexPatterns(savedObjectsClient);
 
   // remove the package archive and its contents from the cache so that a reinstall fetches
   // a fresh copy from the registry
