@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elast
 import { isEmpty } from 'lodash';
 import * as i18n from '../translations';
 import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
-import { DataViewField } from '../../../../../../../../src/plugins/data_views/common';
+import type { DataViewField } from '../../../../../../../../src/plugins/data_views/common';
 import { getExampleText } from '../helpers';
 import { BrowserField } from '../../../containers/source';
 import { EventFieldsData } from '../types';
