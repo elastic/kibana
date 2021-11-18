@@ -27,7 +27,7 @@ import { AgentIcon } from '../../shared/agent_icon';
 import { NewPackagePolicy } from '../apm_policy_form/typings';
 import { getCommands } from '../../../tutorial/config_agent/commands/get_commands';
 import { replaceTemplateStrings } from './replace_template_strings';
-import { RuntimeAttachment } from './runtime_attachment';
+import { JavaRuntimeAttachment } from './runtime_attachment/supported_agents/java_runtime_attachment';
 
 function AccordionButtonContent({
   agentName,
@@ -213,7 +213,7 @@ export function AgentInstructionsAccordion({
             content: (
               <>
                 <EuiSpacer />
-                <RuntimeAttachment />
+                <JavaRuntimeAttachment />
               </>
             ),
           },

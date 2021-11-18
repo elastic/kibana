@@ -1,68 +1,75 @@
-import React, { useState, useCallback } from 'react';
+import { htmlIdGenerator } from '@elastic/eui';
+import React, { useState, useCallback, ReactNode } from 'react';
 import { RuntimeAttachment as RuntimeAttachmentStateless } from './runtime_attachment';
-// import {
-//   NewPackagePolicy,
-//   PackagePolicy,
-//   PackagePolicyEditExtensionComponentProps,
-// } from '../apm_policy_form/typings';
+
+export const STAGED_DISCOVERY_RULE_ID = 'STAGED_DISCOVERY_RULE_ID';
+
+interface IDiscoveryRule {
+  operation: string;
+  type: string;
+  probe: string;
+}
+
+export type IDiscoveryRuleList = Array<{
+  id: string;
+  discoveryRule: IDiscoveryRule;
+}>;
 
 interface Props {
-  // policy: PackagePolicy;
-  // newPolicy: NewPackagePolicy;
-  // onChange: PackagePolicyEditExtensionComponentProps['onChange'];
+  operations: string[];
+  types: string[];
+  onChange?: () => void;
+  toggleDescription: ReactNode;
+  discoveryRulesDescription: ReactNode;
+  showUnsavedWarning?: boolean;
+  initialDiscoveryRules?: IDiscoveryRule[];
 }
 
 export function RuntimeAttachment(props: Props) {
+  const { initialDiscoveryRules = [] } = props;
   const [isEnabled, setIsEnabled] = useState(true);
-  const [list, setList] = useState([
-    {
-      id: 'main java-opbeans-10010',
-      content: {
-        include: true,
-        key: 'main',
-        value: 'java-opbeans-10010',
-      },
-    },
-    {
-      id: 'pid 10948653898867',
-      content: {
-        include: false,
-        key: 'pid',
-        value: '10948653898867',
-      },
-    },
-  ]);
-  const [editItemId, setEditItemId] = useState<null | string>(null);
+  const [discoveryRuleList, setDiscoveryRuleList] =
+    useState<IDiscoveryRuleList>(
+      initialDiscoveryRules.map((discoveryRule) => ({
+        id: generateId(),
+        discoveryRule,
+      }))
+    );
+  const [editDiscoveryRuleId, setEditDiscoveryRuleId] = useState<null | string>(
+    null
+  );
 
   const onToggleEnable = useCallback(() => {
     setIsEnabled(!isEnabled);
-    setList([]);
+    setDiscoveryRuleList([]);
   }, [isEnabled]);
 
   const onDelete = useCallback(
-    (discoveryItemId: string) => {
-      const filteredList = list.filter(({ id }) => id !== discoveryItemId);
-      setList(filteredList);
+    (discoveryRuleId: string) => {
+      const filteredDiscoveryRuleList = discoveryRuleList.filter(
+        ({ id }) => id !== discoveryRuleId
+      );
+      setDiscoveryRuleList(filteredDiscoveryRuleList);
     },
-    [list]
+    [discoveryRuleList]
   );
 
   const onEdit = useCallback(
-    (discoveryItemId: string | null) => {
-      const editingDiscoveryRule = list.find(
-        ({ id }) => id === discoveryItemId
+    (discoveryRuleId: string) => {
+      const editingDiscoveryRule = discoveryRuleList.find(
+        ({ id }) => id === discoveryRuleId
       );
       if (editingDiscoveryRule) {
         const {
-          content: { include, key, value },
+          discoveryRule: { operation, type, probe },
         } = editingDiscoveryRule;
-        setStagedOperationText(include ? 'Include' : 'Exclude');
-        setStagedTypeText(key);
-        setStagedProbeText(value);
-        setEditItemId(discoveryItemId);
+        setStagedOperationText(operation);
+        setStagedTypeText(type);
+        setStagedProbeText(probe);
+        setEditDiscoveryRuleId(discoveryRuleId);
       }
     },
-    [list]
+    [discoveryRuleList]
   );
 
   const [stagedOperationText, setStagedOperationText] = useState('');
@@ -81,63 +88,71 @@ export function RuntimeAttachment(props: Props) {
   }, []);
 
   const onCancel = useCallback(() => {
-    if (editItemId === 'new') {
-      onDelete('new');
+    if (editDiscoveryRuleId === STAGED_DISCOVERY_RULE_ID) {
+      onDelete(STAGED_DISCOVERY_RULE_ID);
     }
-    setEditItemId(null);
-  }, [editItemId, onDelete]);
+    setEditDiscoveryRuleId(null);
+  }, [editDiscoveryRuleId, onDelete]);
 
   const onSubmit = useCallback(() => {
-    const editItemIndex = list.findIndex(({ id }) => id === editItemId);
-    const editItem = list[editItemIndex];
-    const nextList = [
-      ...list.slice(0, editItemIndex),
+    const editDiscoveryRuleIndex = discoveryRuleList.findIndex(
+      ({ id }) => id === editDiscoveryRuleId
+    );
+    const editDiscoveryRule = discoveryRuleList[editDiscoveryRuleIndex];
+    const nextDiscoveryRuleList = [
+      ...discoveryRuleList.slice(0, editDiscoveryRuleIndex),
       {
         id:
-          editItem.id === 'new'
-            ? Math.random().toString(16).substr(2)
-            : editItem.id,
-        content: {
-          include: stagedOperationText === 'Include',
-          key: stagedTypeText,
-          value: stagedProbeText,
+          editDiscoveryRule.id === STAGED_DISCOVERY_RULE_ID
+            ? generateId()
+            : editDiscoveryRule.id,
+        discoveryRule: {
+          operation: stagedOperationText,
+          type: stagedTypeText,
+          probe: stagedProbeText,
         },
       },
-      ...list.slice(editItemIndex + 1),
+      ...discoveryRuleList.slice(editDiscoveryRuleIndex + 1),
     ];
-    setList(nextList);
-    setEditItemId(null);
-  }, [editItemId, stagedOperationText, stagedTypeText, stagedProbeText, list]);
+    setDiscoveryRuleList(nextDiscoveryRuleList);
+    setEditDiscoveryRuleId(null);
+  }, [
+    editDiscoveryRuleId,
+    stagedOperationText,
+    stagedTypeText,
+    stagedProbeText,
+    discoveryRuleList,
+  ]);
 
   const onAddRule = useCallback(() => {
-    const operationText = 'Include';
-    const typeText = 'main';
+    const operationText = props.operations[0];
+    const typeText = props.types[0];
     const valueText = '';
     setStagedOperationText(operationText);
     setStagedTypeText(typeText);
     setStagedProbeText(valueText);
-    const nextList = [
+    const nextDiscoveryRuleList = [
       {
-        id: 'new',
-        content: {
-          include: false,
-          key: '',
-          value: '',
+        id: STAGED_DISCOVERY_RULE_ID,
+        discoveryRule: {
+          operation: operationText,
+          type: typeText,
+          probe: valueText,
         },
       },
-      ...list,
+      ...discoveryRuleList,
     ];
-    setList(nextList);
-    setEditItemId('new');
-  }, [list]);
+    setDiscoveryRuleList(nextDiscoveryRuleList);
+    setEditDiscoveryRuleId(STAGED_DISCOVERY_RULE_ID);
+  }, [discoveryRuleList]);
   return (
     <RuntimeAttachmentStateless
       isEnabled={isEnabled}
       onToggleEnable={onToggleEnable}
-      list={list}
-      setList={setList}
+      discoveryRuleList={discoveryRuleList}
+      setDiscoveryRuleList={setDiscoveryRuleList}
       onDelete={onDelete}
-      editItemId={editItemId}
+      editDiscoveryRuleId={editDiscoveryRuleId}
       onEdit={onEdit}
       onChangeOperation={onChangeOperation}
       stagedOperationText={stagedOperationText}
@@ -148,6 +163,13 @@ export function RuntimeAttachment(props: Props) {
       onCancel={onCancel}
       onSubmit={onSubmit}
       onAddRule={onAddRule}
+      operations={props.operations}
+      types={props.types}
+      toggleDescription={props.toggleDescription}
+      discoveryRulesDescription={props.discoveryRulesDescription}
+      showUnsavedWarning={props.showUnsavedWarning}
     />
   );
 }
+
+const generateId = htmlIdGenerator();

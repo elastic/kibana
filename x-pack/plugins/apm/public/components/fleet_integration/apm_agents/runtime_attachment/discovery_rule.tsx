@@ -12,20 +12,20 @@ import React from 'react';
 interface Props {
   id: string;
   order: number;
-  include: boolean;
-  ruleKey: string;
-  ruleValue: string;
+  operation: string;
+  type: string;
+  probe: string;
   providedDragHandleProps?: DraggableProvidedDragHandleProps;
   onDelete: (discoveryItemId: string) => void;
-  onEdit: (discoveryItemId: null | string) => void;
+  onEdit: (discoveryItemId: string) => void;
 }
 
 export function DiscoveryRule({
   id,
   order,
-  include,
-  ruleKey,
-  ruleValue,
+  operation,
+  type,
+  probe,
   providedDragHandleProps,
   onDelete,
   onEdit,
@@ -44,7 +44,7 @@ export function DiscoveryRule({
               <EuiBadge>{order}</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {include ? (
+              {operation === 'Include' ? (
                 <EuiBadge color="success">Include</EuiBadge>
               ) : (
                 <EuiBadge color="danger">Exclude</EuiBadge>
@@ -54,11 +54,11 @@ export function DiscoveryRule({
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiText>
-                    <h4>{ruleKey}</h4>
+                    <h4>{type}</h4>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText>{ruleValue}</EuiText>
+                  <EuiText>{probe}</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

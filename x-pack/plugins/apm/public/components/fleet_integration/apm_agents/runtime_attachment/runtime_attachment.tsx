@@ -20,28 +20,20 @@ import {
   EuiIcon,
   euiDragDropReorder,
 } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { DiscoveryRule } from './discovery_rule';
 import { DefaultDiscoveryRule } from './default_discovery_rule';
 import { EditDiscoveryRule } from './edit_discovery_rule';
-
-interface DiscoveryRuleItem {
-  id: string;
-  content: {
-    include: boolean;
-    key: string;
-    value: string;
-  };
-}
+import { IDiscoveryRuleList } from '.';
 
 interface Props {
   isEnabled: boolean;
   onToggleEnable: () => void;
-  list: DiscoveryRuleItem[];
-  setList: (discoveryRuleItems: DiscoveryRuleItem[]) => void;
+  discoveryRuleList: IDiscoveryRuleList;
+  setDiscoveryRuleList: (discoveryRuleItems: IDiscoveryRuleList) => void;
   onDelete: (discoveryItemId: string) => void;
-  editItemId: null | string;
-  onEdit: (discoveryItemId: null | string) => void;
+  editDiscoveryRuleId: null | string;
+  onEdit: (discoveryItemId: string) => void;
   onChangeOperation: (operationText: string) => void;
   stagedOperationText: string;
   onChangeType: (typeText: string) => void;
@@ -51,15 +43,20 @@ interface Props {
   onCancel: () => void;
   onSubmit: () => void;
   onAddRule: () => void;
+  operations: string[];
+  types: string[];
+  toggleDescription: ReactNode;
+  discoveryRulesDescription: ReactNode;
+  showUnsavedWarning?: boolean;
 }
 
 export function RuntimeAttachment({
   isEnabled,
   onToggleEnable,
-  list,
-  setList,
+  discoveryRuleList,
+  setDiscoveryRuleList,
   onDelete,
-  editItemId,
+  editDiscoveryRuleId,
   onEdit,
   onChangeOperation,
   stagedOperationText,
@@ -70,25 +67,38 @@ export function RuntimeAttachment({
   onCancel,
   onSubmit,
   onAddRule,
+  operations,
+  types,
+  toggleDescription,
+  discoveryRulesDescription,
+  showUnsavedWarning,
 }: Props) {
   const onDragEnd = ({ source, destination }: DropResult) => {
     if (source && destination) {
-      const items = euiDragDropReorder(list, source.index, destination.index);
+      const items = euiDragDropReorder(
+        discoveryRuleList,
+        source.index,
+        destination.index
+      );
 
-      setList(items);
+      setDiscoveryRuleList(items);
     }
   };
   return (
     <div>
-      <EuiCallOut
-        title={
-          'You have unsaved changes. Click "Save integration" to sync changes to the integration.'
-        }
-        color="warning"
-        iconType="iInCircle"
-        size="s"
-      />
-      <EuiSpacer />
+      {showUnsavedWarning && (
+        <>
+          <EuiCallOut
+            title={
+              'You have unsaved changes. Click "Save integration" to sync changes to the integration.'
+            }
+            color="warning"
+            iconType="iInCircle"
+            size="s"
+          />
+          <EuiSpacer />
+        </>
+      )}
       <EuiSwitch
         label="Enable runtime attachment"
         checked={isEnabled}
@@ -96,7 +106,7 @@ export function RuntimeAttachment({
       />
       <EuiSpacer size="s" />
       <EuiText color="subdued" size="s">
-        <p>Attach the Java agent to running and starting Java applications.</p>
+        <p>{toggleDescription}</p>
       </EuiText>
       {isEnabled && (
         <>
@@ -111,17 +121,13 @@ export function RuntimeAttachment({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s">
-                <p>
-                  For every running JVM, the discovery rules are evaluated in
-                  the order they are provided. The first matching rule
-                  determines the outcome. Learn more in the docs.
-                </p>
+                <p>{discoveryRulesDescription}</p>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="plusInCircle"
-                disabled={editItemId !== null}
+                disabled={editDiscoveryRuleId !== null}
                 onClick={onAddRule}
               >
                 Add rule
@@ -130,11 +136,8 @@ export function RuntimeAttachment({
           </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiDragDropContext onDragEnd={onDragEnd}>
-            <EuiDroppable
-              droppableId="CUSTOM_HANDLE_DROPPABLE_AREA"
-              spacing="m"
-            >
-              {list.map(({ content, id }, idx) => (
+            <EuiDroppable droppableId="RUNTIME_ATTACHMENT_DROPPABLE">
+              {discoveryRuleList.map(({ discoveryRule, id }, idx) => (
                 <EuiDraggable
                   spacing="m"
                   key={id}
@@ -143,9 +146,9 @@ export function RuntimeAttachment({
                   customDragHandle={true}
                 >
                   {(provided) =>
-                    id === editItemId ? (
+                    id === editDiscoveryRuleId ? (
                       <EditDiscoveryRule
-                        id={editItemId}
+                        id={editDiscoveryRuleId}
                         onChangeOperation={onChangeOperation}
                         operation={stagedOperationText}
                         onChangeType={onChangeType}
@@ -154,14 +157,16 @@ export function RuntimeAttachment({
                         probe={stagedProbeText}
                         onCancel={onCancel}
                         onSubmit={onSubmit}
+                        operations={operations}
+                        types={types}
                       />
                     ) : (
                       <DiscoveryRule
                         id={id}
                         order={idx + 1}
-                        include={content.include}
-                        ruleKey={content.key}
-                        ruleValue={content.value}
+                        operation={discoveryRule.operation}
+                        type={discoveryRule.type}
+                        probe={discoveryRule.probe}
                         providedDragHandleProps={provided.dragHandleProps}
                         onDelete={onDelete}
                         onEdit={onEdit}

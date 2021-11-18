@@ -9,7 +9,7 @@ import React from 'react';
 
 export function DefaultDiscoveryRule() {
   return (
-    <EuiPanel paddingSize="m" style={{ margin: '0 8px 0 8px' }}>
+    <EuiPanel paddingSize="m" style={{ margin: 4 }}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiText size="s">Everything else</EuiText>

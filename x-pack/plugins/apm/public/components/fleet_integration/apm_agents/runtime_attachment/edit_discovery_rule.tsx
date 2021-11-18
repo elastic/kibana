@@ -10,6 +10,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import React from 'react';
+import { STAGED_DISCOVERY_RULE_ID } from '.';
 
 interface Props {
   id: string;
@@ -21,6 +22,8 @@ interface Props {
   probe: string;
   onCancel: () => void;
   onSubmit: () => void;
+  operations: string[];
+  types: string[];
 }
 
 export function EditDiscoveryRule({
@@ -33,6 +36,8 @@ export function EditDiscoveryRule({
   probe,
   onCancel,
   onSubmit,
+  operations,
+  types,
 }: Props) {
   return (
     <EuiPanel paddingSize="m">
@@ -40,15 +45,13 @@ export function EditDiscoveryRule({
         <EuiFlexItem>
           <EuiFormFieldset legend={{ children: 'Operation' }}>
             <EuiSelect
-              options={[
-                { text: 'Include', value: 'Include' },
-                { text: 'Exclude', value: 'Exclude' },
-              ]}
+              options={operations.map((operation) => ({
+                text: operation,
+                value: operation,
+              }))}
               value={operation}
               onChange={(e) => {
-                onChangeOperation(
-                  e.target.selectedIndex === 0 ? 'Include' : 'Exclude'
-                );
+                onChangeOperation(operations[e.target.selectedIndex]);
               }}
             />
           </EuiFormFieldset>
@@ -57,13 +60,13 @@ export function EditDiscoveryRule({
           <EuiFormFieldset legend={{ children: 'Type' }}>
             <EuiFormRow helpText="Choose from allowed params">
               <EuiSelect
-                options={[
-                  { text: 'main', value: 'main' },
-                  { text: 'pid', value: 'pid' },
-                ]}
+                options={types.map((type) => ({
+                  text: type,
+                  value: type,
+                }))}
                 value={type}
                 onChange={(e) => {
-                  onChangeType(e.target.selectedIndex === 0 ? 'main' : 'pid');
+                  onChangeType(types[e.target.selectedIndex]);
                 }}
               />
             </EuiFormRow>
@@ -86,7 +89,7 @@ export function EditDiscoveryRule({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton onClick={onSubmit} fill disabled={probe === ''}>
-            {id === 'new' ? 'Add' : 'Save'}
+            {id === STAGED_DISCOVERY_RULE_ID ? 'Add' : 'Save'}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
