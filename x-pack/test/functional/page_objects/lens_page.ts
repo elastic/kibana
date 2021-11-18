@@ -131,9 +131,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const operationSelector = opts.isPreviousIncompatible
           ? `lns-indexPatternDimension-${opts.operation} incompatible`
           : `lns-indexPatternDimension-${opts.operation}`;
-        await retry.try(async () => {
-          await testSubjects.exists(operationSelector);
+        async function getAriaPressed() {
+          const operationSelectorContainer = await testSubjects.find(operationSelector);
           await testSubjects.click(operationSelector, undefined, FORMULA_TAB_HEIGHT);
+          const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
+          return ariaPressed;
+        }
+
+        // adding retry here as it seems that there is a flakiness of the operation click
+        // it seems that the aria-pressed attribute is updated to true when the button is clicked
+        await retry.waitFor('aria pressed to be true', async () => {
+          const ariaPressedStatus = await getAriaPressed();
+          return ariaPressedStatus === 'true';
         });
       }
       if (opts.field) {
@@ -933,6 +942,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
       await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
+    },
+
+    async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
+      await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
+    },
+
+    async getMetricStyle() {
+      const el = await testSubjects.find('lns_metric_value');
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
     },
 
     async assertMissingValues(option: string) {
