@@ -108,6 +108,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           body: {
             traceId: apmAgent.currentTraceIds['trace.id'],
             ids: apmAgent.currentTraceIds,
+            started: apmAgent.isStarted(),
+            // @ts-expect-error
+            config: apmAgent._conf,
           },
         });
       }
