@@ -40,14 +40,14 @@ A  rule is required for communication between Elastic and {sn}. To create a CORS
 . Configure the rule settings to use the Elastic SIR API and the Kibana URL:
 * *REST API*: Choose `Elastic SIR API [x_elas2_sir_int/elastic_api]`.
 * *Domain*: Enter the Kibana URL.
-. Go to the *HTTP methods* tab and select *GET*. 
+. Go to the *HTTP methods* tab and select *GET*.
 . Click *Submit* to create the rule.
 
 [float]
 [[servicenow-sir-connector-update]]
 ==== Update a deprecated {sn} SecOps connector
 
-{sn} SecOps connectors created in {stack} version <=7.15 are marked as deprecated after you upgrade to version >=7.16. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
+{sn} SecOps connectors created in {stack} version \<=7.15 are marked as deprecated after you upgrade to version >=7.16. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
