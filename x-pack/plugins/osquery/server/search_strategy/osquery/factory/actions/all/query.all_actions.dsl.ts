@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import { AgentsRequestOptions } from '../../../../../../common/search_strategy';

@@ -10,8 +10,10 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '../../common/constants';
 import { DynamicSettings } from '../../common/runtime_types';
 import { SavedObjectsType, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { UMSavedObjectsQueryFn } from './adapters';
+import { UptimeConfig } from '../config';
 
 export interface UMSavedObjectsAdapter {
+  config: UptimeConfig;
   getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettings>;
   setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettings>;
 }
@@ -55,12 +57,17 @@ export const umDynamicSettings: SavedObjectsType = {
 };
 
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
+  config: null,
   getUptimeDynamicSettings: async (client): Promise<DynamicSettings> => {
     try {
       const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsObjectId);
       return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULTS;
     } catch (getErr) {
+      const config = savedObjectsAdapter.config;
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+        if (config?.index) {
+          return { ...DYNAMIC_SETTINGS_DEFAULTS, heartbeatIndices: config.index };
+        }
         return DYNAMIC_SETTINGS_DEFAULTS;
       }
       throw getErr;

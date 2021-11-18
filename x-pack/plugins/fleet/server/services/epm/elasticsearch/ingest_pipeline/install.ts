@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';

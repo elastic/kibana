@@ -5,60 +5,105 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Client } from '@elastic/elasticsearch';
+import pLimit from 'p-limit';
+import Path from 'path';
+import { Worker } from 'worker_threads';
 import { ElasticsearchOutputWriteTargets } from '../../lib/output/to_elasticsearch_output';
-import { Scenario } from './get_scenario';
-import { Logger } from './logger';
-import { uploadEvents } from './upload_events';
+import { Logger, LogLevel } from '../../lib/utils/create_logger';
 
 export async function startHistoricalDataUpload({
   from,
   to,
-  scenario,
-  intervalInMs,
   bucketSizeInMs,
-  client,
   workers,
+  clientWorkers,
+  batchSize,
   writeTargets,
+  logLevel,
   logger,
+  target,
+  file,
 }: {
   from: number;
   to: number;
-  scenario: Scenario;
-  intervalInMs: number;
   bucketSizeInMs: number;
   client: Client;
   workers: number;
+  clientWorkers: number;
+  batchSize: number;
   writeTargets: ElasticsearchOutputWriteTargets;
   logger: Logger;
+  logLevel: LogLevel;
+  target: string;
+  file: string;
 }) {
   let requestedUntil: number = from;
-  function uploadNextBatch() {
+
+  function processNextBatch() {
     const bucketFrom = requestedUntil;
     const bucketTo = Math.min(to, bucketFrom + bucketSizeInMs);
 
-    const events = scenario({ from: bucketFrom, to: bucketTo });
-
-    logger.info(
-      `Uploading: ${new Date(bucketFrom).toISOString()} to ${new Date(bucketTo).toISOString()}`
-    );
-
-    uploadEvents({
-      events,
-      client,
-      workers,
-      writeTargets,
-      logger,
-    }).then(() => {
-      if (bucketTo >= to) {
-        return;
-      }
-      uploadNextBatch();
-    });
+    if (bucketFrom === bucketTo) {
+      return;
+    }
 
     requestedUntil = bucketTo;
+
+    logger.info(
+      `Starting worker for ${new Date(bucketFrom).toISOString()} to ${new Date(
+        bucketTo
+      ).toISOString()}`
+    );
+
+    const worker = new Worker(Path.join(__dirname, './upload_next_batch.js'), {
+      workerData: {
+        bucketFrom,
+        bucketTo,
+        logLevel,
+        writeTargets,
+        target,
+        file,
+        clientWorkers,
+        batchSize,
+      },
+    });
+
+    logger.perf('created_worker', () => {
+      return new Promise<void>((resolve, reject) => {
+        worker.on('online', () => {
+          resolve();
+        });
+      });
+    });
+
+    logger.perf('completed_worker', () => {
+      return new Promise<void>((resolve, reject) => {
+        worker.on('exit', () => {
+          resolve();
+        });
+      });
+    });
+
+    return new Promise<void>((resolve, reject) => {
+      worker.on('error', (err) => {
+        reject(err);
+      });
+
+      worker.on('exit', (code) => {
+        if (code !== 0) {
+          reject(new Error(`Worker stopped: exit code ${code}`));
+          return;
+        }
+        logger.debug('Worker completed');
+        resolve();
+      });
+    });
   }
 
-  return uploadNextBatch();
+  const numBatches = Math.ceil((to - from) / bucketSizeInMs);
+
+  const limiter = pLimit(workers);
+
+  return Promise.all(new Array(numBatches).fill(undefined).map((_) => limiter(processNextBatch)));
 }

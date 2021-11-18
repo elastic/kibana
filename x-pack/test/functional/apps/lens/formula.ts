@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await PageObjects.lens.clickAddField();
-      await fieldEditor.setName(`*' "'`);
+      await fieldEditor.setName(`ab' "'`);
       await fieldEditor.enableValue();
       await fieldEditor.typeScript("emit('abc')");
       await fieldEditor.save();
@@ -106,21 +106,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
         operation: 'unique_count',
-        field: `*`,
+        field: `ab`,
         keepOpen: true,
       });
 
       await PageObjects.lens.switchToFormula();
-      await PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
+      await PageObjects.lens.expectFormulaText(`unique_count('ab\\' "\\'')`);
 
       await PageObjects.lens.typeFormula('unique_count(');
       const input = await find.activeElement();
-      await input.type('*');
+      await input.type('ab');
       await input.pressKeys(browser.keys.ENTER);
 
       await PageObjects.common.sleep(100);
 
-      await PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
+      await PageObjects.lens.expectFormulaText(`unique_count('ab\\' "\\'')`);
     });
 
     it('should persist a broken formula on close', async () => {

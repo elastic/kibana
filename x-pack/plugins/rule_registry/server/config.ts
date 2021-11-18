@@ -13,6 +13,9 @@ export const config: PluginConfigDescriptor = {
   schema: schema.object({
     write: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      cache: schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+      }),
     }),
     unsafe: schema.object({
       legacyMultiTenancy: schema.object({

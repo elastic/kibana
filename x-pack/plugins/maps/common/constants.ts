@@ -9,22 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 
 export const EMS_APP_NAME = 'kibana';
-
-export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
-export const EMS_FILES_API_PATH = 'ems/files';
-export const EMS_FILES_DEFAULT_JSON_PATH = 'file';
-export const EMS_GLYPHS_PATH = 'fonts';
-export const EMS_SPRITES_PATH = 'sprites';
-
-export const EMS_TILES_CATALOGUE_PATH = 'ems/tiles';
-export const EMS_TILES_API_PATH = 'ems/tiles';
-export const EMS_TILES_RASTER_STYLE_PATH = 'raster/style';
-export const EMS_TILES_RASTER_TILE_PATH = 'raster/tile';
-
-export const EMS_TILES_VECTOR_STYLE_PATH = 'vector/style';
-export const EMS_TILES_VECTOR_SOURCE_PATH = 'vector/source';
-export const EMS_TILES_VECTOR_TILE_PATH = 'vector/tile';
-
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
@@ -101,7 +85,6 @@ export const SOURCE_DATA_REQUEST_ID = 'source';
 export const SOURCE_META_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${META_DATA_REQUEST_ID_SUFFIX}`;
 export const SOURCE_FORMATTERS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${FORMATTERS_DATA_REQUEST_ID_SUFFIX}`;
 export const SOURCE_BOUNDS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_bounds`;
-export const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
@@ -191,7 +174,6 @@ export enum GRID_RESOLUTION {
   SUPER_FINE = 'SUPER_FINE',
 }
 
-export const SUPER_FINE_ZOOM_DELTA = 7; // (2 ^ SUPER_FINE_ZOOM_DELTA) ^ 2 =  number of cells in a given tile
 export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
 export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 
@@ -306,5 +288,3 @@ export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
 export const emsWorldLayerId = 'world_countries';
-export const emsRegionLayerId = 'administrative_regions_lvl2';
-export const emsUsaZipLayerId = 'usa_zip_codes';

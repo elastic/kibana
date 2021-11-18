@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   ElasticsearchClient,
@@ -16,10 +16,6 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 
-import {
-  TransformGetTransform,
-  TransformGetTransformStats,
-} from '@elastic/elasticsearch/api/requestParams';
 import { TRANSFORM_STATE } from '../../../common/constants';
 import {
   transformIdParamSchema,
@@ -85,28 +81,32 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
    */
   router.get(
     { path: addBasePath('transforms'), validate: false },
-    license.guardApiRoute<TransformGetTransform, undefined, undefined>(async (ctx, req, res) => {
-      try {
-        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
-          size: 1000,
-          ...req.params,
-        });
-
-        if (ctx.alerting) {
-          const transformHealthService = transformHealthServiceProvider(
-            ctx.core.elasticsearch.client.asCurrentUser,
-            ctx.alerting.getRulesClient()
+    license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
+      async (ctx, req, res) => {
+        try {
+          const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform(
+            {
+              size: 1000,
+              ...req.params,
+            }
           );
 
-          // @ts-ignore
-          await transformHealthService.populateTransformsWithAssignedRules(body.transforms);
-        }
+          if (ctx.alerting) {
+            const transformHealthService = transformHealthServiceProvider(
+              ctx.core.elasticsearch.client.asCurrentUser,
+              ctx.alerting.getRulesClient()
+            );
 
-        return res.ok({ body });
-      } catch (e) {
-        return res.customError(wrapError(wrapEsError(e)));
+            // @ts-ignore
+            await transformHealthService.populateTransformsWithAssignedRules(body.transforms);
+          }
+
+          return res.ok({ body });
+        } catch (e) {
+          return res.customError(wrapError(wrapEsError(e)));
+        }
       }
-    })
+    )
   );
 
   /**
@@ -145,7 +145,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
    */
   router.get(
     { path: addBasePath('transforms/_stats'), validate: false },
-    license.guardApiRoute<TransformGetTransformStats, undefined, undefined>(
+    license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
       async (ctx, req, res) => {
         try {
           const { body } =
@@ -555,7 +555,6 @@ const previewTransformHandler: RequestHandler<
   try {
     const reqBody = req.body;
     const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
-      // @ts-expect-error max_page_search_size is required in TransformPivot
       body: reqBody,
     });
     if (isLatestTransform(reqBody)) {

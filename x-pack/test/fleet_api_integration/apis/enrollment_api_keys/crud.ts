@@ -73,9 +73,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
-        const {
-          body: { api_keys: apiKeys },
-        } = await es.security.getApiKey({ id: esApiKeyId });
+        const { api_keys: apiKeys } = await es.security.getApiKey({ id: esApiKeyId });
 
         expect(apiKeys).length(1);
         expect(apiKeys[0].invalidated).eql(true);
@@ -173,7 +171,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const { body: apiKeyRes } = await es.security.getApiKey({
+        const apiKeyRes = await es.security.getApiKey({
           id: apiResponse.item.api_key_id,
         });
 
@@ -197,17 +195,20 @@ export default function (providerContext: FtrProviderContext) {
         const { body: privileges } = await getEsClientForAPIKey(
           providerContext,
           apiResponse.item.api_key
-        ).security.hasPrivileges({
-          body: {
-            cluster: ['all', 'monitor', 'manage_api_key'],
-            index: [
-              {
-                names: ['log-*', 'metrics-*', 'events-*', '*'],
-                privileges: ['write', 'create_index'],
-              },
-            ],
+        ).security.hasPrivileges(
+          {
+            body: {
+              cluster: ['all', 'monitor', 'manage_api_key'],
+              index: [
+                {
+                  names: ['log-*', 'metrics-*', 'events-*', '*'],
+                  privileges: ['write', 'create_index'],
+                },
+              ],
+            },
           },
-        });
+          { meta: true }
+        );
         expect(privileges.cluster).to.eql({
           all: false,
           monitor: false,

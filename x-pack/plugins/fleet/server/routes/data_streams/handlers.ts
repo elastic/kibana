@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, keys, merge } from 'lodash';
 import type { RequestHandler } from 'src/core/server';
 
@@ -127,7 +127,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
         type: '',
         package: dataStream._meta?.package?.name || '',
         package_version: '',
-        last_activity_ms: dataStream.maximum_timestamp,
+        last_activity_ms: dataStream.maximum_timestamp, // overridden below if maxIngestedTimestamp agg returns a result
         size_in_bytes: dataStream.store_size_bytes,
         dashboards: [],
       };
@@ -156,6 +156,11 @@ export const getListHandler: RequestHandler = async (context, request, response)
             },
           },
           aggs: {
+            maxIngestedTimestamp: {
+              max: {
+                field: 'event.ingested',
+              },
+            },
             dataset: {
               terms: {
                 field: 'data_stream.dataset',
@@ -178,12 +183,20 @@ export const getListHandler: RequestHandler = async (context, request, response)
         },
       });
 
+      const { maxIngestedTimestamp } = dataStreamAggs as Record<
+        string,
+        estypes.AggregationsValueAggregate
+      >;
       const { dataset, namespace, type } = dataStreamAggs as Record<
         string,
-        estypes.AggregationsMultiBucketAggregate<{ key?: string }>
+        estypes.AggregationsMultiBucketAggregate<{ key?: string; value?: number }>
       >;
 
-      // Set values from backing indices query
+      // some integrations e.g custom logs don't have event.ingested
+      if (maxIngestedTimestamp?.value) {
+        dataStreamResponse.last_activity_ms = maxIngestedTimestamp?.value;
+      }
+
       dataStreamResponse.dataset = dataset.buckets[0]?.key || '';
       dataStreamResponse.namespace = namespace.buckets[0]?.key || '';
       dataStreamResponse.type = type.buckets[0]?.key || '';

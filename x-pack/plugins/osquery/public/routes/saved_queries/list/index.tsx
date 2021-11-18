@@ -12,6 +12,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,6 @@ import { ECSMapping } from '../../../../common/schemas/common';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
 
 type SavedQuerySO = SavedObject<{
@@ -218,15 +218,14 @@ const SavedQueriesPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.savedQueryList.pageTitle"
                 defaultMessage="Saved queries"
               />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

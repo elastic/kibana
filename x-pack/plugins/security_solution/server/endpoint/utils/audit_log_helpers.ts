@@ -6,9 +6,9 @@
  */
 
 import { Logger } from 'kibana/server';
-import { SearchRequest } from 'src/plugins/data/public';
-import { SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { SearchRequest } from 'src/plugins/data/public';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
 import {
   ENDPOINT_ACTIONS_INDEX,
@@ -84,7 +84,7 @@ export const getUniqueLogData = (activityLogEntries: ActivityLogEntry[]): Activi
 export const categorizeResponseResults = ({
   results,
 }: {
-  results: Array<SearchHit<EndpointActionResponse | LogsEndpointActionResponse>>;
+  results: Array<estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>>;
 }): Array<ActivityLogActionResponse | EndpointActivityLogActionResponse> => {
   return results?.length
     ? results?.map((e) => {
@@ -108,7 +108,7 @@ export const categorizeResponseResults = ({
 export const categorizeActionResults = ({
   results,
 }: {
-  results: Array<SearchHit<EndpointAction | LogsEndpointAction>>;
+  results: Array<estypes.SearchHit<EndpointAction | LogsEndpointAction>>;
 }): Array<ActivityLogAction | EndpointActivityLogAction> => {
   return results?.length
     ? results?.map((e) => {
@@ -153,7 +153,7 @@ export const getActionRequestsResult = async ({
   from: number;
 }): Promise<{
   actionIds: string[];
-  actionRequests: ApiResponse<SearchResponse<unknown>, unknown>;
+  actionRequests: TransportResult<estypes.SearchResponse<unknown>, unknown>;
 }> => {
   const dateFilters = getDateFilters({ startDate, endDate });
   const baseActionFilters = [
@@ -189,7 +189,7 @@ export const getActionRequestsResult = async ({
     },
   };
 
-  let actionRequests: ApiResponse<SearchResponse<unknown>, unknown>;
+  let actionRequests: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     actionRequests = await esClient.search(actionsSearchQuery, queryOptions);
@@ -220,7 +220,7 @@ export const getActionResponsesResult = async ({
   actionIds: string[];
   startDate: string;
   endDate: string;
-}): Promise<ApiResponse<SearchResponse<unknown>, unknown>> => {
+}): Promise<TransportResult<estypes.SearchResponse<unknown>, unknown>> => {
   const dateFilters = getDateFilters({ startDate, endDate });
   const baseResponsesFilter = [
     { term: { agent_id: elasticAgentId } },
@@ -246,7 +246,7 @@ export const getActionResponsesResult = async ({
     },
   };
 
-  let actionResponses: ApiResponse<SearchResponse<unknown>, unknown>;
+  let actionResponses: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     actionResponses = await esClient.search(responsesSearchQuery, queryOptions);

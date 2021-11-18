@@ -9,7 +9,7 @@ import { JobsHealthService, jobsHealthServiceProvider } from './jobs_health_serv
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { Logger } from 'kibana/server';
 import { MlClient } from '../ml_client';
-import { MlJob, MlJobStats } from '@elastic/elasticsearch/api/types';
+import { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AnnotationService } from '../../models/annotation_service/annotation';
 import { JobsHealthExecutorOptions } from './register_jobs_monitoring_rule_type';
 import { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';

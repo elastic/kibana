@@ -85,8 +85,6 @@ kibana_vars=(
     logging.root.appenders
     logging.root.level
     map.includeElasticMapsService
-    map.proxyElasticMapsServiceInMaps
-    map.regionmap
     map.tilemap.options.attribution
     map.tilemap.options.maxZoom
     map.tilemap.options.minZoom
@@ -201,6 +199,7 @@ kibana_vars=(
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
     xpack.alerting.defaultRuleTaskTimeout
+    xpack.alerting.cancelAlertsOnRuleTimeout
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -377,6 +376,7 @@ kibana_vars=(
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
     xpack.task_manager.version_conflict_threshold
+    xpack.uptime.index
 )
 
 longopts=''

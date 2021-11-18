@@ -6,6 +6,8 @@
  */
 
 /* eslint-disable max-classes-per-file */
+import type { ElasticsearchErrorDetails } from 'src/core/server';
+
 import { isESClientError } from './utils';
 
 export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
@@ -51,6 +53,8 @@ export class HostedAgentPolicyRestrictionRelatedError extends IngestManagerError
 export class FleetSetupError extends IngestManagerError {}
 export class GenerateServiceTokenError extends IngestManagerError {}
 
+export class OutputUnauthorizedError extends IngestManagerError {}
+
 export class ArtifactsClientError extends IngestManagerError {}
 export class ArtifactsClientAccessDeniedError extends IngestManagerError {
   constructor(deniedPackageName: string, allowedPackageName: string) {
@@ -65,8 +69,8 @@ export class ArtifactsElasticsearchError extends IngestManagerError {
   constructor(public readonly meta: Error) {
     super(
       `${
-        isESClientError(meta) && meta.meta.body?.error?.reason
-          ? meta.meta.body?.error?.reason
+        isESClientError(meta) && (meta.meta.body as ElasticsearchErrorDetails)?.error?.reason
+          ? (meta.meta.body as ElasticsearchErrorDetails)?.error?.reason
           : `Elasticsearch error while working with artifacts: ${meta.message}`
       }`
     );

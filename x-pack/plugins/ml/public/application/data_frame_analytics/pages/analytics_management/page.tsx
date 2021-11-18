@@ -31,7 +31,6 @@ import { NodeAvailableWarning } from '../../../components/node_available_warning
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
-import { ModelsList } from './components/models_management';
 import { JobMap } from '../job_map';
 import { usePageUrlState } from '../../../util/url_state';
 import { ListingPageUrlState } from '../../../../../common/types/common';
@@ -125,7 +124,6 @@ export const Page: FC = () => {
                 updatePageState={setDfaPageState}
               />
             )}
-            {selectedTabId === 'models' && <ModelsList />}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

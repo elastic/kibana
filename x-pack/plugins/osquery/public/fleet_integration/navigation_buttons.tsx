@@ -14,13 +14,11 @@ import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kiba
 
 interface NavigationButtonsProps {
   isDisabled?: boolean;
-  integrationPolicyId?: string | undefined;
   agentPolicyId?: string | undefined;
 }
 
 const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
   isDisabled = false,
-  integrationPolicyId,
   agentPolicyId,
 }) => {
   const {
@@ -52,7 +50,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
   );
 
   const packsHref = getUrlForApp(PLUGIN_ID, {
-    path: integrationPolicyId ? `/packs/${integrationPolicyId}/edit` : `/packs`,
+    path: `/packs`,
   });
 
   const packsClick = useCallback(
@@ -60,11 +58,11 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
         navigateToApp(PLUGIN_ID, {
-          path: integrationPolicyId ? `/packs/${integrationPolicyId}/edit` : `/packs`,
+          path: `/packs`,
         });
       }
     },
-    [navigateToApp, integrationPolicyId]
+    [navigateToApp]
   );
 
   return (

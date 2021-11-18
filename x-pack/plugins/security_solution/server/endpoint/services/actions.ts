@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
-import { ApiResponse } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
 import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
@@ -89,8 +89,8 @@ const getActivityLog = async ({
   endDate: string;
   logger: Logger;
 }): Promise<ActivityLogEntry[]> => {
-  let actionsResult: ApiResponse<SearchResponse<unknown>, unknown>;
-  let responsesResult: ApiResponse<SearchResponse<unknown>, unknown>;
+  let actionsResult: TransportResult<estypes.SearchResponse<unknown>, unknown>;
+  let responsesResult: TransportResult<estypes.SearchResponse<unknown>, unknown>;
 
   try {
     // fetch actions with matching agent_id
@@ -126,14 +126,14 @@ const getActivityLog = async ({
   // label record as `action`, `fleetAction`
   const responses = categorizeResponseResults({
     results: responsesResult?.body?.hits?.hits as Array<
-      SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
+      estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
     >,
   });
 
   // label record as `response`, `fleetResponse`
   const actions = categorizeActionResults({
     results: actionsResult?.body?.hits?.hits as Array<
-      SearchHit<EndpointAction | LogsEndpointAction>
+      estypes.SearchHit<EndpointAction | LogsEndpointAction>
     >,
   });
 
@@ -148,7 +148,7 @@ const getActivityLog = async ({
 };
 
 const hasAckInResponse = (response: EndpointActionResponse): boolean => {
-  return typeof response.action_data.ack !== 'undefined';
+  return response.action_response?.endpoint?.ack ?? false;
 };
 
 // return TRUE if for given action_id/agent_id
@@ -186,7 +186,8 @@ export const getPendingActionCounts = async (
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
   /** The Fleet Agent IDs to be checked */
-  agentIDs: string[]
+  agentIDs: string[],
+  isPendingActionResponsesWithAckEnabled: boolean
 ): Promise<EndpointPendingActions[]> => {
   // retrieve the unexpired actions for the given hosts
   const recentActions = await esClient
@@ -222,8 +223,6 @@ export const getPendingActionCounts = async (
     agentIDs
   );
 
-  //
-
   const pending: EndpointPendingActions[] = [];
   for (const agentId of agentIDs) {
     const agentResponses = responses[agentId];
@@ -256,11 +255,17 @@ export const getPendingActionCounts = async (
       pending_actions: pendingActions
         .map((a) => a.data.command)
         .reduce((acc, cur) => {
-          if (cur in acc) {
-            acc[cur] += 1;
+          if (!isPendingActionResponsesWithAckEnabled) {
+            acc[cur] = 0; // set pending counts to 0 when FF is disabled
           } else {
-            acc[cur] = 1;
+            // else do the usual counting
+            if (cur in acc) {
+              acc[cur] += 1;
+            } else {
+              acc[cur] = 1;
+            }
           }
+
           return acc;
         }, {} as EndpointPendingActions['pending_actions']),
     });
@@ -270,11 +275,11 @@ export const getPendingActionCounts = async (
 };
 
 /**
- * Returns a boolean for search result
+ * Returns a string of action ids for search result
  *
  * @param esClient
  * @param actionIds
- * @param agentIds
+ * @param agentId
  */
 const hasEndpointResponseDoc = async ({
   actionIds,
@@ -289,6 +294,7 @@ const hasEndpointResponseDoc = async ({
     .search<LogsEndpointActionResponse>(
       {
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        size: 10000,
         body: {
           query: {
             bool: {
@@ -307,7 +313,7 @@ const hasEndpointResponseDoc = async ({
 };
 
 /**
- * Returns back a map of elastic Agent IDs to array of Action IDs that have received a response.
+ * Returns back a map of elastic Agent IDs to array of action responses that have a response.
  *
  * @param esClient
  * @param metadataService

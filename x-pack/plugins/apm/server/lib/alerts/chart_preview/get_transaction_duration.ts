@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { rangeQuery } from '../../../../../observability/server';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { rangeQuery, termQuery } from '../../../../../observability/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -46,10 +46,8 @@ export async function getTransactionDurationChartPreview({
   const query = {
     bool: {
       filter: [
-        ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-        ...(transactionType
-          ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-          : []),
+        ...termQuery(SERVICE_NAME, serviceName),
+        ...termQuery(TRANSACTION_TYPE, transactionType),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),

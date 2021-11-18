@@ -597,6 +597,22 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
+        "id": "def-server.runFindBabelHelpersInEntryBundlesCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runFindBabelHelpersInEntryBundlesCli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-optimizer/src/babel_runtime_helpers/find_babel_runtime_helpers_in_entry_bundles.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/optimizer",
         "id": "def-server.runKbnOptimizerCli",
         "type": "Function",
         "tags": [],

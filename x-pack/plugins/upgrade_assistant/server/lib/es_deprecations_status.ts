@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import {
-  MigrationDeprecationInfoDeprecation,
-  MigrationDeprecationInfoResponse,
-} from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from 'src/core/server';
 import { indexSettingDeprecations } from '../../common/constants';
 import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
+import {
+  getESSystemIndicesMigrationStatus,
+  convertFeaturesToIndicesArray,
+} from '../lib/es_system_indices_migration';
 
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient
@@ -22,14 +23,23 @@ export async function getESUpgradeStatus(
 
   const getCombinedDeprecations = async () => {
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
+    const systemIndices = await getESSystemIndicesMigrationStatus(dataClient.asCurrentUser);
+    const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
 
     return Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {
       if (deprecationType === 'index_settings') {
-        combinedDeprecations = combinedDeprecations.concat(indices);
+        // We need to exclude all index related deprecations for system indices since
+        // they are resolved separately through the system indices upgrade section in
+        // the Overview page.
+        const withoutSystemIndices = indices.filter(
+          (index) => !systemIndicesList.includes(index.index!)
+        );
+
+        combinedDeprecations = combinedDeprecations.concat(withoutSystemIndices);
       } else {
         const deprecationsByType = deprecations[
-          deprecationType as keyof MigrationDeprecationInfoResponse
-        ] as MigrationDeprecationInfoDeprecation[];
+          deprecationType as keyof estypes.MigrationDeprecationsResponse
+        ] as estypes.MigrationDeprecationsDeprecation[];
 
         const enrichedDeprecationInfo = deprecationsByType.map(
           ({
@@ -46,7 +56,7 @@ export async function getESUpgradeStatus(
               details,
               message,
               url,
-              type: deprecationType as keyof MigrationDeprecationInfoResponse,
+              type: deprecationType as keyof estypes.MigrationDeprecationsResponse,
               isCritical: level === 'critical',
               resolveDuringUpgrade,
               correctiveAction: getCorrectiveAction(message, metadata),
@@ -72,7 +82,7 @@ export async function getESUpgradeStatus(
 
 // Reformats the index deprecations to an array of deprecation warnings extended with an index field.
 const getCombinedIndexInfos = async (
-  deprecations: MigrationDeprecationInfoResponse,
+  deprecations: estypes.MigrationDeprecationsResponse,
   dataClient: IScopedClusterClient
 ) => {
   const indices = Object.keys(deprecations.index_settings).reduce(

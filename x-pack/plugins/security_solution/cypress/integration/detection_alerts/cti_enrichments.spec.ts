@@ -55,7 +55,7 @@ describe('CTI Enrichment', () => {
     goToRuleDetails();
   });
 
-  it('Displays enrichment matched.* fields on the timeline', () => {
+  it.skip('Displays enrichment matched.* fields on the timeline', () => {
     const expectedFields = {
       'threat.enrichments.matched.atomic': getNewThreatIndicatorRule().atomic,
       'threat.enrichments.matched.type': 'indicator_match_rule',

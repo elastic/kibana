@@ -17,7 +17,7 @@ describe('AutomatedCurationHistory', () => {
   it('renders', () => {
     const wrapper = shallow(<AutomatedCurationHistory engineName="foo" query="some text" />);
     expect(wrapper.find(EntSearchLogStream).prop('query')).toEqual(
-      'appsearch.search_relevance_suggestions.query: some text and event.kind: event and event.dataset: search-relevance-suggestions and appsearch.search_relevance_suggestions.engine: foo and event.action: curation_suggestion and appsearch.search_relevance_suggestions.suggestion.new_status: automated'
+      'appsearch.adaptive_relevance.query: some text and event.kind: event and event.dataset: search-relevance-suggestions and appsearch.adaptive_relevance.engine: foo and event.action: curation_suggestion and appsearch.adaptive_relevance.suggestion.new_status: automated'
     );
   });
 });

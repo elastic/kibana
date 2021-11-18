@@ -393,7 +393,7 @@ adds dynamic actions to every embeddables state, in order to support drilldowns.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/encrypted_saved_objects/README.md[encryptedSavedObjects]
 |The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with
-security and spaces filtering as well as performing audit logging.
+security and spaces filtering.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/enterprise_search/README.md[enterpriseSearch]
@@ -587,7 +587,7 @@ Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-produc
 
 |<<translations-plugin>>
 |Contains Elastic-supported translations. Owned by the Localizations team.
-For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/master/packages/kbn-i18n
+For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/main/packages/kbn-i18n
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
@@ -600,8 +600,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
-|Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. Its primary
-purposes are to:
+|Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. It will only be enabled on the last minor before the next major release. This is controlled via the config: xpack.upgrade_assistant.readonly (#101296).
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/uptime/README.md[uptime]

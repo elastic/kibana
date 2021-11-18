@@ -10,12 +10,14 @@ import { stringify } from 'query-string';
 import rison from 'rison-node';
 import type { HttpFetchQuery } from 'src/core/public';
 import { HttpSetup, IUiSettingsClient } from 'src/core/public';
+import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
   API_GENERATE_IMMEDIATE,
   API_LIST_URL,
   API_MIGRATE_ILM_POLICY_URL,
+  getRedirectAppPath,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
 import {
@@ -73,6 +75,19 @@ export class ReportingAPIClient implements IReportingAPI {
     private kibanaVersion: string
   ) {}
 
+  public getKibanaAppHref(job: Job): string {
+    const searchParams = stringify({ jobId: job.id });
+
+    const path = buildKibanaPath({
+      basePath: this.http.basePath.serverBasePath,
+      spaceId: job.spaceId,
+      appPath: getRedirectAppPath(),
+    });
+
+    const href = `${path}?${searchParams}`;
+    return href;
+  }
+
   public getReportURL(jobId: string) {
     const apiBaseUrl = this.http.basePath.prepend(API_LIST_URL);
     const downloadLink = `${apiBaseUrl}/download/${jobId}`;
@@ -87,7 +102,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async deleteReport(jobId: string) {
-    return await this.http.delete(`${API_LIST_URL}/delete/${jobId}`, {
+    return await this.http.delete<void>(`${API_LIST_URL}/delete/${jobId}`, {
       asSystemRequest: true,
     });
   }
@@ -108,7 +123,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async total() {
-    return await this.http.get(`${API_LIST_URL}/count`, {
+    return await this.http.get<number>(`${API_LIST_URL}/count`, {
       asSystemRequest: true,
     });
   }
@@ -196,13 +211,13 @@ export class ReportingAPIClient implements IReportingAPI {
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public verifyBrowser() {
-    return this.http.post(`${API_BASE_URL}/diagnose/browser`, {
+    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/browser`, {
       asSystemRequest: true,
     });
   }
 
   public verifyScreenCapture() {
-    return this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
+    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/screenshot`, {
       asSystemRequest: true,
     });
   }

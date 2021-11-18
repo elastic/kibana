@@ -6,8 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { ApiResponse } from '@elastic/elasticsearch';
-import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/api/types';
 
 import { TypeOf } from '@kbn/config-schema';
 import {
@@ -22,7 +20,6 @@ import {
 import {
   HostInfo,
   HostMetadata,
-  UnitedAgentMetadata,
   HostResultList,
   HostStatus,
 } from '../../../../common/endpoint/types';
@@ -30,10 +27,10 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import {
   getESQueryHostMetadataByID,
+  getPagingProperties,
   kibanaRequestToMetadataListESQuery,
-  buildUnitedIndexQuery,
 } from './query_builders';
-import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common/types/models';
+import { Agent, PackagePolicy } from '../../../../../fleet/common/types/models';
 import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
@@ -41,14 +38,13 @@ import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { getAllEndpointPackagePolicies } from './support/endpoint_package_policies';
 import { findAgentIdsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
+import { catchAndWrapError, fleetAgentStatusToEndpointHostStatus } from '../../utils';
 import {
   queryResponseToHostListResult,
   queryResponseToHostResult,
 } from './support/query_strategies';
-import { NotFoundError } from '../../errors';
+import { EndpointError, NotFoundError } from '../../errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
-import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -57,16 +53,6 @@ export interface MetadataRequestContext {
   requestHandlerContext?: SecuritySolutionRequestHandlerContext;
   savedObjectsClient?: SavedObjectsClientContract;
 }
-
-/**
- * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
- * 11111111-1111-1111-1111-111111111111 is Elastic Agent id sent by Endpoint when policy does not contain an id
- */
-
-const IGNORED_ELASTIC_AGENT_IDS = [
-  '00000000-0000-0000-0000-000000000000',
-  '11111111-1111-1111-1111-111111111111',
-];
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
@@ -85,8 +71,8 @@ const errorHandler = <E extends Error>(
     return res.badRequest({ body: error });
   }
 
-  // legacy check for Boom errors. `ts-ignore` is for the errors around non-standard error properties
-  // @ts-ignore
+  // legacy check for Boom errors. for the errors around non-standard error properties
+  // @ts-expect-error TS2339
   const boomStatusCode = error.isBoom && error?.output?.statusCode;
   if (boomStatusCode) {
     return res.customError({
@@ -109,39 +95,69 @@ export const getMetadataListRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, request, response) => {
-    const agentService = endpointAppContext.service.getAgentService();
-    if (agentService === undefined) {
-      throw new Error('agentService not available');
+    const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
+    if (!endpointMetadataService) {
+      throw new EndpointError('endpoint metadata service not available');
     }
 
-    const endpointPolicies = await getAllEndpointPackagePolicies(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      endpointAppContext.service.getPackagePolicyService()!,
-      context.core.savedObjects.client
-    );
+    let doesUnitedIndexExist = false;
+    let didUnitedIndexError = false;
+    let body: HostResultList = {
+      hosts: [],
+      total: 0,
+      request_page_size: 0,
+      request_page_index: 0,
+    };
 
-    const { unitedIndexExists, unitedQueryResponse } = await queryUnitedIndex(
-      context,
-      request,
-      endpointAppContext,
-      logger,
-      endpointPolicies
-    );
-    if (unitedIndexExists) {
-      return response.ok({
-        body: unitedQueryResponse,
-      });
+    try {
+      doesUnitedIndexExist = await endpointMetadataService.doesUnitedIndexExist(
+        context.core.elasticsearch.client.asCurrentUser
+      );
+    } catch (error) {
+      // for better UX, try legacy query instead of immediately failing on united index error
+      didUnitedIndexError = true;
     }
 
-    return response.ok({
-      body: await legacyListMetadataQuery(
+    // If no unified Index present, then perform a search using the legacy approach
+    if (!doesUnitedIndexExist || didUnitedIndexError) {
+      const endpointPolicies = await getAllEndpointPackagePolicies(
+        endpointAppContext.service.getPackagePolicyService(),
+        context.core.savedObjects.client
+      );
+
+      body = await legacyListMetadataQuery(
         context,
         request,
         endpointAppContext,
         logger,
         endpointPolicies
-      ),
-    });
+      );
+      return response.ok({ body });
+    }
+
+    // Unified index is installed and being used - perform search using new approach
+    try {
+      const pagingProperties = await getPagingProperties(request, endpointAppContext);
+      const { data, page, total, pageSize } = await endpointMetadataService.getHostMetadataList(
+        context.core.elasticsearch.client.asCurrentUser,
+        {
+          page: pagingProperties.pageIndex + 1,
+          pageSize: pagingProperties.pageSize,
+          filters: request.body?.filters || {},
+        }
+      );
+
+      body = {
+        hosts: data,
+        request_page_index: page - 1,
+        total,
+        request_page_size: pageSize,
+      };
+    } catch (error) {
+      return errorHandler(logger, response, error);
+    }
+
+    return response.ok({ body });
   };
 };
 
@@ -194,7 +210,9 @@ export async function getHostMetaData(
 
   const query = getESQueryHostMetadataByID(id);
 
-  const response = await esClient.asCurrentUser.search<HostMetadata>(query);
+  const response = await esClient.asCurrentUser
+    .search<HostMetadata>(query)
+    .catch(catchAndWrapError);
 
   const hostResult = queryResponseToHostResult(response.body);
 
@@ -410,6 +428,9 @@ async function legacyListMetadataQuery(
 ): Promise<HostResultList> {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const agentService = endpointAppContext.service.getAgentService()!;
+  if (agentService === undefined) {
+    throw new Error('agentService not available');
+  }
 
   const metadataRequestContext: MetadataRequestContext = {
     esClient: context.core.elasticsearch.client,
@@ -427,15 +448,15 @@ async function legacyListMetadataQuery(
   );
 
   const statusesToFilter = request?.body?.filters?.host_status ?? [];
-  const statusIds = await findAgentIdsByStatus(
+  const statusAgentIds = await findAgentIdsByStatus(
     agentService,
     context.core.elasticsearch.client.asCurrentUser,
     statusesToFilter
   );
 
   const queryParams = await kibanaRequestToMetadataListESQuery(request, endpointAppContext, {
-    unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
-    statusAgentIds: statusIds,
+    unenrolledAgentIds,
+    statusAgentIds,
   });
 
   const result = await context.core.elasticsearch.client.asCurrentUser.search<HostMetadata>(
@@ -443,119 +464,4 @@ async function legacyListMetadataQuery(
   );
   const hostListQueryResult = queryResponseToHostListResult(result.body);
   return mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext);
-}
-
-async function queryUnitedIndex(
-  context: SecuritySolutionRequestHandlerContext,
-  request: KibanaRequest,
-  endpointAppContext: EndpointAppContext,
-  logger: Logger,
-  endpointPolicies: PackagePolicy[]
-): Promise<{
-  unitedIndexExists: boolean;
-  unitedQueryResponse: HostResultList;
-}> {
-  const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
-  const unitedIndexQuery = await buildUnitedIndexQuery(
-    request,
-    endpointAppContext,
-    IGNORED_ELASTIC_AGENT_IDS,
-    endpointPolicyIds
-  );
-
-  let unitedMetadataQueryResponse: ApiResponse<SearchResponse<UnitedAgentMetadata>>;
-  try {
-    unitedMetadataQueryResponse =
-      await context.core.elasticsearch.client.asCurrentUser.search<UnitedAgentMetadata>(
-        unitedIndexQuery
-      );
-  } catch (error) {
-    const errorType = error?.meta?.body?.error?.type ?? '';
-
-    // no united index means that the endpoint package hasn't been upgraded yet
-    // this is expected so we fall back to the legacy query
-    // errors other than index_not_found_exception are unexpected
-    if (errorType !== 'index_not_found_exception') {
-      logger.error(error);
-      throw error;
-    }
-    return {
-      unitedIndexExists: false,
-      unitedQueryResponse: {} as HostResultList,
-    };
-  }
-
-  const { hits: docs, total: docsCount } = unitedMetadataQueryResponse?.body?.hits || {};
-  const agentPolicyIds: string[] = docs.map((doc) => doc._source?.united?.agent?.policy_id ?? '');
-
-  const agentPolicies =
-    (await endpointAppContext.service
-      .getAgentPolicyService()
-      ?.getByIds(context.core.savedObjects.client, agentPolicyIds)) ?? [];
-
-  const agentPoliciesMap: Record<string, AgentPolicy> = agentPolicies.reduce(
-    (acc, agentPolicy) => ({
-      ...acc,
-      [agentPolicy.id]: {
-        ...agentPolicy,
-      },
-    }),
-    {}
-  );
-
-  const endpointPoliciesMap: Record<string, PackagePolicy> = endpointPolicies.reduce(
-    (acc, packagePolicy) => ({
-      ...acc,
-      [packagePolicy.policy_id]: packagePolicy,
-    }),
-    {}
-  );
-
-  const hosts = docs
-    .filter((doc) => {
-      const { endpoint: metadata, agent } = doc?._source?.united ?? {};
-      return metadata && agent;
-    })
-    .map((doc) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { endpoint: metadata, agent } = doc!._source!.united!;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const agentPolicy = agentPoliciesMap[agent.policy_id!];
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const endpointPolicy = endpointPoliciesMap[agent.policy_id!];
-      const fleetAgentStatus = getAgentStatus(agent as Agent);
-
-      return {
-        metadata,
-        host_status: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus),
-        policy_info: {
-          agent: {
-            applied: {
-              id: agent.policy_id || '',
-              revision: agent.policy_revision || 0,
-            },
-            configured: {
-              id: agentPolicy?.id || '',
-              revision: agentPolicy?.revision || 0,
-            },
-          },
-          endpoint: {
-            id: endpointPolicy?.id || '',
-            revision: endpointPolicy?.revision || 0,
-          },
-        },
-      } as HostInfo;
-    });
-
-  const unitedQueryResponse: HostResultList = {
-    request_page_size: unitedIndexQuery.size,
-    request_page_index: unitedIndexQuery.from,
-    total: (docsCount as SearchTotalHits).value,
-    hosts,
-  };
-
-  return {
-    unitedIndexExists: true,
-    unitedQueryResponse,
-  };
 }

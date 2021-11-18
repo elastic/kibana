@@ -62,11 +62,11 @@ export class KibanaConfigWriter {
   public async writeConfig(params: WriteConfigParameters) {
     const caPath = path.join(this.dataDirectoryPath, `ca_${Date.now()}.crt`);
     const config: Record<string, string | string[]> = { 'elasticsearch.hosts': [params.host] };
-    if ('serviceAccountToken' in params) {
+    if ('serviceAccountToken' in params && params.serviceAccountToken) {
       config['elasticsearch.serviceAccountToken'] = params.serviceAccountToken.value;
-    } else if ('username' in params) {
-      config['elasticsearch.password'] = params.password;
+    } else if ('username' in params && params.username) {
       config['elasticsearch.username'] = params.username;
+      config['elasticsearch.password'] = params.password;
     }
     if (params.caCert) {
       config['elasticsearch.ssl.certificateAuthorities'] = [caPath];

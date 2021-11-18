@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from 'kibana/server';
 import type {
   DataViewsService,
@@ -29,7 +29,7 @@ export async function rollupServiceProvider(
   let jobIndexPatterns: string[] = [indexPattern];
 
   async function getRollupJobs(): Promise<
-    estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[] | null
+    estypes.RollupGetRollupCapsRollupCapabilitySummary[] | null
   > {
     if (
       rollupIndexPatternObject !== null &&

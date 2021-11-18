@@ -6,27 +6,34 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiText } from '@elastic/eui';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { DataView, DataViewField } from '../../../../data_views/common';
-import { FieldIcon, FieldButton } from '../../../../kibana_react/public';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldButton } from '@kbn/react-field/field_button';
 
 import { FieldSearch } from './field_search';
+import { DataView, DataViewField } from '../../../../data_views/common';
 
 import './field_picker.scss';
 
-export interface Props {
-  dataView: DataView | null;
+export interface FieldPickerProps {
+  dataView?: DataView;
+  selectedFieldName?: string;
   filterPredicate?: (f: DataViewField) => boolean;
+  onSelectField?: (selectedField: DataViewField) => void;
 }
 
-export const FieldPicker = ({ dataView, filterPredicate }: Props) => {
+export const FieldPicker = ({
+  dataView,
+  onSelectField,
+  filterPredicate,
+  selectedFieldName,
+}: FieldPickerProps) => {
   const [nameFilter, setNameFilter] = useState<string>('');
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
-  const [selectedField, setSelectedField] = useState<DataViewField | null>(null);
 
   // Retrieve, filter, and sort fields from data view
   const fields = dataView
@@ -42,7 +49,13 @@ export const FieldPicker = ({ dataView, filterPredicate }: Props) => {
       )
     : [];
 
-  const uniqueTypes = dataView ? uniq(dataView.fields.map((f) => f.type as string)) : [];
+  const uniqueTypes = dataView
+    ? uniq(
+        dataView.fields
+          .filter((f) => (filterPredicate ? filterPredicate(f) : true))
+          .map((f) => f.type as string)
+      )
+    : [];
 
   return (
     <EuiFlexGroup
@@ -75,9 +88,13 @@ export const FieldPicker = ({ dataView, filterPredicate }: Props) => {
                 return (
                   <EuiFlexItem key={f.name}>
                     <FieldButton
-                      className="presFieldPicker__fieldButton"
-                      onClick={() => setSelectedField(f)}
-                      isActive={f.name === selectedField?.name}
+                      className={classNames('presFieldPicker__fieldButton', {
+                        presFieldPickerFieldButtonActive: f.name === selectedFieldName,
+                      })}
+                      onClick={() => {
+                        onSelectField?.(f);
+                      }}
+                      isActive={f.name === selectedFieldName}
                       fieldName={f.name}
                       fieldIcon={<FieldIcon type={f.type} label={f.name} scripted={f.scripted} />}
                     />
@@ -122,31 +139,6 @@ export const FieldPicker = ({ dataView, filterPredicate }: Props) => {
           )}
         </EuiPanel>
       </EuiFlexItem>
-      {selectedField && (
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h4>
-              <FormattedMessage
-                id="presentationUtil.fieldPicker.selectedFieldLabel"
-                defaultMessage="Selected Field"
-              />
-            </h4>
-          </EuiTitle>
-          <div>
-            <FieldButton
-              size="m"
-              fieldName={selectedField.name}
-              fieldIcon={
-                <FieldIcon
-                  type={selectedField.type}
-                  label={selectedField.name}
-                  scripted={selectedField.scripted}
-                />
-              }
-            />
-          </div>
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 };

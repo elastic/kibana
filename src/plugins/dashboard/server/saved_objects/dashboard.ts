@@ -52,6 +52,12 @@ export const createDashboardSavedObjectType = ({
           value: { type: 'integer', index: false, doc_values: false },
         },
       },
+      controlGroupInput: {
+        properties: {
+          controlStyle: { type: 'keyword', index: false, doc_values: false },
+          panelsJSON: { type: 'text', index: false },
+        },
+      },
       timeFrom: { type: 'keyword', index: false, doc_values: false },
       timeRestore: { type: 'boolean', index: false, doc_values: false },
       timeTo: { type: 'keyword', index: false, doc_values: false },

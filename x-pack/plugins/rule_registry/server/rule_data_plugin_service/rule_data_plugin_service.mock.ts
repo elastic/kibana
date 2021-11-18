@@ -12,6 +12,7 @@ export const ruleDataServiceMock = {
     getResourcePrefix: jest.fn(),
     getResourceName: jest.fn(),
     isWriteEnabled: jest.fn(),
+    isWriterCacheEnabled: jest.fn(),
     initializeService: jest.fn(),
     initializeIndex: jest.fn(),
     findIndexByName: jest.fn(),

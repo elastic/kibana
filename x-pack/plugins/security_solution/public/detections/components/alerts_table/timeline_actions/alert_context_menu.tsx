@@ -15,7 +15,7 @@ import { get } from 'lodash/fp';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../timelines/public';
 import { Ecs } from '../../../../../common/ecs';
 import {
   AddExceptionModal,
@@ -68,8 +68,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const afterItemSelection = useCallback(() => {
     setPopover(false);
   }, []);
-  const ruleId = get(0, ecsRowData?.signal?.rule?.id);
-  const ruleName = get(0, ecsRowData?.signal?.rule?.name);
+  const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
+  const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
   const { timelines: timelinesUi } = useKibana().services;
 
   const { addToCaseActionProps, addToCaseActionItems } = useAddToCaseActions({
@@ -79,7 +79,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
   });
 
-  const alertStatus = get(0, ecsRowData?.signal?.status) as Status;
+  const alertStatus = get(0, ecsRowData?.['kibana.alert.workflow_status']) as Status;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
 
@@ -185,7 +185,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       {addToCaseActionProps && timelinesUi.getAddToCaseAction(addToCaseActionProps)}
       {items.length > 0 && (
         <div key="actions-context-menu">
-          <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             <EuiPopover
               id="singlePanel"
               button={button}

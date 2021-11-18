@@ -18,7 +18,7 @@ export interface EnableAlertResponse {
   disabledWatcherClusterAlerts?: boolean;
 }
 
-const showTlsAndEncryptionError = () => {
+const showApiKeyAndEncryptionError = () => {
   const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
@@ -32,7 +32,7 @@ const showTlsAndEncryptionError = () => {
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.tlsAndEncryptionError', {
-            defaultMessage: `Stack monitoring alerts require Transport Layer Security between Kibana and Elasticsearch, and an encryption key in your kibana.yml file.`,
+            defaultMessage: `Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`,
           })}
         </p>
         <EuiSpacer size="xs" />
@@ -98,7 +98,7 @@ export const showAlertsToast = (response: EnableAlertResponse) => {
     response;
 
   if (isSufficientlySecure === false || hasPermanentEncryptionKey === false) {
-    showTlsAndEncryptionError();
+    showApiKeyAndEncryptionError();
   } else if (disabledWatcherClusterAlerts === false) {
     showUnableToDisableWatcherClusterAlertsError();
   } else if (disabledWatcherClusterAlerts === true) {

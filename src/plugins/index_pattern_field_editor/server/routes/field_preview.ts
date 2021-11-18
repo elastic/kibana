@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -58,6 +58,13 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
       };
 
       try {
+        // Ideally we want to use the Painless _execute API to get the runtime field preview.
+        // There is a current ES limitation that requires a user to have too many privileges
+        // to execute the script. (issue: https://github.com/elastic/elasticsearch/issues/48856)
+        // Until we find a way to execute a script without advanced privileges we are going to
+        // use the Search API to get the field value (and possible errors).
+        // Note: here is the PR were we changed from using Painless _execute to _search and should be
+        // reverted when the ES issue is fixed: https://github.com/elastic/kibana/pull/115070
         const response = await client.asCurrentUser.search({
           index: req.body.index,
           body,

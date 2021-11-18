@@ -10,6 +10,10 @@ jest.mock('crypto', () => ({
   constants: jest.requireActual('crypto').constants,
 }));
 
+jest.mock('@kbn/utils', () => ({
+  getLogsPath: () => '/mock/kibana/logs/path',
+}));
+
 import { loggingSystemMock } from 'src/core/server/mocks';
 
 import { ConfigSchema, createConfig } from './config';
@@ -1703,6 +1707,50 @@ describe('createConfig()', () => {
     `);
   });
 
+  it('creates a default audit appender when audit logging is enabled', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          audit: {
+            enabled: true,
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).audit.appender
+    ).toMatchInlineSnapshot(`
+      Object {
+        "fileName": "/mock/kibana/logs/path/audit.log",
+        "layout": Object {
+          "type": "json",
+        },
+        "policy": Object {
+          "interval": "PT24H",
+          "type": "time-interval",
+        },
+        "strategy": Object {
+          "max": 10,
+          "type": "numeric",
+        },
+        "type": "rolling-file",
+      }
+    `);
+  });
+
+  it('does not create a default audit appender when audit logging is disabled', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          audit: {
+            enabled: false,
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).audit.appender
+    ).toBeUndefined();
+  });
+
   it('accepts an audit appender', () => {
     expect(
       ConfigSchema.validate({
@@ -1739,19 +1787,6 @@ describe('createConfig()', () => {
         },
       })
     ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
-  });
-
-  it('rejects an ignore_filter when no appender is configured', () => {
-    expect(() =>
-      ConfigSchema.validate({
-        audit: {
-          enabled: true,
-          ignore_filters: [{ actions: ['some_action'] }],
-        },
-      })
-    ).toThrow(
-      '[audit]: xpack.security.audit.ignore_filters can only be used with the ECS audit logger. To enable the ECS audit logger, specify where you want to write the audit events using xpack.security.audit.appender.'
-    );
   });
 
   describe('#getExpirationTimeouts', () => {

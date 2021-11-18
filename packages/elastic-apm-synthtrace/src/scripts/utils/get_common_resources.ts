@@ -8,29 +8,29 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { getScenario } from './get_scenario';
-import { getWriteTargets } from './get_write_targets';
+import { getWriteTargets } from '../../lib/utils/get_write_targets';
 import { intervalToMs } from './interval_to_ms';
-import { createLogger, LogLevel } from './logger';
+import { createLogger, LogLevel } from '../../lib/utils/create_logger';
 
 export async function getCommonResources({
   file,
   interval,
   bucketSize,
-  workers,
   target,
-  clean,
   logLevel,
 }: {
-  file: unknown;
-  interval: unknown;
-  bucketSize: unknown;
-  workers: unknown;
-  target: unknown;
-  clean: boolean;
-  logLevel: unknown;
+  file: string;
+  interval: string;
+  bucketSize: string;
+  target: string;
+  logLevel: string;
 }) {
   let parsedLogLevel = LogLevel.info;
   switch (logLevel) {
+    case 'trace':
+      parsedLogLevel = LogLevel.trace;
+      break;
+
     case 'info':
       parsedLogLevel = LogLevel.info;
       break;
@@ -39,8 +39,8 @@ export async function getCommonResources({
       parsedLogLevel = LogLevel.debug;
       break;
 
-    case 'quiet':
-      parsedLogLevel = LogLevel.quiet;
+    case 'error':
+      parsedLogLevel = LogLevel.error;
       break;
   }
 
@@ -58,7 +58,7 @@ export async function getCommonResources({
   }
 
   const client = new Client({
-    node: String(target),
+    node: target,
   });
 
   const [scenario, writeTargets] = await Promise.all([
@@ -73,8 +73,6 @@ export async function getCommonResources({
     client,
     intervalInMs,
     bucketSizeInMs,
-    workers: Number(workers),
-    target: String(target),
-    clean,
+    logLevel: parsedLogLevel,
   };
 }

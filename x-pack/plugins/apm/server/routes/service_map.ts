@@ -15,8 +15,8 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapBackendNodeInfo } from '../lib/service_map/get_service_map_backend_node_info';
 import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import { environmentRt, rangeRt } from './default_api_types';
 
 const serviceMapRoute = createApmServerRoute({
@@ -114,12 +114,13 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 });
 
 const serviceMapBackendNodeRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/backend/{backendName}',
+  endpoint: 'GET /internal/apm/service-map/backend',
   params: t.type({
-    path: t.type({
-      backendName: t.string,
-    }),
-    query: t.intersection([environmentRt, rangeRt]),
+    query: t.intersection([
+      t.type({ backendName: t.string }),
+      environmentRt,
+      rangeRt,
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
@@ -134,8 +135,7 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const {
-      path: { backendName },
-      query: { environment, start, end },
+      query: { backendName, environment, start, end },
     } = params;
 
     return getServiceMapBackendNodeInfo({

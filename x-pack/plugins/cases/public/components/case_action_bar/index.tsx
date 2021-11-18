@@ -86,7 +86,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
         <MyDescriptionList compressed>
           <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
             {caseData.type !== CaseType.collection && (
-              <EuiFlexItem data-test-subj="case-view-status">
+              <EuiFlexItem grow={false} data-test-subj="case-view-status">
                 <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
                   <StatusContextMenu
@@ -97,7 +97,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
             )}
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <FormattedRelativePreferenceDate

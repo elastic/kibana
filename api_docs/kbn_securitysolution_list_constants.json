@@ -78,7 +78,7 @@
         "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION",
         "description": [],
         "signature": [
-          "\"Endpoint Security Host Isolation Exceptions List\""
+          "\"Endpoint Security Host isolation exceptions List\""
         ],
         "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
         "deprecated": false,
@@ -106,7 +106,7 @@
         "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME",
         "description": [],
         "signature": [
-          "\"Endpoint Security Host Isolation Exceptions List\""
+          "\"Endpoint Security Host isolation exceptions List\""
         ],
         "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
         "deprecated": false,

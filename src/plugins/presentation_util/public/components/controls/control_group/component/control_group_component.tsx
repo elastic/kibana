@@ -36,15 +36,16 @@ import {
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
 
-import { ControlGroupInput, ViewMode } from '../types';
+import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../../../services';
 import { ControlGroupStrings } from '../control_group_strings';
 import { CreateControlButton } from '../editor/create_control';
+import { ViewMode } from '../../../../../../embeddable/public';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { forwardAllContext } from '../editor/forward_all_context';
+import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
-import { controlGroupReducers } from '../state/control_group_reducers';
 
 export const ControlGroup = () => {
   // Presentation Services Context
@@ -107,11 +108,15 @@ export const ControlGroup = () => {
     return null;
   }
 
+  let panelBg: 'subdued' | 'primary' | 'success' = 'subdued';
+  if (emptyState) panelBg = 'primary';
+  if (draggingId) panelBg = 'success';
+
   return (
     <EuiPanel
       borderRadius="m"
-      color={emptyState ? 'subdued' : undefined}
-      paddingSize={emptyState ? 'none' : 's'}
+      color={panelBg}
+      paddingSize={emptyState ? 's' : 'none'}
       className={classNames('controlsWrapper', {
         'controlsWrapper--empty': emptyState,
         'controlsWrapper--twoLine': controlStyle === 'twoLine',
@@ -140,7 +145,7 @@ export const ControlGroup = () => {
                 <EuiFlexGroup
                   className={classNames('controlGroup', { 'controlGroup-isDragging': draggingId })}
                   alignItems="center"
-                  gutterSize={'m'}
+                  gutterSize="s"
                   wrap={true}
                 >
                   {idsInOrder.map(

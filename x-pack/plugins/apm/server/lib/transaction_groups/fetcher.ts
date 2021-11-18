@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sortBy } from 'lodash';
 import moment from 'moment';
 import { Unionize } from 'utility-types';
 import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '../../../../observability/server';
 import {
   PARENT_ID,
   SERVICE_NAME,
@@ -69,10 +73,6 @@ function getRequest(topTraceOptions: TopTraceOptions) {
     end,
   } = topTraceOptions;
 
-  const transactionNameFilter = transactionName
-    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
-    : [];
-
   return {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
@@ -82,7 +82,7 @@ function getRequest(topTraceOptions: TopTraceOptions) {
       query: {
         bool: {
           filter: [
-            ...transactionNameFilter,
+            ...termQuery(TRANSACTION_NAME, transactionName),
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),

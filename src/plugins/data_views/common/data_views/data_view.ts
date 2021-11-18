@@ -10,10 +10,10 @@
 
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
 import type { RuntimeField } from '../types';
-import { DuplicateField } from '../../../kibana_utils/common';
+import { CharacterNotAllowedInField, DuplicateField } from '../../../kibana_utils/common';
 
 import { IIndexPattern, IFieldType } from '../../common';
 import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
@@ -237,6 +237,10 @@ export class DataView implements IIndexPattern {
     const scriptedFields = this.getScriptedFields();
     const names = _.map(scriptedFields, 'name');
 
+    if (name.includes('*')) {
+      throw new CharacterNotAllowedInField('*', name);
+    }
+
     if (_.includes(names, name)) {
       throw new DuplicateField(name);
     }
@@ -358,6 +362,11 @@ export class DataView implements IIndexPattern {
    */
   addRuntimeField(name: string, runtimeField: RuntimeField) {
     const existingField = this.getFieldByName(name);
+
+    if (name.includes('*')) {
+      throw new CharacterNotAllowedInField('*', name);
+    }
+
     if (existingField) {
       existingField.runtimeField = runtimeField;
     } else {

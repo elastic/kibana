@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { ActionResult, PreConfiguredAction } from '../types';
@@ -379,4 +379,184 @@ function replaceFirstAndLastDotSymbols(strToReplace: string) {
   return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
-// TODO: Implement executions count telemetry with eventLog, when it will write to index
+export async function getExecutionsPerDayCount(
+  esClient: ElasticsearchClient,
+  eventLogIndex: string
+): Promise<{
+  countTotal: number;
+  countByType: Record<string, number>;
+  countFailed: number;
+  countFailedByType: Record<string, number>;
+  avgExecutionTime: number;
+  avgExecutionTimeByType: Record<string, number>;
+}> {
+  const scriptedMetric = {
+    scripted_metric: {
+      init_script: 'state.connectorTypes = [:];  state.total = 0;',
+      map_script: `
+        if (doc['kibana.saved_objects.type'].value == 'action') { 
+          String connectorType = doc['kibana.saved_objects.type_id'].value; 
+          state.connectorTypes.put(connectorType, state.connectorTypes.containsKey(connectorType) ? state.connectorTypes.get(connectorType) + 1 : 1);
+          state.total++;
+        }
+      `,
+      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+      // Despite docs that say this is optional, this script can't be blank.
+      combine_script: 'return state',
+      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+      // This also needs to account for having no data
+      reduce_script: `
+          Map connectorTypes = [:];
+          long total = 0;
+          for (state in states) {
+            if (state !== null) {
+              total += state.total;
+              for (String k : state.connectorTypes.keySet()) {
+                connectorTypes.put(k, connectorTypes.containsKey(k) ? connectorTypes.get(k) + state.connectorTypes.get(k) : state.connectorTypes.get(k));
+              }
+            }
+          }
+          Map result = new HashMap();
+          result.total = total;
+          result.connectorTypes = connectorTypes;
+          return result;
+      `,
+    },
+  };
+
+  const { body: actionResults } = await esClient.search({
+    index: eventLogIndex,
+    size: 0,
+    body: {
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              must: [
+                {
+                  term: { 'event.action': 'execute' },
+                },
+                {
+                  term: { 'event.provider': 'actions' },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-1d',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      aggs: {
+        totalExecutions: {
+          nested: {
+            path: 'kibana.saved_objects',
+          },
+          aggs: {
+            byConnectorTypeId: scriptedMetric,
+          },
+        },
+        failedExecutions: {
+          filter: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'event.outcome': 'failure',
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            refs: {
+              nested: {
+                path: 'kibana.saved_objects',
+              },
+              aggs: {
+                byConnectorTypeId: scriptedMetric,
+              },
+            },
+          },
+        },
+        avgDuration: { avg: { field: 'event.duration' } },
+        avgDurationByType: {
+          nested: {
+            path: 'kibana.saved_objects',
+          },
+          aggs: {
+            actionSavedObjects: {
+              filter: { term: { 'kibana.saved_objects.type': 'action' } },
+              aggs: {
+                byTypeId: {
+                  terms: {
+                    field: 'kibana.saved_objects.type_id',
+                  },
+                  aggs: {
+                    refs: {
+                      reverse_nested: {},
+                      aggs: {
+                        avgDuration: { avg: { field: 'event.duration' } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // @ts-expect-error aggegation type is not specified
+  const aggsExecutions = actionResults.aggregations.totalExecutions?.byConnectorTypeId.value;
+  // convert nanoseconds to milliseconds
+  const aggsAvgExecutionTime = Math.round(
+    // @ts-expect-error aggegation type is not specified
+    actionResults.aggregations.avgDuration.value / (1000 * 1000)
+  );
+  const aggsFailedExecutions =
+    // @ts-expect-error aggegation type is not specified
+    actionResults.aggregations.failedExecutions?.refs?.byConnectorTypeId.value;
+
+  const avgDurationByType =
+    // @ts-expect-error aggegation type is not specified
+    actionResults.aggregations.avgDurationByType?.actionSavedObjects?.byTypeId?.buckets;
+
+  const avgExecutionTimeByType: Record<string, number> = avgDurationByType.reduce(
+    // @ts-expect-error aggegation type is not specified
+    (res: Record<string, number>, bucket) => {
+      res[replaceFirstAndLastDotSymbols(bucket.key)] = bucket?.refs.avgDuration.value;
+      return res;
+    },
+    {}
+  );
+
+  return {
+    countTotal: aggsExecutions.total,
+    countByType: Object.entries(aggsExecutions.connectorTypes).reduce(
+      (res: Record<string, number>, [key, value]) => {
+        // @ts-expect-error aggegation type is not specified
+        res[replaceFirstAndLastDotSymbols(key)] = value;
+        return res;
+      },
+      {}
+    ),
+    countFailed: aggsFailedExecutions.total,
+    countFailedByType: Object.entries(aggsFailedExecutions.connectorTypes).reduce(
+      (res: Record<string, number>, [key, value]) => {
+        // @ts-expect-error aggegation type is not specified
+        res[replaceFirstAndLastDotSymbols(key)] = value;
+        return res;
+      },
+      {}
+    ),
+    avgExecutionTime: aggsAvgExecutionTime,
+    avgExecutionTimeByType,
+  };
+}

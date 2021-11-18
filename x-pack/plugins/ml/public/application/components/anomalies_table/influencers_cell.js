@@ -12,6 +12,7 @@ import React, { Component } from 'react';
 import { EuiLink, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { blurButtonOnClick } from '../../util/component_utils';
 
 /*
  * Component for rendering a list of record influencers inside a cell in the anomalies table.
@@ -59,13 +60,13 @@ export class InfluencersCell extends Component {
               <EuiButtonIcon
                 size="s"
                 className="filter-button"
-                onClick={() =>
+                onClick={blurButtonOnClick(() => {
                   influencerFilter(
                     influencer.influencerFieldName,
                     influencer.influencerFieldValue,
                     '+'
-                  )
-                }
+                  );
+                })}
                 iconType="plusInCircle"
                 aria-label={i18n.translate(
                   'xpack.ml.anomaliesTable.influencersCell.addFilterAriaLabel',
@@ -86,13 +87,13 @@ export class InfluencersCell extends Component {
               <EuiButtonIcon
                 size="s"
                 className="filter-button"
-                onClick={() =>
+                onClick={blurButtonOnClick(() => {
                   influencerFilter(
                     influencer.influencerFieldName,
                     influencer.influencerFieldValue,
                     '-'
-                  )
-                }
+                  );
+                })}
                 iconType="minusInCircle"
                 aria-label={i18n.translate(
                   'xpack.ml.anomaliesTable.influencersCell.removeFilterAriaLabel',

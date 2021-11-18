@@ -30,6 +30,7 @@ const hostIpData: EventFieldsData = {
   isObjectArray: false,
   name: 'host.ip',
   originalValue: ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'],
+  readFromDocValues: false,
   searchable: true,
   type: 'ip',
   values: ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'],
@@ -101,6 +102,7 @@ describe('FieldValueCell', () => {
       isObjectArray: false,
       name: 'message',
       originalValue: ['Endpoint network event'],
+      readFromDocValues: false,
       searchable: true,
       type: 'string',
       values: ['Endpoint network event'],
@@ -117,6 +119,7 @@ describe('FieldValueCell', () => {
       format: '',
       indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
       name: 'message',
+      readFromDocValues: false,
       searchable: true,
       type: 'string',
     };
@@ -156,6 +159,7 @@ describe('FieldValueCell', () => {
       format: '',
       indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
       name: 'host.ip',
+      readFromDocValues: false,
       searchable: true,
       type: 'ip',
     };
@@ -177,6 +181,12 @@ describe('FieldValueCell', () => {
     test('it renders values formatted with the expected class', () => {
       expect(screen.getByTestId(`event-field-${hostIpData.field}`).firstChild).toHaveClass(
         'eventFieldsTable__fieldValue'
+      );
+    });
+
+    test('it aligns items at the start of the group to prevent content from stretching (by default)', () => {
+      expect(screen.getByTestId(`event-field-${hostIpData.field}`)).toHaveClass(
+        'euiFlexGroup--alignItemsFlexStart'
       );
     });
 

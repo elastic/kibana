@@ -12,13 +12,13 @@ import { Provider } from 'react-redux';
 import { createBrowserHistory } from 'history';
 import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks';
 
-import { DashboardContainer } from '..';
 import { DashboardSessionStorage } from '../lib';
 import { coreMock } from '../../../../../core/public/mocks';
 import { DashboardConstants } from '../../dashboard_constants';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { SavedObjectLoader } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppState } from '../../types';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { EmbeddableFactory, ViewMode } from '../../services/embeddable';
 import { dashboardStateStore, setDescription, setViewMode } from '../state';

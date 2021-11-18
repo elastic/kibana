@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
   HostDetailsStrategyResponse,

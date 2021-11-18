@@ -183,8 +183,8 @@ describe('KibanaConfigWriter', () => {
 
         # This section was automatically generated during setup.
         elasticsearch.hosts: [some-host]
-        elasticsearch.password: password
         elasticsearch.username: username
+        elasticsearch.password: password
         elasticsearch.ssl.certificateAuthorities: [/data/ca_1234.crt]
 
         ",
@@ -212,8 +212,8 @@ describe('KibanaConfigWriter', () => {
 
         # This section was automatically generated during setup.
         elasticsearch.hosts: [some-host]
-        elasticsearch.password: password
         elasticsearch.username: username
+        elasticsearch.password: password
 
         ",
           ],

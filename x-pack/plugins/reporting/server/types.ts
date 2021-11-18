@@ -57,7 +57,7 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export { BaseParams, BasePayload };
+export type { BaseParams, BasePayload };
 
 // default fn type for CreateJobFnFactory
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (

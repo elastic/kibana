@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 
 import { MatrixHistogramStrategyResponse } from '../../../../../../common/search_strategy';
 
@@ -2098,8 +2098,8 @@ export const formattedPreviewStrategyResponse = {
       JSON.stringify(
         {
           index: ['.siem-preview-signals-default'],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           track_total_hits: true,
           body: {
             aggregations: {

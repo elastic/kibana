@@ -60,7 +60,7 @@ import {
 } from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
-import { GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
+import { GeoJsonWithMeta, SourceStatus } from '../vector_source';
 import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
@@ -154,7 +154,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       fieldName,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
-      canReadFromGeoJson: this._descriptor.scalingType !== SCALING_TYPES.MVT,
     });
   }
 
@@ -461,14 +460,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     if (!(this.indexPattern && this.indexPattern.title)) {
       return [];
     }
-    let success;
-    let matchingIndexes;
     try {
-      ({ success, matchingIndexes } = await getMatchingIndexes(this.indexPattern.title));
+      const { success, matchingIndexes } = await getMatchingIndexes(this.indexPattern.title);
+      return success ? matchingIndexes : [];
     } catch (e) {
       // Fail silently
+      return [];
     }
-    return success ? matchingIndexes : [];
   }
 
   async supportsFeatureEditing(): Promise<boolean> {
@@ -672,7 +670,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     if (!meta) {
       // no tooltip content needed when there is no feature collection or meta
