@@ -29,7 +29,10 @@ import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
 import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import {
+  getDisplayValueFromFilter,
+  FilterLabel,
+} from '../../../../../../../../src/plugins/data/public';
 
 import {
   subtechniquesOptions,
@@ -83,9 +86,9 @@ export const buildQueryBarDescription = ({
               <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
-                    <esFilters.FilterLabel
+                    <FilterLabel
                       filter={filter}
-                      valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
+                      valueLabel={getDisplayValueFromFilter(filter, [indexPatterns])}
                     />
                   ) : (
                     <EuiLoadingSpinner size="m" />

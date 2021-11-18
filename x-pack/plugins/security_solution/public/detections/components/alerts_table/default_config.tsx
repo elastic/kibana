@@ -18,11 +18,10 @@ import {
   ALERT_RULE_RISK_SCORE,
 } from '@kbn/rule-data-utils/technical_field_names';
 
+import type { Filter } from '@kbn/es-query';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-
 import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { columns } from '../../configurations/security_solution_detections/columns';
