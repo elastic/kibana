@@ -204,7 +204,7 @@ export const getColumns = ({
             popoverTitle={i18n.COLUMN_TAGS}
             popoverButtonTitle={tags.length.toString()}
             popoverButtonIcon="tag"
-            dataTestEntity="tags"
+            dataTestPrefix="tags"
             renderItem={renderItem as PopoverItemsProps<unknown>['renderItem']}
           />
         );
