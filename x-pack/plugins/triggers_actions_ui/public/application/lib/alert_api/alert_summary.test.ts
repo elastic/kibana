@@ -31,6 +31,7 @@ describe('loadAlertSummary', () => {
       executionDuration: {
         average: 0,
         values: [],
+        valuesWithTimestamp: {},
       },
     };
 
@@ -52,6 +53,7 @@ describe('loadAlertSummary', () => {
       execution_duration: {
         average: 0,
         values: [],
+        valuesWithTimestamp: {},
       },
     });
 

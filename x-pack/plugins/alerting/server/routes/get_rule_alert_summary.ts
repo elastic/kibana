@@ -14,6 +14,7 @@ import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
   AlertSummary,
+  ExecutionDuration,
 } from '../types';
 
 const paramSchema = schema.object({
@@ -31,6 +32,15 @@ const rewriteReq: RewriteRequestCase<GetAlertSummaryParams> = ({
   ...rest,
   dateStart,
 });
+
+const transformExecutionDuration: RewriteResponseCase<ExecutionDuration> = ({
+  valuesWithTimestamp,
+  ...rest
+}) => ({
+  values_with_timestamp: valuesWithTimestamp,
+  ...rest,
+});
+
 const rewriteBodyRes: RewriteResponseCase<AlertSummary> = ({
   ruleTypeId,
   muteAll,
@@ -48,7 +58,7 @@ const rewriteBodyRes: RewriteResponseCase<AlertSummary> = ({
   status_end_date: statusEndDate,
   error_messages: errorMessages,
   last_run: lastRun,
-  execution_duration: executionDuration,
+  execution_duration: transformExecutionDuration(executionDuration),
 });
 
 export const getRuleAlertSummaryRoute = (

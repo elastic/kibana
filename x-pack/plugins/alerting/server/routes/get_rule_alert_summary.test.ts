@@ -41,6 +41,11 @@ describe('getRuleAlertSummaryRoute', () => {
     executionDuration: {
       average: 1,
       values: [3, 5, 5],
+      valuesWithTimestamp: {
+        '17 Nov 2021 @ 19:19:17': 3,
+        '18 Nov 2021 @ 19:19:17': 5,
+        '19 Nov 2021 @ 19:19:17': 5,
+      },
     },
   };
 

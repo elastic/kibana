@@ -8,6 +8,12 @@
 export type RuleStatusValues = 'OK' | 'Active' | 'Error';
 export type AlertStatusValues = 'OK' | 'Active';
 
+export interface ExecutionDuration {
+  average: number;
+  values: number[];
+  valuesWithTimestamp: Record<string, number>;
+}
+
 export interface AlertSummary {
   id: string;
   name: string;
@@ -23,10 +29,7 @@ export interface AlertSummary {
   lastRun?: string;
   errorMessages: Array<{ date: string; message: string }>;
   alerts: Record<string, AlertStatus>;
-  executionDuration: {
-    average: number;
-    values: number[];
-  };
+  executionDuration: ExecutionDuration;
 }
 
 export interface AlertStatus {
