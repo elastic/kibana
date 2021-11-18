@@ -14866,7 +14866,6 @@
     "xpack.maps.style.customColorPaletteLabel": "カスタムカラーパレット",
     "xpack.maps.style.customColorRampLabel": "カスタマカラーランプ",
     "xpack.maps.style.fieldSelect.OriginLabel": "{fieldOrigin} からのフィールド",
-    "xpack.maps.style.heatmap.resolutionStyleErrorMessage": "解像度パラメーターが認識されません：{resolution}",
     "xpack.maps.styles.categorical.otherCategoryLabel": "その他",
     "xpack.maps.styles.categoricalDataMapping.isEnabled.local": "無効にすると、ローカルデータからカテゴリを計算し、データが変更されたときにカテゴリを再計算します。ユーザーがパン、ズーム、フィルターを使用するときにスタイルが一貫しない場合があります。",
     "xpack.maps.styles.categoricalDataMapping.isEnabled.server": "データセット全体からカテゴリを計算します。ユーザーがパン、ズーム、フィルターを使用するときにスタイルが一貫します。",
