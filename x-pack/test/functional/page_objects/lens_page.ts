@@ -131,7 +131,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           : `lns-indexPatternDimension-${opts.operation}`;
         async function getAriaPressed() {
           const operationSelectorContainer = await testSubjects.find(operationSelector);
-          await testSubjects.click(operationSelect);
+          await testSubjects.click(operationSelector);
           const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
           return ariaPressed;
         }
