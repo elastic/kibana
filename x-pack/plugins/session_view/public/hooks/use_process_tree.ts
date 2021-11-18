@@ -89,7 +89,7 @@ export interface ProcessEvent {
       original_time: Date;
       original_event: {
         action: string;
-      },
+      };
       rule: {
         category: string;
         consumer: string;
@@ -100,9 +100,9 @@ export interface ProcessEvent {
         risk_score: number;
         severity: string;
         uuid: string;
-      }
-    }
-  }
+      };
+    };
+  };
 }
 
 export interface Process {
@@ -146,7 +146,7 @@ class ProcessImpl implements Process {
   hasAlerts() {
     return !!this.events.find(({ event }) => event.kind === EventKind.signal);
   }
-  
+
   getAlerts() {
     return this.events.filter(({ event }) => event.kind === EventKind.signal);
   }
@@ -167,7 +167,7 @@ class ProcessImpl implements Process {
     if (execsForks.length === 0) {
       debugger;
     }
-    
+
     return execsForks[execsForks.length - 1];
   }
 
@@ -208,16 +208,16 @@ export const useProcessTree = ({
   // we add a fake session leader event, sourced from wide event data.
   // this is because we might not always have a session leader event
   // especially if we are paging in reverse from deep within a large session
-  const fakeLeaderEvent = forward.find(event => event.event.kind === EventKind.event);
+  const fakeLeaderEvent = forward.find((event) => event.event.kind === EventKind.event);
   const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
-  
+
   if (fakeLeaderEvent) {
-    fakeLeaderEvent.process = { ...fakeLeaderEvent.process, ...fakeLeaderEvent.process.entry};
+    fakeLeaderEvent.process = { ...fakeLeaderEvent.process, ...fakeLeaderEvent.process.entry };
     sessionLeaderProcess.events.push(fakeLeaderEvent);
   }
 
   const initializedProcessMap: ProcessMap = {
-    [sessionEntityId]: sessionLeaderProcess, 
+    [sessionEntityId]: sessionLeaderProcess,
   };
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);

@@ -6,29 +6,23 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
-import MonacoEditor from 'react-monaco-editor';
+import { i18n } from '@kbn/i18n';
 import {
   EuiSearchBar,
   EuiSearchBarOnChangeArgs,
   EuiEmptyPrompt,
   EuiButton,
-  EuiDescriptionList,
-  EuiSpacer,
   EuiSplitPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiTabs,
-  EuiTab,
-  EuiAccordion,
 } from '@elastic/eui';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { ProcessTree } from '../ProcessTree';
 import { Process, ProcessEvent } from '../../hooks/use_process_tree';
+import { SessionViewDetailPanel } from '../SessionViewDetailPanel';
 import { useStyles } from './styles';
 import { PROCESS_EVENTS_ROUTE } from '../../../common/constants';
-import { flattenJSON } from '../../../common/utils/flatten_json';
 
 interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session.entity_id
@@ -47,6 +41,13 @@ interface ProcessEventResults {
   };
 }
 
+const BUTTON_OPEN_DETAIL_PANEL = i18n.translate(
+  'xpack.sessionView.detailPanel.buttonOpenDetailPanel',
+  {
+    defaultMessage: 'Detail panel',
+  }
+);
+
 /**
  * The main wrapper component for the session view.
  * TODO:
@@ -57,10 +58,9 @@ interface ProcessEventResults {
  */
 export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<ProcessEvent[]>([]);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDetailMounted, setIsDetailMounted] = useState(false);
-  const [selectedDetailTab, setSelectedDetailTab] = useState('tree');
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
 
   const { http } = useKibana<CoreStart>().services;
@@ -106,10 +106,10 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
       return;
     }
 
-    const events: ProcessEvent[] = getData.events.hits.map(
+    const events: ProcessEvent[] = (getData.events?.hits || []).map(
       (event: any) => event._source as ProcessEvent
     );
-    const alerts: ProcessEvent[] = getData.alerts.hits.map((event: any) => {
+    const alerts: ProcessEvent[] = (getData.alerts?.hits || []).map((event: any) => {
       return event._source as ProcessEvent;
     });
     const all: ProcessEvent[] = events.concat(alerts).sort(sortEvents);
@@ -130,123 +130,6 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     if (!isDetailOpen) setIsDetailOpen(true);
   };
 
-  const detailPanelTabs = [
-    {
-      id: 'tree',
-      name: 'Tree view',
-      content: (
-        <>
-          {selectedProcess && (
-            <>
-              <EuiTitle size="s">
-                <span>Command Detail</span>
-              </EuiTitle>
-              <EuiSpacer />
-              {selectedProcess.events.map((event) => {
-                const flattenedSelectedProcess = flattenJSON(event);
-                return (
-                  <EuiAccordion
-                    id={flattenedSelectedProcess['event.action']}
-                    buttonContent={flattenedSelectedProcess['event.action']}
-                  >
-                    <EuiDescriptionList
-                      type="column"
-                      compressed
-                      listItems={Object.keys(flattenedSelectedProcess).map((title) => ({
-                        title,
-                        description: flattenedSelectedProcess[title],
-                      }))}
-                    />
-                    <EuiSpacer />
-                  </EuiAccordion>
-                );
-              })}
-              <EuiSpacer size="xxl" />
-            </>
-          )}
-          <EuiTitle size="s">
-            <span>Session Detail</span>
-          </EuiTitle>
-          <EuiSpacer />
-          {(() => {
-            const flattenedSession = flattenJSON(data?.[0]?.process.session);
-            return (
-              <EuiDescriptionList
-                type="column"
-                compressed
-                listItems={Object.keys(flattenedSession).map((title) => ({
-                  title,
-                  description: flattenedSession[title],
-                }))}
-              />
-            );
-          })()}
-          <EuiSpacer size="xxl" />
-          <EuiTitle size="s">
-            <span>Server Detail</span>
-          </EuiTitle>
-          {/* Add server detail */}
-          <EuiSpacer size="xxl" />
-          <EuiTitle size="s">
-            <span>Alert Detail</span>
-          </EuiTitle>
-          {/* Add alert detail conditionally */}
-        </>
-      ),
-    },
-    {
-      id: 'json',
-      name: 'JSON view',
-      content: (
-        <>
-          {selectedProcess && (
-            <>
-              <EuiTitle size="s">
-                <span>Command Detail</span>
-              </EuiTitle>
-              <EuiSpacer />
-              <MonacoEditor
-                height={400}
-                language="javascript"
-                options={{
-                  lineNumbers: 'on',
-                  language: 'json',
-                  readOnly: true,
-                }}
-                value={JSON.stringify(selectedProcess?.events || {}, null, 4)}
-              />
-              <EuiSpacer size="xxl" />
-            </>
-          )}
-          <EuiTitle size="s">
-            <span>Session Detail</span>
-          </EuiTitle>
-          <EuiSpacer />
-          <MonacoEditor
-            height={400}
-            language="javascript"
-            options={{
-              lineNumbers: 'on',
-              language: 'json',
-              readOnly: true,
-            }}
-            value={JSON.stringify(data?.[0]?.process.session || {}, null, 4)}
-          />
-          <EuiSpacer size="xxl" />
-          <EuiTitle size="s">
-            <span>Server Detail</span>
-          </EuiTitle>
-          {/* Add server detail */}
-          <EuiSpacer size="xxl" />
-          <EuiTitle size="s">
-            <span>Alert Detail</span>
-          </EuiTitle>
-          {/* Add alert detail conditionally */}
-        </>
-      ),
-    },
-  ];
-
   if (!data.length) {
     return renderNoData();
   }
@@ -259,7 +142,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton onClick={toggleDetailPanel} iconType="list" fill>
-            Detail Panel
+            {BUTTON_OPEN_DETAIL_PANEL}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -270,39 +153,26 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
         css={styles.outerPanel}
       >
         <EuiSplitPanel.Inner paddingSize="none" css={styles.treePanel}>
-          {data && <div css={styles.processTree}>
-            <ProcessTree
-              sessionEntityId={sessionEntityId}
-              forward={data}
-              searchQuery={searchQuery}
-              selectedProcess={selectedProcess}
-              onProcessSelected={onProcessSelected}
-            />
-          </div>}
+          {data && (
+            <div css={styles.processTree}>
+              <ProcessTree
+                sessionEntityId={sessionEntityId}
+                forward={data}
+                searchQuery={searchQuery}
+                selectedProcess={selectedProcess}
+                onProcessSelected={onProcessSelected}
+              />
+            </div>
+          )}
         </EuiSplitPanel.Inner>
         {isDetailOpen && (
-          <EuiSplitPanel.Inner
-            paddingSize="s"
-            color="plain"
-            css={isDetailMounted ? styles.detailPanelIn : styles.detailPanelOut}
-            onAnimationEnd={() => {
-              if (!isDetailMounted) setIsDetailOpen(false);
-            }}
-          >
-            <EuiTabs>
-              {detailPanelTabs.map((tab, idx) => (
-                <EuiTab
-                  key={idx}
-                  onClick={() => setSelectedDetailTab(tab.id)}
-                  isSelected={tab.id === selectedDetailTab}
-                >
-                  {tab.name}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-            <EuiSpacer size="xxl" />
-            {detailPanelTabs.find((obj) => obj.id === selectedDetailTab)?.content}
-          </EuiSplitPanel.Inner>
+          <SessionViewDetailPanel
+            isDetailMounted={isDetailMounted}
+            height={height}
+            selectedProcess={selectedProcess}
+            setIsDetailOpen={setIsDetailOpen}
+            session={data?.[0]?.process.session}
+          />
         )}
       </EuiSplitPanel.Outer>
     </>

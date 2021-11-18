@@ -135,9 +135,9 @@ export const ProcessTree = ({
             onProcessSelected={onProcessSelected}
           />
         );
-      })
+      });
     }
-  }
+  };
 
   return (
     <div ref={scrollerRef} css={styles.scroller}>

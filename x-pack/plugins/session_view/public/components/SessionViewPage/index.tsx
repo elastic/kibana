@@ -52,7 +52,6 @@ export const SessionViewPage = (props: RouteComponentProps) => {
     }
   }, [data]);
 
-
   return (
     <EuiPage>
       <EuiPageContent>

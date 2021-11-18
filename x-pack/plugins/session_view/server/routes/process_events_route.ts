@@ -21,7 +21,7 @@ export const registerProcessEventsRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const client = context.core.elasticsearch.client.asCurrentUser;
-      
+
       // TODO: would be good to figure out how to add securitySolution as a dep
       // and make use of this way of getting the siem-signals index, instead of
       // hardcoding it.
@@ -40,7 +40,7 @@ export const registerProcessEventsRoute = (router: IRouter) => {
           },
           size: PROCESS_EVENTS_PER_PAGE,
           sort: [{ '@timestamp': 'asc' }],
-        }
+        },
       });
 
       // temporary approach. ideally we'd pull from both these indexes above, but unfortunately
@@ -48,11 +48,11 @@ export const registerProcessEventsRoute = (router: IRouter) => {
       // this should hopefully change once we update ECS or endpoint-package..
       // for demo purpose we just load all alerts, and stich it together on the frontend.
       const alerts = await client.search({
-        index: ['.siem-signals-default'],
+        index: ['.siem-signals-default*'],
         body: {
           size: PROCESS_EVENTS_PER_PAGE,
           sort: [{ '@timestamp': 'asc' }],
-        }
+        },
       });
 
       alerts.body.hits.hits = alerts.body.hits.hits.map((hit: any) => {
