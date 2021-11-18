@@ -6,7 +6,7 @@
  */
 import apmAgent from 'elastic-apm-node';
 
-import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
+import type { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
 import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../plugins/alerting/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
