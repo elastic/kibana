@@ -245,7 +245,7 @@ export const ROLES_DISABLED_NOTE = i18n.translate(
 export const RBAC_BUTTON_DISABLED_LABEL = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.rbacButtonDisabledLabel',
   {
-    defaultMessage: 'Enabling RBAC can be performed by a superadmin user.',
+    defaultMessage: 'Enabling RBAC can be performed by a superuser.',
   }
 );
 
