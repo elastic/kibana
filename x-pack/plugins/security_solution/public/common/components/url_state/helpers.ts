@@ -110,6 +110,8 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'case';
   } else if (pageName === SecurityPageName.administration) {
     return 'administration';
+  } else if (pageName === SecurityPageName.cloud_posture) {
+    return 'cloud_posture';
   }
   return 'overview';
 };

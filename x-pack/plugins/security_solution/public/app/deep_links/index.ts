@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { get } from 'lodash';
 import { LicenseType } from '../../../../licensing/common/types';
-import { SecurityPageName } from '../types';
+import { SecurityPageName, CloudPosturePage } from '../types';
 import { AppDeepLink, AppNavLinkStatus, Capabilities } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
@@ -356,6 +356,39 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         id: SecurityPageName.hostIsolationExceptions,
         title: HOST_ISOLATION_EXCEPTIONS,
         path: HOST_ISOLATION_EXCEPTIONS_PATH,
+      },
+    ],
+  },
+  {
+    id: SecurityPageName.cloud_posture,
+    title: 'Cloud Posture',
+    path: '/csp',
+    navLinkStatus: AppNavLinkStatus.visible,
+    keywords: [],
+    deepLinks: [
+      {
+        id: CloudPosturePage.dashboard,
+        title: 'Dashboard',
+        // eslint-disable-next-line prettier/prettier
+        path: '/csp/dashboard',
+      },
+      {
+        id: CloudPosturePage.rules,
+        title: 'Rules',
+        // eslint-disable-next-line prettier/prettier
+        path: '/csp/rules',
+      },
+      {
+        id: CloudPosturePage.alerts,
+        title: 'Alerts',
+        // eslint-disable-next-line prettier/prettier
+        path: '/csp/alerts',
+      },
+      {
+        id: CloudPosturePage.findings,
+        title: 'Findings',
+        // eslint-disable-next-line prettier/prettier
+        path: '/csp/findings',
       },
     ],
   },
