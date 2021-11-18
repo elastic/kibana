@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { mount } from 'enzyme';
 import { omit, set } from 'lodash/fp';
 import React from 'react';
@@ -17,11 +18,9 @@ import {
   getSchema,
 } from './helpers';
 import {
+  DEFAULT_ACTION_BUTTON_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  DEFAULT_ACTIONS_COLUMN_WIDTH,
-  EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
-  SHOW_CHECK_BOXES_COLUMN_WIDTH,
 } from '../constants';
 import { mockBrowserFields } from '../../../../mock/browser_fields';
 import { ColumnHeaderOptions } from '../../../../../common';
@@ -44,28 +43,6 @@ describe('helpers', () => {
 
     test('it returns the expected width for a date column', () => {
       expect(getColumnWidthFromType('date')).toEqual(DEFAULT_DATE_COLUMN_MIN_WIDTH);
-    });
-  });
-
-  describe('getActionsColumnWidth', () => {
-    test('returns the default actions column width when isEventViewer is false', () => {
-      expect(getActionsColumnWidth(false)).toEqual(DEFAULT_ACTIONS_COLUMN_WIDTH);
-    });
-
-    test('returns the default actions column width + checkbox width when isEventViewer is false and showCheckboxes is true', () => {
-      expect(getActionsColumnWidth(false, true)).toEqual(
-        DEFAULT_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
-      );
-    });
-
-    test('returns the events viewer actions column width when isEventViewer is true', () => {
-      expect(getActionsColumnWidth(true)).toEqual(EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH);
-    });
-
-    test('returns the events viewer actions column width + checkbox width when isEventViewer is true and showCheckboxes is true', () => {
-      expect(getActionsColumnWidth(true, true)).toEqual(
-        EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
-      );
     });
   });
 
@@ -341,6 +318,37 @@ describe('helpers', () => {
       expect(
         getColumnHeaders([headerDoesNotMatchBrowserField], mockBrowserFields).map(omit('display'))
       ).toEqual(expected);
+    });
+  });
+
+  describe('getActionsColumnWidth', () => {
+    // ideally the following implementation detail wouldn't be part of these tests,
+    // but without it, the test would be brittle when `euiDataGridCellPaddingM` changes:
+    const expectedPadding = parseInt(euiThemeVars.euiDataGridCellPaddingM, 10) * 2;
+
+    test('it returns the expected width', () => {
+      const ACTION_BUTTON_COUNT = 5;
+      const expectedContentWidth = ACTION_BUTTON_COUNT * DEFAULT_ACTION_BUTTON_WIDTH;
+
+      expect(getActionsColumnWidth(ACTION_BUTTON_COUNT)).toEqual(
+        expectedContentWidth + expectedPadding
+      );
+    });
+
+    test('it returns the minimum width when the button count is zero', () => {
+      const ACTION_BUTTON_COUNT = 0;
+
+      expect(getActionsColumnWidth(ACTION_BUTTON_COUNT)).toEqual(
+        DEFAULT_ACTION_BUTTON_WIDTH + expectedPadding
+      );
+    });
+
+    test('it returns the minimum width when the button count is negative', () => {
+      const ACTION_BUTTON_COUNT = -1;
+
+      expect(getActionsColumnWidth(ACTION_BUTTON_COUNT)).toEqual(
+        DEFAULT_ACTION_BUTTON_WIDTH + expectedPadding
+      );
     });
   });
 });

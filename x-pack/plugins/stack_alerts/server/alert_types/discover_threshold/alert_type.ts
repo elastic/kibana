@@ -160,6 +160,19 @@ export function getAlertType(
     isExportable: true,
     executor,
     producer: 'discover',
+    /**
+     * These are the new hooks
+     **/
+    useSavedObjectReferences: {
+      extractReferences: (params) => {
+        console.log(params);
+        return { params, references: [] };
+      },
+      injectReferences: (params, references) => {
+        console.log(params);
+        return params;
+      },
+    },
   };
 
   async function executor(

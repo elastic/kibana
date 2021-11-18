@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { elementsOverlap } from '../../helpers/rules';
 import {
   TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN,
   TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON,
   TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX,
   TIMELINE_ROW_RENDERERS_SEARCHBOX,
   TIMELINE_SHOW_ROW_RENDERERS_GEAR,
+  TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE,
+  TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP,
+  TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP,
 } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
@@ -80,5 +84,23 @@ describe('Row renderers', () => {
       .should('not.be.checked');
 
     cy.wait('@updateTimeline').its('response.statusCode').should('eq', 200);
+  });
+
+  describe('Suricata', () => {
+    it('Signature tooltips do not overlap', () => {
+      // Hover the signature to show the tooltips
+      cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE)
+        .parents('.euiPopover__anchor')
+        .trigger('mouseover');
+
+      cy.get(TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP).then(($googleLinkTooltip) => {
+        cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP).then(($signatureTooltip) => {
+          expect(
+            elementsOverlap($googleLinkTooltip, $signatureTooltip),
+            'tooltips do not overlap'
+          ).to.equal(false);
+        });
+      });
+    });
   });
 });

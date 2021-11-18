@@ -7,9 +7,9 @@
  */
 
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { History } from 'history';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
@@ -25,8 +25,8 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
   };
 
   return (
-    <EuiErrorBoundary>
-      <KibanaContextProvider services={services}>
+    <KibanaContextProvider services={services}>
+      <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
           <Switch>
             <Route
@@ -50,7 +50,7 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
             <NotFoundRoute services={services} />
           </Switch>
         </Router>
-      </KibanaContextProvider>
-    </EuiErrorBoundary>
+      </EuiErrorBoundary>
+    </KibanaContextProvider>
   );
 };
