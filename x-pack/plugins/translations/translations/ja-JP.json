@@ -21413,8 +21413,6 @@
     "xpack.securitySolution.endpoint.fleetCustomExtension.exceptionItemsSummary.macos": "Mac",
     "xpack.securitySolution.endpoint.fleetCustomExtension.exceptionItemsSummary.total": "合計",
     "xpack.securitySolution.endpoint.fleetCustomExtension.exceptionItemsSummary.windows": "Windows",
-    "xpack.securitySolution.endpoint.fleetCustomExtension.manageEventFiltersLinkLabel": "イベントフィルターの管理",
-    "xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel": "信頼できるアプリケーションを管理",
     "xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel": "信頼できるアプリケーション",
     "xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummaryError": "信頼できるアプリ統計情報の取得中にエラーが発生しました：\"{error}\"",
     "xpack.securitySolution.endpoint.hostIsolation.cancel": "キャンセル",
