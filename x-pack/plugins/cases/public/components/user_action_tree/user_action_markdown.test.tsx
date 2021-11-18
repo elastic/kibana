@@ -13,6 +13,7 @@ import { waitFor } from '@testing-library/react';
 const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
 
+const newValue = 'Hello from Tehas';
 const hyperlink = `[hyperlink](http://elastic.co)`;
 const defaultProps = {
   content: `A link to a timeline ${hyperlink}`,
@@ -37,18 +38,40 @@ describe('UserActionMarkdown ', () => {
     expect(wrapper.find(`[data-test-subj="markdown-link"]`).first().text()).toContain('hyperlink');
   });
 
-  it('Save button click calls onSaveContent and onChangeEditable', async () => {
+  it('Save button click calls onSaveContent and onChangeEditable when text area value changed', async () => {
     const wrapper = mount(
       <TestProviders>
         <UserActionMarkdown {...defaultProps} />
       </TestProviders>
     );
+
+    wrapper
+      .find(`.euiMarkdownEditorTextArea`)
+      .first()
+      .simulate('change', {
+        target: { value: newValue },
+      });
+
     wrapper.find(`[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
 
     await waitFor(() => {
-      expect(onSaveContent).toHaveBeenCalledWith(defaultProps.content);
+      expect(onSaveContent).toHaveBeenCalledWith(newValue);
       expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
     });
+  });
+  it('Does not call onSaveContent if no change from current text', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <UserActionMarkdown {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
+
+    await waitFor(() => {
+      expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
+    });
+    expect(onSaveContent).not.toHaveBeenCalled();
   });
   it('Cancel button click calls only onChangeEditable', async () => {
     const wrapper = mount(
