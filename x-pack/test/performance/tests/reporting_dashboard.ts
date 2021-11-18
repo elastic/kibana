@@ -16,7 +16,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const dashboard = getPageObject('dashboard');
   const reporting = getPageObject('reporting');
 
-  describe('reporting dashbaord', () => {
+  describe('Reporting Dashboard', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/performance/kbn_archives/reporting_dashboard'

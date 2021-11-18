@@ -11,6 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('performance', function () {
     this.tags('ciGroup8');
 
-    loadTestFile(require.resolve('./reporting_dashboard'));
+    loadTestFile(require.resolve('./home'));
   });
 }
