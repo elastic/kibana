@@ -31,12 +31,25 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from ES)');
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
 
-      //Source should be correct
-      expect(
-        mapboxStyle.sources[MB_VECTOR_SOURCE_ID].tiles[0].startsWith(
-          `/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=geo.coordinates&index=logstash-*&requestBody=(_source:(excludes:!()),aggs:(max_of_bytes:(max:(field:bytes))),fields:!((field:'@timestamp',format:date_time),(field:'relatedContent.article:modified_time',format:date_time),(field:'relatedContent.article:published_time',format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((range:('@timestamp':(format:strict_date_optional_time,gte:'2015-09-20T00:00:00.000Z',lte:'2015-09-20T01:00:00.000Z')))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:'doc[!'@timestamp!'].value.getHour()'))),size:0,stored_fields:!('*'))&requestType=grid`
-        )
-      ).to.equal(true);
+      const tileUrl = new URL(
+        mapboxStyle.sources[MB_VECTOR_SOURCE_ID].tiles[0],
+        'http://absolute_path'
+      );
+      const searchParams = Object.fromEntries(tileUrl.searchParams);
+
+      expect(tileUrl.pathname).to.equal('/api/maps/mvt/getGridTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf');
+
+      // token is an unique id that changes between runs
+      expect(typeof searchParams.token).to.equal('string');
+      delete searchParams.token;
+
+      expect(searchParams).to.eql({
+        geometryFieldName: 'geo.coordinates',
+        index: 'logstash-*',
+        gridPrecision: 8,
+        requestType: 'grid',
+        requestBody: `(_source:(excludes:!()),aggs:(max_of_bytes:(max:(field:bytes))),fields:!((field:'@timestamp',format:date_time),(field:'relatedContent.article:modified_time',format:date_time),(field:'relatedContent.article:published_time',format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((range:('@timestamp':(format:strict_date_optional_time,gte:'2015-09-20T00:00:00.000Z',lte:'2015-09-20T01:00:00.000Z')))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:'doc[!'@timestamp!'].value.getHour()'))),size:0,stored_fields:!('*'))`,
+      });
 
       //Should correctly load meta for style-rule (sigma is set to 1, opacity to 1)
       const fillLayer = mapboxStyle.layers.find(
@@ -167,6 +180,36 @@ export default function ({ getPageObjects, getService }) {
           '#6092c0',
         ],
         'fill-opacity': 0.75,
+      });
+    });
+
+    it('should render heatmap layer', async () => {
+      await PageObjects.maps.loadSavedMap('geo grid heatmap example');
+      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+
+      const heatmapLayer = mapboxStyle.layers.find((layer) => layer.id === '3xlvm_heatmap');
+
+      expect(heatmapLayer.paint).to.eql({
+        'heatmap-radius': 128,
+        'heatmap-color': [
+          'interpolate',
+          ['linear'],
+          ['heatmap-density'],
+          0,
+          'rgba(0, 0, 255, 0)',
+          0.1,
+          'rgb(65, 105, 225)',
+          0.28,
+          'rgb(0, 256, 256)',
+          0.45999999999999996,
+          'rgb(0, 256, 0)',
+          0.64,
+          'rgb(256, 256, 0)',
+          0.82,
+          'rgb(256, 0, 0)',
+        ],
+        'heatmap-opacity': 0.75,
+        'heatmap-weight': ['interpolate', ['linear'], ['get', '_count'], 0, 0, 1, 1],
       });
     });
   });

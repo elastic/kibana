@@ -77,7 +77,7 @@ export interface ILayer {
   getMbLayerIds(): string[];
 
   /*
-   * ILayer.getMbLayerIds returns mapbox source id assoicated with this layer.
+   * ILayer.getMbSourceId returns mapbox source id assoicated with this layer.
    */
   getMbSourceId(): string;
 

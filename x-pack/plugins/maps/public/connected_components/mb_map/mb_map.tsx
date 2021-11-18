@@ -130,9 +130,7 @@ export class MbMap extends Component<Props, State> {
       (source as IVectorSource).isMvt()
     ) {
       const features = getTileMetaFeatures(this.state.mbMap, layer.getMbSourceId());
-      if (features !== null) {
-        this.props.updateMetaFromTiles(layer.getId(), features);
-      }
+      this.props.updateMetaFromTiles(layer.getId(), features);
     }
   };
 
