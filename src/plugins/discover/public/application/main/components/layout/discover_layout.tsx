@@ -292,7 +292,13 @@ export function DiscoverLayout({
                 />
               )}
               {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next()} />
+                <DiscoverUninitialized
+                  onRefresh={() => {
+                    // eslint-disable-next-line no-console
+                    console.log('refresh clicked');
+                    savedSearchRefetch$.next();
+                  }}
+                />
               )}
               {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (
