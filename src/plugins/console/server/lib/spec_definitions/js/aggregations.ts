@@ -87,6 +87,26 @@ const rules = {
       compression: 100,
       missing: 0,
     },
+    t_test: {
+      a: {
+        field: '{field}',
+        filter: { __scope_link: 'GLOBAL.filter' },
+      },
+      b: {
+        field: '{field}',
+        filter: { __scope_link: 'GLOBAL.filter' },
+      },
+      type: { __one_of: ['paired', 'homoscedastic', 'heteroscedastic'] },
+      __template: {
+        a: {
+          field: '',
+        },
+        b: {
+          field: '',
+        },
+        type: '',
+      },
+    },
     adjacency_matrix: {
       filters: {},
     },
