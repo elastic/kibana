@@ -1873,19 +1873,19 @@ describe('Authenticator', () => {
     });
 
     it('if session does not exist and providers is empty, returns whatever authentication provider returns.', async () => {
-      mockOptions = getMockOptions({ providers: [] });
-      mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
       const request = httpServerMock.createKibanaRequest();
       mockOptions.session.get.mockResolvedValue(null);
-
-      mockBasicAuthenticationProvider.logout.mockResolvedValue(
-        DeauthenticationResult.redirectTo('some-url')
-      );
+      mockOptions.config.authc = {
+        ...mockOptions.config.authc,
+        sortedProviders: [],
+      };
+      mockBasicAuthenticationProvider.logout.mockResolvedValue(DeauthenticationResult.notHandled());
 
       await expect(authenticator.logout(request)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('some-url')
+        DeauthenticationResult.redirectTo(
+          '/mock-server-basepath/security/logged_out?msg=LOGGED_OUT'
+        )
       );
-
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledWith(request);
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();

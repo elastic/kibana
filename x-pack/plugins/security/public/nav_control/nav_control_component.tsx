@@ -174,9 +174,8 @@ export class SecurityNavControl extends Component<Props, State> {
       href: logoutUrl,
       'data-test-subj': 'logoutLink',
     };
-    if (authenticatedUser?.authentication_provider.type !== 'http') {
-      items.push(logoutMenuItem);
-    }
+
+    items.push(logoutMenuItem);
 
     const panels = [
       {

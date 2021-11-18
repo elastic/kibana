@@ -436,7 +436,6 @@ export class Authenticator {
         }
       }
     }
-
     // If none of the configured providers could perform a logout, we should redirect user to the
     // default logout location.
     return DeauthenticationResult.redirectTo(this.getLoggedOutURL(request));
@@ -819,16 +818,11 @@ export class Authenticator {
         searchParams.append(key, value);
       }
     }
-    if (!providerType) {
-      providerType =
-        this.options.config.authc.sortedProviders.length > 0
-          ? this.options.config.authc.sortedProviders[0].type
-          : '';
-    }
 
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
-    return this.options.config.authc.selector.enabled || shouldProviderUseLoginForm(providerType)
+    return this.options.config.authc.selector.enabled ||
+      shouldProviderUseLoginForm(providerType ?? this.options.config.authc.sortedProviders[0]?.type)
       ? `${this.options.basePath.serverBasePath}/login?${searchParams.toString()}`
       : `${this.options.basePath.serverBasePath}/security/logged_out?${searchParams.toString()}`;
   }

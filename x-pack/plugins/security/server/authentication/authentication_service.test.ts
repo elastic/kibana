@@ -130,8 +130,10 @@ describe('AuthenticationService', () => {
     });
 
     it('properly registers auth handler with no providers', () => {
-      const mockAuthGet = mockStartAuthenticationParams.http.auth.get as jest.Mock;
-      mockAuthGet.mockReturnValue({ sortedProviders: [] });
+      mockSetupAuthenticationParams.config.authc = {
+        ...mockSetupAuthenticationParams.config.authc,
+        sortedProviders: [],
+      };
       service.setup(mockSetupAuthenticationParams);
 
       expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledTimes(1);
