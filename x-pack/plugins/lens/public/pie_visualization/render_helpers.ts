@@ -8,8 +8,8 @@
 import type { Datum, LayerValue } from '@elastic/charts';
 import type { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
 import type { LensFilterEvent } from '../types';
-import type { PieChartTypes, PieExpressionProps } from '../../common/expressions/pie_chart/types';
-import type { PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import type { PieChartTypes } from '../../common/expressions/pie_chart/types';
+import type { PaletteDefinition, PaletteOutput } from '../../../../../src/plugins/charts/public';
 
 export function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
   const value = d[metricColumn.id];
@@ -47,8 +47,8 @@ export const isTreemapOrMosaicShape = (shape: PieChartTypes | string) =>
 export const byDataColorPaletteMap = (
   dataTable: Datatable,
   columnId: string,
-  paletteService: PaletteRegistry,
-  { name, params }: PieExpressionProps['args']['palette']
+  paletteDefinition: PaletteDefinition,
+  { params }: PaletteOutput
 ) => {
   const colorMap = new Map<string, string | undefined>(
     dataTable.rows.map((item) => [String(item[columnId]), undefined])
@@ -66,7 +66,7 @@ export const byDataColorPaletteMap = (
           return color;
         }
         color =
-          paletteService.get(name).getCategoricalColor(
+          paletteDefinition.getCategoricalColor(
             [
               {
                 name: key,

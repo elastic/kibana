@@ -832,7 +832,7 @@ describe('suggestions', () => {
           Object {
             "hide": false,
             "previewIcon": "bullseye",
-            "score": 0.7999999999999999,
+            "score": 0.6,
             "state": Object {
               "layers": Array [
                 Object {

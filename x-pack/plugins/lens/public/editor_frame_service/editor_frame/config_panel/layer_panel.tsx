@@ -385,10 +385,14 @@ export function LayerPanel(
           </header>
 
           {groups.map((group, groupIndex) => {
-            const isMissing =
-              !isEmptyLayer && group.required && group.requiredMinDimensionCount
+            let isMissing = false;
+
+            if (!isEmptyLayer && group.required) {
+              isMissing = group.requiredMinDimensionCount
                 ? group.accessors.length < group.requiredMinDimensionCount
                 : group.accessors.length === 0;
+            }
+
             const isMissingError = !group.requiredMinDimensionCount
               ? i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
                   defaultMessage: 'Required dimension',

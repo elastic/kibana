@@ -119,7 +119,12 @@ export function PieComponent(
   const shouldUseByDataPalette = !syncColors && ['mosaic'].includes(shape) && bucketColumns[1]?.id;
 
   if (shouldUseByDataPalette) {
-    byDataPalette = byDataColorPaletteMap(firstTable, bucketColumns[1].id, paletteService, palette);
+    byDataPalette = byDataColorPaletteMap(
+      firstTable,
+      bucketColumns[1].id,
+      paletteService.get(palette.name),
+      palette
+    );
   }
 
   const layers: PartitionLayer[] = bucketColumns.map((col, layerIndex) => {

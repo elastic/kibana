@@ -74,7 +74,7 @@ export function suggestions({
         values: { chartName: CHART_NAMES[newShape].label },
         description: 'chartName is already translated',
       }),
-      score: state && state.shape !== 'treemap' ? 0.6 : 0.4,
+      score: state && !isTreemapOrMosaicShape(state.shape) ? 0.6 : 0.4,
       state: {
         shape: newShape,
         palette: mainPalette || state?.palette,
@@ -181,7 +181,7 @@ export function suggestions({
       title: i18n.translate('xpack.lens.pie.mosaicSuggestionLabel', {
         defaultMessage: 'As Mosaic',
       }),
-      score: state?.shape === 'treemap' ? 0.7 : 0.5,
+      score: state?.shape === 'mosaic' ? 0.7 : 0.5,
       state: {
         shape: 'mosaic',
         palette: mainPalette || state?.palette,
