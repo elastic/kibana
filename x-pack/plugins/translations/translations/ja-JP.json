@@ -8115,7 +8115,6 @@
     "xpack.canvas.workpadConfig.pageSizeBadgeOnClickAriaLabel": "ページサイズを {sizeName} に設定",
     "xpack.canvas.workpadConfig.swapDimensionsAriaLabel": "ページの幅と高さを入れ替えます",
     "xpack.canvas.workpadConfig.swapDimensionsTooltip": "ページの幅と高さを入れ替える",
-    "xpack.canvas.workpadConfig.title": "ワークパッドの設定",
     "xpack.canvas.workpadConfig.USLetterButtonLabel": "US レター",
     "xpack.canvas.workpadConfig.widthLabel": "幅",
     "xpack.canvas.workpadCreate.createButtonLabel": "ワークパッドを作成",
