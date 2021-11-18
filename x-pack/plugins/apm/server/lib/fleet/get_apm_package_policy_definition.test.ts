@@ -10,6 +10,7 @@ import { preprocessLegacyFields } from './get_apm_package_policy_definition';
 const apmServerSchema = {
   'apm-server.host': '0.0.0.0:8200',
   'apm-server.secret_token': 'asdfkjhasdf',
+  'apm-server.api_key.enabled': true,
   'apm-server.read_timeout': 3600,
   'apm-server.rum.event_rate.limit': 100,
   'apm-server.rum.event_rate.lru_size': 100,
@@ -29,6 +30,7 @@ describe('get_apm_package_policy_definition', () => {
           "apm-server.auth.anonymous.allow_service": "opbeans-test",
           "apm-server.auth.anonymous.rate_limit.event_limit": 100,
           "apm-server.auth.anonymous.rate_limit.ip_limit": 100,
+          "apm-server.auth.api_key.enabled": true,
           "apm-server.auth.secret_token": "asdfkjhasdf",
           "apm-server.host": "0.0.0.0:8200",
           "apm-server.read_timeout": 3600,
