@@ -20,8 +20,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  const FORMULA_TAB_HEIGHT = 40;
-
   const PageObjects = getPageObjects([
     'common',
     'header',
@@ -133,7 +131,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           : `lns-indexPatternDimension-${opts.operation}`;
         async function getAriaPressed() {
           const operationSelectorContainer = await testSubjects.find(operationSelector);
-          await testSubjects.click(operationSelector, undefined, FORMULA_TAB_HEIGHT);
+          await testSubjects.click(operationSelect);
           const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
           return ariaPressed;
         }
