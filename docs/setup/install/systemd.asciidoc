@@ -20,5 +20,3 @@ sudo systemctl stop kibana.service
 These commands provide no feedback as to whether {kib} was started
 successfully or not. Log information can be accessed via
 `journalctl -u kibana.service`.
-
-include::auto-enroll.asciidoc[]
