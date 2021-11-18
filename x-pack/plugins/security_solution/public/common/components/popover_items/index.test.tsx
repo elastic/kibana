@@ -17,7 +17,7 @@ const renderHelper = (props: Partial<PopoverItemsProps<unknown>> = {}) =>
   render(
     <TestProviders>
       <PopoverItems
-        dataTestEntity="tags"
+        dataTestPrefix="tags"
         items={mockTags}
         popoverButtonTitle="show mocks"
         renderItem={

@@ -23,7 +23,7 @@ export interface PopoverItemsProps<T> {
   popoverButtonIcon?: string;
   popoverTitle?: string;
   numberOfItemsToDisplay?: number;
-  dataTestEntity?: string;
+  dataTestPrefix?: string;
 }
 
 interface OverflowListProps<T> {
@@ -42,7 +42,14 @@ const PopoverWrapper = styled(EuiBadgeGroup)`
 `;
 
 /**
- * @param items to display
+ * Component to render list of items in popover, wicth configurabe number of display items by default
+ * @param items - array of items to render
+ * @param renderItem - render function that render item, arguments: item, index, items[]
+ * @param popoverTitle - title of popover
+ * @param popoverButtonTitle - title of popover button that triggers popover
+ * @param popoverButtonIcon - icon of popover button that triggers popover
+ * @param numberOfItemsToDisplay - number of items to render that are no in popover, defaults to 0
+ * @param dataTestPrefix - data-test-subj prefix to apply to elements
  */
 const PopoverItemsComponent = <T extends unknown>({
   items,
@@ -51,7 +58,7 @@ const PopoverItemsComponent = <T extends unknown>({
   popoverButtonTitle,
   popoverButtonIcon,
   numberOfItemsToDisplay = 0,
-  dataTestEntity = 'items',
+  dataTestPrefix = 'items',
 }: PopoverItemsProps<T>) => {
   const [isExceptionOverflowPopoverOpen, setIsExceptionOverflowPopoverOpen] = useState(false);
 
@@ -61,25 +68,25 @@ const PopoverItemsComponent = <T extends unknown>({
 
   if (items.length <= numberOfItemsToDisplay) {
     return (
-      <PopoverItemsWrapper data-test-subj={dataTestEntity} gutterSize="none">
+      <PopoverItemsWrapper data-test-subj={dataTestPrefix} alignItems="center" gutterSize="s">
         <OverflowList items={items} />
       </PopoverItemsWrapper>
     );
   }
 
   return (
-    <PopoverItemsWrapper alignItems="center" gutterSize="s" data-test-subj={dataTestEntity}>
+    <PopoverItemsWrapper alignItems="center" gutterSize="s" data-test-subj={dataTestPrefix}>
       <EuiFlexItem grow={1} className="eui-textTruncate">
         <OverflowList items={items.slice(0, numberOfItemsToDisplay)} />
       </EuiFlexItem>
       <EuiPopover
         ownFocus
-        data-test-subj={`${dataTestEntity}-display-popover`}
+        data-test-subj={`${dataTestPrefix}-display-popover`}
         button={
           <EuiBadge
             iconType={popoverButtonIcon}
             color="hollow"
-            data-test-subj={`${dataTestEntity}-display-popover-button`}
+            data-test-subj={`${dataTestPrefix}-display-popover-button`}
             onClick={() => setIsExceptionOverflowPopoverOpen(!isExceptionOverflowPopoverOpen)}
             onClickAriaLabel={popoverButtonTitle}
           >
@@ -91,11 +98,11 @@ const PopoverItemsComponent = <T extends unknown>({
         repositionOnScroll
       >
         {popoverTitle ? (
-          <EuiPopoverTitle data-test-subj={`${dataTestEntity}-display-popover-title`}>
+          <EuiPopoverTitle data-test-subj={`${dataTestPrefix}-display-popover-title`}>
             {popoverTitle}
           </EuiPopoverTitle>
         ) : null}
-        <PopoverWrapper data-test-subj={`${dataTestEntity}-display-popover-wrapper`}>
+        <PopoverWrapper data-test-subj={`${dataTestPrefix}-display-popover-wrapper`}>
           <OverflowList items={items} />
         </PopoverWrapper>
       </EuiPopover>
