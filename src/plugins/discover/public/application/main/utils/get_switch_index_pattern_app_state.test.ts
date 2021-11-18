@@ -16,6 +16,9 @@ const getIndexPattern = (id: string, timeFieldName: string, fields: string[]) =>
   return {
     id,
     timeFieldName,
+    isTimeBased() {
+      return !!timeFieldName;
+    },
     getFieldByName(name) {
       return this.fields.getByName(name);
     },

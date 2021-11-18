@@ -37,15 +37,15 @@ export function getSwitchIndexPatternAppState(
     return nextIndexPattern.timeFieldName || value[0] !== currentIndexPattern.timeFieldName;
   });
 
-  if (nextIndexPattern.timeFieldName && !nextSort.length) {
-    // set default sorting when it was not changed
+  if (nextIndexPattern.isTimeBased() && !nextSort.length) {
+    // set default timefield sorting when there was no new sorting
     nextSort = [[nextIndexPattern.timeFieldName, sortDirection]];
   } else if (
     nextIndexPattern.timeFieldName &&
     nextSort.length !== 0 &&
     nextSort[0][0] === currentIndexPattern.timeFieldName
   ) {
-    // replace previous data view timeFieldName with a new one
+    // replace previous data view timeFieldName with new one
     nextSort = [[nextIndexPattern.timeFieldName, sortDirection], ...nextSort.slice(1)];
   }
 
