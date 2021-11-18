@@ -222,8 +222,6 @@ export function useDiscoverState({
    */
   useEffect(() => {
     if (indexPattern) {
-      // eslint-disable-next-line no-console
-      console.log('fetching first time');
       refetch$.next();
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);

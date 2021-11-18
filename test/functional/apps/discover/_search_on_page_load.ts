@@ -31,12 +31,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const waitForFetches = (fetchesNumber: number) => async () => {
     const nrOfFetches = await PageObjects.discover.getNrOfFetches();
-    // eslint-disable-next-line no-console
-    console.log('number of fetches:', nrOfFetches);
     return nrOfFetches === fetchesNumber;
   };
 
-  describe.only('usage of discover:searchOnPageLoad', () => {
+  describe('usage of discover:searchOnPageLoad', () => {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
@@ -80,7 +78,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // needs for discover debounce reload, which timeout set to 100 sec
         await PageObjects.common.sleep(100);
-
         await testSubjects.click('refreshDataButton');
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
