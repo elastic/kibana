@@ -12,7 +12,7 @@ import _ from 'lodash';
 import path from 'path';
 import Printer from 'pdfmake';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
-import { LayoutInstance } from '../../../lib/layouts';
+import { LayoutInstance, PdfLayout } from '../../../lib/layouts';
 import { getDocOptions, REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
 import { getTemplate } from './get_template';
@@ -21,14 +21,14 @@ const assetPath = path.resolve(__dirname, '..', '..', 'common', 'assets');
 const tableBorderWidth = 1;
 
 export class PdfMaker {
-  private _layout: LayoutInstance;
+  private _layout: LayoutInstance<PdfLayout>;
   private _logo: string | undefined;
   private _title: string;
   private _content: Content[];
   private _printer: Printer;
   private _pdfDoc: PDFKit.PDFDocument | undefined;
 
-  constructor(layout: LayoutInstance, logo: string | undefined) {
+  constructor(layout: LayoutInstance<PdfLayout>, logo: string | undefined) {
     const fontPath = (filename: string) => path.resolve(assetPath, 'fonts', filename);
     const fonts = {
       Roboto: {
