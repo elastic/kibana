@@ -31,6 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const waitForFetches = (fetchesNumber: number) => async () => {
     const nrOfFetches = await PageObjects.discover.getNrOfFetches();
+    // eslint-disable-next-line no-console
+    console.log('number of fetches:', nrOfFetches);
     return nrOfFetches === fetchesNumber;
   };
 
