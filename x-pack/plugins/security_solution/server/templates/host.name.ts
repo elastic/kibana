@@ -98,8 +98,4 @@ export const hostName = {
       },
     },
   },
-  migrationVersion: {
-    lens: '8.0.0',
-  },
-  coreMigrationVersion: '8.1.0',
 };

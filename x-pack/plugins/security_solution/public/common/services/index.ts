@@ -12,14 +12,11 @@ import {
   PluginServiceRegistry,
   PluginServices,
 } from '../../../../../../src/plugins/presentation_util/public';
-import {
-  MatrixHistogramTemplates,
-  TemplateFindResponse,
-} from '../../../common/types/matrix_histogram_templates';
+import { TemplateFindResponse } from '../../../common/types/matrix_histogram_templates';
+import { StartPlugins } from '../../types';
 import { matrixHistogramTemplatesServiceFactory } from './matrix_histogram_templates';
 
 export interface SecuritySolutionMatrixHistogramService {
-  createFromTemplate: (templateId: string) => Promise<MatrixHistogramTemplates>;
   findTemplates: () => Promise<TemplateFindResponse>;
 }
 
@@ -34,12 +31,12 @@ export const useMatrixHistogramTemplatesService = () =>
 
 export const pluginServiceProviders: PluginServiceProviders<
   SecuritySolutionPluginServices,
-  KibanaPluginServiceParams<CanvasStartDeps>
+  KibanaPluginServiceParams<StartPlugins>
 > = {
   matrixHistogramTemplates: new PluginServiceProvider(matrixHistogramTemplatesServiceFactory),
 };
 
 export const pluginServiceRegistry = new PluginServiceRegistry<
   SecuritySolutionPluginServices,
-  KibanaPluginServiceParams<CanvasStartDeps>
+  KibanaPluginServiceParams<StartPlugins>
 >(pluginServiceProviders);
