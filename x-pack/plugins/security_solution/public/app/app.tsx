@@ -100,7 +100,6 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   setHeaderActionMenu,
   store,
 }) => {
-  console.log('the fuck');
   return (
     <KibanaContextProvider
       services={{

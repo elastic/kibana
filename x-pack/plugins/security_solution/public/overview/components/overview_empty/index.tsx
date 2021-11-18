@@ -17,7 +17,7 @@ import {
 
 const OverviewEmptyComponent: React.FC = () => {
   const { docLinks } = useKibana().services;
-  console.log('aa', docLinks);
+
   const agentAction: NoDataPageActionsProps = {
     elasticAgent: {
       category: 'security',

@@ -40,6 +40,7 @@ export const Findings = () => (
 const getAgentLogsEsQuery = (): SearchSourceFields => ({
   size: 0,
   query: {
+    // TODO: types are wrong? query fails when they are 'correct'
     bool: {
       filter: [
         { term: { 'event_status.keyword': 'end' } },
@@ -78,7 +79,7 @@ const FindingsTableContainer = () => {
     search,
   } = dataService;
 
-  const findingsDataView = views[1];
+  const findingsDataView = views?.[1];
 
   useEffect(() => {
     if (!dataViews) return;

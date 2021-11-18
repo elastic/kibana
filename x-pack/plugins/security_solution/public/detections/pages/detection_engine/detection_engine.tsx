@@ -305,7 +305,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       </SecuritySolutionPageWrapper>
     );
   }
-  console.log({ indexPattern });
   return (
     <>
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
