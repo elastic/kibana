@@ -46,10 +46,10 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
           if (state && state.app) {
             this._store = undefined;
           } else {
-            if (props.onTGridStateChange) {
+            if (props.onStateChange) {
               this._storeUnsubscribe = this._store.subscribe(
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                throttle(() => props.onTGridStateChange!(getState()), 500)
+                throttle(() => props.onStateChange!(getState()), 500)
               );
             }
           }

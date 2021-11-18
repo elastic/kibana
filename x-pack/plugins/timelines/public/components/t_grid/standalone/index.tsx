@@ -107,7 +107,7 @@ export interface TGridStandaloneProps {
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
-  onTGridStateChange?: (state: State) => void;
+  onStateChange?: (state: State) => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   runtimeMappings: MappingRuntimeFields;

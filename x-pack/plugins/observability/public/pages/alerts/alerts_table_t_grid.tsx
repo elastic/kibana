@@ -396,7 +396,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     ];
   }, [workflowStatus, setEventsDeleted]);
 
-  const onTGridStateChange = useCallback(
+  const onStateChange = useCallback(
     (state: TGridState) => {
       const pickedState = pick(state.timelineById['standalone-t-grid'], [
         'columns',
@@ -428,7 +428,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.alertsTable.loadingTextLabel,
       footerText: translations.alertsTable.footerTextLabel,
-      onTGridStateChange,
+      onStateChange,
       query: {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
@@ -463,7 +463,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     setRefetch,
     leadingControlColumns,
     deletedEventIds,
-    onTGridStateChange,
+    onStateChange,
     tGridState,
   ]);
 
