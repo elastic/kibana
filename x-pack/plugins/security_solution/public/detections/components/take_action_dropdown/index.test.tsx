@@ -192,11 +192,22 @@ describe('take action dropdown', () => {
       },
     });
 
-    const modifiedMockDetailsData = mockAlertDetailsData.filter((obj) => {
-      return obj.field !== 'kibana.alert.rule.uuid';
-    }) as TimelineEventsDetailsItem[];
+    const modifiedMockDetailsData = mockAlertDetailsData.map((obj) => {
+      if (obj.field === 'kibana.alert.rule.uuid') {
+        return null;
+      }
+      if (obj.field === 'event.kind') {
+        return {
+          category: 'event', 
+          field: 'event.kind', 
+          values: ['event'], 
+          originalValue: 'event',
+        };
+      }
+      return obj;
+    }).filter(obj => obj) as TimelineEventsDetailsItem[];
 
-    test('should enable the "Add Endpoint event filter" button if ECS data is endpoint', async () => {
+    test('should enable the "Add Endpoint event filter" button if provided endpoint event', async () => {
       wrapper = mount(
         <TestProviders>
           <TakeActionDropdown
@@ -209,10 +220,10 @@ describe('take action dropdown', () => {
       wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
       await waitFor(() => {
         expect(wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()).toBeEnabled();
-      })
-    })
+      });
+    });
 
-    test('should disable the "Add Endpoint event filter" button if ECS data is not event and not endpoint', async () => {
+    test('should disable the "Add Endpoint event filter" button if provided non-event or non-endpoint', async () => {
       wrapper = mount(
         <TestProviders>
           <TakeActionDropdown
@@ -225,7 +236,7 @@ describe('take action dropdown', () => {
       wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
       await waitFor(() => {
         expect(wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()).toBeDisabled();
-      })
+      });
     });
   });
 });

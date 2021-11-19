@@ -89,9 +89,9 @@ export const TakeActionDropdown = React.memo(
 
     const isAgentEndpoint = useMemo(() => ecsData?.agent?.type?.includes('endpoint'), [ecsData]);
 
-    const disableEventFilterAction = useMemo(() => {
-      return !isEvent && !isAgentEndpoint;
-     }, [isEvent, isAgentEndpoint]);
+    const isEndpointEvent = isEvent && isAgentEndpoint;
+
+    const disableEventFilterAction = !isEndpointEvent;
 
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
