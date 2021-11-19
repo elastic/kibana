@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useContext } from 'react';
+import React, { useCallback, useState } from 'react';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { EventFieldsData, FieldsData } from '../types';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import { BrowserField } from '../../../containers/source';
-import { TimelineContext } from '../../../../../../timelines/public';
 
 interface Props {
   contextId: string;
@@ -22,7 +21,7 @@ interface Props {
   getLinkValue?: (field: string) => string | null;
   linkValue?: string | null | undefined;
   onFilterAdded?: () => void;
-  timelineId?: string;
+  timelineId: string;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   values: string[] | null | undefined;
 }
@@ -53,7 +52,6 @@ export const ActionCell: React.FC<Props> = React.memo(
     });
 
     const [showTopN, setShowTopN] = useState<boolean>(false);
-    const { timelineId: timelineIdFind } = useContext(TimelineContext);
     const [hoverActionsOwnFocus] = useState<boolean>(false);
     const toggleTopN = useCallback(() => {
       setShowTopN((prevShowTopN) => {
@@ -77,7 +75,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         onFilterAdded={onFilterAdded}
         ownFocus={hoverActionsOwnFocus}
         showTopN={showTopN}
-        timelineId={timelineId ?? timelineIdFind}
+        timelineId={timelineId}
         toggleColumn={toggleColumn}
         toggleTopN={toggleTopN}
         values={actionCellConfig?.stringValues}

@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { isTab, TimelineContext } from '../../../../../timelines/public';
+import { isTab } from '../../../../../timelines/public';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
@@ -160,41 +160,38 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
-  const timelineContext = useMemo(() => ({ timelineId }), [timelineId]);
   const resolveConflictComponent = useResolveConflict();
 
   return (
-    <TimelineContext.Provider value={timelineContext}>
-      <TimelineContainer
-        data-test-subj="timeline"
-        data-timeline-id={timelineId}
-        onKeyDown={onKeyDown}
-        ref={containerElement}
+    <TimelineContainer
+      data-test-subj="timeline"
+      data-timeline-id={timelineId}
+      onKeyDown={onKeyDown}
+      ref={containerElement}
+    >
+      <TimelineSavingProgress timelineId={timelineId} />
+      {timelineType === TimelineType.template && (
+        <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
+      )}
+      {resolveConflictComponent}
+      <HideShowContainer
+        $isVisible={!timelineFullScreen}
+        data-test-subj="timeline-hide-show-container"
       >
-        <TimelineSavingProgress timelineId={timelineId} />
-        {timelineType === TimelineType.template && (
-          <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
-        )}
-        {resolveConflictComponent}
-        <HideShowContainer
-          $isVisible={!timelineFullScreen}
-          data-test-subj="timeline-hide-show-container"
-        >
-          <FlyoutHeaderPanel timelineId={timelineId} />
-          <FlyoutHeader timelineId={timelineId} />
-        </HideShowContainer>
+        <FlyoutHeaderPanel timelineId={timelineId} />
+        <FlyoutHeader timelineId={timelineId} />
+      </HideShowContainer>
 
-        <TabsContent
-          graphEventId={graphEventId}
-          renderCellValue={renderCellValue}
-          rowRenderers={rowRenderers}
-          timelineId={timelineId}
-          timelineType={timelineType}
-          timelineDescription={description}
-          timelineFullScreen={timelineFullScreen}
-        />
-      </TimelineContainer>
-    </TimelineContext.Provider>
+      <TabsContent
+        graphEventId={graphEventId}
+        renderCellValue={renderCellValue}
+        rowRenderers={rowRenderers}
+        timelineId={timelineId}
+        timelineType={timelineType}
+        timelineDescription={description}
+        timelineFullScreen={timelineFullScreen}
+      />
+    </TimelineContainer>
   );
 };
 

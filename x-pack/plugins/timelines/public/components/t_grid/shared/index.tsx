@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext } from 'react';
+import React from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -23,8 +23,6 @@ const heights = {
   tall: 490,
   short: 250,
 };
-
-export const TimelineContext = createContext<{ timelineId: string | null }>({ timelineId: null });
 
 export const TGridLoading: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
   return (

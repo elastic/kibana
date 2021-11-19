@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import { HoverActions } from '.';
-import { TimelineContext } from '../../../../../timelines/public';
 
 import { DataProvider } from '../../../../common/types';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';
@@ -50,7 +49,6 @@ export const useHoverActions = ({
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
   const [showTopN, setShowTopN] = useState<boolean>(false);
   const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
-  const { timelineId: timelineIdFind } = useContext(TimelineContext);
 
   const handleClosePopOverTrigger = useCallback(() => {
     setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -108,7 +106,7 @@ export const useHoverActions = ({
         ownFocus={hoverActionsOwnFocus}
         showOwnFocus={false}
         showTopN={showTopN}
-        timelineId={timelineId ?? timelineIdFind}
+        timelineId={timelineId}
         toggleTopN={toggleTopN}
         values={
           typeof dataProvider.queryMatch.value !== 'number'
@@ -128,7 +126,6 @@ export const useHoverActions = ({
     render,
     showTopN,
     timelineId,
-    timelineIdFind,
     toggleTopN,
   ]);
 

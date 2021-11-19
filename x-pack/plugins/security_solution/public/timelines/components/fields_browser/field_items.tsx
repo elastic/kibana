@@ -131,6 +131,7 @@ const DraggableFieldsBrowserFieldComponent = ({
               hoverActionsOwnFocus={hoverActionsOwnFocus}
               onCloseRequested={onCloseRequested}
               onUpdateColumns={onUpdateColumns}
+              timelineId={timelineId}
             />
           </div>
         )}

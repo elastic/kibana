@@ -45,7 +45,7 @@ import {
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
-import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
+import { TGridLoading, TGridEmpty } from '../shared';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const STANDALONE_ID = 'standalone-t-grid';
@@ -339,7 +339,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       isFirstUpdate.current = false;
     }
   }, [loading]);
-  const timelineContext = { timelineId: STANDALONE_ID };
 
   // Clear checkbox selection when new events are fetched
   useEffect(() => {
@@ -357,57 +356,55 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       <AlertsTableWrapper>
         {isFirstUpdate.current && <TGridLoading />}
         {canQueryTimeline ? (
-          <TimelineContext.Provider value={timelineContext}>
-            <EventsContainerLoading
-              data-timeline-id={STANDALONE_ID}
-              data-test-subj={`events-container-loading-${loading}`}
-            >
-              <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  <InspectButton title={justTitle} inspect={inspect} loading={loading} />
-                </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  <LastUpdatedAt updatedAt={updatedAt} />
-                </UpdatedFlexItem>
-              </UpdatedFlexGroup>
+          <EventsContainerLoading
+            data-timeline-id={STANDALONE_ID}
+            data-test-subj={`events-container-loading-${loading}`}
+          >
+            <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
+              <UpdatedFlexItem grow={false} $show={!loading}>
+                <InspectButton title={justTitle} inspect={inspect} loading={loading} />
+              </UpdatedFlexItem>
+              <UpdatedFlexItem grow={false} $show={!loading}>
+                <LastUpdatedAt updatedAt={updatedAt} />
+              </UpdatedFlexItem>
+            </UpdatedFlexGroup>
 
-              {!hasAlerts && !loading && <TGridEmpty />}
+            {!hasAlerts && !loading && <TGridEmpty />}
 
-              {hasAlerts && (
-                <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
-                  <ScrollableFlexItem grow={1}>
-                    <StatefulBody
-                      activePage={pageInfo.activePage}
-                      browserFields={browserFields}
-                      data={nonDeletedEvents}
-                      defaultCellActions={defaultCellActions}
-                      filterQuery={filterQuery}
-                      hasAlertsCrud={hasAlertsCrud}
-                      hasAlertsCrudPermissions={hasAlertsCrudPermissions}
-                      id={STANDALONE_ID}
-                      indexNames={indexNames}
-                      isEventViewer={true}
-                      itemsPerPageOptions={itemsPerPageOptionsStore}
-                      leadingControlColumns={leadingControlColumns}
-                      loadPage={loadPage}
-                      refetch={refetch}
-                      renderCellValue={renderCellValue}
-                      rowRenderers={rowRenderers}
-                      onRuleChange={onRuleChange}
-                      pageSize={itemsPerPageStore}
-                      tabType={TimelineTabs.query}
-                      tableView="gridView"
-                      totalItems={totalCountMinusDeleted}
-                      totalSelectAllAlerts={totalSelectAllAlerts}
-                      unit={unit}
-                      filterStatus={filterStatus}
-                      trailingControlColumns={trailingControlColumns}
-                    />
-                  </ScrollableFlexItem>
-                </FullWidthFlexGroup>
-              )}
-            </EventsContainerLoading>
-          </TimelineContext.Provider>
+            {hasAlerts && (
+              <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
+                <ScrollableFlexItem grow={1}>
+                  <StatefulBody
+                    activePage={pageInfo.activePage}
+                    browserFields={browserFields}
+                    data={nonDeletedEvents}
+                    defaultCellActions={defaultCellActions}
+                    filterQuery={filterQuery}
+                    hasAlertsCrud={hasAlertsCrud}
+                    hasAlertsCrudPermissions={hasAlertsCrudPermissions}
+                    id={STANDALONE_ID}
+                    indexNames={indexNames}
+                    isEventViewer={true}
+                    itemsPerPageOptions={itemsPerPageOptionsStore}
+                    leadingControlColumns={leadingControlColumns}
+                    loadPage={loadPage}
+                    refetch={refetch}
+                    renderCellValue={renderCellValue}
+                    rowRenderers={rowRenderers}
+                    onRuleChange={onRuleChange}
+                    pageSize={itemsPerPageStore}
+                    tabType={TimelineTabs.query}
+                    tableView="gridView"
+                    totalItems={totalCountMinusDeleted}
+                    totalSelectAllAlerts={totalSelectAllAlerts}
+                    unit={unit}
+                    filterStatus={filterStatus}
+                    trailingControlColumns={trailingControlColumns}
+                  />
+                </ScrollableFlexItem>
+              </FullWidthFlexGroup>
+            )}
+          </EventsContainerLoading>
         ) : null}
         <AddToCaseAction {...addToCaseActionProps} disableAlerts />
       </AlertsTableWrapper>

@@ -48,7 +48,7 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem }
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
-import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
+import { TGridLoading, TGridEmpty } from '../shared';
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -291,7 +291,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   useEffect(() => {
     setQuery(inspect, loading, refetch);
   }, [inspect, loading, refetch, setQuery]);
-  const timelineContext = useMemo(() => ({ timelineId: id }), [id]);
 
   // Clear checkbox selection when new events are fetched
   useEffect(() => {
@@ -318,69 +317,67 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         {graphOverlay}
 
         {canQueryTimeline && (
-          <TimelineContext.Provider value={timelineContext}>
-            <EventsContainerLoading
-              data-timeline-id={id}
-              data-test-subj={`events-container-loading-${loading}`}
-            >
-              <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  <InspectButton title={justTitle} inspect={inspect} loading={loading} />
-                </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  {!resolverIsShowing(graphEventId) && additionalFilters}
-                </UpdatedFlexItem>
-                {tGridEventRenderedViewEnabled &&
-                  ['detections-page', 'detections-rules-details-page'].includes(id) && (
-                    <UpdatedFlexItem grow={false} $show={!loading}>
-                      <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
-                    </UpdatedFlexItem>
-                  )}
-              </UpdatedFlexGroup>
-              {!graphEventId && graphOverlay == null && (
-                <>
-                  {!hasAlerts && !loading && <TGridEmpty height="short" />}
-                  {hasAlerts && (
-                    <FullWidthFlexGroup
-                      $visible={!graphEventId && graphOverlay == null}
-                      gutterSize="none"
-                    >
-                      <ScrollableFlexItem grow={1}>
-                        <StatefulBody
-                          activePage={pageInfo.activePage}
-                          browserFields={browserFields}
-                          bulkActions={bulkActions}
-                          createFieldComponent={createFieldComponent}
-                          data={nonDeletedEvents}
-                          defaultCellActions={defaultCellActions}
-                          filterQuery={filterQuery}
-                          filters={filters}
-                          filterStatus={filterStatus}
-                          hasAlertsCrud={hasAlertsCrud}
-                          id={id}
-                          indexNames={indexNames}
-                          isEventViewer={true}
-                          itemsPerPageOptions={itemsPerPageOptions}
-                          leadingControlColumns={leadingControlColumns}
-                          loadPage={loadPage}
-                          onRuleChange={onRuleChange}
-                          pageSize={itemsPerPage}
-                          refetch={refetch}
-                          renderCellValue={renderCellValue}
-                          rowRenderers={rowRenderers}
-                          tableView={tableView}
-                          tabType={TimelineTabs.query}
-                          totalItems={totalCountMinusDeleted}
-                          trailingControlColumns={trailingControlColumns}
-                          unit={unit}
-                        />
-                      </ScrollableFlexItem>
-                    </FullWidthFlexGroup>
-                  )}
-                </>
-              )}
-            </EventsContainerLoading>
-          </TimelineContext.Provider>
+          <EventsContainerLoading
+            data-timeline-id={id}
+            data-test-subj={`events-container-loading-${loading}`}
+          >
+            <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
+              <UpdatedFlexItem grow={false} $show={!loading}>
+                <InspectButton title={justTitle} inspect={inspect} loading={loading} />
+              </UpdatedFlexItem>
+              <UpdatedFlexItem grow={false} $show={!loading}>
+                {!resolverIsShowing(graphEventId) && additionalFilters}
+              </UpdatedFlexItem>
+              {tGridEventRenderedViewEnabled &&
+                ['detections-page', 'detections-rules-details-page'].includes(id) && (
+                  <UpdatedFlexItem grow={false} $show={!loading}>
+                    <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                  </UpdatedFlexItem>
+                )}
+            </UpdatedFlexGroup>
+            {!graphEventId && graphOverlay == null && (
+              <>
+                {!hasAlerts && !loading && <TGridEmpty height="short" />}
+                {hasAlerts && (
+                  <FullWidthFlexGroup
+                    $visible={!graphEventId && graphOverlay == null}
+                    gutterSize="none"
+                  >
+                    <ScrollableFlexItem grow={1}>
+                      <StatefulBody
+                        activePage={pageInfo.activePage}
+                        browserFields={browserFields}
+                        bulkActions={bulkActions}
+                        createFieldComponent={createFieldComponent}
+                        data={nonDeletedEvents}
+                        defaultCellActions={defaultCellActions}
+                        filterQuery={filterQuery}
+                        filters={filters}
+                        filterStatus={filterStatus}
+                        hasAlertsCrud={hasAlertsCrud}
+                        id={id}
+                        indexNames={indexNames}
+                        isEventViewer={true}
+                        itemsPerPageOptions={itemsPerPageOptions}
+                        leadingControlColumns={leadingControlColumns}
+                        loadPage={loadPage}
+                        onRuleChange={onRuleChange}
+                        pageSize={itemsPerPage}
+                        refetch={refetch}
+                        renderCellValue={renderCellValue}
+                        rowRenderers={rowRenderers}
+                        tableView={tableView}
+                        tabType={TimelineTabs.query}
+                        totalItems={totalCountMinusDeleted}
+                        trailingControlColumns={trailingControlColumns}
+                        unit={unit}
+                      />
+                    </ScrollableFlexItem>
+                  </FullWidthFlexGroup>
+                )}
+              </>
+            )}
+          </EventsContainerLoading>
         )}
       </StyledEuiPanel>
     </InspectButtonContainer>

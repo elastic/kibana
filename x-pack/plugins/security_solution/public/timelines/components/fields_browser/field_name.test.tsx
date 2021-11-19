@@ -12,6 +12,7 @@ import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { getColumnsWithTimestamp } from '../../../common/components/event_details/helpers';
+import { TimelineId } from '../../../../common/types/timeline';
 
 import { FieldName } from './field_name';
 
@@ -33,6 +34,7 @@ const defaultProps = {
   onCloseRequested: jest.fn(),
   onUpdateColumns: jest.fn(),
   setClosePopOverTrigger: jest.fn(),
+  timelineId: TimelineId.test,
 };
 
 describe('FieldName', () => {

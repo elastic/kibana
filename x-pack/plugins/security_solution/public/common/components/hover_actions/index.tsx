@@ -91,14 +91,13 @@ interface Props {
   draggableId?: DraggableId;
   enableOverflowButton?: boolean;
   field: string;
-  goGetTimelineId?: (args: boolean) => void;
   hideTopN?: boolean;
   isObjectArray: boolean;
   onFilterAdded?: () => void;
   ownFocus: boolean;
   showOwnFocus?: boolean;
   showTopN: boolean;
-  timelineId?: string | null;
+  timelineId?: string;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
   values?: string[] | string | null;
@@ -129,7 +128,6 @@ export const HoverActions: React.FC<Props> = React.memo(
     draggableId,
     enableOverflowButton = false,
     field,
-    goGetTimelineId,
     isObjectArray,
     hideTopN = false,
     onFilterAdded,
@@ -161,15 +159,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       }
     }, [closePopOver, closeTopN]);
 
-    const isInit = useRef(true);
     const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
-
-    useEffect(() => {
-      if (isInit.current && goGetTimelineId != null && timelineId == null) {
-        isInit.current = false;
-        goGetTimelineId(true);
-      }
-    }, [goGetTimelineId, timelineId]);
 
     useEffect(() => {
       if (ownFocus) {

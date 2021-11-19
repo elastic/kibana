@@ -6,14 +6,13 @@
  */
 
 import { EuiHighlight, EuiText } from '@elastic/eui';
-import React, { useCallback, useState, useMemo, useRef, useContext } from 'react';
+import React, { useCallback, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 import { OnUpdateColumns } from '../timeline/events';
 import { WithHoverActions } from '../../../common/components/with_hover_actions';
 import { ColumnHeaderOptions } from '../../../../common';
 import { HoverActions } from '../../../common/components/hover_actions';
-import { TimelineContext } from '../../../../../timelines/public';
 
 /**
  * The name of a (draggable) field
@@ -84,6 +83,7 @@ export const FieldName = React.memo<{
   hoverActionsOwnFocus: boolean;
   onCloseRequested: () => void;
   onUpdateColumns: OnUpdateColumns;
+  timelineId: string;
 }>(
   ({
     closePopOverTrigger,
@@ -92,10 +92,10 @@ export const FieldName = React.memo<{
     handleClosePopOverTrigger,
     hoverActionsOwnFocus,
     onCloseRequested,
+    timelineId,
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [showTopN, setShowTopN] = useState<boolean>(false);
-    const { timelineId: timelineIdFind } = useContext(TimelineContext);
 
     const toggleTopN = useCallback(() => {
       setShowTopN((prevShowTopN) => {
@@ -121,7 +121,7 @@ export const FieldName = React.memo<{
           ownFocus={hoverActionsOwnFocus}
           showTopN={showTopN}
           toggleTopN={toggleTopN}
-          timelineId={timelineIdFind}
+          timelineId={timelineId}
         />
       ),
       [
@@ -130,7 +130,7 @@ export const FieldName = React.memo<{
         handleClosePopOverTrigger,
         hoverActionsOwnFocus,
         showTopN,
-        timelineIdFind,
+        timelineId,
         toggleTopN,
       ]
     );

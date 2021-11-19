@@ -40,7 +40,7 @@ export interface UseHoverActionItemsProps {
   ownFocus: boolean;
   showTopN: boolean;
   stKeyboardEvent: React.KeyboardEvent<Element> | undefined;
-  timelineId?: string | null;
+  timelineId?: string;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
   values?: string[] | string | null;
