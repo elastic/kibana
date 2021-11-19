@@ -54,7 +54,7 @@ const groups = [group1, group2];
 
 const component: FC<any> = ({ value }) => (
   <EuiText>
-    <EuiTextColor color="secondary">
+    <EuiTextColor color="success">
       <h3>{value}</h3>
     </EuiTextColor>
   </EuiText>
