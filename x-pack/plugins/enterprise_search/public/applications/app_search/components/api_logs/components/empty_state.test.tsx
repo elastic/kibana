@@ -23,7 +23,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('No API events in the last 24 hours');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining(`${docLinks.appSearchApis}`)
+      expect.stringContaining(docLinks.appSearchApis)
     );
   });
 });
