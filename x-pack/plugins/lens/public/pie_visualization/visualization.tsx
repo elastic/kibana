@@ -88,6 +88,7 @@ export const getPieVisualization = ({
       id: 'mosaic',
       icon: CHART_NAMES.mosaic.icon,
       label: CHART_NAMES.mosaic.label,
+      showExperimentalBadge: true,
       groupLabel: CHART_NAMES.mosaic.groupLabel,
     },
   ],
