@@ -57,7 +57,6 @@ export class SecurityPlugin
 {
   private readonly config: ConfigType;
   private sessionTimeout!: SessionTimeout;
-  private readonly initializerContext: PluginInitializerContext;
   private readonly authenticationService = new AuthenticationService();
   private readonly navControlService = new SecurityNavControlService();
   private readonly securityLicenseService = new SecurityLicenseService();
@@ -66,12 +65,7 @@ export class SecurityPlugin
   private readonly anonymousAccessService = new AnonymousAccessService();
   private authc!: AuthenticationServiceSetup;
 
-<<<<<<< HEAD
-  constructor(initializerContext: PluginInitializerContext) {
-    this.initializerContext = initializerContext;
-=======
   constructor(private readonly initializerContext: PluginInitializerContext) {
->>>>>>> upstream/main
     this.config = this.initializerContext.config.get<ConfigType>();
     this.securityCheckupService = new SecurityCheckupService(this.config, localStorage);
   }
