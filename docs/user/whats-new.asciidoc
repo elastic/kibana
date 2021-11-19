@@ -44,40 +44,35 @@ image::images/integrations-view-7.16.png[View of all ingest options for Elastic]
 [float]
 === Reference lines in Lens
 
-Reference lines are base lines bound to a metric axis of your visualization.
-These lines allow you to track metrics against goals, warning zones, and any other
-meaningful area of a metric’s range. You can do a lot with reference lines:
+Reference lines are now available in *Lens* to help you easily identify important values in your visualizations. You create reference lines with static values, dynamic data using {es} *Quick Functions*, or define with a custom *Formula*. Reference lines can come from separate index patterns, such as a goal dataset that is independent of the source data.
 
-* Create reference lines from static values, from dynamic data using Elasticsearch Quick Functions, or define from a custom formula.
-* Style your reference line’s color, stroke width, line style, and thickness.
-* Include an icon and show the display name to make it easy to quickly communicate the reference line’s meaning.
-* Color the area above or below the reference line to make it easy to identify the meaning of this area.
-If you use multiple lines on the same axis, the color will go until the next reference line to
-help establish different areas of metric performance.
+With reference lines, you can:
 
-Reference lines can come from separate {kib} index patterns, such as a goal dataset that is independent of the source data.
-
+* Track metrics against goals, warning zones, and more.
+* Add display options, such as color, icons, and labels.
+* Apply color to the area above or below the reference line.
++
 [role="screenshot"]
 image::images/reference-line-7.16.png[View of all ingest options for Elastic]
-
 
 [float]
 === Enhancements to visualization editors
 
 {kib} now offers even more ways to work with your visualizations:
 
-* *Custom field formats in TSVB*.
+* *Custom field formats in TSVB.*
 Take advantage of the field formatters from your index pattern in
-TSVB&mdash;or override the format for a specific visualization with new options.
+*TSVB*&mdash;or override the format for a specific visualization.
 * *Filter bar in TSVB.*
-TSVB layers have always had the ability to ignore global filters but now,
-from the TSVB editor, you can directly modify those global filters.
-* *Inspector in Lens.*
-Inspect your data and requests from within the *Lens* editor.
-* *Inspector requests in Console.*
-Open the Inspector and click a button to view the inspected request in Console.
-This makes it easier to explore your data in TSVB without having to edit each series’ filters separately.
-* Auto fit rows to content.  This feature is now available in non-legacy data tables.
+In *TSVB* layers, you always had the ability to ignore global filters, 
+but now you can change the global filter.
+* *View Lens data and requests.*
+You can now view the data in visualizations and the requests that collected the data right in the *Lens* editor.
+* *View requests in Console.*
+View the requests that collect the data in visualizations in *Console*, which is especially useful 
+to inspect your *TSVB* data without having to edit the filters for each series.
+* *Auto fit rows to content.*  
+You can now specify to automatically resize *Aggregation-based* data table rows so that text and images are fully visible. 
 
 [float]
 ==== New and updated connectors
