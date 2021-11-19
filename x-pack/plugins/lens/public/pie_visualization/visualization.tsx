@@ -47,7 +47,7 @@ const applyPaletteToColumnConfig = (
 ) => {
   const colorPickerIndex = shape === 'mosaic' ? columns.length - 1 : 0;
 
-  if (columns.length > 0 && colorPickerIndex >= 0) {
+  if (colorPickerIndex >= 0) {
     columns[colorPickerIndex] = {
       columnId: columns[colorPickerIndex].columnId,
       triggerIcon: 'colorBy',
@@ -147,7 +147,9 @@ export const getPieVisualization = ({
       new Set(originalOrder.concat(layer.groups))
     ).map((accessor) => ({ columnId: accessor }));
 
-    applyPaletteToColumnConfig(sortedColumns, state, paletteService);
+    if (sortedColumns.length) {
+      applyPaletteToColumnConfig(sortedColumns, state, paletteService);
+    }
 
     const getSliceByGroup = (): VisualizationDimensionGroupConfig => {
       const baseProps = {
@@ -168,7 +170,7 @@ export const getPieVisualization = ({
             }),
             supportsMoreColumns: sortedColumns.length < MAX_TREEMAP_BUCKETS,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
-            requiredMinDimensionCount: state.shape === 'mosaic' ? 2 : 0,
+            requiredMinDimensionCount: state.shape === 'mosaic' ? 2 : undefined,
           };
         default:
           return {

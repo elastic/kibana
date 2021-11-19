@@ -22,6 +22,7 @@ import type { PieVisualizationState, SharedPieLayerState } from '../../common/ex
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
 import { PalettePicker } from '../shared_components';
+import { isTreemapOrMosaicShape } from './render_helpers';
 
 const numberOptions: Array<{
   value: SharedPieLayerState['numberDisplay'];
@@ -143,7 +144,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           <EuiSuperSelect
             compressed
             valueOfSelected={layer.categoryDisplay}
-            options={state.shape === 'treemap' ? categoryOptionsTreemap : categoryOptions}
+            options={isTreemapOrMosaicShape(state.shape) ? categoryOptionsTreemap : categoryOptions}
             onChange={(option) => {
               setState({
                 ...state,

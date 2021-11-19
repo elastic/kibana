@@ -387,22 +387,25 @@ export function LayerPanel(
           {groups.map((group, groupIndex) => {
             let isMissing = false;
 
-            if (!isEmptyLayer && group.required) {
-              isMissing = group.requiredMinDimensionCount
-                ? group.accessors.length < group.requiredMinDimensionCount
-                : group.accessors.length === 0;
+            if (!isEmptyLayer) {
+              if (group.requiredMinDimensionCount) {
+                isMissing = group.accessors.length < group.requiredMinDimensionCount;
+              } else if (group.required) {
+                isMissing = group.accessors.length === 0;
+              }
             }
 
-            const isMissingError = !group.requiredMinDimensionCount
-              ? i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
-                  defaultMessage: 'Requires field',
-                })
-              : i18n.translate('xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel', {
+            const isMissingError = group.requiredMinDimensionCount
+              ? i18n.translate('xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel', {
                   defaultMessage: 'Requires {requiredMinDimensionCount} fields',
                   values: {
                     requiredMinDimensionCount: group.requiredMinDimensionCount,
                   },
+                })
+              : i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
+                  defaultMessage: 'Requires field',
                 });
+
             const isOptional = !group.required;
             return (
               <EuiFormRow
