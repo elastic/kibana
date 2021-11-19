@@ -26,6 +26,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
+  TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
 } from '../common';
 
@@ -157,14 +158,14 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     schema: schema.arrayOf(schema.string()),
   },
   [DOC_TABLE_LEGACY]: {
-    name: i18n.translate('discover.advancedSettings.docTableVersionName', {
-      defaultMessage: 'Use classic table',
+    name: i18n.translate('discover.advancedSettings.disableDocumentExplorer', {
+      defaultMessage: 'Document Explorer or classic view',
     }),
     value: true,
-    description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
+    description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
-        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen view. ' +
-        'Turn on this option to use the classic table. Turn off to use the new table. ',
+        'To use the new Document Explorer instead of the classic view, turn off this option. ' +
+        'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -240,5 +241,17 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
+  },
+  [TRUNCATE_MAX_HEIGHT]: {
+    name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
+      defaultMessage: 'Maximum table cell height',
+    }),
+    value: 115,
+    category: ['discover'],
+    description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
+      defaultMessage:
+        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
+    }),
+    schema: schema.number({ min: 0 }),
   },
 });

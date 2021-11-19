@@ -10519,6 +10519,19 @@
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.TimelineEventsDetailsStrategyResponse.rawEventData",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rawEventData",
+            "description": [],
+            "signature": [
+              "object | null | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -12635,33 +12648,7 @@
         ],
         "signature": [
           "EuiDataGridCellValueElementProps",
-          " & { data: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineNonEcsData",
-            "text": "TimelineNonEcsData"
-          },
-          "[]; eventId: string; header: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.ColumnHeaderOptions",
-            "text": "ColumnHeaderOptions"
-          },
-          "; isDraggable: boolean; linkValues: string[] | undefined; timelineId: string; setFlyoutAlert?: ((data: any) => void) | undefined; ecsData?: ",
-          "Ecs",
-          " | undefined; rowRenderers?: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.RowRenderer",
-            "text": "RowRenderer"
-          },
-          "[] | undefined; browserFields?: Readonly<Record<string, Partial<",
+          " & { asPlainText?: boolean | undefined; browserFields?: Readonly<Record<string, Partial<",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -12669,7 +12656,41 @@
             "section": "def-common.BrowserField",
             "text": "BrowserField"
           },
-          ">>> | undefined; }"
+          ">>> | undefined; data: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimelineNonEcsData",
+            "text": "TimelineNonEcsData"
+          },
+          "[]; ecsData?: ",
+          "Ecs",
+          " | undefined; eventId: string; globalFilters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; header: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.ColumnHeaderOptions",
+            "text": "ColumnHeaderOptions"
+          },
+          "; isDraggable: boolean; linkValues: string[] | undefined; rowRenderers?: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.RowRenderer",
+            "text": "RowRenderer"
+          },
+          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; timelineId: string; truncate?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": false,
@@ -14259,7 +14280,7 @@
           "\nA `TGridCellAction` function accepts `data`, where each row of data is\nrepresented as a `TimelineNonEcsData[]`. For example, `data[0]` would\ncontain a `TimelineNonEcsData[]` with the first row of data.\n\nA `TGridCellAction` returns a function that has access to all the\n`EuiDataGridColumnCellActionProps`, _plus_ access to `data`,\n which enables code like the following example to be written:\n\nExample:\n```\n({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {\n  const value = getMappedNonEcsValue({\n    data: data[rowIndex], // access a specific row's values\n    fieldName: columnId,\n  });\n\n  return (\n    <Component onClick={() => alert(`row ${rowIndex} col ${columnId} has value ${value}`)} iconType=\"heart\">\n      {'Love it'}\n     </Component>\n  );\n};\n```"
         ],
         "signature": [
-          "({ browserFields, data, globalFilters, pageSize, timelineId, }: { browserFields: Readonly<Record<string, Partial<",
+          "({ browserFields, data, ecsData, header, pageSize, timelineId, }: { browserFields: Readonly<Record<string, Partial<",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -14275,15 +14296,17 @@
             "section": "def-common.TimelineNonEcsData",
             "text": "TimelineNonEcsData"
           },
-          "[][]; globalFilters?: ",
+          "[][]; ecsData: ",
+          "Ecs",
+          "[]; header?: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "timelines",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.ColumnHeaderOptions",
+            "text": "ColumnHeaderOptions"
           },
-          "[] | undefined; pageSize: number; timelineId: string; }) => (props: ",
+          " | undefined; pageSize: number; timelineId: string; }) => (props: ",
           "EuiDataGridColumnCellActionProps",
           ") => React.ReactNode"
         ],
@@ -14315,15 +14338,17 @@
                 "section": "def-common.TimelineNonEcsData",
                 "text": "TimelineNonEcsData"
               },
-              "[][]; globalFilters?: ",
+              "[][]; ecsData: ",
+              "Ecs",
+              "[]; header?: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "timelines",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.ColumnHeaderOptions",
+                "text": "ColumnHeaderOptions"
               },
-              "[] | undefined; pageSize: number; timelineId: string; }"
+              " | undefined; pageSize: number; timelineId: string; }"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
             "deprecated": false

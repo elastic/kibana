@@ -8,6 +8,8 @@
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import uuid from 'uuid';
 
+import type { Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
 
@@ -20,7 +22,6 @@ import { AlertsCount } from './alerts_count';
 import type { AlertsCountAggregation } from './types';
 import { DEFAULT_STACK_BY_FIELD } from '../common/config';
 import type { AlertsStackByField } from '../common/types';
-import { Filter, esQuery, Query } from '../../../../../../../../src/plugins/data/public';
 import { KpiPanel, StackBySelect } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 
@@ -52,7 +53,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     const additionalFilters = useMemo(() => {
       try {
         return [
-          esQuery.buildEsQuery(
+          buildEsQuery(
             undefined,
             query != null ? [query] : [],
             filters?.filter((f) => f.meta.disabled === false) ?? []
@@ -94,7 +95,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
         <KpiPanel hasBorder data-test-subj="alertsCountPanel">
           <HeaderSection
             id={uniqueQueryId}
-            title={<span className="eui-textBreakNormal">{i18n.COUNT_TABLE_TITLE}</span>}
+            title={i18n.COUNT_TABLE_TITLE}
             titleSize="s"
             hideSubtitle
           >

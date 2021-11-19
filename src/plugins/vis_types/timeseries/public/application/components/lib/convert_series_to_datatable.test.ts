@@ -154,7 +154,6 @@ describe('convert series to datatables', () => {
           ],
           split_mode: 'terms',
           terms_field: 'Cancelled',
-          type: 'timeseries',
         },
       ],
     } as TimeseriesVisParams;

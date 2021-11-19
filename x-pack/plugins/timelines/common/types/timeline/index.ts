@@ -467,6 +467,10 @@ export enum TimelineTabs {
   eql = 'eql',
 }
 
+export type CreateFieldComponentType = React.FC<{
+  onClick: () => void;
+}>;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Partial<Record<any, never>>;
 

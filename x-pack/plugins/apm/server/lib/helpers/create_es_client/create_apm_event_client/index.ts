@@ -26,7 +26,7 @@ import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
 import {
   callAsyncWithDebug,
   getDebugBody,
@@ -100,7 +100,7 @@ export function createApmEventClient({
 
       const searchParams = {
         ...withPossibleLegacyDataFilter,
-        ignore_throttled: !includeFrozen,
+        ...(includeFrozen ? { ignore_throttled: false } : {}),
         ignore_unavailable: true,
         preference: 'any',
       };

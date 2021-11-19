@@ -117,7 +117,6 @@ export async function SecuritySolutionCypressUpgradeCliTestRunner({
   getService,
 }: FtrProviderContext) {
   const log = getService('log');
-  const config = getService('config');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
@@ -126,10 +125,10 @@ export async function SecuritySolutionCypressUpgradeCliTestRunner({
       cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
-        CYPRESS_BASE_URL: Url.format(config.get('servers.kibana')),
-        CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-        CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-        CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+        CYPRESS_BASE_URL: process.env.TEST_KIBANA_URL,
+        CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ES_URL,
+        CYPRESS_ELASTICSEARCH_USERNAME: process.env.TEST_ES_USER,
+        CYPRESS_ELASTICSEARCH_PASSWORD: process.env.TEST_ES_PASS,
         ...process.env,
       },
       wait: true,

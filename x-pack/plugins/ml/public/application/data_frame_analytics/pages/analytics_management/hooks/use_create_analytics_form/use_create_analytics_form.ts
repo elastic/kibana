@@ -127,7 +127,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     const dataViewName = destinationIndex;
 
     try {
-      await mlContext.indexPatterns.createAndSave(
+      await mlContext.dataViewsContract.createAndSave(
         {
           title: dataViewName,
         },
@@ -179,7 +179,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     try {
       // Set the existing data view names.
       const indexPatternsMap: SourceIndexMap = {};
-      const savedObjects = (await mlContext.indexPatterns.getCache()) || [];
+      const savedObjects = (await mlContext.dataViewsContract.getCache()) || [];
       savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
@@ -201,7 +201,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const initiateWizard = async () => {
-    await mlContext.indexPatterns.clearCache();
+    await mlContext.dataViewsContract.clearCache();
     await prepareFormValidation();
   };
 

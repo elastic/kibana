@@ -356,7 +356,9 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const route = '/internal/workplace_search/org/role_mappings/enable_role_based_access';
 
       try {
-        const response = await http.post(route);
+        const response = await http.post<{
+          roleMappings: WSRoleMapping[];
+        }>(route);
         actions.setRoleMappings(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -367,7 +369,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const route = '/internal/workplace_search/org/role_mappings';
 
       try {
-        const response = await http.get(route);
+        const response = await http.get<RoleMappingsServerDetails>(route);
         actions.setRoleMappingsData(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -466,11 +468,9 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       });
 
       try {
-        const response = await http.post(
+        const response = await http.post<UserMapping>(
           '/internal/workplace_search/org/single_user_role_mapping',
-          {
-            body,
-          }
+          { body }
         );
         actions.setSingleUserRoleMapping(response);
         actions.setUserCreated();

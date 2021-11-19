@@ -242,6 +242,7 @@ export const getCreateTransformRequestBody = (
         },
       }
     : {}),
+  ...(transformDetailsState._meta ? { _meta: transformDetailsState._meta } : {}),
   // conditionally add additional settings
   ...getCreateTransformSettingsRequestBody(transformDetailsState),
 });

@@ -19,6 +19,7 @@ target
 .idea
 *.iml
 *.log
+types.eslint.config.js
 
 # Ignore example plugin builds
 /examples/*/build
@@ -86,3 +87,8 @@ report.asciidoc
 /bazel
 /bazel-*
 .bazelrc.user
+
+elastic-agent-*
+fleet-server-*
+elastic-agent.yml
+fleet-server.yml

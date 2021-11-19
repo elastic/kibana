@@ -88,6 +88,7 @@ export const migrations = {
             // owner: Team:Core
             'telemetry:optIn',
             'xPackMonitoring:allowReport',
+            'theme:version',
           ].includes(key)
             ? {
                 ...acc,

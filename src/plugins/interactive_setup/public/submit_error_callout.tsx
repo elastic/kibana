@@ -11,7 +11,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { IHttpFetchError } from 'kibana/public';
+import type { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 
 import {
   ERROR_CONFIGURE_FAILURE,
@@ -29,7 +29,7 @@ export interface SubmitErrorCalloutProps {
 }
 
 export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (props) => {
-  const error = props.error as IHttpFetchError;
+  const error = props.error as IHttpFetchError<ResponseErrorBody>;
 
   if (
     error.body?.statusCode === 404 ||

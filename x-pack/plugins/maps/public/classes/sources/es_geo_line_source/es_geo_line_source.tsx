@@ -85,7 +85,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   constructor(descriptor: Partial<ESGeoLineSourceDescriptor>, inspectorAdapters?: Adapters) {
     const sourceDescriptor = ESGeoLineSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters, true);
+    super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
 
@@ -140,7 +140,6 @@ export class ESGeoLineSource extends AbstractESAggSource {
       fieldName: this._descriptor.splitField,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
-      canReadFromGeoJson: true,
     });
   }
 
@@ -319,7 +318,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     };
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest) {
+  getSourceStatus(sourceDataRequest?: DataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     const meta = sourceDataRequest
       ? (sourceDataRequest.getMeta() as ESGeoLineSourceResponseMeta)

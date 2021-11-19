@@ -53,12 +53,7 @@ export const config: PluginConfigDescriptor = {
           schema.object({
             fields: schema.maybe(
               schema.object({
-                timestamp: schema.maybe(schema.string()),
                 message: schema.maybe(schema.arrayOf(schema.string())),
-                tiebreaker: schema.maybe(schema.string()),
-                host: schema.maybe(schema.string()),
-                container: schema.maybe(schema.string()),
-                pod: schema.maybe(schema.string()),
               })
             ),
           })
@@ -158,7 +153,8 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {
-        path: `/app/logs`,
+        sampleObject: null, // indicates that there is no sample object associated with this app link's path
+        getPath: () => `/app/logs`,
         label: logsSampleDataLinkLabel,
         icon: 'logsApp',
       },

@@ -401,7 +401,7 @@
           "\nHook for fetching ExceptionLists\n"
         ],
         "signature": [
-          "({ errorMessage, http, initialPagination, filterOptions, namespaceTypes, notifications, showTrustedApps, showEventFilters, }: ",
+          "({ errorMessage, http, initialPagination, filterOptions, namespaceTypes, notifications, showTrustedApps, showEventFilters, showHostIsolationExceptions, }: ",
           {
             "pluginId": "@kbn/securitysolution-io-ts-list-types",
             "scope": "common",
@@ -426,7 +426,7 @@
             "id": "def-common.useExceptionLists.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  errorMessage,\n  http,\n  initialPagination = DEFAULT_PAGINATION,\n  filterOptions = {},\n  namespaceTypes,\n  notifications,\n  showTrustedApps = false,\n  showEventFilters = false,\n}",
+            "label": "{\n  errorMessage,\n  http,\n  initialPagination = DEFAULT_PAGINATION,\n  filterOptions = {},\n  namespaceTypes,\n  notifications,\n  showTrustedApps = false,\n  showEventFilters = false,\n  showHostIsolationExceptions = false,\n}",
             "description": [],
             "signature": [
               {

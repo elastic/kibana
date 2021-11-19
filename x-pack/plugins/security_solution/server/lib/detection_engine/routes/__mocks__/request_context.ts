@@ -11,6 +11,11 @@ import { coreMock } from 'src/core/server/mocks';
 import { ActionsApiRequestHandlerContext } from '../../../../../../actions/server';
 import { AlertingApiRequestHandlerContext } from '../../../../../../alerting/server';
 import { rulesClientMock } from '../../../../../../alerting/server/mocks';
+
+// See: https://github.com/elastic/kibana/issues/117255, the moduleNameMapper creates mocks to avoid memory leaks from kibana core.
+// We cannot import from "../../../../../../actions/server" directly here or we have a really bad memory issue. We cannot add this to the existing mocks we created, this fix must be here.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
 import { listMock } from '../../../../../../lists/server/mocks';
 import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
@@ -44,6 +49,7 @@ const createMockClients = () => {
       exceptionListClient: listMock.getExceptionListClient(core.savedObjects.client),
     },
     rulesClient: rulesClientMock.create(),
+    actionsClient: actionsClientMock.create(),
     ruleDataService: ruleRegistryMocks.createRuleDataService(),
 
     config: createMockConfig(),
@@ -65,7 +71,9 @@ const createRequestContextMock = (
   return {
     core: clients.core,
     securitySolution: createSecuritySolutionRequestContextMock(clients),
-    actions: {} as unknown as jest.Mocked<ActionsApiRequestHandlerContext>,
+    actions: {
+      getActionsClient: jest.fn(() => clients.actionsClient),
+    } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>,
     alerting: {
       getRulesClient: jest.fn(() => clients.rulesClient),
     } as unknown as jest.Mocked<AlertingApiRequestHandlerContext>,

@@ -19,9 +19,10 @@ import {
   EuiOutsideClickDetector,
   EuiFilterButton,
   EuiSpacer,
+  EuiPopoverTitle,
 } from '@elastic/eui';
+import { FieldIcon } from '@kbn/react-field/field_icon';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldIcon } from '../../../../kibana_react/public';
 
 export interface Props {
   onSearchChange: (value: string) => void;
@@ -87,7 +88,6 @@ export function FieldSearch({
           <EuiPopover
             panelClassName="euiFilterGroup__popoverPanel"
             panelPaddingSize="none"
-            anchorPosition="rightUp"
             display="block"
             isOpen={isPopoverOpen}
             closePopover={() => {
@@ -95,6 +95,11 @@ export function FieldSearch({
             }}
             button={buttonContent}
           >
+            <EuiPopoverTitle paddingSize="s">
+              {i18n.translate('presentationUtil.fieldSearch.filterByTypeLabel', {
+                defaultMessage: 'Filter by type',
+              })}
+            </EuiPopoverTitle>
             <EuiContextMenuPanel
               watchedItemProps={['icon', 'disabled']}
               items={(availableFieldTypes as string[]).map((type) => (
@@ -110,10 +115,12 @@ export function FieldSearch({
                     }
                   }}
                 >
-                  <span>
-                    <FieldIcon type={type} label={type} />
-                    {type}
-                  </span>
+                  <EuiFlexGroup gutterSize="xs" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <FieldIcon type={type} label={type} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>{type}</EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiContextMenuItem>
               ))}
             />
