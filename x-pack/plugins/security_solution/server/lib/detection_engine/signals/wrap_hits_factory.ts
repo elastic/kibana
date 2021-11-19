@@ -27,7 +27,9 @@ export const wrapHitsFactory =
   (events, buildReasonMessage) => {
     const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => {
       const timestampKey = completeRule.ruleParams.timestampOverride ?? '@timestamp';
-      const timestampValue = String(doc[timestampKey] ?? '');
+      const timestampValue = String(
+        (doc as unknown as { [key: string]: unknown })[timestampKey] ?? ''
+      );
       return [
         {
           _index: signalsIndex,
