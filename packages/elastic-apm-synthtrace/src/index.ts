@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export type { Exception } from './lib/entity';
 export { service } from './lib/service';
 export { browser } from './lib/browser';
 export { timerange } from './lib/timerange';
