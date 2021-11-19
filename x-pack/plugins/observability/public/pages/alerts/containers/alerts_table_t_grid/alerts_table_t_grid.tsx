@@ -38,27 +38,31 @@ import { get } from 'lodash';
 import {
   getAlertsPermissions,
   useGetUserAlertsPermissions,
-} from '../../hooks/use_alert_permission';
-import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
-import { useStatusBulkActionItems } from '../../../../timelines/public';
-import type { TopAlert } from './';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+} from '../../../../hooks/use_alert_permission';
+import type {
+  TimelinesUIStart,
+  TGridType,
+  SortDirection,
+} from '../../../../../../timelines/public';
+import { useStatusBulkActionItems } from '../../../../../../timelines/public';
+import type { TopAlert } from '../alerts_page/alerts_page';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import type {
   ActionProps,
   AlertWorkflowStatus,
   ColumnHeaderOptions,
   RowRenderer,
-} from '../../../../timelines/common';
+} from '../../../../../../timelines/common';
 
-import { getRenderCellValue } from './render_cell_value';
-import { observabilityFeatureId } from '../../../common';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { getDefaultCellActions } from './default_cell_actions';
-import { LazyAlertsFlyout } from '../..';
-import { parseAlert } from './parse_alert';
-import { CoreStart } from '../../../../../../src/core/public';
-import { translations, paths } from '../../config';
+import { getRenderCellValue } from '../../components/render_cell_value/render_cell_value';
+import { observabilityFeatureId } from '../../../../../common';
+import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { getDefaultCellActions } from '../../components/default_cell_actions';
+import { LazyAlertsFlyout } from '../../../..';
+import { parseAlert } from '../../components/parse_alert';
+import { CoreStart } from '../../../../../../../../src/core/public';
+import { translations, paths } from '../../../../config';
 
 interface AlertsTableTGridProps {
   indexNames: string[];
