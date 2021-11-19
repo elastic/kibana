@@ -34,10 +34,7 @@ import {
   VisualizationMap,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import {
-  ReactExpressionRendererProps,
-  ReactExpressionRendererType,
-} from '../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
@@ -392,7 +389,7 @@ export function SuggestionPanel({
             />
           )}
           {!hideSuggestions &&
-            suggestions.map((suggestion, index) => {
+            localSuggestions.map((suggestion, index) => {
               return (
                 <SuggestionPreview
                   preview={{
@@ -411,6 +408,7 @@ export function SuggestionPanel({
                       switchToSuggestion(dispatchLens, suggestion);
                     }
                   }}
+                  isLoading={!isEqual(localParams.context, context) || !isEqual(suggestion, suggestions[index])}
                   selected={index === lastSelectedSuggestion}
                 />
               );

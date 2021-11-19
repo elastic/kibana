@@ -201,11 +201,20 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   );
 
   const bands = ranges.map((start, index, array) => {
+    const { min, max } = minMaxByColumnId[args.valueAccessor!];
+    let rangeMax = Infinity;
+    if (paletteParams?.rangeMax) {
+      rangeMax =
+        paletteParams?.range === 'percent'
+          ? min + ((max - min) * paletteParams?.rangeMax) / 100
+          : paletteParams?.rangeMax;
+    }
+
     return {
       // with the default continuity:above the every range is left-closed
       start,
       // with the default continuity:above the last range is right-open
-      end: index === array.length - 1 ? Infinity : array[index + 1],
+      end: index === array.length - 1 ? rangeMax : array[index + 1],
       // the current colors array contains a duplicated color at the beginning that we need to skip
       color: colors[index + 1],
     };

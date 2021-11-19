@@ -19,7 +19,8 @@ import { getStopsForFixedMode } from './utils';
 
 function getCustomPaletteConfig(
   palettes: PaletteRegistry,
-  activePalette: PaletteOutput<CustomPaletteParams> | undefined
+  activePalette: PaletteOutput<CustomPaletteParams> | undefined,
+  dataBounds
 ) {
   const { id, title } = palettes.get(CUSTOM_PALETTE);
 
@@ -46,13 +47,15 @@ function getCustomPaletteConfig(
     return { value: id, title, type: 'text' as const, 'data-test-subj': `custom-palette` };
   }
 
+  // getStopsForFixedMode(activePalette.params.stops, activePalette.params.colorStops, dataBounds),
+
   // full custom palette
   return {
     value: id,
     title,
     type: FIXED_PROGRESSION,
     'data-test-subj': `custom-palette`,
-    palette: getStopsForFixedMode(activePalette.params.stops, activePalette.params.colorStops),
+    palette: (activePalette.params.colorStops || activePalette.params.stops).map((colorStop) => colorStop.color)
   };
 }
 
@@ -64,6 +67,7 @@ export function PalettePicker({
   setPalette,
   showCustomPalette,
   showDynamicColorOnly,
+  dataBounds,
   ...rest
 }: {
   palettes: PaletteRegistry;
@@ -91,7 +95,7 @@ export function PalettePicker({
       };
     });
   if (showCustomPalette) {
-    palettesToShow.push(getCustomPaletteConfig(palettes, activePalette));
+    palettesToShow.push(getCustomPaletteConfig(palettes, activePalette, dataBounds));
   }
   return (
     <EuiColorPalettePicker

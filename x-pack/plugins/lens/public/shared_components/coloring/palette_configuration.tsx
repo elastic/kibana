@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PalettePicker } from './palette_picker';
+import { NewCustomizablePalette } from '../color_palette/palette_configuration'
 
 import './palette_configuration.scss';
 
@@ -87,13 +88,11 @@ export function CustomizablePalette({
   }
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
-  const colorStopsToShow = roundStopValues(
-    getColorStops(palettes, activePalette?.params?.colorStops || [], activePalette, dataBounds)
-  );
+  const colorStopsToShow = [];
 
   return (
     <>
-      <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded">
+      {/* <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded">
         <EuiFormRow
           display="rowCompressed"
           fullWidth
@@ -375,8 +374,14 @@ export function CustomizablePalette({
               return setPalette(newParams);
             }}
           />
-        </EuiFormRow>
-      </div>
+        </EuiFormRow>}
+      </div> */}
+      <NewCustomizablePalette
+        palettes={palettes}
+        activePalette={activePalette}
+        setPalette={setPalette}
+        dataBounds={dataBounds}
+      />
     </>
   );
 }

@@ -307,21 +307,26 @@ export function getContrastColor(color: string, isDarkTheme: boolean) {
 /**
  * Same as stops, but remapped against a range 0-100
  */
-export function getStopsForFixedMode(stops: ColorStop[], colorStops?: ColorStop[]) {
+export function getStopsForFixedMode(stops: ColorStop[], colorStops?: ColorStop[], dataBounds = { min: 0, max: 100}) {
   const referenceStops =
     colorStops || stops.map(({ color }, index) => ({ color, stop: 20 * index }));
   const fallbackStops = stops;
+  const { min, max } = dataBounds;
+  const maxIntervalValue = isFinite(referenceStops[referenceStops.length - 1].stop)
+    ? referenceStops[referenceStops.length - 1].stop
+    : max;
+  const minIntervalValue = isFinite(referenceStops[0].stop) ? referenceStops[0].stop : min;
 
   // what happens when user set two stops with the same value? we'll fallback to the display interval
   const oldInterval =
-    referenceStops[referenceStops.length - 1].stop - referenceStops[0].stop ||
+    maxIntervalValue - minIntervalValue ||
     fallbackStops[fallbackStops.length - 1].stop - fallbackStops[0].stop;
 
   return remapStopsByNewInterval(stops, {
     newInterval: 100,
     oldInterval,
     newMin: 0,
-    oldMin: referenceStops[0].stop,
+    oldMin: isFinite(referenceStops[0].stop) ?  referenceStops[0].stop : min,
   });
 }
 
