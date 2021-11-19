@@ -37,6 +37,9 @@ describe('getNodeIds', () => {
         },
       },
       server: {
+        config: () => ({
+          get: () => true,
+        }),
         plugins: {
           elasticsearch: {
             getCluster: () => ({
