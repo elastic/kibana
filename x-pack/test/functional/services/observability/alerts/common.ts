@@ -276,8 +276,5 @@ export function ObservabilityAlertsCommonProvider({
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
-    getCheckboxByNumber,
-    clickCheckboxByNumber,
-    isCheckboxByNumberChecked,
   };
 }
