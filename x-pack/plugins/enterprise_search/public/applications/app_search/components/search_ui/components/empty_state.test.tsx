@@ -23,7 +23,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('Add documents to generate a Search UI');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining(`${docLinks.appSearchSearchUI}`)
+      expect.stringContaining(docLinks.appSearchSearchUI)
     );
   });
 });
