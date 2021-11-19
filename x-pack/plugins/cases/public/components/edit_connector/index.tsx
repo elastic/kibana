@@ -332,7 +332,7 @@ export const EditConnector = React.memo(
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color="secondary"
+                    color="success"
                     data-test-subj="edit-connectors-submit"
                     fill
                     iconType="save"

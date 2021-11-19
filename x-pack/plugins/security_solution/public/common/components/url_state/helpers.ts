@@ -10,7 +10,8 @@ import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
 
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import type { Filter, Query } from '@kbn/es-query';
+
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
