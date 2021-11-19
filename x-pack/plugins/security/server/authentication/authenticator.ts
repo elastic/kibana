@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
 
@@ -197,18 +198,21 @@ export class Authenticator {
   /**
    * Session instance.
    */
-  private readonly session = this.options.session;
+  private readonly session: AuthenticatorOptions['session'];
 
   /**
    * Internal authenticator logger.
    */
-  private readonly logger = this.options.loggers.get('authenticator');
+  private readonly logger: Logger;
 
   /**
    * Instantiates Authenticator and bootstrap configured providers.
    * @param options Authenticator options.
    */
   constructor(private readonly options: Readonly<AuthenticatorOptions>) {
+    this.session = this.options.session;
+    this.logger = this.options.loggers.get('authenticator');
+
     const providerCommonOptions = {
       client: this.options.clusterClient,
       basePath: this.options.basePath,
