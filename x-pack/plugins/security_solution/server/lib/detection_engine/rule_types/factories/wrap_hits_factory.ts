@@ -29,7 +29,9 @@ export const wrapHitsFactory =
   (events, buildReasonMessage) => {
     const wrappedDocs = events.map((event) => {
       const timestampKey = completeRule.ruleParams.timestampOverride ?? '@timestamp';
-      const timestampValue = String(event[timestampKey] ?? '');
+      const timestampValue = String(
+        (event as unknown as { [key: string]: unknown })[timestampKey] ?? ''
+      );
       const id = generateId(
         event._index,
         event._id,

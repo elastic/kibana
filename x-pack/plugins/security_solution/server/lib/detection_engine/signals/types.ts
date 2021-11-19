@@ -288,9 +288,10 @@ export type BulkCreate = <T extends Record<string, unknown>>(
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 
-type SearchHit = estypes.SearchHit<SignalSource> & { [key: string]: unknown };
-
-export type WrapHits = (hits: SearchHit[], buildReasonMessage: BuildReasonMessage) => SimpleHit[];
+export type WrapHits = (
+  hits: Array<estypes.SearchHit<SignalSource>>,
+  buildReasonMessage: BuildReasonMessage
+) => SimpleHit[];
 
 export type WrapSequences = (
   sequences: Array<EqlSequence<SignalSource>>,
