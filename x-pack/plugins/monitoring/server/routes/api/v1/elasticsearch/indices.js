@@ -40,11 +40,7 @@ export function esIndicesRoute(server) {
 
       try {
         const clusterStats = await getClusterStats(req, clusterUuid, ccs);
-        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
-          req,
-          clusterStats,
-          ccs
-        );
+        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(req, clusterStats);
         const indices = await getIndices(req, showSystemIndices, indicesUnassignedShardStats);
 
         return {

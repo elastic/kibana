@@ -71,16 +71,14 @@ export function getIndexSummary(
     indexUuid,
     start,
     end,
-  }: { clusterUuid: string; indexUuid: string; start: number; end: number },
-  ccs?: string
+  }: { clusterUuid: string; indexUuid: string; start: number; end: number }
 ) {
   const datasets = ['index', 'index_stats'];
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     datasets,
     moduleType,
-    ccs,
-    server: req.server,
+    req,
   });
 
   const metric = ElasticsearchMetric.getMetricFields();

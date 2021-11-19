@@ -38,7 +38,7 @@ export function handleResponse(response: ElasticsearchResponse) {
 
 export type MLJobs = ReturnType<typeof handleResponse>;
 
-export function getMlJobs(req: LegacyRequest, ccs?: string) {
+export function getMlJobs(req: LegacyRequest) {
   const config = req.server.config();
   const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
   const start = req.payload.timeRange.min; // no wrapping in moment :)
@@ -49,10 +49,9 @@ export function getMlJobs(req: LegacyRequest, ccs?: string) {
   const datasets = ['ml_job', 'job_stats'];
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    server: req.server,
+    req,
     moduleType,
     datasets,
-    ccs,
   });
 
   const params = {
@@ -110,7 +109,7 @@ export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSo
     const datasets = ['ml_job', 'job_stats'];
     const moduleType = 'elasticsearch';
     const indexPatterns = getNewIndexPatterns({
-      server: req.server,
+      req,
       moduleType,
       datasets,
     });

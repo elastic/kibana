@@ -81,28 +81,17 @@ export function esNodeRoute(server) {
           get(cluster, 'elasticsearch.cluster.stats.state')
         );
 
-        const shardStats = await getShardStats(
-          req,
-          cluster,
-          {
-            includeIndices: true,
-            includeNodes: true,
-            nodeUuid,
-          },
-          ccs
-        );
-        const nodeSummary = await getNodeSummary(
-          req,
-          clusterState,
-          shardStats,
-          {
-            clusterUuid,
-            nodeUuid,
-            start,
-            end,
-          },
-          ccs
-        );
+        const shardStats = await getShardStats(req, cluster, {
+          includeIndices: true,
+          includeNodes: true,
+          nodeUuid,
+        });
+        const nodeSummary = await getNodeSummary(req, clusterState, shardStats, {
+          clusterUuid,
+          nodeUuid,
+          start,
+          end,
+        });
         const metrics = await getNewMetrics(
           req,
           'elasticsearch',
@@ -132,7 +121,7 @@ export function esNodeRoute(server) {
             stateUuid,
             showSystemIndices,
           };
-          const shards = await getShardAllocation(req, allocationOptions, ccs);
+          const shards = await getShardAllocation(req, allocationOptions);
 
           shardAllocation = {
             shards,

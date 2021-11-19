@@ -31,13 +31,12 @@ export function mlJobRoute(server) {
       },
     },
     async handler(req) {
-      const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
 
       try {
         const clusterStats = await getClusterStats(req, clusterUuid);
         const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(req, clusterStats);
-        const rows = await getMlJobs(req, ccs);
+        const rows = await getMlJobs(req);
         return {
           clusterStatus: getClusterStatus(clusterStats, indicesUnassignedShardStats),
           rows,

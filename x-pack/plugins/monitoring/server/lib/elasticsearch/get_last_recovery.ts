@@ -87,7 +87,7 @@ export function handleMbLastRecoveries(resp: ElasticsearchResponse, start: numbe
   return filtered;
 }
 
-export async function getLastRecovery(req: LegacyRequest, size: number, ccs?: string) {
+export async function getLastRecovery(req: LegacyRequest, size: number) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
   const clusterUuid = req.params.clusterUuid;
@@ -97,10 +97,9 @@ export async function getLastRecovery(req: LegacyRequest, size: number, ccs?: st
   const datasets = ['index_recovery'];
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
-    server: req.server,
+    req,
     moduleType,
     datasets,
-    ccs,
   });
 
   const legacyParams = {

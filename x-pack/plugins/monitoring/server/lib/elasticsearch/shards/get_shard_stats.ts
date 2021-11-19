@@ -57,15 +57,13 @@ export function handleResponse(
 export function getShardStats(
   req: LegacyRequest,
   cluster: ElasticsearchModifiedSource,
-  { includeNodes = false, includeIndices = false, indexName = null, nodeUuid = null } = {},
-  ccs?: string
+  { includeNodes = false, includeIndices = false, indexName = null, nodeUuid = null } = {}
 ) {
   const datasets = ['shard', 'shards'];
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    server: req.server,
+    req,
     moduleType,
-    ccs,
     datasets,
   });
 

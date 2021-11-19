@@ -52,14 +52,10 @@ export function esOverviewRoute(server) {
         const [clusterStats, metrics, shardActivity, logs] = await Promise.all([
           getClusterStats(req, clusterUuid),
           getNewMetrics(req, 'elasticsearch', metricSet, ccs),
-          getLastRecovery(req, config.get('monitoring.ui.max_bucket_size'), ccs),
+          getLastRecovery(req, config.get('monitoring.ui.max_bucket_size')),
           getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end }),
         ]);
-        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
-          req,
-          clusterStats,
-          ccs
-        );
+        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(req, clusterStats);
 
         const result = {
           clusterStatus: getClusterStatus(clusterStats, indicesUnassignedShardStats),

@@ -203,8 +203,7 @@ async function fetchNewSeries(
   min: string | number,
   max: string | number,
   bucketSize: number,
-  filters: Array<Record<string, any>>,
-  ccs?: string
+  filters: Array<Record<string, any>>
 ) {
   // if we're using a derivative metric, offset the min (also @see comment on offsetMinForDerivativeMetric function)
   const adjustedMin = metric.derivative
@@ -256,9 +255,8 @@ async function fetchNewSeries(
   }
 
   const indexPatterns = getNewIndexPatterns({
-    server: req.server,
+    req,
     moduleType,
-    ccs,
   });
 
   const params = {
@@ -463,8 +461,7 @@ export async function getNewSeries(
     max,
     bucketSize,
     timezone,
-  }: { min: string | number; max: string | number; bucketSize: number; timezone: string },
-  ccs?: string
+  }: { min: string | number; max: string | number; bucketSize: number; timezone: string }
 ) {
   checkParam(moduleType, 'moduleType in details/getSeries');
 
@@ -481,8 +478,7 @@ export async function getNewSeries(
     min,
     max,
     bucketSize,
-    filters,
-    ccs
+    filters
   );
 
   return handleSeries(metric, groupBy, min, max, bucketSize, timezone, response);

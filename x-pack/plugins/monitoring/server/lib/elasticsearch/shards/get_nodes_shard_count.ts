@@ -16,11 +16,7 @@ import { LegacyRequest } from '../../../types';
 import { ElasticsearchModifiedSource } from '../../../../common/types/es';
 import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
 
-async function getShardCountPerNode(
-  req: LegacyRequest,
-  cluster: ElasticsearchModifiedSource,
-  ccs?: string
-) {
+async function getShardCountPerNode(req: LegacyRequest, cluster: ElasticsearchModifiedSource) {
   const config = req.server.config();
   const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
   const metric = ElasticsearchMetric.getMetricFields();
@@ -39,10 +35,9 @@ async function getShardCountPerNode(
   const datasets = ['shard', 'shards'];
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
-    server: req.server,
+    req,
     moduleType,
     datasets,
-    ccs,
   });
 
   const params = {
@@ -73,12 +68,8 @@ async function getShardCountPerNode(
   return await callWithRequest(req, 'search', params);
 }
 
-export async function getNodesShardCount(
-  req: LegacyRequest,
-  cluster: ElasticsearchModifiedSource,
-  ccs?: string
-) {
-  const response = await getShardCountPerNode(req, cluster, ccs);
+export async function getNodesShardCount(req: LegacyRequest, cluster: ElasticsearchModifiedSource) {
+  const response = await getShardCountPerNode(req, cluster);
   const nodes = get(response, 'aggregations.nodes.buckets', []).reduce(
     (accum: any, bucket: any) => {
       accum[bucket.key] = { shardCount: bucket.doc_count };

@@ -59,7 +59,7 @@ export async function getPaginatedNodes(
 ) {
   const config = req.server.config();
   const size = Number(config.get('monitoring.ui.max_bucket_size'));
-  const nodes: Node[] = await getNodeIds(req, { clusterUuid }, size, ccs);
+  const nodes: Node[] = await getNodeIds(req, { clusterUuid }, size);
 
   // Add `isOnline` and shards from the cluster state and shard stats
   const clusterState = clusterStats?.cluster_state ?? { nodes: {} };

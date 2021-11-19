@@ -45,7 +45,7 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid: string) {
   const datasets = ['cluster_stats'];
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
-    server: req.server,
+    req,
     moduleType,
     datasets,
   });

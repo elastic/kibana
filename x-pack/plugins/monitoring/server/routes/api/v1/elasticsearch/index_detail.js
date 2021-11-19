@@ -58,16 +58,11 @@ export function esIndexRoute(server) {
         const cluster = await getClusterStats(req, clusterUuid);
         const showSystemIndices = true; // hardcode to true, because this could be a system index
 
-        const shardStats = await getShardStats(
-          req,
-          cluster,
-          {
-            includeNodes: true,
-            includeIndices: true,
-            indexName: indexUuid,
-          },
-          ccs
-        );
+        const shardStats = await getShardStats(req, cluster, {
+          includeNodes: true,
+          includeIndices: true,
+          indexName: indexUuid,
+        });
         const indexSummary = await getIndexSummary(req, shardStats, {
           clusterUuid,
           indexUuid,
@@ -104,7 +99,7 @@ export function esIndexRoute(server) {
             stateUuid,
             showSystemIndices,
           };
-          const shards = await getShardAllocation(req, allocationOptions, ccs);
+          const shards = await getShardAllocation(req, allocationOptions);
 
           logs = await getLogs(config, req, filebeatIndexPattern, {
             clusterUuid,

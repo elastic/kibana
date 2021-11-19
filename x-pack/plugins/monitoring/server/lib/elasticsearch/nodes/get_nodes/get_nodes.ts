@@ -37,8 +37,7 @@ export async function getNodes(
   req: LegacyRequest,
   pageOfNodes: Array<{ uuid: string }>,
   clusterStats: ElasticsearchModifiedSource,
-  nodesShardCount: { nodes: { [nodeId: string]: { shardCount: number } } },
-  ccs?: string
+  nodesShardCount: { nodes: { [nodeId: string]: { shardCount: number } } }
 ) {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const orgStart = start;
@@ -68,10 +67,9 @@ export async function getNodes(
   const datasets = ['node_stats'];
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
+    req,
     moduleType,
-    server: req.server,
     datasets,
-    ccs,
   });
 
   const params = {

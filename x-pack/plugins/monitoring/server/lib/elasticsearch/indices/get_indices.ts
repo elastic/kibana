@@ -103,8 +103,7 @@ export function buildGetIndicesQuery(
     end,
     size,
     showSystemIndices = false,
-  }: { start: number; end: number; size: number; showSystemIndices: boolean },
-  ccs?: string
+  }: { start: number; end: number; size: number; showSystemIndices: boolean }
 ) {
   const filters = [];
   if (!showSystemIndices) {
@@ -118,10 +117,9 @@ export function buildGetIndicesQuery(
   const datasets = ['index', 'index_stats'];
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
+    req,
     datasets,
     moduleType,
-    ccs,
-    server: req.server,
   });
 
   return {
@@ -179,24 +177,18 @@ export function buildGetIndicesQuery(
 export function getIndices(
   req: LegacyRequest,
   showSystemIndices: boolean = false,
-  shardStats: any,
-  ccs?: string
+  shardStats: any
 ) {
   const { min: start, max: end } = req.payload.timeRange;
 
   const clusterUuid = req.params.clusterUuid;
   const config = req.server.config();
-  const params = buildGetIndicesQuery(
-    req,
-    clusterUuid,
-    {
-      start,
-      end,
-      showSystemIndices,
-      size: parseInt(config.get('monitoring.ui.max_bucket_size') || '', 10),
-    },
-    ccs
-  );
+  const params = buildGetIndicesQuery(req, clusterUuid, {
+    start,
+    end,
+    showSystemIndices,
+    size: parseInt(config.get('monitoring.ui.max_bucket_size') || '', 10),
+  });
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then((resp) =>

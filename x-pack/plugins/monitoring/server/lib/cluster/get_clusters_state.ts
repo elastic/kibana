@@ -59,7 +59,7 @@ export function getClustersState(req: LegacyRequest, clusters: ElasticsearchModi
   }
 
   const indexPatterns = getNewIndexPatterns({
-    server: req.server,
+    req,
     moduleType: 'elasticsearch',
   });
 

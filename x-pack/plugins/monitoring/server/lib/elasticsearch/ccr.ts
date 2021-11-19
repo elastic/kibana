@@ -20,7 +20,7 @@ export async function checkCcrEnabled(req: LegacyRequest) {
   const datasets = ['cluster_stats'];
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    server: req.server,
+    req,
     moduleType,
     datasets,
   });

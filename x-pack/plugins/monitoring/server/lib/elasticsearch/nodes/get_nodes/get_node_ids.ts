@@ -15,8 +15,7 @@ import { getNewIndexPatterns } from '../../../cluster/get_index_patterns';
 export async function getNodeIds(
   req: LegacyRequest,
   { clusterUuid }: { clusterUuid: string },
-  size: number,
-  ccs?: string
+  size: number
 ) {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
@@ -24,10 +23,9 @@ export async function getNodeIds(
   const datasets = ['node_stats'];
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
-    server: req.server,
+    req,
     moduleType,
     datasets,
-    ccs,
   });
 
   const params = {

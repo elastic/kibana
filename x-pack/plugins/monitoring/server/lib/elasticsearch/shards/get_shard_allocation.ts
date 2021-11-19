@@ -62,8 +62,7 @@ export function getShardAllocation(
     shardFilter,
     stateUuid,
     showSystemIndices = false,
-  }: { shardFilter: any; stateUuid: string; showSystemIndices: boolean },
-  ccs?: string
+  }: { shardFilter: any; stateUuid: string; showSystemIndices: boolean }
 ) {
   const filters = [
     {
@@ -103,10 +102,9 @@ export function getShardAllocation(
   const datasets = ['shard', 'shards'];
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
+    req,
     datasets,
     moduleType,
-    server: req.server,
-    ccs,
   });
 
   const params = {

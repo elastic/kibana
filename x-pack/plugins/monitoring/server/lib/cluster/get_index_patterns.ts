@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LegacyServer } from '../../types';
+import { LegacyRequest, LegacyServer } from '../../types';
 import { prefixIndexPattern } from '../../../common/ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
@@ -83,21 +83,23 @@ export function getDsIndexPattern({
 }
 
 export function getNewIndexPatterns({
-  server,
+  req,
   moduleType,
-  ccs = '*',
   type = DS_INDEX_PATTERN_METRICS,
   datasets,
   namespace = '*',
 }: {
-  server: LegacyServer;
+  req: LegacyRequest;
   moduleType: string;
-  ccs?: string;
   type?: string;
   datasets?: string[];
   namespace?: string;
 }): string {
   const dsIndexPattern = getDsIndexPattern({ type, moduleType, datasets, namespace });
   const legacyIndexPattern = getLegacyIndexPattern({ moduleType });
-  return prefixIndexPattern(server.config(), `${legacyIndexPattern},${dsIndexPattern}`, ccs);
+  return prefixIndexPattern(
+    req.server.config(),
+    `${legacyIndexPattern},${dsIndexPattern}`,
+    req.payload.ccs || '*'
+  );
 }

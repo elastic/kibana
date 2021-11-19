@@ -108,8 +108,7 @@ export function getNodeSummary(
     nodeUuid,
     start,
     end,
-  }: { clusterUuid: string; nodeUuid: string; start: number; end: number },
-  ccs?: string
+  }: { clusterUuid: string; nodeUuid: string; start: number; end: number }
 ) {
   const metric = ElasticsearchMetric.getMetricFields();
   const filters = [
@@ -121,10 +120,9 @@ export function getNodeSummary(
   const datasets = ['node_stats'];
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    server: req.server,
+    req,
     datasets,
     moduleType,
-    ccs,
   });
 
   const params = {

@@ -18,11 +18,7 @@ import { LegacyRequest } from '../../../types';
 import { ElasticsearchModifiedSource } from '../../../../common/types/es';
 import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
 
-async function getUnassignedShardData(
-  req: LegacyRequest,
-  cluster: ElasticsearchModifiedSource,
-  ccs?: string
-) {
+async function getUnassignedShardData(req: LegacyRequest, cluster: ElasticsearchModifiedSource) {
   const config = req.server.config();
   const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
   const metric = ElasticsearchMetric.getMetricFields();
@@ -41,10 +37,9 @@ async function getUnassignedShardData(
 
   const datasets = ['shard', 'shards'];
   const indexPattern = getNewIndexPatterns({
-    server: req.server,
+    req,
     moduleType: 'elasticsearch',
     datasets,
-    ccs,
   });
 
   const params = {
@@ -94,10 +89,9 @@ async function getUnassignedShardData(
 
 export async function getIndicesUnassignedShardStats(
   req: LegacyRequest,
-  cluster: ElasticsearchModifiedSource,
-  ccs?: string
+  cluster: ElasticsearchModifiedSource
 ) {
-  const response = await getUnassignedShardData(req, cluster, ccs);
+  const response = await getUnassignedShardData(req, cluster);
   const indices = get(response, 'aggregations.indices.buckets', []).reduce(
     (accum: any, bucket: any) => {
       const index = bucket.key;

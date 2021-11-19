@@ -48,12 +48,8 @@ export function esNodesRoute(server) {
 
       try {
         const clusterStats = await getClusterStats(req, clusterUuid);
-        const nodesShardCount = await getNodesShardCount(req, clusterStats, ccs);
-        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
-          req,
-          clusterStats,
-          ccs
-        );
+        const nodesShardCount = await getNodesShardCount(req, clusterStats);
+        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(req, clusterStats);
         const clusterStatus = getClusterStatus(clusterStats, indicesUnassignedShardStats);
 
         const metricSet = LISTING_METRICS_NAMES;
@@ -71,7 +67,7 @@ export function esNodesRoute(server) {
           ccs
         );
 
-        const nodes = await getNodes(req, pageOfNodes, clusterStats, nodesShardCount, ccs);
+        const nodes = await getNodes(req, pageOfNodes, clusterStats, nodesShardCount);
         return { clusterStatus, nodes, totalNodeCount };
       } catch (err) {
         throw handleError(err, req);

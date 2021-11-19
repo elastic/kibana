@@ -86,7 +86,7 @@ export function createQuery(options: {
     filters: [],
   });
   // TODO: improve typing instead of having this
-  // if (types?.length && !moduleType) throw new Error('types must have a product type');
+  if (types?.length && !moduleType) throw new Error('types must have a product type');
 
   const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
