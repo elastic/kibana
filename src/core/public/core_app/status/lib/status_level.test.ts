@@ -116,7 +116,7 @@ describe('getHighestStatus', () => {
     expect(getHighestStatus([])).toEqual({
       id: 'available',
       title: 'Green',
-      uiColor: 'secondary',
+      uiColor: 'success',
     });
   });
 });

@@ -69,7 +69,7 @@ exports[`ServerStatus renders correctly for red state 2`] = `
 exports[`ServerStatus renders correctly for yellow state 2`] = `
 <EuiBadge
   aria-label="Yellow"
-  color="secondary"
+  color="success"
   data-test-subj="serverStatusTitleBadge"
 >
   <EuiInnerText>
