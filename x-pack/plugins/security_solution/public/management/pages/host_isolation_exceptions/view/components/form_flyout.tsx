@@ -52,8 +52,6 @@ export const HostIsolationExceptionsFormFlyout = memo(
     >(undefined);
 
     // Load the entry to create or edit
-    // NOTE: This form doesn't use the hook data directly
-    // because that data object will be mutated
     useGetHostIsolationExceptionFormEntry({
       id,
       onSuccess: (data) => setException(data),
@@ -63,7 +61,13 @@ export const HostIsolationExceptionsFormFlyout = memo(
       },
     });
 
-    const policiesRequest = useGetEndpointSpecificPolicies();
+    // load the list of policies
+    const policiesRequest = useGetEndpointSpecificPolicies({
+      onError: (error) => {
+        toasts.addWarning(getLoadErrorMessage(error));
+        onCancel();
+      },
+    });
 
     const mutation = useMutation(
       () => {
