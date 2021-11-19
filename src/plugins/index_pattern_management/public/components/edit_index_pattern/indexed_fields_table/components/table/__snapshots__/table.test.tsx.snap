@@ -6,13 +6,9 @@ exports[`Table render conflict summary modal  1`] = `
     <EuiModalHeaderTitle>
       <h1>
         <FormattedMessage
-          defaultMessage="Field '{fieldName}' type conflict"
+          defaultMessage="This field has a type conflict"
           id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
-          values={
-            Object {
-              "fieldName": "message",
-            }
-          }
+          values={Object {}}
         />
       </h1>
     </EuiModalHeaderTitle>
@@ -21,9 +17,13 @@ exports[`Table render conflict summary modal  1`] = `
     <EuiText>
       <p>
         <FormattedMessage
-          defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
+          defaultMessage="The type of the '{fieldName}' field changes across indices and might not be available for search, visualizations, and other analysis."
           id="indexPatternManagement.editIndexPattern.fields.conflictModal.description"
-          values={Object {}}
+          values={
+            Object {
+              "fieldName": "message",
+            }
+          }
         />
       </p>
       <EuiBasicTable

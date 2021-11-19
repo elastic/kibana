@@ -273,8 +273,7 @@ export const getConflictModalContent = ({
         <h1>
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
-            defaultMessage="Field &#39;{fieldName}&#39; type conflict"
-            values={{ fieldName }}
+            defaultMessage="This field has a type conflict"
           />
         </h1>
       </EuiModalHeaderTitle>
@@ -284,7 +283,8 @@ export const getConflictModalContent = ({
         <p>
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.fields.conflictModal.description"
-            defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
+            defaultMessage="The type of the '{fieldName}' field changes across indices and might not be available for search, visualizations, and other analysis."
+            values={{ fieldName }}
           />
         </p>
         <EuiBasicTable
