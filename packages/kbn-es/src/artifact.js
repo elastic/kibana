@@ -199,12 +199,16 @@ exports.Artifact = class Artifact {
       const cacheMeta = cache.readMeta(dest);
       const tmpPath = `${dest}.tmp`;
 
-      if (useCached && cacheMeta.exists) {
-        this._log.info(
-          'use-cached passed, forcing to use existing snapshot',
-          chalk.bold(cacheMeta.ts)
-        );
-        return;
+      if (useCached) {
+        if (cacheMeta.exists) {
+          this._log.info(
+            'use-cached passed, forcing to use existing snapshot',
+            chalk.bold(cacheMeta.ts)
+          );
+          return;
+        } else {
+          this._log.info('use-cached passed but no cached snapshot found. Continuing to download');
+        }
       }
 
       const artifactResp = await this._download(tmpPath, cacheMeta.etag, cacheMeta.ts);
