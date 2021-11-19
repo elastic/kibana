@@ -52,7 +52,7 @@ const TABLE_COLUMNS: EuiBasicTableProps<Change>['columns'] = [
     }),
     render: (_, item) => {
       return (
-        <EuiText size="s" color={item.direction === 'added' ? 'secondary' : 'danger'}>
+        <EuiText size="s" color={item.direction === 'added' ? 'success' : 'danger'}>
           {item.urls.map((url) => (
             <div key={url}>{url}</div>
           ))}
