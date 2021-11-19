@@ -318,12 +318,12 @@ export const validateKibanaPrivileges = (
 
       if (feature.includes('all')) {
         if (kibanaFeature.privileges?.all.disabled) {
-          errors.push(`Feature [${featureId}.all] is disabled and cannot be specified`);
+          errors.push(`Feature [${featureId}] does not support privilege [all].`);
         }
 
         if (kibanaFeature.privileges?.all.requireAllSpaces && !forAllSpaces) {
           errors.push(
-            `Feature [${featureId}.all] requires all spaces to be selected but received [${priv.spaces.join(
+            `Feature privilege [${featureId}.all] requires all spaces to be selected but received [${priv.spaces.join(
               ','
             )}]`
           );
@@ -332,12 +332,12 @@ export const validateKibanaPrivileges = (
 
       if (feature.includes('read')) {
         if (kibanaFeature.privileges?.read.disabled) {
-          errors.push(`Feature [${featureId}.read] is disabled and cannot be specified`);
+          errors.push(`Feature [${featureId}] does not support privilege [read].`);
         }
 
         if (kibanaFeature.privileges?.read.requireAllSpaces && !forAllSpaces) {
           errors.push(
-            `Feature [${featureId}.read] requires all spaces to be selected but received [${priv.spaces.join(
+            `Feature privilege [${featureId}.read] requires all spaces to be selected but received [${priv.spaces.join(
               ','
             )}]`
           );
