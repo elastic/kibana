@@ -561,6 +561,13 @@ describe('Task Runner', () => {
             kind: 'alert',
           },
           kibana: {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: undefined,
+                },
+              },
+            },
             alerting: {
               instance_id: '1',
               action_group_id: 'default',
@@ -1435,6 +1442,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -1745,6 +1759,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "recovered",
                 "instance_id": "2",
@@ -1785,6 +1806,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": undefined,
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",

@@ -173,6 +173,13 @@ test('enqueues execution per selected action', async () => {
             "kind": "alert",
           },
           "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": undefined,
+                },
+              },
+            },
             "alerting": Object {
               "action_group_id": "default",
               "instance_id": "2",

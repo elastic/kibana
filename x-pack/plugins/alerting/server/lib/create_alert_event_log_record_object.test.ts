@@ -50,6 +50,13 @@ describe('createAlertEventLogRecordObject', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: undefined,
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -109,6 +116,13 @@ describe('createAlertEventLogRecordObject', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: undefined,
+            },
+          },
+        },
         alerting: {
           action_group_id: 'group 1',
           action_subgroup: 'subgroup value',
@@ -176,6 +190,13 @@ describe('createAlertEventLogRecordObject', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: undefined,
+            },
+          },
+        },
         alerting: {
           action_group_id: 'group 1',
           action_subgroup: 'subgroup value',

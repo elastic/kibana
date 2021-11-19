@@ -325,6 +325,13 @@ describe('disable()', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: undefined,
+            },
+          },
+        },
         alerting: {
           action_group_id: 'default',
           action_subgroup: 'newSubgroup',
