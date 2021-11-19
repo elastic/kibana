@@ -312,7 +312,7 @@ exports[`Table should render the boolean template (false) 1`] = `<span />`;
 exports[`Table should render the boolean template (true) 1`] = `
 <span
   aria-label="Is searchable"
-  color="secondary"
+  color="success"
   data-euiicon-type="dot"
 />
 `;

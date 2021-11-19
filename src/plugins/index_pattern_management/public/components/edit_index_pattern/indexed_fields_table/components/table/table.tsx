@@ -344,7 +344,7 @@ const getConflictBtn = (
 
 export class Table extends PureComponent<IndexedFieldProps> {
   renderBooleanTemplate(value: string, arialLabel: string) {
-    return value ? <EuiIcon type="dot" color="secondary" aria-label={arialLabel} /> : <span />;
+    return value ? <EuiIcon type="dot" color="success" aria-label={arialLabel} /> : <span />;
   }
 
   renderFieldType(type: string, field: IndexedFieldItem) {

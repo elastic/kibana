@@ -358,8 +358,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
-|[![Issues][issues-shield]][issues-url]
-[![Pull Requests][pr-shield]][pr-url]
+|This plugin provides cases management in Kibana
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
