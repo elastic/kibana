@@ -23,7 +23,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('Create your first synonym set');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining(`${docLinks.appSearchSynonyms}`)
+      expect.stringContaining(docLinks.appSearchSynonyms)
     );
   });
 
