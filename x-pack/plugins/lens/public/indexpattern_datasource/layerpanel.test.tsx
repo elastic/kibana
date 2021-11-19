@@ -13,6 +13,7 @@ import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { getFieldByNameFactory } from './pure_helpers';
+import { TermsIndexPatternColumn } from './operations';
 
 interface IndexPatternPickerOption {
   label: string;
@@ -160,7 +161,7 @@ const initialState: IndexPatternPrivateState = {
               type: 'alphabetical',
             },
           },
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'My Op',
           dataType: 'number',

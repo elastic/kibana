@@ -16,7 +16,7 @@ import { hasField, isDraggedField } from '../../utils';
 import { DragContextState } from '../../../drag_drop/providers';
 import { OperationMetadata } from '../../../types';
 import { getOperationTypesForField } from '../../operations';
-import { IndexPatternColumn } from '../../indexpattern';
+import { GenericIndexPatternColumn } from '../../indexpattern';
 import {
   IndexPatternPrivateState,
   IndexPattern,
@@ -36,7 +36,7 @@ const operationLabels = getOperationDisplay();
 export function getNewOperation(
   field: IndexPatternField | undefined | false,
   filterOperations: (meta: OperationMetadata) => boolean,
-  targetColumn: IndexPatternColumn
+  targetColumn: GenericIndexPatternColumn
 ) {
   if (!field) {
     return;
@@ -50,7 +50,10 @@ export function getNewOperation(
   return shouldOperationPersist ? targetColumn.operationType : newOperations[0];
 }
 
-export function getField(column: IndexPatternColumn | undefined, indexPattern: IndexPattern) {
+export function getField(
+  column: GenericIndexPatternColumn | undefined,
+  indexPattern: IndexPattern
+) {
   if (!column) {
     return;
   }
@@ -89,7 +92,10 @@ export function getDropProps(props: GetDropProps) {
   }
 }
 
-function hasTheSameField(sourceColumn: IndexPatternColumn, targetColumn?: IndexPatternColumn) {
+function hasTheSameField(
+  sourceColumn: GenericIndexPatternColumn,
+  targetColumn?: GenericIndexPatternColumn
+) {
   return (
     targetColumn &&
     hasField(targetColumn) &&
@@ -127,11 +133,11 @@ function getDropPropsForField({
   return;
 }
 
-function getDropPropsForSameGroup(targetColumn?: IndexPatternColumn): DropProps {
+function getDropPropsForSameGroup(targetColumn?: GenericIndexPatternColumn): DropProps {
   return targetColumn ? { dropTypes: ['reorder'] } : { dropTypes: ['duplicate_compatible'] };
 }
 
-function getDropPropsForCompatibleGroup(targetColumn?: IndexPatternColumn): DropProps {
+function getDropPropsForCompatibleGroup(targetColumn?: GenericIndexPatternColumn): DropProps {
   return {
     dropTypes: targetColumn
       ? ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible']
