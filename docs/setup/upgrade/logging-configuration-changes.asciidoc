@@ -1,6 +1,8 @@
 [[logging-configuration-changes]]
 === Logging configuration changes
 
+WARNING: {kib} 8.0 and later uses a logging system. Be sure to read the documentation for your version of {kib} before proceeding.
+
 [[logging-pattern-format-old-and-new-example]]
 [options="header"]
 |===

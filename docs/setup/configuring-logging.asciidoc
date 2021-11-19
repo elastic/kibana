@@ -27,7 +27,7 @@ Levels are ordered, so _all_ > _fatal_ > _error_ > _warn_ > _info_ > _debug_ > _
 
 A log record is being logged by the logger if its level is higher than or equal to the level of its logger. Otherwise, the log record is ignored.
 
-The _all_ and _off_ levels can be used only in configuration and are just handy shortcuts that allow you to log every log record or disable logging entirely or for a specific logger. These levels are also configurable as <<logging-cli-migration,cli arguments>>.
+The _all_ and _off_ levels can only be used in configuration and are handy shortcuts that allow you to log every log record or disable logging entirely or for a specific logger. These levels can also be specified using <<logging-cli-migration,cli arguments>>.
 
 [float]
 [[logging-layouts]]
@@ -247,7 +247,7 @@ There are currently two policies supported: `size-limit` and `time-interval`.
 
 [float]
 [[size-limit-triggering-policy]]
-**SizeLimitTriggeringPolicy**
+**Size-limit triggering policy**
 
 This policy will rotate the file when it reaches a predetermined size.
 
@@ -274,7 +274,7 @@ The options are:
 The maximum size the log file should reach before a rollover should be performed. The default value is `100mb`
 
 [[time-interval-triggering-policy]]
-**TimeIntervalTriggeringPolicy**
+**Time-interval triggering policy**
 
 This policy will rotate the file every given interval of time.
 
@@ -316,7 +316,7 @@ and their retention policy.
 
 There is currently one strategy supported: `numeric`.
 
-**NumericRollingStrategy**
+**Numeric rolling strategy**
 
 This strategy will suffix the file with a given pattern when rolling,
 and will retains a fixed amount of rolled files.
@@ -363,7 +363,7 @@ The maximum number of files to keep. Once this number is reached, oldest files w
 
 [float]
 [[rewrite-appender]]
-==== Rewrite Appender
+==== Rewrite appender
 
 WARNING: This appender is currently considered experimental and is not intended
 for public consumption. The API is subject to change at any time.
@@ -393,7 +393,7 @@ To configure additional rewrite rules, you'll need to specify a <<rewrite-polici
 
 [float]
 [[rewrite-policies]]
-====== Rewrite Policies
+====== Rewrite policies
 
 Rewrite policies exist to indicate which parts of a log record can be
 modified within the rewrite appender.
@@ -678,14 +678,20 @@ logging:
     appenders: [custom]
 ----
 
-you can override the flags with:
+you can override the root logging level with:
 
 [options="header"]
+[cols="1, 4, 1"]
 |===
 
-| legacy logging | {kib} Platform logging | cli shortcuts
+|legacy logging|{kib} Platform logging|cli shortcuts
 
-|--verbose| --logging.root.level=debug --logging.root.appenders[0]=custom | --verbose
+|--verbose 
+|--logging.root.level=debug
+|--verbose
 
-|--silent| --logging.root.level=off | --silent
+|--silent
+|--logging.root.level=off
+|--silent
+
 |===
