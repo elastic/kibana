@@ -29,6 +29,7 @@ import {
 } from '../../../../components/effected_policy_select';
 import {
   getArtifactTagsByEffectedPolicySelection,
+  getEffectedPolicySelectionByTags,
   isGlobalPolicyEffected,
 } from '../../../../components/effected_policy_select/utils';
 import { isValidIPv4OrCIDR } from '../../utils';
@@ -67,6 +68,13 @@ export const HostIsolationExceptionsForm: React.FC<{
     isGlobal,
     selected: [],
   });
+
+  // set current policies if not previously selected
+  useEffect(() => {
+    if (selectedPolicies.selected.length === 0) {
+      setSelectedPolicies(getEffectedPolicySelectionByTags(exception.tags || [], policies));
+    }
+  }, [exception.tags, policies, selectedPolicies.selected.length]);
 
   useEffect(() => {
     onError(hasNameError || hasIpError);
@@ -111,7 +119,11 @@ export const HostIsolationExceptionsForm: React.FC<{
   const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
     (selection) => {
       setIsGlobal(selection.isGlobal);
-      setSelectedPolicies(() => selection);
+
+      // preseve the previous selection between global and not global toggle
+      if (!selection.isGlobal) {
+        setSelectedPolicies(() => selection);
+      }
       onChange({
         ...exception,
         tags: getArtifactTagsByEffectedPolicySelection(selection),
