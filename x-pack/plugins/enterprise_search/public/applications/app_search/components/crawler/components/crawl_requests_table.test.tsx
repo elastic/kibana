@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -35,7 +35,23 @@ const values: { events: CrawlEvent[] } = {
         domainAllowlist: ['https://www.elastic.co'],
       },
     },
+    {
+      id: '54325423aef7890543',
+      status: CrawlerStatus.Success,
+      stage: 'process',
+      createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      beganAt: null,
+      completedAt: null,
+      type: CrawlType.Full,
+      crawlConfig: {
+        domainAllowlist: ['https://www.elastic.co'],
+      },
+    },
   ],
+};
+
+const actions = {
+  fetchCrawlRequest: jest.fn(),
 };
 
 describe('CrawlRequestsTable', () => {
@@ -48,6 +64,7 @@ describe('CrawlRequestsTable', () => {
 
   describe('columns', () => {
     beforeAll(() => {
+      setMockActions(actions);
       setMockValues(values);
       wrapper = shallow(<CrawlRequestsTable />);
       tableContent = mountWithIntl(<CrawlRequestsTable />)
@@ -55,8 +72,20 @@ describe('CrawlRequestsTable', () => {
         .text();
     });
 
-    it('renders an id column', () => {
+    it('renders a id column ', () => {
+      expect(tableContent).toContain('Request ID');
       expect(tableContent).toContain('618d0e66abe97bc688328900');
+      expect(tableContent).toContain('54325423aef7890543');
+
+      // TODO Use data-test-subj instead, currently not able to find inside the table
+      // expect(wrapper.find('[data-test-subj="CrawlRequestsTableId"]').children()).toContain(
+      //   '54325423aef7890543'
+      // );
+      // expect(wrapper.find('[data-test-subj="CrawlRequestsTableIdLink"]').children()).toContain(
+      //   '618d0e66abe97bc688328900'
+      // );
+      // wrapper.find('[data-test-subj="CrawlRequestsTableIdLink"]').simulate('click');
+      // expect(actions.fetchCrawlRequest).toHaveBeenCalledWith('618d0e66abe97bc688328900');
     });
 
     it('renders a created at column', () => {
