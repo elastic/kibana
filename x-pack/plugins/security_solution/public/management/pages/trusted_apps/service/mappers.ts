@@ -220,7 +220,6 @@ export const newTrustedAppToCreateExceptionListItem = ({
     comments: [],
     description,
     entries: conditionEntriesToEntries(entries),
-    // item_id: uuid.v4(),
     list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
     meta: undefined,
     name,

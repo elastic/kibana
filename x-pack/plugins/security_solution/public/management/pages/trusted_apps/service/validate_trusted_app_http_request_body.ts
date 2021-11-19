@@ -22,7 +22,7 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 export const validateTrustedAppHttpRequestBody = async (
   http: HttpStart,
   trustedApp: PostTrustedAppCreateRequest | PutTrustedAppUpdateRequest
-): Promise<true> => {
+): Promise<void> => {
   const failedValidations: string[] = [];
 
   // Validate that the Policy IDs are still valid
