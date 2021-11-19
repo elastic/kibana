@@ -186,10 +186,10 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
     );
 
   const steps = [
-    DownloadStep(),
     !agentPolicy
       ? AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId, excludeFleetServer: true })
       : undefined,
+    DownloadStep(false),
     {
       title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigureAgentTitle', {
         defaultMessage: 'Configure the agent',
