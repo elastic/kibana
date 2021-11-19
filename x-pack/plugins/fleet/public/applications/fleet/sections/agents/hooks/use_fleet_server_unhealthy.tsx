@@ -50,12 +50,12 @@ export function useFleetServerUnhealthy() {
 
       setIsLoading(false);
     } catch (err) {
-      setIsLoading(false);
       notifications.toasts.addError(err, {
         title: i18n.translate('xpack.fleet.fleetServerUnhealthy.requestError', {
           defaultMessage: 'An error happened while fetching fleet server status',
         }),
       });
+      setIsLoading(false);
     }
   }, [notifications.toasts]);
 

@@ -30,7 +30,7 @@ export const FleetServerOnPremUnhealthyCallout: React.FunctionComponent<FleetSer
       >
         <FormattedMessage
           id="xpack.fleet.fleetServerOnPremUnhealthyCallout.calloutDescription"
-          defaultMessage="A healthy Fleet server is required before you can enroll agents with Fleet.  For more information see the Fleet and {guideLink}."
+          defaultMessage="A healthy Fleet server is required before you can enroll agents with Fleet.  For more information see the {guideLink}."
           values={{
             guideLink: (
               <EuiLink

@@ -31,7 +31,7 @@ export const FleetServerCloudUnhealthyCallout: React.FunctionComponent<FleetServ
       >
         <FormattedMessage
           id="xpack.fleet.fleetServerCloudRequiredCallout.calloutDescription"
-          defaultMessage="A healthy Fleet server is required to enroll agents with Fleet. Enable Fleet Server in you {cloudDeploymentLink}. For more information see the Fleet and {guideLink}."
+          defaultMessage="A healthy Fleet server is required to enroll agents with Fleet. Enable Fleet Server in you {cloudDeploymentLink}. For more information see the {guideLink}."
           values={{
             cloudDeploymentLink: (
               <EuiLink href={deploymentUrl} target="_blank" external>

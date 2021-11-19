@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
 import {
   EuiBasicTable,
   EuiButton,
@@ -151,13 +150,11 @@ function safeMetadata(val: any) {
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { notifications, cloud } = useStartServices();
   useBreadcrumbs('agent_list');
-  const { getHref, getPath } = useLink();
+  const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
   const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();
-
-  const history = useHistory();
 
   // Agent data states
   const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
@@ -199,7 +196,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [setSearch, setDraftKuery, setSelectedAgentPolicies, setSelectedStatus, setShowUpgradeable]);
 
   // Agent enrollment flyout state
-  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
+  const [enrollmentFlyout, setEnrollmentFlyoutState] = useState<{
+    isOpen: boolean;
+    selectedPolicyId?: string;
+  }>({
+    isOpen: false,
+  });
 
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
@@ -380,11 +382,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const onClickAddFleetServer = useCallback(() => {
     const defaultPolicy = agentPolicies.find((policy) => policy.is_default_fleet_server);
     if (defaultPolicy) {
-      history.push(
-        getPath('policy_details', { policyId: defaultPolicy.id }) + '?openEnrollmentFlyout=true'
-      );
+      setEnrollmentFlyoutState({ isOpen: true, selectedPolicyId: defaultPolicy.id });
     }
-  }, [history, agentPolicies, getPath]);
+  }, [agentPolicies]);
 
   const columns = [
     {
@@ -508,7 +508,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       }
       actions={
         hasWriteCapabilites ? (
-          <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            onClick={() => setEnrollmentFlyoutState({ isOpen: true })}
+          >
             <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
           </EuiButton>
         ) : null
@@ -518,11 +522,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   return (
     <>
-      {isEnrollmentFlyoutOpen ? (
+      {enrollmentFlyout.isOpen ? (
         <EuiPortal>
           <AgentEnrollmentFlyout
             agentPolicies={agentPolicies}
-            onClose={() => setIsEnrollmentFlyoutOpen(false)}
+            agentPolicy={agentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
+            onClose={() => setEnrollmentFlyoutState({ isOpen: false })}
           />
         </EuiPortal>
       ) : null}
