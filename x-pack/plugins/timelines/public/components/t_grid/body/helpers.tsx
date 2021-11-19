@@ -239,3 +239,12 @@ export const addBuildingBlockStyle = (
     });
   }
 };
+
+/** Returns true when the specified column has cell actions */
+export const hasCellActions = ({
+  columnId,
+  disabledCellActions,
+}: {
+  columnId: string;
+  disabledCellActions: string[];
+}) => !disabledCellActions.includes(columnId);

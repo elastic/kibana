@@ -85,6 +85,10 @@ export const ProviderContentWrapper = styled.span`
   > span.euiToolTipAnchor {
     display: block; /* allow EuiTooltip content to be truncatable */
   }
+
+  > span.euiToolTipAnchor.eui-textTruncate {
+    display: inline-block; /* do not override display when a tooltip is truncated via eui-textTruncate */
+  }
 `;
 
 type RenderFunctionProp = (

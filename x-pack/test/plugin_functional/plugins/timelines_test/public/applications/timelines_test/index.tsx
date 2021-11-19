@@ -75,6 +75,7 @@ const AppRoot = React.memo(
                   columns: [],
                   indexNames: [],
                   deletedEventIds: [],
+                  disabledCellActions: [],
                   end: '',
                   footerText: 'Events',
                   filters: [],
