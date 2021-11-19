@@ -7,7 +7,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./no_constructor_args_in_property_initializers');
+const rule = require('./no_this_in_property_initializers');
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
@@ -21,7 +21,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('@kbn/eslint/no_constructor_args_in_property_initializers', rule, {
+ruleTester.run('@kbn/eslint/no_this_in_property_initializers', rule, {
   valid: [
     {
       code: dedent`
@@ -50,9 +50,6 @@ ruleTester.run('@kbn/eslint/no_constructor_args_in_property_initializers', rule,
         }
       `,
     },
-  ],
-
-  invalid: [
     {
       code: dedent`
         class Foo {
@@ -60,38 +57,21 @@ ruleTester.run('@kbn/eslint/no_constructor_args_in_property_initializers', rule,
           constructor(private readonly foo: string) {}
         }
       `,
-      errors: [
-        {
-          line: 2,
-          message: `The constructor argument "foo" can't be used in a class property intializer, define the property in the constructor instead`,
-        },
-      ],
     },
+  ],
+
+  invalid: [
     {
       code: dedent`
         class Foo {
-          bar = this.foo()
-          constructor(private readonly foo: () => void) {}
-        }
-      `,
-      errors: [
-        {
-          line: 2,
-          message: `The constructor argument "foo" can't be used in a class property intializer, define the property in the constructor instead`,
-        },
-      ],
-    },
-    {
-      code: dedent`
-        class Foo {
-          bar = this.foo()
+          bar = new Bar(this)
           constructor(private readonly foo: (() => void) = defaultValue) {}
         }
       `,
       errors: [
         {
           line: 2,
-          message: `The constructor argument "foo" can't be used in a class property intializer, define the property in the constructor instead`,
+          message: `"this" is not fully initialized in class property intializers, define the value for this property in the constructor instead`,
         },
       ],
     },
