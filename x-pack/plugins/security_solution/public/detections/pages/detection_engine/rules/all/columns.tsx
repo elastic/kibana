@@ -42,6 +42,7 @@ import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { PopoverTooltip } from './popover_tooltip';
 import { getCapitalizedRuleStatusText } from '../../../../../../common/detection_engine/utils';
+import { RuleExecutionStatus } from  '../../../../../../common/detection_engine/schemas/common/schemas';
 import {
   APP_UI_ID,
   SecurityPageName,
@@ -145,6 +146,12 @@ interface GetColumns {
         [x: string]: boolean;
       }>;
 }
+
+const LastResponse = ({ status } : { status?: RuleExecutionStatus | null }) => (
+  <EuiHealth color={getStatusColor(status ?? null)}>
+    {getCapitalizedRuleStatusText(status) ?? getEmptyTagValue()}
+  </EuiHealth>
+);
 
 export const getColumns = ({
   dispatch,
@@ -251,15 +258,7 @@ export const getColumns = ({
     {
       field: 'status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: Rule['status']) => {
-        return (
-          <>
-            <EuiHealth color={getStatusColor(value ?? null)}>
-              {getCapitalizedRuleStatusText(value) ?? getEmptyTagValue()}
-            </EuiHealth>
-          </>
-        );
-      },
+      render: (value: Rule['status']) => <LastResponse status={value} />,
       width: '16%',
       truncateText: true,
     },
@@ -449,15 +448,7 @@ export const getMonitoringColumns = (
     {
       field: 'current_status.status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: RuleStatus['current_status']['status']) => {
-        return (
-          <>
-            <EuiHealth color={getStatusColor(value ?? null)}>
-              {getCapitalizedRuleStatusText(value) ?? getEmptyTagValue()}
-            </EuiHealth>
-          </>
-        );
-      },
+      render: (value: RuleStatus['current_status']['status']) => <LastResponse status={value} />,
       width: '12%',
       truncateText: true,
     },
