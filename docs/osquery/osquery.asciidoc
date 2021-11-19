@@ -99,7 +99,7 @@ Each query must include a unique query ID and the interval at which it should ru
 Optionally, set the minimum Osquery version and platform,
 or <<osquery-map-fields,map ECS fields>>. When you add a saved query to a pack, this adds a copy of the query. A connection is not maintained between saved queries and packs.
 
-* To upload queries from a .conf query pack, drag the pack to the drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
+* To upload queries from a `.conf` query pack, drag the pack to the drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
 
 . Click *Save pack*. The queries run when the policy receives the update.
 
@@ -146,7 +146,7 @@ Add or edit saved queries from the *Saved queries* tab.
 
 . Click *Test configuration* to test the query and any mapped fields: 
 
-* From the *Test query* panel, select agents or groups to test the query, then click *Submit*. This runs a live query. Result columns that are mapped are marked with image:images/mapped-icon.png[mapping icon]. Hover over the icon to see the mapped ECS field.
+* From the *Test query* panel, select agents or groups to test the query, then click *Submit* to run a live query. Result columns with the image:images/mapped-icon.png[mapping] icon are mapped. Hover over the icon to see the mapped ECS field.
 
 . Click **Save query**.
 
