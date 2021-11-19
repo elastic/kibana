@@ -242,6 +242,13 @@ export const ROLES_DISABLED_NOTE = i18n.translate(
   }
 );
 
+export const RBAC_BUTTON_DISABLED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.rbacButtonDisabledLabel',
+  {
+    defaultMessage: 'Enabling RBAC can be performed by a superuser.',
+  }
+);
+
 export const ENABLE_ROLES_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.enableRolesButton',
   { defaultMessage: 'Enable role-based access' }

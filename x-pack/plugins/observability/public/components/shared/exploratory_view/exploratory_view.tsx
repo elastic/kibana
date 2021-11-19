@@ -102,11 +102,7 @@ export function ExploratoryView({
             chartTimeRange={chartTimeRangeContext}
           />
           <LensWrapper ref={wrapperRef} height={height}>
-            <EuiResizableContainer
-              style={{ height: '100%' }}
-              direction="vertical"
-              onToggleCollapsed={onCollapse}
-            >
+            <ResizableContainer direction="vertical" onToggleCollapsed={onCollapse}>
               {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
                 collapseFn.current = (id, direction) => togglePanel?.(id, { direction });
 
@@ -134,20 +130,13 @@ export function ExploratoryView({
                       mode={'main'}
                       id="seriesPanel"
                       color="subdued"
+                      className="paddingTopSmall"
                     >
-                      {hiddenPanel === 'chartPanel' ? (
-                        <ShowChart onClick={() => onChange('chartPanel')} iconType="arrowDown">
-                          {SHOW_CHART_LABEL}
-                        </ShowChart>
-                      ) : (
-                        <HideChart
-                          onClick={() => onChange('chartPanel')}
-                          iconType="arrowUp"
-                          color="text"
-                        >
-                          {HIDE_CHART_LABEL}
-                        </HideChart>
-                      )}
+                      <ChartToggle
+                        isCollapsed={hiddenPanel === 'chartPanel'}
+                        onClick={() => onChange('chartPanel')}
+                      />
+
                       <SeriesViews
                         seriesBuilderRef={seriesBuilderRef}
                         onSeriesPanelCollapse={onChange}
@@ -156,7 +145,7 @@ export function ExploratoryView({
                   </>
                 );
               }}
-            </EuiResizableContainer>
+            </ResizableContainer>
             {hiddenPanel === 'seriesPanel' && (
               <ShowPreview onClick={() => onChange('seriesPanel')} iconType="arrowUp">
                 {PREVIEW_LABEL}
@@ -180,6 +169,14 @@ const LensWrapper = styled.div<{ height: string }>`
     height: 100%;
   }
 `;
+
+const ResizableContainer = styled(EuiResizableContainer)`
+  height: 100%;
+  &&& .paddingTopSmall {
+    padding-top: 8px;
+  }
+`;
+
 const Wrapper = styled(EuiPanel)`
   max-width: 1800px;
   min-width: 800px;
@@ -197,15 +194,22 @@ const ShowPreview = styled(EuiButtonEmpty)`
   position: absolute;
   bottom: 34px;
 `;
-const HideChart = styled(EuiButtonEmpty)`
+
+const ChartToggle = styled(({ isCollapsed, ...rest }) => (
+  <EuiButtonEmpty
+    {...(isCollapsed ? { iconType: 'arrowDown' } : { iconType: 'arrowUp', color: 'text' })}
+    {...rest}
+  >
+    {isCollapsed ? SHOW_CHART_LABEL : HIDE_CHART_LABEL}
+  </EuiButtonEmpty>
+))`
+  &:focus,
+  &:focus:enabled {
+    background: none;
+  }
   position: absolute;
-  top: -35px;
-  right: 50px;
-`;
-const ShowChart = styled(EuiButtonEmpty)`
-  position: absolute;
-  top: -10px;
-  right: 50px;
+  top: -30px;
+  right: 0;
 `;
 
 const HIDE_CHART_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.hideChart', {
