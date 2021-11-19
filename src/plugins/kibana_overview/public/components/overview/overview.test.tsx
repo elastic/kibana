@@ -7,6 +7,7 @@
  */
 
 import { hasUserDataViewMock } from './overview.test.mocks';
+import { setTimeout as setTimeoutP } from 'timers/promises';
 import moment from 'moment';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -124,15 +125,7 @@ const mockFeatures = [
   },
 ];
 
-const flushPromises = async () => {
-  await new Promise<void>(async (resolve, reject) => {
-    try {
-      setTimeout(() => resolve(), 10);
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
+const flushPromises = async () => await setTimeoutP(10);
 
 const updateComponent = async (component: ReactWrapper) => {
   await act(async () => {
