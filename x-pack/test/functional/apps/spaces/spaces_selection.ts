@@ -63,36 +63,6 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
-    describe('Space Selector', () => {
-      before(async () => {
-        await PageObjects.security.forceLogout();
-      });
-
-      afterEach(async () => {
-        await PageObjects.security.forceLogout();
-      });
-
-      it('allows user to navigate to different spaces', async () => {
-        const spaceId = 'another-space';
-
-        await PageObjects.security.login(undefined, undefined, {
-          expectSpaceSelector: true,
-        });
-
-        await PageObjects.spaceSelector.clickSpaceCard(spaceId);
-
-        await PageObjects.spaceSelector.expectHomePage(spaceId);
-
-        await PageObjects.spaceSelector.openSpacesNav();
-
-        // change spaces
-
-        await PageObjects.spaceSelector.clickSpaceAvatar('default');
-
-        await PageObjects.spaceSelector.expectHomePage('default');
-      });
-    });
-
     // FLAKY: https://github.com/elastic/kibana/issues/118356
     // FLAKY: https://github.com/elastic/kibana/issues/118474
     describe.skip('Search spaces in popover', () => {
