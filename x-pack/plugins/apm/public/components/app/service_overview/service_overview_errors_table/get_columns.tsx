@@ -96,9 +96,9 @@ export function getColumns({
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',
               {
-                defaultMessage: `{occurrencesCount} occ.`,
+                defaultMessage: `{occurrences} occ.`,
                 values: {
-                  occurrencesCount: asInteger(occurrences),
+                  occurrences: asInteger(occurrences),
                 },
               }
             )}

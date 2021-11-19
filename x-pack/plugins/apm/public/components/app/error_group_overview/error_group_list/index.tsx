@@ -191,7 +191,7 @@ function ErrorGroupList({
           ),
       },
       {
-        field: 'occurrenceCount',
+        field: 'occurrences',
         name: i18n.translate('xpack.apm.errorsTable.occurrencesColumnLabel', {
           defaultMessage: 'Occurrences',
         }),
@@ -210,9 +210,9 @@ function ErrorGroupList({
               valueLabel={i18n.translate(
                 'xpack.apm.serviceOveriew.errorsTableOccurrences',
                 {
-                  defaultMessage: `{occurrencesCount} occ.`,
+                  defaultMessage: `{occurrences} occ.`,
                   values: {
-                    occurrencesCount: asInteger(occurrences),
+                    occurrences: asInteger(occurrences),
                   },
                 }
               )}
@@ -222,9 +222,6 @@ function ErrorGroupList({
             />
           );
         },
-        // occurrences
-        //   ? numeral(occurrences).format('0.[0]a')
-        //   : NOT_AVAILABLE_LABEL,
       },
     ] as Array<ITableColumn<ErrorGroupItem>>;
   }, [serviceName, urlParams, periods, comparisonEnabled]);
@@ -237,7 +234,7 @@ function ErrorGroupList({
       items={items}
       columns={columns}
       initialPageSize={25}
-      initialSortField="occurrenceCount"
+      initialSortField="occurrences"
       initialSortDirection="desc"
       sortItems={false}
     />

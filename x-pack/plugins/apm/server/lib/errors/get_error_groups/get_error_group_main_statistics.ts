@@ -46,7 +46,7 @@ export async function getServiceErrorGroupMainStatistics({
   const { apmEventClient } = setup;
 
   // sort buckets by last occurrence of error
-  const sortByLatestOccurrence = sortField === 'latestOccurrenceAt';
+  const sortByLatestOccurrence = sortField === 'lastSeen';
 
   const maxTimestampAggKey = 'max_timestamp';
 
@@ -99,10 +99,10 @@ export async function getServiceErrorGroupMainStatistics({
                   },
                 },
               },
+              ...(sortByLatestOccurrence
+                ? { [maxTimestampAggKey]: { max: { field: '@timestamp' } } }
+                : {}),
             },
-            ...(sortByLatestOccurrence
-              ? { [maxTimestampAggKey]: { max: { field: '@timestamp' } } }
-              : {}),
           },
         },
       },
