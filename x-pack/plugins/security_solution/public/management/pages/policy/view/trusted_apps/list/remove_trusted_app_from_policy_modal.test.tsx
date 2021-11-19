@@ -214,7 +214,7 @@ describe('When using the RemoveTrustedAppFromPolicyModal component', () => {
     await clickConfirmButton(true, true);
 
     expect(appTestContext.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-      text: '"Avast Business Antivirus" has been removed from Endpoint Policy policy',
+      text: '"Generated Exception (3xnng)" has been removed from Endpoint Policy policy',
       title: 'Successfully removed',
     });
   });
