@@ -442,7 +442,7 @@ async function installPackageByUpload({
 }
 
 export type InstallPackageParams = {
-  skipPostInstall?: boolean;
+  skipIndexPatternCreation?: boolean;
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
@@ -453,9 +453,9 @@ export async function installPackage(args: InstallPackageParams) {
     throw new Error('installSource is required');
   }
   const logger = appContextService.getLogger();
-  const { savedObjectsClient, esClient, skipPostInstall = false } = args;
+  const { savedObjectsClient, esClient, skipIndexPatternCreation = false } = args;
 
-  if (!skipPostInstall) {
+  if (!skipIndexPatternCreation) {
     await installIndexPatterns(savedObjectsClient);
   }
 
