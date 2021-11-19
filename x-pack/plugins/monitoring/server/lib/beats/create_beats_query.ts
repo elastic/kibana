@@ -6,7 +6,7 @@
  */
 
 import { BeatsMetric, BeatsMetricFields } from '../metrics';
-import { createQuery } from '../create_query';
+import { createNewQuery } from '../create_query';
 
 /**
  * {@code createQuery} for all Beats instances.
@@ -26,6 +26,7 @@ export function createBeatsQuery(options: {
   end?: number;
 }) {
   const opts = {
+    productType: 'beats',
     filters: [] as any[],
     metric: BeatsMetric.getMetricFields(),
     types: ['stats', 'beats_stats'],
@@ -43,5 +44,5 @@ export function createBeatsQuery(options: {
     },
   });
 
-  return createQuery(opts);
+  return createNewQuery(opts);
 }

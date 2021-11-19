@@ -11,7 +11,7 @@ import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest, Bucket } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { metrics } from '../metrics';
-import { createQuery, createNewQuery } from '../create_query';
+import { createNewQuery } from '../create_query';
 import { formatTimestampToDuration } from '../../../common';
 import { NORMALIZED_DERIVATIVE_UNIT, CALCULATE_DURATION_UNTIL } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
@@ -177,7 +177,7 @@ async function fetchSeries(
     size: 0,
     ignore_unavailable: true,
     body: {
-      query: createQuery({
+      query: createNewQuery({
         start: adjustedMin,
         end: Number(max),
         metric,

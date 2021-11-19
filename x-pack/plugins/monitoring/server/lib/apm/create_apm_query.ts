@@ -6,7 +6,7 @@
  */
 
 import { ApmMetric, ApmMetricFields } from '../metrics';
-import { createQuery } from '../create_query';
+import { createNewQuery } from '../create_query';
 
 /**
  * {@code createQuery} for all APM instances.
@@ -25,6 +25,7 @@ export function createApmQuery(options: {
   const opts = {
     filters: [] as any[],
     metric: ApmMetric.getMetricFields(),
+    productType: 'beats',
     types: ['stats', 'beats_stats'],
     ...(options ?? {}),
   };
@@ -38,6 +39,5 @@ export function createApmQuery(options: {
       },
     },
   });
-
-  return createQuery(opts);
+  return createNewQuery(opts);
 }
