@@ -30,6 +30,7 @@ export const createLogEntryCategoryExamplesQuery = (
               [timestampField]: {
                 gte: startTime,
                 lte: endTime,
+                format: 'epoch_millis',
               },
             },
           },
