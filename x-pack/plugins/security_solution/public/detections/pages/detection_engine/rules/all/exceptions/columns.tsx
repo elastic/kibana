@@ -22,6 +22,8 @@ import { ExceptionsTableItem } from './types';
 
 export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionsTableItem>;
 
+const RULES_TO_DISPLAY = 1;
+
 export const getAllExceptionListsColumns = (
   onExport: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
   onDelete: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
@@ -89,7 +91,7 @@ export const getAllExceptionListsColumns = (
       return (
         <PopoverItems
           items={rules}
-          numberOfItemsToDisplay={1}
+          numberOfItemsToDisplay={RULES_TO_DISPLAY}
           popoverTitle={i18n.RULES_ASSIGNED_TO_TITLE}
           popoverButtonTitle={i18n.showMoreRules(rules.length - 1)}
           renderItem={renderItem as PopoverItemsProps<unknown>['renderItem']}
