@@ -568,6 +568,8 @@ export interface DocLinksStart {
         readonly enterpriseSearch: {
             readonly configuration: string;
             readonly licenseManagement: string;
+            readonly mailService: string;
+            readonly usersAccess: string;
         };
         readonly workplaceSearch: {
             readonly box: string;
