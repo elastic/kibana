@@ -20,7 +20,7 @@ import {
 import { Logger } from '../../logging';
 import type { ElasticsearchClient } from '../client';
 
-/** @internal */
+/** @public */
 export interface PollEsNodesVersionOptions {
   internalClient: ElasticsearchClient;
   log: Logger;
@@ -140,7 +140,7 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
   );
 }
 
-/** @internal */
+/** @public */
 export const pollEsNodesVersion = ({
   internalClient,
   log,

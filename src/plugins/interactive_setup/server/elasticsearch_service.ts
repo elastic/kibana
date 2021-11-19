@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
@@ -29,13 +27,13 @@ import type {
   ElasticsearchServicePreboot,
   ICustomClusterClient,
   Logger,
-  NodesVersionCompatibility,
   ScopeableRequest,
 } from 'src/core/server';
 
 import { pollEsNodesVersion } from '../../../../src/core/server';
 import { ElasticsearchConnectionStatus } from '../common';
 import type { Certificate, PingResult } from '../common';
+import { CompatibilityError } from './compatibility_error';
 import { getDetailedErrorMessage, getErrorStatusCode } from './errors';
 
 export interface EnrollParameters {
@@ -446,22 +444,5 @@ export class ElasticsearchService {
         .match(/.{1,2}/g)
         ?.join(':') ?? ''
     );
-  }
-}
-
-export class CompatibilityError extends Error {
-  constructor(private meta: NodesVersionCompatibility) {
-    super('Compatibility Error');
-    Error.captureStackTrace(this, CompatibilityError);
-    this.name = 'CompatibilityError';
-    this.message = meta.message!;
-  }
-
-  public get elasticsearchVersion() {
-    return this.meta.incompatibleNodes[0].version;
-  }
-
-  public get kibanaVersion() {
-    return this.meta.kibanaVersion;
   }
 }

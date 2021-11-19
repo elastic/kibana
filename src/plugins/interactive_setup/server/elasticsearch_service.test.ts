@@ -7,11 +7,14 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { BehaviorSubject } from 'rxjs';
 import tls from 'tls';
 
 import { nextTick } from '@kbn/test/jest';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
+import { pollEsNodesVersion } from '../../../../src/core/server';
+import type { NodesVersionCompatibility } from '../../../../src/core/server';
 import { ElasticsearchConnectionStatus } from '../common';
 import { ConfigSchema } from './config';
 import type { ElasticsearchServiceSetup } from './elasticsearch_service';
@@ -19,8 +22,18 @@ import { ElasticsearchService } from './elasticsearch_service';
 import { interactiveSetupMock } from './mocks';
 
 jest.mock('tls');
+jest.mock('../../../../src/core/server', () => ({
+  pollEsNodesVersion: jest.fn(),
+}));
 
 const tlsConnectMock = tls.connect as jest.MockedFunction<typeof tls.connect>;
+const mockPollEsNodesVersion = pollEsNodesVersion as jest.MockedFunction<typeof pollEsNodesVersion>;
+
+function mockCompatibility(isCompatible: boolean, message?: string) {
+  mockPollEsNodesVersion.mockReturnValue(
+    new BehaviorSubject({ isCompatible, message } as NodesVersionCompatibility).asObservable()
+  );
+}
 
 describe('ElasticsearchService', () => {
   let service: ElasticsearchService;
@@ -64,18 +77,7 @@ describe('ElasticsearchService', () => {
           headers: { 'x-elastic-product': 'Elasticsearch' },
         })
       );
-      mockAuthenticateClient.asInternalUser.nodes.info.mockResolvedValue(
-        interactiveSetupMock.createApiResponse({
-          statusCode: 200,
-          body: {
-            nodes: [
-              {
-                version: '8.0.0',
-              },
-            ],
-          } as any,
-        })
-      );
+      mockCompatibility(true);
 
       setupContract = service.setup({
         elasticsearch: mockElasticsearchPreboot,
@@ -412,18 +414,7 @@ describe('ElasticsearchService', () => {
           interactiveSetupMock.createApiResponse({ statusCode: 200, body: {} as any })
         );
 
-        mockAuthenticateClient.asInternalUser.nodes.info.mockResolvedValue(
-          interactiveSetupMock.createApiResponse({
-            statusCode: 200,
-            body: {
-              nodes: [
-                {
-                  version: '7.0.0',
-                },
-              ],
-            } as any,
-          })
-        );
+        mockCompatibility(false, 'Oh no!');
 
         await expect(
           setupContract.enroll({
@@ -431,9 +422,7 @@ describe('ElasticsearchService', () => {
             hosts: ['host1', 'host2'],
             caFingerprint: 'DE:AD:BE:EF',
           })
-        ).rejects.toMatchInlineSnapshot(
-          `[CompatibilityError: This version of Kibana (v8.0.0) is incompatible with the following Elasticsearch nodes in your cluster: v7.0.0 @ undefined (undefined)]`
-        );
+        ).rejects.toMatchInlineSnapshot(`[CompatibilityError: Oh no!]`);
 
         // Check that we properly closed all clients.
         expect(mockEnrollClient.close).toHaveBeenCalledTimes(1);
@@ -575,24 +564,11 @@ some weird+ca/with
           interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
         );
 
-        mockAuthenticateClient.asInternalUser.nodes.info.mockResolvedValue(
-          interactiveSetupMock.createApiResponse({
-            statusCode: 200,
-            body: {
-              nodes: [
-                {
-                  version: '7.0.0',
-                },
-              ],
-            } as any,
-          })
-        );
+        mockCompatibility(false, 'Oh no!');
 
         await expect(
           setupContract.authenticate({ host: 'http://localhost:9200' })
-        ).rejects.toMatchInlineSnapshot(
-          `[CompatibilityError: This version of Kibana (v8.0.0) is incompatible with the following Elasticsearch nodes in your cluster: v7.0.0 @ undefined (undefined)]`
-        );
+        ).rejects.toMatchInlineSnapshot(`[CompatibilityError: Oh no!]`);
         expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
       });
 
