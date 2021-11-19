@@ -57,7 +57,7 @@ your {es} data.
 To view the ecommerce sample data, make sure the {data-source} is set to **kibana_sample_data_ecommerce**.
 +
 [role="screenshot"]
-image::images/discover-data-view.png[How to set the data view in Discover, width=50%]
+image::images/discover-data-view.png[How to set the {data-source} in Discover, width=50%]
 
 . Adjust the <<set-time-filter,time range>> to view data for the *Last 7 days*.
 +
