@@ -236,7 +236,7 @@ describe('<IndexManagementHome />', () => {
     });
   });
 
-  describe.only('Edit index settings', () => {
+  describe('Edit index settings', () => {
     const indexName = 'testIndex';
 
     beforeEach(async () => {
@@ -257,18 +257,6 @@ describe('<IndexManagementHome />', () => {
         statusCode: 400,
         error: 'Bad Request',
         message: 'invalid tier names found in ...',
-        attributes: {
-          error: {
-            root_cause: [
-              {
-                type: 'illegal_argument_exception',
-                reason: 'invalid tier names found in ...',
-              },
-            ],
-            type: 'illegal_argument_exception',
-            reason: 'invalid tier names found in ...',
-          },
-        },
       };
       httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
 

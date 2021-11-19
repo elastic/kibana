@@ -10,6 +10,12 @@ import { API_BASE_PATH } from '../../../common/constants';
 
 type HttpResponse = Record<string, any> | any[];
 
+interface ResponseError {
+  statusCode: number;
+  message: string | Error;
+  attributes?: Record<string, any>;
+}
+
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   const setLoadTemplatesResponse = (response: HttpResponse = []) => {
@@ -101,14 +107,14 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
-  const setUpdateIndexSettingsResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? JSON.stringify(error) : JSON.stringify(response);
+  const setUpdateIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
 
     server.respondWith('PUT', `${API_BASE_PATH}/settings/:name`, [
       status,
       { 'Content-Type': 'application/json' },
-      body,
+      JSON.stringify(body),
     ]);
   };
 
