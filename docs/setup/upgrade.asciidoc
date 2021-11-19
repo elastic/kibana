@@ -59,7 +59,7 @@ Before you upgrade {kib}:
   the same Elasticseach index is unsupported. Upgrading while older {kib}
   instances are running can cause data loss or upgrade failures.
   
-NOTE: {kib} logging system may have changed, depending on your target version. For details, see <<logging-configuration-migration, Logging configuration migration>>.
+NOTE: {kib} logging system may have changed, depending on your target version. For details, see <<logging-configuration, Configure logging>>.
 
 To identify the changes you need to make to upgrade, and to enable you to
 perform an Elasticsearch rolling upgrade with no downtime, you must upgrade to
@@ -104,4 +104,4 @@ include::upgrade/upgrade-standard.asciidoc[]
 
 include::upgrade/upgrade-migrations.asciidoc[]
 
-include::upgrade/logging-configuration-migration.asciidoc[]
+include::upgrade/logging-configuration-changes.asciidoc[]

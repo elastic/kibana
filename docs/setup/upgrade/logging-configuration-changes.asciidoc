@@ -1,13 +1,5 @@
-[[logging-configuration-migration]]
-== Logging configuration migration
-
-Compatibility with the legacy logging system is assured until the end of the `v7` version. 
-All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
-root appenders, make sure that it contains `default` appender to provide backward compatibility.
-
-NOTE: When you switch to the new logging configuration, you will start seeing duplicate log entries in both formats. 
-These will be removed when the `default` appender is no longer required. If you define an appender for a logger, 
-the log messages aren't handled by the `root` logger anymore and are not forwarded to the legacy logging service.
+[[logging-configuration-changes]]
+=== Logging configuration changes
 
 [[logging-pattern-format-old-and-new-example]]
 [options="header"]

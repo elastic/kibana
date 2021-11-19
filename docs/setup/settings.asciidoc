@@ -123,7 +123,7 @@ logging:
         type: pattern
         highlight: true
   root:
-    appenders: [default, console_appender]
+    appenders: [console_appender]
     level: warn
   loggers:
     - name: elasticsearch.query
@@ -306,8 +306,7 @@ For more logging configuration options, see the <<logging-configuration, Configu
 |===
 
 |[[logging-root]] `logging.root:`
-| The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured and will log at an `info` level if not specifically declared. If any other logging configuration is specified, `root` _must_ also be explicitly configured.
-// TODO: add link to the advanced logging documentation.
+| The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured. The `root` logger logs at `info` level by default. If any other logging configuration is specified, `root` _must_ also be explicitly configured.
 
 |[[logging-root-appenders]] `logging.root.appenders:`
 | A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that must be included in the list. This is the configuration that all custom loggers will use unless they're re-configured explicitly. Additional appenders, if configured, can be included in the list.

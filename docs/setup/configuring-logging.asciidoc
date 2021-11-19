@@ -133,10 +133,9 @@ With `json` layout log messages will be formatted as JSON strings in https://www
 
 Every logger has a unique name that follows a hierarchical naming rule. The logger is considered to be an
 ancestor of another logger if its name followed by a `.` is a prefix of the descendant logger. For example, a logger
-named `a.b` is an ancestor of logger `a.b.c`. All top-level loggers are descendants of a special `root` logger at the top of the logger hierarchy. The `root` logger always exists and
-fully configured.
+named `a.b` is an ancestor of logger `a.b.c`. All top-level loggers are descendants of a special `root` logger at the top of the logger hierarchy. The `root` logger always exists, is fully configured and logs to `info` level be default. The `root` logger must also be configured if any other logging configuration is specified in your `kibana.yml`.
 
-You can configure _<<log-level, log level>>_ and _appenders_ for a specific logger. If a logger only has a _log level_ configured, then the _appenders_ configuration applied to the logger is inherited from the ancestor logger.
+You can configure _<<log-level, log level>>_ and _appenders_ for a specific logger. If a logger only has a _log level_ configured, then the _appenders_ configuration applied to the logger is inherited from the ancestor logger, up to the `root` logger.
 
 NOTE: In the current implementation we __don't support__ so called _appender additivity_ when log messages are forwarded to _every_ distinct appender within the
 ancestor chain including `root`. That means that log messages are only forwarded to appenders that are configured for a particular logger. If a logger doesn't have any appenders configured, the configuration of that particular logger will be inherited from its closest ancestor. 
@@ -656,8 +655,6 @@ Here is what we get with the config above:
 | metrics.ops | console | debug
 |===
 
-NOTE: If you modify `root.appenders`, make sure to include `default`.
-
 === Cli configuration
 [float]
 [[logging-cli-migration]]
@@ -676,6 +673,9 @@ logging:
       layout:
         type: pattern
         pattern: "[%date][%level] %message"
+  root:
+    level: warn
+    appenders: [custom]
 ----
 
 you can override the flags with:
@@ -685,7 +685,7 @@ you can override the flags with:
 
 | legacy logging | {kib} Platform logging | cli shortcuts
 
-|--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=custom | --verbose
+|--verbose| --logging.root.level=debug --logging.root.appenders[0]=custom | --verbose
 
 |--silent| --logging.root.level=off | --silent
 |===
