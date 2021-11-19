@@ -47,6 +47,15 @@ Search across Google Drive, GitHub, Salesforce, and many other web services usin
 {workplace-search-ref}/workplace-search-content-sources.html[Workplace Search content sources].
 
 [float]
+==== Language clients
+
+Elastic provides
+https://www.elastic.co/guide/en/elasticsearch/client/index.html[libraries for several programming languages] that
+allow you to connect your code directly to your {es} Service deployment.
+If you are running {kib} on our hosted {es} Service,
+click *View deployment details* to verify your {es} endpoint, Cloud ID, and API key authentication methods.
+
+[float]
 === Add sample data
 
 Sample data sets come with sample visualizations, dashboards, and more to help you
