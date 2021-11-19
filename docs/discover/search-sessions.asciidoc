@@ -41,7 +41,7 @@ The icon after the dashboard title displays the current state of the search sess
 A clock icon indicates the search session is in progress.
 A checkmark indicates that the search session is complete.
 
-. To instruct {kib} to continue a search in the background, click the clock icon,
+. To continue a search in the background, click the clock icon,
 and then click *Save session*.
 +
 [role="screenshot"]
