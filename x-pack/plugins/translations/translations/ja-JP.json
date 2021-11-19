@@ -3578,7 +3578,6 @@
     "kibana-react.exitFullScreenButton.exitFullScreenModeButtonAriaLabel": "全画面モードを終了",
     "kibana-react.exitFullScreenButton.exitFullScreenModeButtonText": "全画面を終了",
     "kibana-react.exitFullScreenButton.fullScreenModeDescription": "ESC キーで全画面モードを終了します。",
-    "kibana-react.kbnOverviewPageHeader.addDataButtonLabel": "データの追加",
     "kibana-react.kbnOverviewPageHeader.devToolsButtonLabel": "開発ツール",
     "kibana-react.kbnOverviewPageHeader.stackManagementButtonLabel": "管理",
     "kibana-react.kibanaCodeEditor.ariaLabel": "コードエディター",

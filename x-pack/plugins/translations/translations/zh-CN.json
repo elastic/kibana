@@ -3603,7 +3603,6 @@
     "kibana-react.exitFullScreenButton.exitFullScreenModeButtonAriaLabel": "退出全屏模式",
     "kibana-react.exitFullScreenButton.exitFullScreenModeButtonText": "退出全屏",
     "kibana-react.exitFullScreenButton.fullScreenModeDescription": "在全屏模式下，按 ESC 键可退出。",
-    "kibana-react.kbnOverviewPageHeader.addDataButtonLabel": "添加数据",
     "kibana-react.kbnOverviewPageHeader.devToolsButtonLabel": "开发工具",
     "kibana-react.kbnOverviewPageHeader.stackManagementButtonLabel": "管理",
     "kibana-react.kibanaCodeEditor.ariaLabel": "代码编辑器",
