@@ -9,26 +9,31 @@ import { upperFirst } from 'lodash/fp';
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
-
+import { TooltipHealth } from '../../../../common/components/tooltip_health';
 interface Props {
   value: string;
 }
 
-const SeverityBadgeComponent: React.FC<Props> = ({ value }) => (
-  <EuiHealth
-    data-test-subj="severity"
-    color={
-      value === 'low'
-        ? euiLightVars.euiColorVis0
-        : value === 'medium'
-        ? euiLightVars.euiColorVis5
-        : value === 'high'
-        ? euiLightVars.euiColorVis7
-        : euiLightVars.euiColorVis9
-    }
-  >
-    {upperFirst(value)}
-  </EuiHealth>
-);
+const SeverityBadgeComponent: React.FC<Props> = ({ value }) => {
+  const displayValue = upperFirst(value);
+  return (
+    <EuiHealth
+      data-test-subj="severity"
+      color={
+        value === 'low'
+          ? euiLightVars.euiColorVis0
+          : value === 'medium'
+          ? euiLightVars.euiColorVis5
+          : value === 'high'
+          ? euiLightVars.euiColorVis7
+          : euiLightVars.euiColorVis9
+      }
+    >
+      <TooltipHealth content={displayValue}>
+        <>{displayValue}</>
+      </TooltipHealth>
+    </EuiHealth>
+  );
+};
 
 export const SeverityBadge = React.memo(SeverityBadgeComponent);

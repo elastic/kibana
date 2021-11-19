@@ -7,19 +7,14 @@
 
 import React from 'react';
 
-import { EuiHealth, EuiToolTip } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiHealth } from '@elastic/eui';
 
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { TooltipHealth } from '../../../../common/components/tooltip_health';
 import { getStatusColor } from '../rule_status/helpers';
 
 import { getCapitalizedRuleStatusText } from '../../../../../common/detection_engine/utils';
 import type { RuleExecutionStatus as RuleExecutionStatusType } from '../../../../../common/detection_engine/schemas/common/schemas';
-
-const StatusTextWrapper = styled.div`
-  width: 100%;
-  display: inline-grid;
-`;
 
 interface RuleExecutionStatusProps {
   status: RuleExecutionStatusType | null | undefined;
@@ -33,11 +28,9 @@ const RuleExecutionStatusComponent = ({ status }: RuleExecutionStatusProps) => {
   const displayStatus = getCapitalizedRuleStatusText(status);
   return (
     <EuiHealth color={getStatusColor(status ?? null)}>
-      <StatusTextWrapper>
-        <EuiToolTip content={displayStatus} anchorClassName="eui-textTruncate">
-          <span>{displayStatus ?? getEmptyTagValue()}</span>
-        </EuiToolTip>
-      </StatusTextWrapper>
+      <TooltipHealth content={displayStatus}>
+        <>{displayStatus ?? getEmptyTagValue()}</>
+      </TooltipHealth>
     </EuiHealth>
   );
 };
