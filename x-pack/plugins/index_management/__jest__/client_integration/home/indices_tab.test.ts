@@ -12,6 +12,10 @@ import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
 import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
 
+// Since the editor component being used for editing index settings is not a React
+// component but an editor being instantiated on a div reference, we cannot mock
+// the component and replace it with something else. In this particular case we're
+// mocking the returned instance of the editor to always have the same values.
 jest.mock('../../../public/application/lib/ace.js', () => {
   const createAceEditor = () => {
     return {
@@ -241,7 +245,6 @@ describe('<IndexManagementHome />', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
-      // httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexName] });
 
       testBed = await setup();
       const { find, component } = testBed;
