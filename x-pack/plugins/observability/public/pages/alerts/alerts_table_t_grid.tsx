@@ -307,6 +307,14 @@ function ObservabilityActions({
   );
 }
 
+const FIELDS_WITHOUT_CELL_ACTIONS = [
+  '@timestamp',
+  'signal.rule.risk_score',
+  'signal.reason',
+  'kibana.alert.duration.us',
+  'kibana.alert.reason',
+];
+
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
   const prevWorkflowStatus = usePrevious(workflowStatus);
@@ -381,6 +389,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       columns,
       deletedEventIds,
       defaultCellActions: getDefaultCellActions({ addToQuery }),
+      disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
       end: rangeTo,
       filters: [],
       hasAlertsCrudPermissions,
