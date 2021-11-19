@@ -24,9 +24,12 @@ describe('deleteIndexTemplates', () => {
     await deleteIndexTemplates({ client, log });
 
     expect(client.indices.getTemplate).toHaveBeenCalledTimes(1);
-    expect(client.indices.getTemplate).toHaveBeenCalledWith({
-      name: 'kibana_index_template*',
-    });
+    expect(client.indices.getTemplate).toHaveBeenCalledWith(
+      {
+        name: 'kibana_index_template*',
+      },
+      { ignore: [404] }
+    );
   });
 
   it('calls `client.indices.deleteTemplate` for each template', async () => {
