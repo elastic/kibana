@@ -23,7 +23,7 @@ export const inject: EmbeddableRegistryDefinition['inject'] = (state, references
 
     if (Array.isArray(typedState.attributes.references)) {
       typedState.attributes.references.forEach((serializableRef) => {
-        const internalReference = serializableRef as unknown as SavedObjectReference;
+        const internalReference = (serializableRef as unknown) as SavedObjectReference;
         const matchedReference = references.find(
           (reference) => reference.name === internalReference.name
         );
@@ -31,7 +31,7 @@ export const inject: EmbeddableRegistryDefinition['inject'] = (state, references
       });
     }
 
-    typedState.attributes.references = matchedReferences as unknown as Serializable[];
+    typedState.attributes.references = (matchedReferences as unknown) as Serializable[];
   }
 
   return typedState;
