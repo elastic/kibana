@@ -24,11 +24,11 @@ const noop = () => {};
 const isRecord = (item: unknown): item is Record<string, unknown> =>
   typeof item === 'object' && !!item;
 
-const isHostsRiskScoreHit = (item: unknown): item is HostsRiskScore =>
+const isHostsRiskScoreHit = (item: Partial<HostsRiskScore>): item is HostsRiskScore =>
   isRecord(item) &&
   isRecord(item.host) &&
   typeof item.host.name === 'string' &&
-  typeof item.risk_score === 'number' &&
+  typeof item.risk_stats?.risk_score === 'number' &&
   typeof item.risk === 'string';
 
 export interface HostRisk {

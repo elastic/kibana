@@ -14,9 +14,9 @@ import { HostRisk } from '../../containers/overview_risky_host_links/use_hosts_r
 import { HostsRiskScore } from '../../../../common/search_strategy';
 
 const getListItemsFromHits = (items: HostsRiskScore[]): LinkPanelListItem[] => {
-  return items.map(({ host, risk_score: count, risk: copy }) => ({
+  return items.map(({ host, risk_stats: riskStats, risk: copy }) => ({
     title: host.name,
-    count,
+    count: riskStats.risk_score,
     copy,
     path: '',
   }));
