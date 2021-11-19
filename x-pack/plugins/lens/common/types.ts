@@ -58,8 +58,13 @@ export interface CustomPaletteParams {
   colorStops?: ColorStop[];
   steps?: number;
 }
+export type CustomPaletteParamsConfig = CustomPaletteParams & {
+  maxSteps?: number;
+};
 
-export type RequiredPaletteParamTypes = Required<CustomPaletteParams>;
+export type RequiredPaletteParamTypes = Required<CustomPaletteParams> & {
+  maxSteps?: number;
+};
 
 export type LayerType = 'data' | 'referenceLine';
 
