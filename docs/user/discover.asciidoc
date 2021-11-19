@@ -106,7 +106,7 @@ column header, and then use the move control.
 
 What happens if you forgot to define an important value as a separate field? Or, what if you
 want to combine two fields and treat them as one? This is where {ref}/runtime.html[runtime fields] come into play.
-You can add a runtime field to your data view from inside of **Discover**,
+You can add a runtime field to your {data-source} from inside of **Discover**,
 and then use that field for analysis and visualizations,
 the same way you do with other fields.
 
