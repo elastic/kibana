@@ -187,7 +187,6 @@ describe('getAlertSummary()', () => {
 
     expect(result.executionDuration).toEqual({
       average: Math.round(mean(Object.values(durations))),
-      values: Object.values(durations),
       valuesWithTimestamp: durations,
     });
   });
