@@ -30,7 +30,7 @@ export class DiscoverSearchSessionManager {
    * Notifies about `searchSessionId` changes in the URL,
    * skips if `searchSessionId` matches current search session id
    */
-  readonly newSearchSessionIdFromURL$: Rx.Observable<string>;
+  readonly newSearchSessionIdFromURL$: Rx.Observable<string | null>;
 
   constructor(private readonly deps: DiscoverSearchSessionManagerDeps) {
     this.newSearchSessionIdFromURL$ = createQueryParamObservable<string>(
