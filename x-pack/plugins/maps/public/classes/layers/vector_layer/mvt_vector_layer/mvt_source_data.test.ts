@@ -53,7 +53,7 @@ const mockSource = {
 describe('syncMvtSourceData', () => {
   test('Should sync source data when there are no previous data request', async () => {
     const syncContext = new MockSyncContext({ dataFilters: {} });
-    
+
     await syncMvtSourceData({
       layerId: 'layer1',
       prevDataRequest: undefined,
