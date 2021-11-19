@@ -28,7 +28,7 @@ import { IndexPatternField } from '../../../../../../../../src/plugins/data_view
 interface Props {
   stats: FieldVisStats | undefined;
   fieldFormat?: any;
-  barColor?: 'primary' | 'secondary' | 'danger' | 'subdued' | 'accent';
+  barColor?: 'primary' | 'success' | 'danger' | 'subdued' | 'accent';
   compressed?: boolean;
   onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
