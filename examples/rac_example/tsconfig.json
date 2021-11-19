@@ -11,6 +11,7 @@
       "../../typings/**/*",
       // The following paths are optional, based on whether you have common code,
       // or are building a client-side-only or server-side-only plugin.
+      "common/*.tsx",
       "common/**/*.ts",
       "public/**/*.ts",
       "public/**/*.tsx",
