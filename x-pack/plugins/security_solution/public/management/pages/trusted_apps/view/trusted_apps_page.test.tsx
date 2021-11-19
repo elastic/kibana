@@ -24,7 +24,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { licenseService } from '../../../../common/hooks/use_license';
 import { trustedAppsPageHttpApiMocks } from '../test_utils/mocks';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL } from '../../../../../../../../../../../../private/var/tmp/_bazel_ptavares/a4a237a05d507fc23e0818d3647eedfe/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-securitysolution-list-constants';
+import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 // TODO: remove this mock when feature flag is removed
 jest.mock('../../../../common/hooks/use_experimental_features');
