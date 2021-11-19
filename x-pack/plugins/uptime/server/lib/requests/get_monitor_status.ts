@@ -13,6 +13,7 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
 import { createEsQuery } from '../../../common/utils/es_search';
 import { UptimeESClient } from '../lib';
+import { UNNAMED_LOCATION } from '../../../common/constants';
 
 export interface GetMonitorStatusParams {
   filters?: JsonObject;
@@ -193,7 +194,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
       count,
       monitorId: key.monitorId as string,
       status: key.status as string,
-      location: key.location as string,
+      location: key.location === null ? UNNAMED_LOCATION : (key.location as string),
       monitorInfo: fields?.hits?.hits?.[0]?._source,
     }));
 };
