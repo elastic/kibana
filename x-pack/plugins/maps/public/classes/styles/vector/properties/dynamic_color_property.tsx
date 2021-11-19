@@ -425,7 +425,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     if (defaultColor) {
       breaks.push({
         color: defaultColor,
-        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+        label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,
         symbolId,
       });
     }
