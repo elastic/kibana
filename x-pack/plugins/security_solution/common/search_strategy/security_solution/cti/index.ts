@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from 'src/plugins/data/public';
+import { IEsSearchResponse, IEsSearchRequest } from 'src/plugins/data/public';
+import { FactoryQueryTypes } from '../..';
 import { EVENT_ENRICHMENT_INDICATOR_FIELD_MAP } from '../../../cti/constants';
-import { Inspect } from '../../common';
+import { Inspect, TimerangeInput } from '../../common';
 import { RequestBasicOptions } from '..';
 
 export enum CtiQueries {
   eventEnrichment = 'eventEnrichment',
+  threatIntelSource = 'threatIntelSource',
 }
 
 export interface CtiEventEnrichmentRequestOptions extends RequestBasicOptions {
@@ -40,3 +42,11 @@ export const validEventFields = Object.keys(EVENT_ENRICHMENT_INDICATOR_FIELD_MAP
 
 export const isValidEventField = (field: string): field is EventField =>
   validEventFields.includes(field as EventField);
+
+export interface CtiThreatIntelSourceRequestOptions extends IEsSearchRequest {
+  defaultIndex: string[];
+  factoryQueryType?: FactoryQueryTypes;
+  hostName?: string;
+  timerange?: TimerangeInput;
+}
+export type CtiThreatIntelSourceStrategyResponse = IEsSearchResponse;

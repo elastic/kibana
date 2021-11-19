@@ -5,13 +5,9 @@
  * 2.0.
  */
 import { useState, useEffect, useMemo } from 'react';
-import { useRequestEventCounts } from './use_request_event_counts';
+import { useThreatIntelSource } from './use_threat_intel_source';
 
 export const useIsThreatIntelModuleEnabled = () => {
-  const [isThreatIntelModuleEnabled, setIsThreatIntelModuleEnabled] = useState<
-    boolean | undefined
-  >();
-
   const { to, from } = useMemo(
     () => ({
       to: new Date().toISOString(),
@@ -20,13 +16,11 @@ export const useIsThreatIntelModuleEnabled = () => {
     []
   );
 
-  const [, { totalCount }] = useRequestEventCounts(to, from);
+  const { totalCount, integrations } = useThreatIntelSource({ to, from });
 
-  useEffect(() => {
-    if (totalCount !== -1) {
-      setIsThreatIntelModuleEnabled(totalCount > 0);
-    }
-  }, [totalCount]);
-
-  return isThreatIntelModuleEnabled;
+  console.log('useIsThreatIntelModuleEnabled')
+  return {
+    isThreatIntelModuleEnabled: totalCount > 0,
+    allIntegrations: integrations,
+  };
 };

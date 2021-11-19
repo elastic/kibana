@@ -12,30 +12,22 @@ import { Integration } from '../../containers/overview_cti_links/use_ti_integrat
 import { ThreatIntelPanelView } from './threat_intel_panel_view';
 
 export const CtiWithEventsComponent = ({
-  eventCountsByDataset,
   from,
   to,
   totalCount,
   isSomeIntegrationsDisabled,
-  installedIntegrations,
+  integrations,
 }: {
-  eventCountsByDataset: { [key: string]: number };
   from: string;
   to: string;
   totalCount: number;
   isSomeIntegrationsDisabled: boolean;
-  installedIntegrations: Integration[];
+  integrations: Integration[];
 }) => {
-  const { isPluginDisabled, listItems } = useCtiDashboardLinks(
-    eventCountsByDataset,
-    to,
-    from,
-    installedIntegrations
-  );
+  const { listItems } = useCtiDashboardLinks({ to, from, integrations });
 
   return (
     <ThreatIntelPanelView
-      isPluginDisabled={isPluginDisabled}
       listItems={listItems}
       totalCount={totalCount}
       isSomeIntegrationsDisabled={isSomeIntegrationsDisabled}
@@ -51,5 +43,5 @@ export const CtiWithEvents = React.memo(
     prevProps.to === nextProps.to &&
     prevProps.from === nextProps.from &&
     prevProps.totalCount === nextProps.totalCount &&
-    isEqual(prevProps.eventCountsByDataset, nextProps.eventCountsByDataset)
+    isEqual(prevProps.integrations, nextProps.integrations)
 );

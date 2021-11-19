@@ -76,7 +76,7 @@ const OverviewComponent = () => {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-  const hasSomeThreatIntelData = useIsThreatIntelModuleEnabled();
+  const { isThreatIntelModuleEnabled, allIntegrations } = useIsThreatIntelModuleEnabled();
   const tiIntegrationStatus = useTiIntegrations();
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
@@ -154,14 +154,14 @@ const OverviewComponent = () => {
                       <EuiFlexItem grow={1}>
                         {tiIntegrationStatus && (
                           <ThreatIntelLinkPanel
-                            hasSomeThreatIntelData={hasSomeThreatIntelData}
+                            hasSomeThreatIntelData={isThreatIntelModuleEnabled}
                             isSomeIntegrationsInstalled={
                               tiIntegrationStatus.isSomeIntegrationsInstalled
                             }
                             isSomeIntegrationsDisabled={
                               tiIntegrationStatus.isSomeIntegrationsDisabled
                             }
-                            installedIntegrations={tiIntegrationStatus.installedIntegrations}
+                            allIntegrations={allIntegrations}
                             deleteQuery={deleteQuery}
                             from={from}
                             setQuery={setQuery}

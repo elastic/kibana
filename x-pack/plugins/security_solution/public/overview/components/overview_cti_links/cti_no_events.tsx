@@ -10,7 +10,6 @@ import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { ThreatIntelPanelView } from './threat_intel_panel_view';
 import { InnerLinkPanel } from '../link_panel';
 import * as i18n from './translations';
-import { emptyEventCountsByDataset } from '../../containers/overview_cti_links/helpers';
 import { Integration } from '../../containers/overview_cti_links/use_ti_integrations';
 
 const warning = (
@@ -26,25 +25,19 @@ export const CtiNoEventsComponent = ({
   to,
   from,
   isSomeIntegrationsDisabled,
-  installedIntegrations,
+  integrations,
 }: {
   to: string;
   from: string;
   isSomeIntegrationsDisabled: boolean;
-  installedIntegrations: Integration[];
+  integrations: Integration[];
 }) => {
-  const { listItems, isPluginDisabled } = useCtiDashboardLinks(
-    emptyEventCountsByDataset,
-    to,
-    from,
-    installedIntegrations
-  );
+  const { listItems } = useCtiDashboardLinks({ to, from, integrations });
 
   return (
     <ThreatIntelPanelView
       listItems={listItems}
       splitPanel={warning}
-      isPluginDisabled={isPluginDisabled}
       isSomeIntegrationsDisabled={isSomeIntegrationsDisabled}
     />
   );
