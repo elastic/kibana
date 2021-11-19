@@ -24,6 +24,7 @@ export async function getEsGridTile({
   requestBody = {},
   requestType = RENDER_AS.POINT,
   gridPrecision,
+  abortController,
 }: {
   x: number;
   y: number;
@@ -35,6 +36,7 @@ export async function getEsGridTile({
   requestBody: any;
   requestType: RENDER_AS.GRID | RENDER_AS.POINT;
   gridPrecision: number;
+  abortController: AbortController;
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
@@ -49,11 +51,16 @@ export async function getEsGridTile({
       fields: requestBody.fields,
       runtime_mappings: requestBody.runtime_mappings,
     };
-    const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
-      method: 'GET',
-      path,
-      body,
-    });
+    const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request(
+      {
+        method: 'GET',
+        path,
+        body,
+      },
+      {
+        signal: abortController.signal,
+      }
+    );
     return tile.body as unknown as Buffer;
   } catch (e) {
     if (!isAbortError(e)) {

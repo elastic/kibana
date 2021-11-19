@@ -54,7 +54,6 @@ import {
   TransformStatsResponse,
 } from '../types';
 import {
-  sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
   sendGetAgentPolicyList,
   sendGetFleetAgentsWithEndpoint,
@@ -81,6 +80,7 @@ import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { getIsInvalidDateRange } from '../utils';
 import { METADATA_TRANSFORM_STATS_URL } from '../../../../../common/constants';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
