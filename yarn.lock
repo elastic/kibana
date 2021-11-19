@@ -1697,10 +1697,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@41.2.0":
-  version "41.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-41.2.0.tgz#290f1361ab18439d396a5df4a9539e8aad7dfdfb"
-  integrity sha512-OcEPWeKJ+b3DgEg3dO+iOhhCqCIqdoWNkBagJpzOilWiWys2rRg8uKoOI0KJeii63pyChKPMoBnhn2UjMio+7w==
+"@elastic/eui@41.2.1":
+  version "41.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-41.2.1.tgz#e8348587592e87aa5438faa24158f2bc3f8fd839"
+  integrity sha512-3TCJCp5EGgLeHCVUPspVBlvw/1pXdQ7eoFDJ5ZwLt48J+BAolduy/+MdrlV9sMSeuVr+wHaOau2KTff1hue3Iw==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1740,6 +1740,7 @@
     url-parse "^1.5.3"
     uuid "^8.3.0"
     vfile "^4.2.0"
+    yargs "^17.2.1"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
@@ -30081,6 +30082,19 @@ yargs@^17.0.1:
   version "17.1.1"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.1.1.tgz#c2a8091564bdb196f7c0a67c1d12e5b85b8067ba"
   integrity sha512-c2k48R0PwKIqKhPMWjeiF6y2xY/gPMUlro0sgxqXpbOIohWiLNXWslsootttv7E1e73QPAMQSg5FeySbVcpsPQ==
+  dependencies:
+    cliui "^7.0.2"
+    escalade "^3.1.1"
+    get-caller-file "^2.0.5"
+    require-directory "^2.1.1"
+    string-width "^4.2.0"
+    y18n "^5.0.5"
+    yargs-parser "^20.2.2"
+
+yargs@^17.2.1:
+  version "17.2.1"
+  resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.2.1.tgz#e2c95b9796a0e1f7f3bf4427863b42e0418191ea"
+  integrity sha512-XfR8du6ua4K6uLGm5S6fA+FIJom/MdJcFNVY8geLlp2v8GYbOXD4EB1tPNZsRn4vBzKGMgb5DRZMeWuFc2GO8Q==
   dependencies:
     cliui "^7.0.2"
     escalade "^3.1.1"
