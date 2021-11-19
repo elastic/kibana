@@ -7,7 +7,7 @@
  */
 import type { KibanaExecutionContext } from 'src/core/public';
 import { DataView } from 'src/plugins/data/common';
-import { Filter, esQuery, TimeRange, Query, DataViewsContract } from '../../../data/public';
+import { Filter, esQuery, TimeRange, Query } from '../../../data/public';
 
 import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';
@@ -67,10 +67,9 @@ export function createVegaRequestHandler(
     timeCache.setTimeRange(timeRange);
 
     let dataView: DataView;
-    try {
-      dataView = await dataViews.get(filters[0]?.meta.index);
-    } catch {
-      dataView = null;
+    const firstFilterIndex = filters[0]?.meta.index;
+    if (firstFilterIndex) {
+      dataView = await dataViews.get(firstFilterIndex).catch(() => undefined);
     }
 
     const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
