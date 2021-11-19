@@ -38,6 +38,7 @@ import {
   StyledFormRow,
 } from './helpers';
 import { DeprecatedSourcerer } from './deprecated';
+import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
 
 interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -93,7 +94,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
   const [expandAdvancedOptions, setExpandAdvancedOptions] = useState(false);
-
+  const [isShowingUpdateModal, setIsShowingUpdateModal] = useState(false);
+  const [missingIndexPatterns, setMissingIndexPatterns] = useState<string[]>([]);
   const setPopoverIsOpenCb = useCallback(() => {
     setPopoverIsOpen((prevState) => !prevState);
     setExpandAdvancedOptions(false); // we always want setExpandAdvancedOptions collapsed by default when popover opened
@@ -125,19 +127,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setIsOnlyDetectionAlertsChecked(false);
   }, [defaultDataView.id, setIndexPatternsByDataView]);
 
-  const onUpdateDeprecated = useCallback(() => {
-    const areAllPatternsInDefault = selectedPatterns.every(
-      (pattern) => defaultDataView.title.indexOf(pattern) > -1
-    );
-    if (areAllPatternsInDefault) {
-      const patterns = selectedPatterns.filter((pattern) =>
-        defaultDataView.patternList.includes(pattern)
-      );
-      onChangeDataView(defaultDataView.id, patterns);
-      setPopoverIsOpen(false);
-    }
-  }, [defaultDataView, onChangeDataView, selectedPatterns]);
-
   const handleSaveIndices = useCallback(() => {
     const patterns = selectedOptions.map((so) => so.label);
     if (dataViewId != null) {
@@ -150,6 +139,40 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setPopoverIsOpen(false);
     setExpandAdvancedOptions(false);
   }, []);
+
+  // deprecated timeline index pattern handlers
+
+  const onContinueUpdateDeprecated = useCallback(() => {
+    setIsShowingUpdateModal(false);
+    const patterns = selectedPatterns.filter((pattern) =>
+      defaultDataView.patternList.includes(pattern)
+    );
+    onChangeDataView(defaultDataView.id, patterns);
+    setPopoverIsOpen(false);
+  }, [defaultDataView.id, defaultDataView.patternList, onChangeDataView, selectedPatterns]);
+
+  const onUpdateDeprecated = useCallback(() => {
+    const missingPatterns = selectedPatterns.filter(
+      (pattern) => defaultDataView.title.indexOf(pattern) === -1
+    );
+    // are all the patterns in the default?
+    if (missingPatterns.length === 0) {
+      onContinueUpdateDeprecated();
+    } else {
+      // open modal
+      setIsShowingUpdateModal(true);
+      setMissingIndexPatterns(missingPatterns);
+    }
+  }, [defaultDataView.title, onContinueUpdateDeprecated, selectedPatterns]);
+
+  const onUpdateDataView = useCallback(() => {
+    // update ui settings string
+    // close modal and sourcerer
+    setIsShowingUpdateModal(false);
+    setPopoverIsOpen(false);
+    // show toaster to refresh page
+  }, []);
+
   const trigger = useMemo(
     () => (
       <StyledButton
@@ -224,13 +247,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   return (
     <EuiPopover
-      data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-popover' : 'sourcerer-popover'}
+      panelClassName="sourcererPopoverPanel"
       button={buttonWithTooptip}
-      isOpen={isPopoverOpen}
       closePopover={handleClosePopOver}
+      data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-popover' : 'sourcerer-popover'}
       display="block"
-      repositionOnScroll
+      isOpen={isPopoverOpen}
       ownFocus
+      repositionOnScroll
     >
       <PopoverContent>
         <EuiPopoverTitle data-test-subj="sourcerer-title">
@@ -331,12 +355,21 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
             <EuiSpacer size="s" />
           </EuiForm>
         ) : (
-          <DeprecatedSourcerer
-            onClick={resetDataSources}
-            onClose={setPopoverIsOpenCb}
-            onUpdate={onUpdateDeprecated}
-            selectedPatterns={selectedPatterns}
-          />
+          <>
+            <DeprecatedSourcerer
+              onClick={resetDataSources}
+              onClose={setPopoverIsOpenCb}
+              onUpdate={onUpdateDeprecated}
+              selectedPatterns={selectedPatterns}
+            />
+            <UpdateDefaultDataViewModal
+              isShowing={isShowingUpdateModal}
+              missingPatterns={missingIndexPatterns}
+              onClose={() => setIsShowingUpdateModal(false)}
+              onContinue={onContinueUpdateDeprecated}
+              onUpdate={onUpdateDataView}
+            />
+          </>
         )}
       </PopoverContent>
     </EuiPopover>

@@ -28,6 +28,32 @@ export const CALL_OUT_TIMELINE_TITLE = i18n.translate(
 export const DATA_VIEW = i18n.translate('xpack.securitySolution.indexPatterns.dataViewLabel', {
   defaultMessage: 'Data view',
 });
+
+export const UPDATE_DATA_VIEW = i18n.translate(
+  'xpack.securitySolution.indexPatterns.updateDataView',
+  {
+    defaultMessage:
+      'Would you like to add this index pattern to Security Data View? Otherwise, we can recreate the data view without the missing index patterns.',
+  }
+);
+
+export const UPDATE_SECURITY_DATA_VIEW = i18n.translate(
+  'xpack.securitySolution.indexPatterns.updateSecurityDataView',
+  {
+    defaultMessage: 'Update Security Data View',
+  }
+);
+
+export const CONTINUE_WITHOUT_ADDING = i18n.translate(
+  'xpack.securitySolution.indexPatterns.continue',
+  {
+    defaultMessage: 'Continue without adding',
+  }
+);
+export const ADD_INDEX_PATTERN = i18n.translate('xpack.securitySolution.indexPatterns.continue', {
+  defaultMessage: 'Add index pattern',
+});
+
 export const MODIFIED_BADGE_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.modifiedBadgeTitle',
   {
