@@ -46,6 +46,7 @@ RUNTIME_DEPS = [
   "@npm//moment-timezone",
   "@npm//moment",
   "@npm//raw-loader",
+  "@npm//react-ace",
   "@npm//react-dom",
   "@npm//react-intl",
   "@npm//react-is",

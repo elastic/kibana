@@ -85,9 +85,8 @@ export function sendUpgradePackagePolicyDryRun(
   packagePolicyIds: string[],
   packageVersion?: string
 ) {
-  const body: { packagePolicyIds: string[]; dryRun: boolean; packageVersion?: string } = {
+  const body: { packagePolicyIds: string[]; packageVersion?: string } = {
     packagePolicyIds,
-    dryRun: true,
   };
 
   if (packageVersion) {
@@ -95,7 +94,7 @@ export function sendUpgradePackagePolicyDryRun(
   }
 
   return sendRequest<UpgradePackagePolicyDryRunResponse>({
-    path: packagePolicyRouteService.getUpgradePath(),
+    path: packagePolicyRouteService.getDryRunPath(),
     method: 'post',
     body: JSON.stringify(body),
   });
@@ -107,7 +106,6 @@ export function sendUpgradePackagePolicy(packagePolicyIds: string[]) {
     method: 'post',
     body: JSON.stringify({
       packagePolicyIds,
-      dryRun: false,
     }),
   });
 }
