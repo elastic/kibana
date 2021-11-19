@@ -8,7 +8,12 @@
 import type { Datatable } from 'src/plugins/expressions/public';
 import type { PaletteDefinition, PaletteOutput } from 'src/plugins/charts/public';
 
-import { getSliceValue, getFilterContext, byDataColorPaletteMap } from './render_helpers';
+import {
+  getSliceValue,
+  getFilterContext,
+  byDataColorPaletteMap,
+  extractUniqTermsMap,
+} from './render_helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 describe('render helpers', () => {
@@ -201,6 +206,37 @@ describe('render helpers', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('#extractUniqTermsMap', () => {
+    it('should extract map', () => {
+      const table: Datatable = {
+        type: 'datatable',
+        columns: [
+          { id: 'a', name: 'A', meta: { type: 'string' } },
+          { id: 'b', name: 'B', meta: { type: 'string' } },
+          { id: 'c', name: 'C', meta: { type: 'number' } },
+        ],
+        rows: [
+          { a: 'Hi', b: 'Two', c: 2 },
+          { a: 'Test', b: 'Two', c: 5 },
+          { a: 'Foo', b: 'Three', c: 6 },
+        ],
+      };
+      expect(extractUniqTermsMap(table, 'a')).toMatchInlineSnapshot(`
+        Object {
+          "Foo": 2,
+          "Hi": 0,
+          "Test": 1,
+        }
+      `);
+      expect(extractUniqTermsMap(table, 'b')).toMatchInlineSnapshot(`
+        Object {
+          "Three": 1,
+          "Two": 0,
+        }
+      `);
     });
   });
 

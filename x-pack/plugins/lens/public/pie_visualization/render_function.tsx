@@ -33,6 +33,7 @@ import {
   getFilterContext,
   isTreemapOrMosaicShape,
   byDataColorPaletteMap,
+  extractUniqTermsMap,
 } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
@@ -114,10 +115,8 @@ export function PieComponent(
     })
   ).length;
 
-  let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
-
   const shouldUseByDataPalette = !syncColors && ['mosaic'].includes(shape) && bucketColumns[1]?.id;
-
+  let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
   if (shouldUseByDataPalette) {
     byDataPalette = byDataColorPaletteMap(
       firstTable,
@@ -125,6 +124,11 @@ export function PieComponent(
       paletteService.get(palette.name),
       palette
     );
+  }
+
+  let sortingMap: Record<string, number>;
+  if (shape === 'mosaic') {
+    sortingMap = extractUniqTermsMap(firstTable, bucketColumns[0].id);
   }
 
   const layers: PartitionLayer[] = bucketColumns.map((col, layerIndex) => {
@@ -141,6 +145,17 @@ export function PieComponent(
         return String(d);
       },
       fillLabel,
+      sortPredicate:
+        shape === 'mosaic'
+          ? ([name1, node1], [, node2]) => {
+              // Sorting for first group
+              if (bucketColumns.length === 1 || (node1.children.length && name1 in sortingMap)) {
+                return sortingMap[name1];
+              }
+              // Sorting for second group
+              return node2.value - node1.value;
+            }
+          : undefined,
       shape: {
         fillColor: (d) => {
           const seriesLayers: SeriesLayer[] = [];

@@ -44,6 +44,15 @@ export const isPartitionShape = (shape: PieChartTypes | string) =>
 export const isTreemapOrMosaicShape = (shape: PieChartTypes | string) =>
   ['treemap', 'mosaic'].includes(shape);
 
+export const extractUniqTermsMap = (dataTable: Datatable, columnId: string) =>
+  [...new Set(dataTable.rows.map((item) => item[columnId]))].reduce(
+    (acc, item, index) => ({
+      ...acc,
+      [item]: index,
+    }),
+    {}
+  );
+
 export const byDataColorPaletteMap = (
   dataTable: Datatable,
   columnId: string,
