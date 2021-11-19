@@ -32,53 +32,6 @@ describe('Detections Usage and Metrics', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          detection_rules: {
-            detection_rule_detail: [],
-            detection_rule_usage: {
-              query: {
-                enabled: 0,
-                disabled: 0,
-                alerts: 0,
-                cases: 0,
-              },
-              threshold: {
-                enabled: 0,
-                disabled: 0,
-                alerts: 0,
-                cases: 0,
-              },
-              eql: {
-                enabled: 0,
-                disabled: 0,
-                alerts: 0,
-                cases: 0,
-              },
-              machine_learning: {
-                enabled: 0,
-                disabled: 0,
-                alerts: 0,
-                cases: 0,
-              },
-              threat_match: {
-                enabled: 0,
-                disabled: 0,
-                alerts: 0,
-                cases: 0,
-              },
-              elastic_total: {
-                enabled: 0,
-                disabled: 0,
-                alerts: 0,
-                cases: 0,
-              },
-              custom_total: {
-                enabled: 0,
-                disabled: 0,
-                alerts: 0,
-                cases: 0,
-              },
-            },
-          },
           ml_jobs: { ml_job_metrics: [], ml_job_usage: initialMlJobsUsage },
         })
       );
