@@ -50,18 +50,18 @@ export const useSendCurrentRequestToES = () => {
       let saveToHistoryError: undefined | Error;
       const { historyDisabled } = settings.toJSON();
 
-      results.forEach(({ request: { path, method, data } }) => {
-        try {
-          if (!historyDisabled) {
+      if (!historyDisabled) {
+        results.forEach(({ request: { path, method, data } }) => {
+          try {
             history.addToHistory(path, method, data);
+          } catch (e) {
+            // Grab only the first error
+            if (!saveToHistoryError) {
+              saveToHistoryError = e;
+            }
           }
-        } catch (e) {
-          // Grab only the first error
-          if (!saveToHistoryError) {
-            saveToHistoryError = e;
-          }
-        }
-      });
+        });
+      }
 
       if (saveToHistoryError) {
         const errorTitle = i18n.translate('console.notification.error.couldNotSaveRequestTitle', {
@@ -69,8 +69,10 @@ export const useSendCurrentRequestToES = () => {
         });
         if (isQuotaExceededError(saveToHistoryError)) {
           notifications.toasts.addWarning({
-            title:
-              'Request history is full. Clear the console history or disable saving new requests.',
+            title: i18n.translate('console.notification.error.historyQuotaReachedMessage', {
+              defaultMessage:
+                'Request history is full. Clear the console history or disable saving new requests.',
+            }),
             text: toMountPoint(
               StorageQuotaError({
                 onClearHistory: () => history.clearHistory(),
