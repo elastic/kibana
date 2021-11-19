@@ -224,7 +224,7 @@ You can bookmark this document and share the link.
 
 Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
 Saving a search saves the query text, filters,
-and current view of *Discover*&mdash;the columns selected in the document table, the sort order, and the data view.
+and current view of *Discover*&mdash;the columns selected in the document table, the sort order, and the {data-source}.
 
 . In the toolbar, click **Save**.
 
