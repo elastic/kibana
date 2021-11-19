@@ -113,7 +113,7 @@ the same way you do with other fields.
 . Click the ellipsis icon (...), and then click *Add field to data view*.
 +
 [role="screenshot"]
-image:images/add-field-to-data-view.png[Dropdown menu located next to data view field with item for adding a field to a data view, width=50%]
+image:images/add-field-to-data-view.png[Dropdown menu located next to {data-source} field with item for adding a field to a {data-source}, width=50%]
 
 . In the *Create field* form, enter `hello` for the name.
 
