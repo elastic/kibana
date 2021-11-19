@@ -102,7 +102,7 @@ column header, and then use the move control.
 
 [float]
 [[add-field-in-discover]]
-=== Add a field to your data view
+=== Add a field to your {data-source}
 
 What happens if you forgot to define an important value as a separate field? Or, what if you
 want to combine two fields and treat them as one? This is where {ref}/runtime.html[runtime fields] come into play.
