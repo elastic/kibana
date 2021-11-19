@@ -23,7 +23,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('Add documents to adjust settings');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining(`${docLinks.appSearchResultSettings}`)
+      expect.stringContaining(docLinks.appSearchResultSettings)
     );
   });
 });
