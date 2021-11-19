@@ -10,7 +10,7 @@ import { API_BASE_PATH } from '../../../common/constants';
 
 type HttpResponse = Record<string, any> | any[];
 
-interface ResponseError {
+export interface ResponseError {
   statusCode: number;
   message: string | Error;
   attributes?: Record<string, any>;
