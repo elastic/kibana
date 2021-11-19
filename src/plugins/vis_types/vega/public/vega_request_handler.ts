@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import type { KibanaExecutionContext } from 'src/core/public';
-import { Filter, esQuery, TimeRange, Query } from '../../../data/public';
+import { DataView } from 'src/plugins/data/common';
+import { Filter, esQuery, TimeRange, Query, DataViewsContract } from '../../../data/public';
 
 import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';
@@ -18,7 +19,7 @@ import { VegaInspectorAdapters } from './vega_inspector';
 
 interface VegaRequestHandlerParams {
   query: Query;
-  filters: Filter;
+  filters: Filter[];
   timeRange: TimeRange;
   visParams: VisParams;
   searchSessionId?: string;
@@ -46,14 +47,14 @@ export function createVegaRequestHandler(
     searchSessionId,
     executionContext,
   }: VegaRequestHandlerParams) {
-    if (!searchAPI) {
-      const { search, indexPatterns } = getData();
+    const { dataViews, search } = getData();
 
+    if (!searchAPI) {
       searchAPI = new SearchAPI(
         {
           uiSettings,
           search,
-          indexPatterns,
+          indexPatterns: dataViews,
           injectedMetadata: getInjectedMetadata(),
         },
         context.abortSignal,
@@ -65,8 +66,15 @@ export function createVegaRequestHandler(
 
     timeCache.setTimeRange(timeRange);
 
+    let dataView: DataView;
+    try {
+      dataView = await dataViews.get(filters[0]?.meta.index);
+    } catch {
+      dataView = null;
+    }
+
     const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
-    const filtersDsl = esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs);
+    const filtersDsl = esQuery.buildEsQuery(dataView, query, filters, esQueryConfigs);
     const { VegaParser } = await import('./data_model/vega_parser');
     const vp = new VegaParser(visParams.spec, searchAPI, timeCache, filtersDsl, getServiceSettings);
 
