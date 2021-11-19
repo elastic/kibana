@@ -7,7 +7,7 @@ WARNING: {kib} 8.0 and later uses a logging system. Be sure to read the document
 [options="header"]
 |===
 
-| Parameter | Platform log record in **pattern** format | Legacy Platform log record **text** format
+| Parameter | Platform log record in **pattern** format | Legacy Platform log record **tedocs/xt** format
 
 | @timestamp | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | Absolute `23:33:22.011`
 

@@ -490,7 +490,6 @@ logging:
       level: debug
 ----
 
-// EXAMPLES COPIED OVER FROM logging-settings
 [[log-settings-examples]]
 === Examples
 Here are some configuration examples for the most common logging use cases:
