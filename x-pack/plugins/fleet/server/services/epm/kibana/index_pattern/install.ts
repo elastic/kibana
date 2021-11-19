@@ -7,6 +7,8 @@
 
 import type { SavedObjectsClientContract } from 'src/core/server';
 
+import { createListStream } from '@kbn/utils';
+
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
 import { appContextService } from '../../../../services';
 import { getPackageSavedObjects } from '../../packages/get';
@@ -29,10 +31,25 @@ export async function installIndexPatterns(savedObjectsClient: SavedObjectsClien
     },
   }));
 
-  // create or overwrite the index patterns
-  await savedObjectsClient.bulkCreate(kibanaIndexPatterns, {
+  const savedObjectsImporter = appContextService
+    .getSavedObjects()
+    .createImporter(savedObjectsClient);
+
+  const { successResults, errors } = await savedObjectsImporter.import({
     overwrite: true,
+    readStream: createListStream(kibanaIndexPatterns),
+    createNewCopies: false,
   });
+
+  if (errors?.length) {
+    throw new Error(
+      `Encountered ${errors.length} creating index patterns: ${JSON.stringify(
+        errors.map(({ id, error }) => ({ id, error })) // discard other fields
+      )}`
+    );
+  }
+
+  return successResults || [];
 }
 
 export async function removeUnusedIndexPatterns(savedObjectsClient: SavedObjectsClientContract) {
