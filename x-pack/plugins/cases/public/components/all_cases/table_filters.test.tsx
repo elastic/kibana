@@ -34,7 +34,7 @@ const props = {
 
 describe('CasesTableFilters ', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags });
     (useGetReporters as jest.Mock).mockReturnValue({
       reporters: ['casetester'],

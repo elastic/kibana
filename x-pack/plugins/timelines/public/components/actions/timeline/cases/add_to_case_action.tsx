@@ -12,12 +12,9 @@ import { TimelineItem } from '../../../../../common/';
 import { useAddToCase, normalizedEventFields } from '../../../../hooks/use_add_to_case';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesStartServices } from '../../../../types';
-import { CreateCaseFlyout } from './create/flyout';
 import { tGridActions } from '../../../../';
-import * as i18n from './translations';
 
 export interface AddToCaseActionProps {
-  ariaLabel?: string;
   event?: TimelineItem;
   useInsertTimeline?: Function;
   casePermissions: {
@@ -31,7 +28,6 @@ export interface AddToCaseActionProps {
 }
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
-  ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
   event,
   useInsertTimeline,
   casePermissions,
@@ -46,15 +42,13 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const { cases } = useKibana<TimelinesStartServices>().services;
   const {
     onCaseClicked,
-    goToCreateCase,
     onCaseSuccess,
     attachAlertToCase,
-    createCaseUrl,
     isAllCaseModalOpen,
     isCreateCaseFlyoutOpen,
-  } = useAddToCase({ event, useInsertTimeline, casePermissions, appId, owner, onClose });
+  } = useAddToCase({ event, casePermissions, appId, owner, onClose });
 
-  const getAllCasesSelectorModalProps = useMemo(() => {
+  const allCasesSelectorModalProps = useMemo(() => {
     const { ruleId, ruleName } = normalizedEventFields(event);
     return {
       alertData: {
@@ -65,10 +59,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           name: ruleName,
         },
         owner,
-      },
-      createCaseNavigation: {
-        href: createCaseUrl,
-        onClick: goToCreateCase,
       },
       hooks: {
         useInsertTimeline,
@@ -85,8 +75,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     casePermissions?.crud,
     onCaseSuccess,
     onCaseClicked,
-    createCaseUrl,
-    goToCreateCase,
     eventId,
     eventIndex,
     dispatch,
@@ -99,19 +87,30 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: false }));
   }, [dispatch, eventId]);
 
+  const createCaseFlyoutProps = useMemo(() => {
+    return {
+      afterCaseCreated: attachAlertToCase,
+      onClose: closeCaseFlyoutOpen,
+      onSuccess: onCaseSuccess,
+      useInsertTimeline,
+      owner: [owner],
+      disableAlerts,
+      userCanCrud: casePermissions?.crud ?? false,
+    };
+  }, [
+    attachAlertToCase,
+    closeCaseFlyoutOpen,
+    onCaseSuccess,
+    useInsertTimeline,
+    owner,
+    disableAlerts,
+    casePermissions,
+  ]);
+
   return (
     <>
-      {isCreateCaseFlyoutOpen && (
-        <CreateCaseFlyout
-          afterCaseCreated={attachAlertToCase}
-          onCloseFlyout={closeCaseFlyoutOpen}
-          onSuccess={onCaseSuccess}
-          useInsertTimeline={useInsertTimeline}
-          owner={owner}
-          disableAlerts={disableAlerts}
-        />
-      )}
-      {isAllCaseModalOpen && cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
+      {isCreateCaseFlyoutOpen && cases.getCreateCaseFlyout(createCaseFlyoutProps)}
+      {isAllCaseModalOpen && cases.getAllCasesSelectorModal(allCasesSelectorModalProps)}
     </>
   );
 };

@@ -32,7 +32,7 @@ import { TimelineStatus, TimelineTabs } from '../../../../../common/types/timeli
 import { appSelectors } from '../../../../common/store/app';
 import { AddNote } from '../../notes/add_note';
 import { CREATED_BY, NOTES } from '../../notes/translations';
-import { PARTICIPANTS } from '../../../../cases/translations';
+import { PARTICIPANTS } from '../translations';
 import { NotePreviews } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
 import { getTimelineNoteSelector } from './selectors';

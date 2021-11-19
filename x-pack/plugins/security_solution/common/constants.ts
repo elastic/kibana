@@ -83,9 +83,13 @@ export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
   authentications = 'authentications',
-  case = 'case',
-  caseConfigure = 'case-configure',
-  caseCreate = 'case-create',
+  /*
+   * Warning: Computed values are not permitted in an enum with string valued members
+   * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
+   */
+  case = 'cases',
+  caseConfigure = 'cases_configure',
+  caseCreate = 'cases_create',
   detections = 'detections',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',

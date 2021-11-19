@@ -10,19 +10,19 @@ import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 
 import * as i18n from './translations';
+import { useCaseViewNavigation, useCaseViewParams } from '../../common/navigation';
 
 interface UserActionCopyLinkProps {
   id: string;
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
 }
 
-const UserActionCopyLinkComponent = ({
-  id: commentId,
-  getCaseDetailHrefWithCommentId,
-}: UserActionCopyLinkProps) => {
+const UserActionCopyLinkComponent = ({ id: commentId }: UserActionCopyLinkProps) => {
+  const { getCaseViewUrl } = useCaseViewNavigation();
+  const { detailName, subCaseId } = useCaseViewParams();
+
   const handleAnchorLink = useCallback(() => {
-    copy(getCaseDetailHrefWithCommentId(commentId));
-  }, [getCaseDetailHrefWithCommentId, commentId]);
+    copy(getCaseViewUrl({ detailName, subCaseId, commentId }, true));
+  }, [detailName, subCaseId, commentId, getCaseViewUrl]);
 
   return (
     <EuiToolTip position="top" content={<p>{i18n.COPY_REFERENCE_LINK}</p>}>

@@ -107,7 +107,7 @@ export const getUrlType = (pageName: string): UrlStateType => {
   } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
   } else if (pageName === SecurityPageName.case) {
-    return 'case';
+    return 'cases';
   } else if (pageName === SecurityPageName.administration) {
     return 'administration';
   }

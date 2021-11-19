@@ -37,24 +37,25 @@ import * as i18n from './translations';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
-import { OwnerProvider } from '../owner_context';
 import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
 import { useKibana } from '../../common/lib/kibana';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import {
+  generateCaseViewPath,
+  useCaseViewNavigation,
+  useCaseViewParams,
+} from '../../common/navigation';
+import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 
 export interface CaseViewComponentProps {
-  allCasesNavigation: CasesNavigation;
-  caseDetailsNavigation: CasesNavigation;
   caseId: string;
-  configureCasesNavigation: CasesNavigation;
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
+  subCaseId?: string;
   onComponentInitialized?: () => void;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
-  subCaseId?: string;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
-  userCanCrud: boolean;
   /**
    * A React `Ref` that Exposes data refresh callbacks.
    * **NOTE**: Do not hold on to the `.current` object, as it could become stale
@@ -63,8 +64,7 @@ export interface CaseViewComponentProps {
   hideSyncAlerts?: boolean;
 }
 
-export interface CaseViewProps extends CaseViewComponentProps {
-  onCaseDataSuccess?: (data: Case) => void;
+export interface CaseViewProps extends Omit<CaseViewComponentProps, 'caseId' | 'subCaseId'> {
   timelineIntegration?: CasesTimelineIntegration;
 }
 
@@ -83,19 +83,13 @@ export interface CaseComponentProps extends CaseViewComponentProps {
   fetchCase: UseGetCase['fetchCase'];
   caseData: Case;
   updateCase: (newCase: Case) => void;
-  onCaseDataSuccess?: (newCase: Case) => void;
 }
 
 export const CaseComponent = React.memo<CaseComponentProps>(
   ({
-    allCasesNavigation,
     caseData,
-    caseDetailsNavigation,
     caseId,
-    configureCasesNavigation,
-    getCaseDetailHrefWithCommentId,
     fetchCase,
-    onCaseDataSuccess,
     onComponentInitialized,
     actionsNavigation,
     ruleDetailsNavigation,
@@ -103,10 +97,13 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     subCaseId,
     updateCase,
     useFetchAlertData,
-    userCanCrud,
     refreshRef,
     hideSyncAlerts = false,
   }) => {
+    const { userCanCrud } = useCasesContext();
+    const { getCaseViewUrl } = useCaseViewNavigation();
+    useCasesTitleBreadcrumbs(caseData.title);
+
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
@@ -321,13 +318,8 @@ export const CaseComponent = React.memo<CaseComponentProps>(
         onUpdateField({
           key: 'title',
           value: newTitle,
-          onSuccess: () => {
-            if (onCaseDataSuccess) {
-              onCaseDataSuccess({ ...caseData, title: newTitle });
-            }
-          },
         }),
-      [caseData, onUpdateField, onCaseDataSuccess]
+      [onUpdateField]
     );
 
     const changeStatus = useCallback(
@@ -347,9 +339,9 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
-        body: i18n.EMAIL_BODY(caseDetailsNavigation.href),
+        body: i18n.EMAIL_BODY(getCaseViewUrl({ detailName: caseId, subCaseId })),
       }),
-      [caseDetailsNavigation.href, caseData.title]
+      [caseData.title, getCaseViewUrl, caseId, subCaseId]
     );
 
     useEffect(() => {
@@ -357,16 +349,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
         setInitLoadingData(false);
       }
     }, [initLoadingData, isLoadingUserActions]);
-
-    const backOptions = useMemo(
-      () => ({
-        href: allCasesNavigation.href,
-        text: i18n.BACK_TO_ALL,
-        dataTestSubj: 'backToCases',
-        onClick: allCasesNavigation.onClick,
-      }),
-      [allCasesNavigation]
-    );
 
     const onShowAlertDetails = useCallback(
       (alertId: string, index: string) => {
@@ -390,7 +372,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     return (
       <>
         <HeaderPage
-          backOptions={backOptions}
+          showBackButton={true}
           data-test-subj="case-view-title"
           titleNode={
             <EditableTitle
@@ -403,7 +385,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
           title={caseData.title}
         >
           <CaseActionBar
-            allCasesNavigation={allCasesNavigation}
             caseData={caseData}
             currentExternalIncident={currentExternalIncident}
             userCanCrud={userCanCrud}
@@ -424,7 +405,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                 {!initLoadingData && (
                   <>
                     <UserActionTree
-                      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
                       getRuleDetailsHref={ruleDetailsNavigation?.href}
                       onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                       caseServices={caseServices}
@@ -485,7 +465,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                 <EditConnector
                   caseData={caseData}
                   caseServices={caseServices}
-                  configureCasesNavigation={configureCasesNavigation}
                   connectorName={connectorName}
                   connectors={connectors}
                   hasDataToPush={hasDataToPush && userCanCrud}
@@ -520,97 +499,71 @@ export const CaseViewLoading = () => (
 
 export const CaseView = React.memo(
   ({
-    allCasesNavigation,
-    caseDetailsNavigation,
-    caseId,
-    configureCasesNavigation,
-    getCaseDetailHrefWithCommentId,
-    onCaseDataSuccess,
     onComponentInitialized,
     actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
-    subCaseId,
     timelineIntegration,
     useFetchAlertData,
-    userCanCrud,
     refreshRef,
     hideSyncAlerts,
   }: CaseViewProps) => {
+    const { spaces: spacesApi } = useKibana().services;
+    const { detailName: caseId, subCaseId } = useCaseViewParams();
+    const { basePath } = useCasesContext();
     const { data, resolveOutcome, resolveAliasId, isLoading, isError, fetchCase, updateCase } =
       useGetCase(caseId, subCaseId);
-    const { spaces: spacesApi, http } = useKibana().services;
-
-    useEffect(() => {
-      if (onCaseDataSuccess && data) {
-        onCaseDataSuccess(data);
-      }
-    }, [data, onCaseDataSuccess]);
 
     useEffect(() => {
       if (spacesApi && resolveOutcome === 'aliasMatch' && resolveAliasId != null) {
-        // CAUTION: the path /cases/:detailName is working in both Observability (/app/observability/cases/:detailName) and
-        // Security Solutions (/app/security/cases/:detailName) plugins. This will need to be changed if this component is loaded
-        // under any another path, passing a path builder function by props from every parent plugin.
-        const newPath = http.basePath.prepend(
-          `cases/${resolveAliasId}${window.location.search}${window.location.hash}`
-        );
+        const newPath = `${basePath}${generateCaseViewPath({ detailName: resolveAliasId })}${
+          window.location.search
+        }${window.location.hash}`;
         spacesApi.ui.redirectLegacyUrl(newPath, i18n.CASE);
       }
-    }, [resolveOutcome, resolveAliasId, spacesApi, http]);
+    }, [resolveOutcome, resolveAliasId, basePath, spacesApi]);
 
     const getLegacyUrlConflictCallout = useCallback(() => {
       // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
       if (data && spacesApi && resolveOutcome === 'conflict' && resolveAliasId != null) {
         // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
         // callout with a warning for the user, and provide a way for them to navigate to the other object.
-        const otherObjectId = resolveAliasId; // This is always defined if outcome === 'conflict'
-        // CAUTION: the path /cases/:detailName is working in both Observability (/app/observability/cases/:detailName) and
-        // Security Solutions (/app/security/cases/:detailName) plugins. This will need to be changed if this component is loaded
-        // under any another path, passing a path builder function by props from every parent plugin.
-        const otherObjectPath = http.basePath.prepend(
-          `cases/${otherObjectId}${window.location.search}${window.location.hash}`
-        );
+        const otherObjectPath = `${basePath}${generateCaseViewPath({
+          detailName: resolveAliasId,
+        })}${window.location.search}${window.location.hash}`;
+
         return spacesApi.ui.components.getLegacyUrlConflict({
           objectNoun: i18n.CASE,
           currentObjectId: data.id,
-          otherObjectId,
+          otherObjectId: resolveAliasId,
           otherObjectPath,
         });
       }
       return null;
-    }, [data, resolveAliasId, resolveOutcome, spacesApi, http.basePath]);
+    }, [data, resolveAliasId, resolveOutcome, basePath, spacesApi]);
 
     return isError ? (
-      <DoesNotExist allCasesNavigation={allCasesNavigation} caseId={caseId} />
+      <DoesNotExist caseId={caseId} />
     ) : isLoading ? (
       <CaseViewLoading />
     ) : (
       data && (
         <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-          <OwnerProvider owner={[data.owner]}>
-            {getLegacyUrlConflictCallout()}
-            <CaseComponent
-              allCasesNavigation={allCasesNavigation}
-              caseData={data}
-              caseDetailsNavigation={caseDetailsNavigation}
-              caseId={caseId}
-              configureCasesNavigation={configureCasesNavigation}
-              getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-              fetchCase={fetchCase}
-              onCaseDataSuccess={onCaseDataSuccess}
-              onComponentInitialized={onComponentInitialized}
-              actionsNavigation={actionsNavigation}
-              ruleDetailsNavigation={ruleDetailsNavigation}
-              showAlertDetails={showAlertDetails}
-              subCaseId={subCaseId}
-              updateCase={updateCase}
-              useFetchAlertData={useFetchAlertData}
-              userCanCrud={userCanCrud}
-              refreshRef={refreshRef}
-              hideSyncAlerts={hideSyncAlerts}
-            />
-          </OwnerProvider>
+          {getLegacyUrlConflictCallout()}
+          <CaseComponent
+            caseData={data}
+            caseId={caseId}
+            fetchCase={fetchCase}
+            onComponentInitialized={onComponentInitialized}
+            actionsNavigation={actionsNavigation}
+            ruleDetailsNavigation={ruleDetailsNavigation}
+            showAlertDetails={showAlertDetails}
+            subCaseId={subCaseId}
+            updateCase={updateCase}
+            useFetchAlertData={useFetchAlertData}
+            refreshRef={refreshRef}
+            hideSyncAlerts={hideSyncAlerts}
+          />
         </CasesTimelineIntegrationProvider>
       )
     );

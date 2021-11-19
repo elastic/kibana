@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { get } from 'lodash';
 import { LicenseType } from '../../../../licensing/common/types';
+import { getCasesDeepLinks } from '../../../../cases/public';
 import { SecurityPageName } from '../types';
 import { AppDeepLink, AppNavLinkStatus, Capabilities } from '../../../../../../src/core/public';
 import {
@@ -22,7 +23,6 @@ import {
   INVESTIGATE,
   NETWORK,
   TIMELINES,
-  CASE,
   MANAGE,
   UEBA,
   HOST_ISOLATION_EXCEPTIONS,
@@ -289,38 +289,23 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           },
         ],
       },
-      {
-        id: SecurityPageName.case,
-        title: CASE,
-        path: CASES_PATH,
-        navLinkStatus: AppNavLinkStatus.visible,
-        features: [FEATURE.casesRead],
-        keywords: [
-          i18n.translate('xpack.securitySolution.search.cases', {
-            defaultMessage: 'Cases',
-          }),
-        ],
-        order: 9006,
-        deepLinks: [
-          {
-            id: SecurityPageName.caseCreate,
-            title: i18n.translate('xpack.securitySolution.search.cases.create', {
-              defaultMessage: 'Create New Case',
-            }),
-            path: `${CASES_PATH}/create`,
-            features: [FEATURE.casesCrud],
+      getCasesDeepLinks<SecuritySolutionDeepLink>({
+        basePath: CASES_PATH,
+        extend: {
+          [SecurityPageName.case]: {
+            navLinkStatus: AppNavLinkStatus.visible,
+            order: 9006,
+            features: [FEATURE.casesRead],
           },
-          {
-            id: SecurityPageName.caseConfigure,
-            title: i18n.translate('xpack.securitySolution.search.cases.configure', {
-              defaultMessage: 'Configure Cases',
-            }),
-            path: `${CASES_PATH}/configure`,
+          [SecurityPageName.caseConfigure]: {
             features: [FEATURE.casesCrud],
             isPremium: true,
           },
-        ],
-      },
+          [SecurityPageName.caseCreate]: {
+            features: [FEATURE.casesCrud],
+          },
+        },
+      }),
     ],
   },
   {
@@ -373,12 +358,10 @@ export function getDeepLinks(
   licenseType?: LicenseType,
   capabilities?: Capabilities
 ): AppDeepLink[] {
-  const hasPremium = isPremiumLicense(licenseType);
-
   const filterDeepLinks = (securityDeepLinks: SecuritySolutionDeepLink[]): AppDeepLink[] =>
     securityDeepLinks.reduce(
       (deepLinks: AppDeepLink[], { isPremium, features, experimentalKey, ...deepLink }) => {
-        if (isPremium && !hasPremium) {
+        if (licenseType && isPremium && !isPremiumLicense(licenseType)) {
           return deepLinks;
         }
         if (experimentalKey && !enableExperimental[experimentalKey]) {

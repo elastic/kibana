@@ -90,7 +90,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
             {
               ...securityNavGroup.investigate,
               items: hasCasesReadPermissions
-                ? [navTabs.timelines, navTabs.case]
+                ? [navTabs.timelines, navTabs.cases]
                 : [navTabs.timelines],
             },
             {
@@ -107,7 +107,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
         ? [
             {
               ...securityNavGroup.investigate,
-              items: [navTabs.case],
+              items: [navTabs.cases],
             },
           ]
         : [],

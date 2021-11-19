@@ -53,3 +53,7 @@ export const TIMELINE_TEMPLATE = i18n.translate(
     defaultMessage: 'Timeline template',
   }
 );
+
+export const PARTICIPANTS = i18n.translate('xpack.securitySolution.timeline.participantsTitle', {
+  defaultMessage: 'Participants',
+});

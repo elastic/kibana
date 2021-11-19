@@ -13,22 +13,18 @@ import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
 import { Case } from '../../../common';
 import { CaseService } from '../../containers/use_get_case_user_actions';
-import { CasesNavigation } from '../links';
+import { useAllCasesNavigation } from '../../common/navigation';
 
 interface CaseViewActions {
-  allCasesNavigation: CasesNavigation;
   caseData: Case;
   currentExternalIncident: CaseService | null;
 }
 
-const ActionsComponent: React.FC<CaseViewActions> = ({
-  allCasesNavigation,
-  caseData,
-  currentExternalIncident,
-}) => {
+const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternalIncident }) => {
   // Delete case
   const { handleToggleModal, handleOnDeleteConfirm, isDeleted, isDisplayConfirmDeleteModal } =
     useDeleteCases();
+  const { navigateToAllCases } = useAllCasesNavigation();
 
   const propertyActions = useMemo(
     () => [
@@ -51,7 +47,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
   );
 
   if (isDeleted) {
-    allCasesNavigation.onClick(null);
+    navigateToAllCases();
     return null;
   }
   return (
