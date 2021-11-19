@@ -6,21 +6,11 @@
  * Side Public License, v 1.
  */
 
-import Boom from '@hapi/boom';
 import { transformError } from '.';
 import { BadRequestError } from '../bad_request_error';
 import { errors } from '@elastic/elasticsearch';
 
 describe('transformError', () => {
-  test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {
-    const boom = new Boom.Boom('some boom message');
-    const transformed = transformError(boom);
-    expect(transformed).toEqual({
-      message: 'An internal server error occurred',
-      statusCode: 500,
-    });
-  });
-
   test('returns transformed output if it is some non boom object that has a statusCode', () => {
     const error: Error & { statusCode?: number } = {
       statusCode: 403,

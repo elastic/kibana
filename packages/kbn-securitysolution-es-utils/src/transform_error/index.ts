@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { BadRequestError } from '../bad_request_error';
 
@@ -16,37 +15,30 @@ export interface OutputError {
 }
 
 export const transformError = (err: Error & Partial<errors.ResponseError>): OutputError => {
-  if (Boom.isBoom(err)) {
-    return {
-      message: err.output.payload.message,
-      statusCode: err.output.statusCode,
-    };
-  } else {
-    if (err.statusCode != null) {
-      if (err.body != null && err.body.error != null) {
-        return {
-          statusCode: err.statusCode,
-          message: `${err.body.error.type}: ${err.body.error.reason}`,
-        };
-      } else {
-        return {
-          statusCode: err.statusCode,
-          message: err.message,
-        };
-      }
-    } else if (err instanceof BadRequestError) {
-      // allows us to throw request validation errors in the absence of Boom
+  if (err.statusCode != null) {
+    if (err.body != null && err.body.error != null) {
       return {
-        message: err.message,
-        statusCode: 400,
+        statusCode: err.statusCode,
+        message: `${err.body.error.type}: ${err.body.error.reason}`,
       };
     } else {
-      // natively return the err and allow the regular framework
-      // to deal with the error when it is a non Boom
       return {
-        message: err.message != null ? err.message : '(unknown error message)',
-        statusCode: 500,
+        statusCode: err.statusCode,
+        message: err.message,
       };
     }
+  } else if (err instanceof BadRequestError) {
+    // allows us to throw request validation errors in the absence of Boom
+    return {
+      message: err.message,
+      statusCode: 400,
+    };
+  } else {
+    // natively return the err and allow the regular framework
+    // to deal with the error when it is a non Boom
+    return {
+      message: err.message != null ? err.message : '(unknown error message)',
+      statusCode: 500,
+    };
   }
 };
