@@ -49,6 +49,7 @@ export const usePreviewHistogram = ({
       errorMessage: QUERY_PREVIEW_ERROR,
       filterQuery,
       histogramType: MatrixHistogramType.preview,
+      includeMissingData: true,
       indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
       stackByField: 'event.category',
       startDate,

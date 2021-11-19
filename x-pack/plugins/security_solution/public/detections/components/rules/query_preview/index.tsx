@@ -118,7 +118,7 @@ export const PreviewQuery = ({
     startDate: toTime,
     filterQuery: queryFilter,
     indexNames: index,
-    includeMissingData: false,
+    includeMissingData: true,
     histogramType: MatrixHistogramType.events,
     stackByField: 'event.category',
     threshold: ruleType === 'threshold' ? threshold : undefined,
