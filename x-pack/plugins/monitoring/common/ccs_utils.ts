@@ -39,6 +39,17 @@ export function appendMetricbeatIndex(
   return `${indexPattern},${mbIndex}`;
 }
 
+export function getCcs(config: Config): boolean | string {
+  let ccsEnabled = false;
+  // TODO: NP
+  // This function is called with both NP config and LP config
+  if (isFunction(config.get)) {
+    ccsEnabled = config.get('monitoring.ui.ccs.enabled');
+  } else {
+    ccsEnabled = get(config, 'ui.ccs.enabled');
+  }
+  return ccsEnabled;
+}
 /**
  * Prefix all comma separated index patterns within the original {@code indexPattern}.
  *
@@ -56,15 +67,7 @@ export function prefixIndexPattern(
   ccs?: string,
   monitoringIndicesOnly: boolean = false
 ) {
-  let ccsEnabled = false;
-  // TODO: NP
-  // This function is called with both NP config and LP config
-  if (isFunction(config.get)) {
-    ccsEnabled = config.get('monitoring.ui.ccs.enabled');
-  } else {
-    ccsEnabled = get(config, 'ui.ccs.enabled');
-  }
-
+  const ccsEnabled = getCcs(config);
   if (!ccsEnabled || !ccs) {
     return indexPattern;
   }

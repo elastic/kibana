@@ -12,7 +12,7 @@ import { createNewQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 // @ts-ignore
-import { parseCrossClusterPrefix } from '../../../common/ccs_utils';
+import { getCcs } from '../../../common/ccs_utils';
 import { getClustersState } from './get_clusters_state';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
@@ -28,7 +28,7 @@ import { getNewIndexPatterns } from './get_index_patterns';
 export function getClustersStats(req: LegacyRequest, clusterUuid: string) {
   return (
     fetchClusterStats(req, clusterUuid)
-      .then((response) => handleClusterStats(response))
+      .then((response) => handleClusterStats(response, req))
       // augment older documents (e.g., from 2.x - 5.4) with their cluster_state
       .then((clusters) => getClustersState(req, clusters))
   );
@@ -110,7 +110,7 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid: string) {
  * @param {Object} response The response from Elasticsearch.
  * @return {Array} Objects representing each cluster.
  */
-export function handleClusterStats(response: ElasticsearchResponse) {
+export function handleClusterStats(response: ElasticsearchResponse, req: LegacyRequest) {
   const hits = response?.hits?.hits ?? [];
 
   return hits
@@ -118,11 +118,9 @@ export function handleClusterStats(response: ElasticsearchResponse) {
       const cluster = hit._source as ElasticsearchModifiedSource;
 
       if (cluster) {
-        const indexName = hit._index;
-        const ccs = parseCrossClusterPrefix(indexName);
-
         // use CCS whenever we come across it so that we can avoid talking to other monitoring clusters whenever possible
-        if (ccs) {
+        const ccs = getCcs(req.server.config());
+        if (typeof ccs === 'string') {
           cluster.ccs = ccs;
         }
       }
