@@ -1,5 +1,5 @@
-import React from 'react';
-import { RuntimeAttachment } from '..';
+import React, { useCallback, useState } from 'react';
+import { RuntimeAttachment, RuntimeAttachmentSettings } from '..';
 import {
   NewPackagePolicy,
   PackagePolicy,
@@ -19,8 +19,45 @@ const excludeOptions = [
 ];
 const includeOptions = [{ value: 'all', label: 'All' }, ...excludeOptions];
 
-export function JavaRuntimeAttachment(props: Props) {
-  console.log(props);
+export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
+  const [isDirty, setIsDirty] = useState(false);
+  const onChangePolicy = useCallback(
+    (runtimeAttachmentSettings: RuntimeAttachmentSettings) => {
+      const apmInputIdx = newPolicy.inputs.findIndex(
+        ({ type }) => type === 'apm'
+      );
+      onChange({
+        isValid: true,
+        updatedPolicy: {
+          ...newPolicy,
+          inputs: [
+            ...newPolicy.inputs.slice(0, apmInputIdx),
+            {
+              ...newPolicy.inputs[apmInputIdx],
+              vars: {
+                ...newPolicy.inputs[apmInputIdx].vars,
+                java_attacher_enabled: {
+                  value: runtimeAttachmentSettings.enabled,
+                  type: 'bool',
+                },
+                java_attacher_discovery_rules: {
+                  type: 'yaml',
+                  value: runtimeAttachmentSettings.discoveryRules.map(
+                    ({ operation, type, probe }) => ({
+                      [`${operation}-${type}`]: probe,
+                    })
+                  ),
+                },
+              },
+            },
+            ...newPolicy.inputs.slice(apmInputIdx + 1),
+          ],
+        },
+      });
+      setIsDirty(true);
+    },
+    [newPolicy]
+  );
   return (
     <RuntimeAttachment
       operationTypes={[
@@ -33,27 +70,25 @@ export function JavaRuntimeAttachment(props: Props) {
           types: excludeOptions,
         },
       ]}
-      onChange={(...args) => {
-        // if (props.onChange) {
-        //   props.onChange(...args);
-        // }
-      }}
+      onChange={onChangePolicy}
       toggleDescription="Attach the Java agent to running and starting Java applications."
       discoveryRulesDescription="For every running JVM, the discovery rules are evaluated in the order they are provided. The first matching rule determines the outcome. Learn more in the docs."
-      showUnsavedWarning={true}
-      initialIsEnabled={true}
-      initialDiscoveryRules={[
-        {
-          operation: 'include',
-          type: 'main',
-          probe: 'java-opbeans-10010',
-        },
-        {
-          operation: 'exclude',
-          type: 'vmarg',
-          probe: '10948653898867',
-        },
-      ]}
+      showUnsavedWarning={isDirty}
+      initialIsEnabled={
+        newPolicy.inputs.find(({ type }) => type === 'apm')?.vars
+          ?.java_attacher_enabled?.value
+      }
+      initialDiscoveryRules={(
+        newPolicy.inputs.find(({ type }) => type === 'apm')?.vars
+          ?.java_attacher_discovery_rules?.value ?? []
+      ).map((discoveryRuleMap: Record<string, string>) => {
+        const [operationType, probe] = Object.entries(discoveryRuleMap)[0];
+        return {
+          operation: operationType.split('-')[0],
+          type: operationType.split('-')[1],
+          probe,
+        };
+      })}
     />
   );
 }
