@@ -13,7 +13,7 @@ import { RuleExecutionStatus } from '.';
 import { RuleExecutionStatus as RuleExecutionStatusType } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 describe('Component RuleExecutionStatus', () => {
-  it('should render component without errors', () => {
+  it('should render component correctly with capitalized status text', () => {
     render(<RuleExecutionStatus status={RuleExecutionStatusType.succeeded} />);
 
     expect(screen.getByText('Succeeded')).toBeInTheDocument();

@@ -7,8 +7,6 @@
 
 import React from 'react';
 
-import { EuiHealth, EuiToolTip } from '@elastic/eui';
-
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HealthTruncateText } from '../../../../common/components/health_truncate_text';
 import { getStatusColor } from '../rule_status/helpers';
@@ -27,11 +25,13 @@ interface RuleExecutionStatusProps {
 const RuleExecutionStatusComponent = ({ status }: RuleExecutionStatusProps) => {
   const displayStatus = getCapitalizedRuleStatusText(status);
   return (
-    <EuiToolTip content={displayStatus}>
-      <EuiHealth color={getStatusColor(status ?? null)}>
-        <HealthTruncateText>{displayStatus ?? getEmptyTagValue()}</HealthTruncateText>
-      </EuiHealth>
-    </EuiToolTip>
+    <HealthTruncateText
+      tooltipContent={displayStatus}
+      healthColor={getStatusColor(status ?? null)}
+      dataTestSubj="ruleExecutionStatus"
+    >
+      {displayStatus ?? getEmptyTagValue()}
+    </HealthTruncateText>
   );
 };
 

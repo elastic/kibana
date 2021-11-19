@@ -7,7 +7,7 @@
 
 import { upperFirst } from 'lodash/fp';
 import React from 'react';
-import { EuiHealth, EuiToolTip } from '@elastic/eui';
+
 import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 import { HealthTruncateText } from '../../../../common/components/health_truncate_text';
 interface Props {
@@ -16,23 +16,18 @@ interface Props {
 
 const SeverityBadgeComponent: React.FC<Props> = ({ value }) => {
   const displayValue = upperFirst(value);
+  const color = 'low'
+    ? euiLightVars.euiColorVis0
+    : value === 'medium'
+    ? euiLightVars.euiColorVis5
+    : value === 'high'
+    ? euiLightVars.euiColorVis7
+    : euiLightVars.euiColorVis9;
+
   return (
-    <EuiToolTip content={displayValue}>
-      <EuiHealth
-        data-test-subj="severity"
-        color={
-          value === 'low'
-            ? euiLightVars.euiColorVis0
-            : value === 'medium'
-            ? euiLightVars.euiColorVis5
-            : value === 'high'
-            ? euiLightVars.euiColorVis7
-            : euiLightVars.euiColorVis9
-        }
-      >
-        <HealthTruncateText>{displayValue}</HealthTruncateText>
-      </EuiHealth>
-    </EuiToolTip>
+    <HealthTruncateText healthColor={color} tooltipContent={displayValue} dataTestSubj="severity">
+      {displayValue}
+    </HealthTruncateText>
   );
 };
 
