@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import { EuiToolTip, EuiToolTipProps } from '@elastic/eui';
 import styled from 'styled-components';
 
 const StatusTextWrapper = styled.div`
@@ -16,12 +15,12 @@ const StatusTextWrapper = styled.div`
 `;
 
 /**
- * Allows text in EuiHealth to be properly truncated and displays tooltip
+ * Allows text in EuiHealth to be properly truncated
  */
-export const TooltipHealth = ({ children, ...rest }: Partial<EuiToolTipProps>) => (
+export const HealthTruncateText: React.FC<{}> = ({ children }) => (
   <StatusTextWrapper>
-    <EuiToolTip anchorClassName="eui-textTruncate" {...rest}>
-      <>{children}</>
-    </EuiToolTip>
+    <span className="eui-textTruncate">{children}</span>
   </StatusTextWrapper>
 );
+
+HealthTruncateText.displayName = 'HealthTruncateText';
