@@ -145,17 +145,10 @@ export const trustedAppPostHttpMocks = httpHandlerMockFactory<TrustedAppPostHttp
         body as string
       ) as Required<CreateExceptionListItemSchema>;
       const response: ExceptionListItemSchema = {
+        ...new ExceptionsListItemGenerator('seed').generate(),
         ...updatedExceptionItem,
-        id: path.split('/').pop() ?? 'unknown-id',
-        comments: [],
-        created_at: '2021-10-12T16:02:55.856Z',
-        created_by: 'elastic',
-        updated_at: '2021-10-13T16:02:55.856Z',
-        updated_by: 'elastic',
-        list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
-        _version: 'abc',
-        tie_breaker_id: '1111',
       };
+      response.id = path.split('/').pop() ?? response.id;
 
       return response;
     },

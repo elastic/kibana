@@ -13,16 +13,10 @@ import { fireEvent } from '@testing-library/dom';
 import { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
 import {
   ConditionEntryField,
-  NewTrustedApp,
   OperatingSystem,
-  PostTrustedAppCreateResponse,
   TrustedApp,
 } from '../../../../../common/endpoint/types';
 import { HttpFetchOptions, HttpFetchOptionsWithPath } from 'kibana/public';
-import {
-  TRUSTED_APPS_GET_API,
-  TRUSTED_APPS_LIST_API,
-} from '../../../../../common/endpoint/constants';
 import {
   GetPackagePoliciesResponse,
   PACKAGE_POLICY_API_ROUTES,
@@ -32,7 +26,6 @@ import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { trustedAppsPageHttpApiMocks } from '../test_utils/mocks';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -331,10 +324,6 @@ describe('When on the Trusted Apps Page', () => {
       });
 
       describe('and attempting to show Edit panel based on URL params', () => {
-        const TRUSTED_APP_GET_URI = resolvePathVariables(TRUSTED_APPS_GET_API, {
-          id: '9999-edit-8888',
-        });
-
         const renderAndWaitForGetApi = async () => {
           // the store action watcher is setup prior to render because `renderWithListData()`
           // also awaits API calls and this action could be missed.
@@ -357,23 +346,6 @@ describe('When on the Trusted Apps Page', () => {
         };
 
         beforeEach(() => {
-          // Mock the API GET for the trusted application
-          const priorMockImplementation = coreStart.http.get.getMockImplementation();
-          coreStart.http.get.mockImplementation(async (...args) => {
-            if ('string' === typeof args[0] && args[0] === TRUSTED_APP_GET_URI) {
-              return {
-                data: {
-                  ...getFakeTrustedApp(),
-                  id: '9999-edit-8888',
-                  name: 'one app for edit',
-                },
-              };
-            }
-            if (priorMockImplementation) {
-              return priorMockImplementation(...args);
-            }
-          });
-
           reactTestingLibrary.act(() => {
             history.push('/administration/trusted_apps?show=edit&id=9999-edit-8888');
           });
@@ -508,7 +480,7 @@ describe('When on the Trusted Apps Page', () => {
       act(() => {
         fireEvent.click(renderResult.getByTestId('perPolicy'));
       });
-      expect(renderResult.getByTestId('policy-abc123'));
+      expect(renderResult.getByTestId('policy-ddf6570b-9175-4a6d-b288-61a09771c647'));
       resetEnv();
     });
 
@@ -566,47 +538,34 @@ describe('When on the Trusted Apps Page', () => {
 
       describe('and the Flyout Add button is clicked', () => {
         let renderResult: ReturnType<AppContextTestRender['render']>;
-        let resolveHttpPost: (response?: PostTrustedAppCreateResponse) => void;
-        let httpPostBody: string;
-        let rejectHttpPost: (response: Error) => void;
+        let releasePostCreateApi: () => void;
 
         beforeEach(async () => {
           // Mock the http.post() call and expose `resolveHttpPost()` method so that
           // we can control when the API call response is returned, which will allow us
           // to test the UI behaviours while the API call is in flight
           mockedApis.responseProvider.trustedAppCreate.mockDelay.mockReturnValue(
-            new Promise((resolve, reject) => {
-              resolveHttpPost = resolve;
-              rejectHttpPost = reject;
+            new Promise((resolve) => {
+              releasePostCreateApi = resolve as typeof releasePostCreateApi;
             })
           );
 
-          // FIXME: cleanup
-          // coreStart.http.post.mockImplementation(
-          // // @ts-expect-error TS2345
-          // async (_, options: HttpFetchOptions) => {
-          //   return new Promise((resolve, reject) => {
-          //     httpPostBody = options.body as string;
-          //     resolveHttpPost = resolve;
-          //     rejectHttpPost = reject;
-          //   });
-          // }
-          // );
-
           renderResult = await renderAndClickAddButton();
           await fillInCreateForm();
+
           const userClickedSaveActionWatcher = waitForAction('trustedAppCreationDialogConfirmed');
           reactTestingLibrary.act(() => {
             fireEvent.click(renderResult.getByTestId('addTrustedAppFlyout-createButton'), {
               button: 1,
             });
           });
+
           await reactTestingLibrary.act(async () => {
             await userClickedSaveActionWatcher;
           });
         });
 
-        afterEach(() => resolveHttpPost());
+        afterEach(() => releasePostCreateApi());
 
         it('should display info about Trusted Apps', async () => {
           expect(renderResult.getByTestId('addTrustedAppFlyout-about').textContent).toEqual(
@@ -619,7 +578,7 @@ describe('When on the Trusted Apps Page', () => {
             (renderResult.getByTestId('addTrustedAppFlyout-cancelButton') as HTMLButtonElement)
               .disabled
           ).toBe(true);
-          resolveHttpPost();
+          releasePostCreateApi();
         });
 
         it('should hide the dialog close button', async () => {
@@ -636,23 +595,13 @@ describe('When on the Trusted Apps Page', () => {
 
         describe('and if create was successful', () => {
           beforeEach(async () => {
-            const successCreateApiResponse: PostTrustedAppCreateResponse = {
-              data: {
-                ...(JSON.parse(httpPostBody) as NewTrustedApp),
-                id: '1',
-                version: 'abc123',
-                created_at: '2020-09-16T14:09:45.484Z',
-                created_by: 'kibana',
-                updated_at: '2021-01-04T13:55:00.561Z',
-                updated_by: 'me',
-              },
-            };
             await reactTestingLibrary.act(async () => {
               const serverResponseAction = waitForAction(
                 'trustedAppCreationSubmissionResourceStateChanged'
               );
+
               coreStart.http.get.mockClear();
-              resolveHttpPost(successCreateApiResponse);
+              releasePostCreateApi();
               await serverResponseAction;
             });
           });
@@ -663,33 +612,47 @@ describe('When on the Trusted Apps Page', () => {
 
           it('should show success toast notification', () => {
             expect(coreStart.notifications.toasts.addSuccess.mock.calls[0][0]).toEqual({
-              text: '"one app" has been added to the Trusted Applications list.',
+              text: '"Generated Exception (3xnng)" has been added to the Trusted Applications list.',
               title: 'Success!',
             });
           });
 
           it('should trigger the List to reload', () => {
             const isCalled = coreStart.http.get.mock.calls.some(
-              (call) => call[0].toString() === TRUSTED_APPS_LIST_API
+              (call) => call[0].toString() === `${EXCEPTION_LIST_ITEM_URL}/_find`
             );
             expect(isCalled).toEqual(true);
           });
         });
 
         describe('and if create failed', () => {
+          const ServerErrorResponseBodyMock = class extends Error {
+            public readonly body: { message: string };
+            constructor(message = 'Test - Bad Call') {
+              super(message);
+              this.body = {
+                message,
+              };
+            }
+          };
           beforeEach(async () => {
-            const failedCreateApiResponse: Error & { body?: { message: string } } = new Error(
-              'Bad call'
-            );
-            failedCreateApiResponse.body = {
-              message: 'bad call',
-            };
+            const failedCreateApiResponse = new ServerErrorResponseBodyMock();
+
+            mockedApis.responseProvider.trustedAppCreate.mockImplementation(() => {
+              throw failedCreateApiResponse;
+            });
+
             await reactTestingLibrary.act(async () => {
               const serverResponseAction = waitForAction(
-                'trustedAppCreationSubmissionResourceStateChanged'
+                'trustedAppCreationSubmissionResourceStateChanged',
+                {
+                  validate({ payload }) {
+                    return isFailedResourceState(payload.newState);
+                  },
+                }
               );
-              coreStart.http.get.mockClear();
-              rejectHttpPost(failedCreateApiResponse);
+
+              releasePostCreateApi();
               await serverResponseAction;
             });
           });
@@ -765,24 +728,26 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and there are no trusted apps', () => {
-    const releaseExistsResponse: jest.MockedFunction<() => Promise<FoundExceptionListItemSchema>> =
-      jest.fn(async () => {
+    const releaseExistsResponse: jest.MockedFunction<() => FoundExceptionListItemSchema> = jest.fn(
+      async () => {
         return {
           data: [],
           total: 0,
           page: 1,
           per_page: 1,
         };
-      });
-    const releaseListResponse: jest.MockedFunction<() => Promise<FoundExceptionListItemSchema>> =
-      jest.fn(async () => {
+      }
+    );
+    const releaseListResponse: jest.MockedFunction<() => FoundExceptionListItemSchema> = jest.fn(
+      () => {
         return {
           data: [],
           total: 0,
           page: 1,
           per_page: 20,
         };
-      });
+      }
+    );
 
     beforeEach(() => {
       mockedApis.responseProvider.trustedAppsList.mockImplementation(({ query }) => {
@@ -802,8 +767,6 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     it('should show a loader until trusted apps existence can be confirmed', async () => {
-      // Make the call that checks if Trusted Apps exists not respond back
-      releaseExistsResponse.mockImplementationOnce(() => new Promise(() => {}));
       const renderResult = render();
       expect(await renderResult.findByTestId('trustedAppsListLoader')).not.toBeNull();
     });
