@@ -30,8 +30,6 @@ import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
 import { User } from './user';
 
-const ROLES_DOCS_LINK = SECURITY_DOCS_URL;
-
 export const RoleMappings: React.FC = () => {
   const {
     enableRoleBasedAccess,
@@ -60,7 +58,7 @@ export const RoleMappings: React.FC = () => {
   const rolesEmptyState = (
     <RolesEmptyPrompt
       productName={APP_SEARCH_PLUGIN.NAME}
-      docsLink={ROLES_DOCS_LINK}
+      docsLink={SECURITY_DOCS_URL}
       onEnable={enableRoleBasedAccess}
     />
   );
@@ -69,7 +67,7 @@ export const RoleMappings: React.FC = () => {
     <section>
       <RoleMappingsHeading
         productName={APP_SEARCH_PLUGIN.NAME}
-        docsLink={ROLES_DOCS_LINK}
+        docsLink={SECURITY_DOCS_URL}
         onClick={() => initializeRoleMapping()}
       />
       <RoleMappingsTable
