@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+// import { SavedObjectsImporter } from 'src/core/server';
 import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
 } from 'src/core/server';
+import type { SavedObjectsImportSuccess } from 'src/core/server/types';
+
+import { createListStream } from '@kbn/utils';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
@@ -17,6 +21,7 @@ import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
 import type { AssetType, AssetReference, AssetParts } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes } from '../index_pattern/install';
+import { appContextService } from '../../../../services';
 
 type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
   type: KibanaSavedObjectType;
@@ -42,23 +47,8 @@ const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectTyp
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
 };
 
-// Define how each asset type will be installed
-const AssetInstallers: Record<
-  KibanaAssetType,
-  (args: {
-    savedObjectsClient: SavedObjectsClientContract;
-    kibanaAssets: ArchiveAsset[];
-  }) => Promise<Array<SavedObject<unknown>>>
-> = {
-  [KibanaAssetType.dashboard]: installKibanaSavedObjects,
-  [KibanaAssetType.indexPattern]: installKibanaIndexPatterns,
-  [KibanaAssetType.map]: installKibanaSavedObjects,
-  [KibanaAssetType.search]: installKibanaSavedObjects,
-  [KibanaAssetType.visualization]: installKibanaSavedObjects,
-  [KibanaAssetType.lens]: installKibanaSavedObjects,
-  [KibanaAssetType.mlModule]: installKibanaSavedObjects,
-  [KibanaAssetType.securityRule]: installKibanaSavedObjects,
-  [KibanaAssetType.tag]: installKibanaSavedObjects,
+const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
+  [KibanaAssetType.indexPattern]: removeReservedIndexPatterns,
 };
 
 export async function getKibanaAsset(key: string): Promise<ArchiveAsset> {
@@ -79,29 +69,39 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
   };
 }
 
-// TODO: make it an exhaustive list
-// e.g. switch statement with cases for each enum key returning `never` for default case
 export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
-}): Promise<SavedObject[]> {
+}): Promise<SavedObjectsImportSuccess[]> {
   const { savedObjectsClient, kibanaAssets } = options;
-
-  // install the assets
-  const kibanaAssetTypes = Object.values(KibanaAssetType);
-  const installedAssets = await Promise.all(
-    kibanaAssetTypes.map((assetType) => {
-      if (kibanaAssets[assetType]) {
-        return AssetInstallers[assetType]({
-          savedObjectsClient,
-          kibanaAssets: kibanaAssets[assetType],
-        });
-      }
+  const assetsToInstall = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
+    if (!kibanaAssets[assetType as KibanaAssetType]) {
       return [];
-    })
-  );
-  return installedAssets.flat();
+    }
+
+    if (!assets.length) {
+      return [];
+    }
+
+    const assetFilter = AssetFilters[assetType];
+    if (assetFilter) {
+      return assetFilter(assets);
+    }
+
+    return assets;
+  });
+
+  if (!assetsToInstall.length) {
+    return [];
+  }
+
+  const installedAssets = await installKibanaSavedObjects({
+    savedObjectsClient,
+    kibanaAssets: assetsToInstall,
+  });
+
+  return installedAssets;
 }
 export const deleteKibanaInstalledRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
@@ -166,26 +166,33 @@ async function installKibanaSavedObjects({
   if (toBeSavedObjects.length === 0) {
     return [];
   } else {
-    const createResults = await savedObjectsClient.bulkCreate(toBeSavedObjects, {
+    const savedObjectsImporter = appContextService
+      .getSavedObjects()
+      .createImporter(savedObjectsClient);
+
+    const { successResults, errors } = await savedObjectsImporter.import({
       overwrite: true,
+      readStream: createListStream(toBeSavedObjects),
+      createNewCopies: false,
     });
-    return createResults.saved_objects;
+
+    if (errors?.length) {
+      throw new Error(
+        `Encountered ${errors.length} creating saved objects: ${JSON.stringify(
+          errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
+        )}`
+      );
+    }
+
+    return successResults || [];
   }
 }
 
-async function installKibanaIndexPatterns({
-  savedObjectsClient,
-  kibanaAssets,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  kibanaAssets: ArchiveAsset[];
-}) {
-  // Filter out any reserved index patterns
+// Filter out any reserved index patterns
+function removeReservedIndexPatterns(kibanaAssets: ArchiveAsset[]) {
   const reservedPatterns = indexPatternTypes.map((pattern) => `${pattern}-*`);
 
-  const nonReservedPatterns = kibanaAssets.filter((asset) => !reservedPatterns.includes(asset.id));
-
-  return installKibanaSavedObjects({ savedObjectsClient, kibanaAssets: nonReservedPatterns });
+  return kibanaAssets.filter((asset) => !reservedPatterns.includes(asset.id));
 }
 
 export function toAssetReference({ id, type }: SavedObject) {
