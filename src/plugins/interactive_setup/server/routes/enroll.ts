@@ -19,7 +19,8 @@ import {
   ERROR_KIBANA_CONFIG_NOT_WRITABLE,
   ERROR_OUTSIDE_PREBOOT_STAGE,
 } from '../../common';
-import { CompatibilityError, ElasticsearchService } from '../elasticsearch_service';
+import { CompatibilityError } from '../compatibility_error';
+import { ElasticsearchService } from '../elasticsearch_service';
 import type { EnrollResult } from '../elasticsearch_service';
 import type { WriteConfigParameters } from '../kibana_config_writer';
 import type { RouteDefinitionParams } from './';

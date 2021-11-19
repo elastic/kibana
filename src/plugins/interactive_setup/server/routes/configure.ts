@@ -20,8 +20,9 @@ import {
   ERROR_KIBANA_CONFIG_NOT_WRITABLE,
   ERROR_OUTSIDE_PREBOOT_STAGE,
 } from '../../common';
+import { CompatibilityError } from '../compatibility_error';
 import type { AuthenticateParameters } from '../elasticsearch_service';
-import { CompatibilityError, ElasticsearchService } from '../elasticsearch_service';
+import { ElasticsearchService } from '../elasticsearch_service';
 import type { WriteConfigParameters } from '../kibana_config_writer';
 
 export function defineConfigureRoute({
