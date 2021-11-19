@@ -229,7 +229,7 @@ describe('CurationsSettings', () => {
       const wrapper = shallow(<CurationsSettings />);
       expect(wrapper.is(DataPanel)).toBe(true);
       expect(wrapper.prop('action').props.to).toEqual('/app/management/stack/license_management');
-      expect(wrapper.find(EuiButtonEmpty).prop('href')).toEqual(`${docLinks.licenseManagement}`);
+      expect(wrapper.find(EuiButtonEmpty).prop('href')).toEqual(docLinks.licenseManagement);
     });
   });
 });
