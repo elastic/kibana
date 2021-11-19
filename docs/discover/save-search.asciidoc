@@ -29,7 +29,7 @@ image::discover/images/read-only-badge.png[Example of Discover's read only acces
 . To reload your search results in *Discover*, click *Open* in the toolbar, and select the saved search.
 +
 If the saved search is associated with a different data view than is currently
-selected, opening the saved search changes the selected data view. The query language
+selected, opening the saved search changes the selected {data-source}. The query language
 used for the saved search is also automatically selected.
 . To add your search results to a dashboard:
 .. Open the main menu, then click *Dashboard*.
