@@ -245,7 +245,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
             <p>
               <FormattedMessage
                 id="xpack.securitySolution.eventFilters.criteriaSectionDescription"
-                defaultMessage="Add event filter conditions"
+                defaultMessage="Select an operating system and add conditions."
               />
             </p>
           </EuiText>
@@ -278,7 +278,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
             <p>
               <FormattedMessage
                 id="xpack.securitySolution.eventFilters.commentsSectionDescription"
-                defaultMessage="Add your desired comments to the event filter"
+                defaultMessage="Add a comment to your event filter."
               />
             </p>
           </EuiText>
