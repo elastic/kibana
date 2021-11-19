@@ -6,7 +6,6 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
-import { i18n } from '@kbn/i18n';
 import {
   EuiSearchBar,
   EuiSearchBarOnChangeArgs,
@@ -16,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { ProcessTree } from '../ProcessTree';
@@ -40,13 +40,6 @@ interface ProcessEventResults {
     total: number;
   };
 }
-
-const BUTTON_OPEN_DETAIL_PANEL = i18n.translate(
-  'xpack.sessionView.detailPanel.buttonOpenDetailPanel',
-  {
-    defaultMessage: 'Detail panel',
-  }
-);
 
 /**
  * The main wrapper component for the session view.
@@ -142,7 +135,10 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton onClick={toggleDetailPanel} iconType="list" fill>
-            {BUTTON_OPEN_DETAIL_PANEL}
+            <FormattedMessage
+              id="kbn.sessionView.buttonOpenDetailPanel"
+              defaultMessage="Detail panel"
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
