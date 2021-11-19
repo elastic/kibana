@@ -25,16 +25,9 @@ export async function requestOAuthToken<T>(
   grantType: string,
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
-  rewriteBodyRequest?: RewriteResponseCase<T>
+  rewriteBodyRequest: RewriteResponseCase<T>
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const defaultRewriteBodyRequest: RewriteResponseCase<T> = ({ ...res }): any => ({
-    ...res,
-  });
-  const transformedBody = rewriteBodyRequest
-    ? rewriteBodyRequest(params)
-    : defaultRewriteBodyRequest(params);
 
   const res = await request({
     axios: axiosInstance,
@@ -42,7 +35,7 @@ export async function requestOAuthToken<T>(
     method: 'post',
     logger,
     data: qs.stringify({
-      ...transformedBody,
+      ...rewriteBodyRequest(params),
       grant_type: grantType,
     }),
     headers: {

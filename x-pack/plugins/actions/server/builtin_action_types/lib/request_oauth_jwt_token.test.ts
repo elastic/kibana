@@ -52,7 +52,7 @@ describe('requestOAuthJWTToken', () => {
         Object {
           "data": "assertion=someJWTvalueishere&client_id=client-id-1&client_secret=some-client-secret&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&scope=test",
           "headers": Object {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
           },
           "httpAgent": undefined,
           "httpsAgent": Agent {
@@ -89,6 +89,7 @@ describe('requestOAuthJWTToken', () => {
           "method": "post",
           "proxy": false,
           "timeout": 360000,
+          "validateStatus": [Function],
         },
       ]
     `);
@@ -123,7 +124,7 @@ describe('requestOAuthJWTToken', () => {
 
     expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "error thrown getting the access token from https://test for clientID: client-id-1: {\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter \'scope\' is not valid.\\"}",
+        "error thrown getting the access token from https://test for params: {\\"assertion\\":\\"someJWTvalueishere\\",\\"clientId\\":\\"client-id-1\\",\\"clientSecret\\":\\"some-client-secret\\",\\"scope\\":\\"test\\"}: {\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter 'scope' is not valid.\\"}",
       ]
     `);
   });

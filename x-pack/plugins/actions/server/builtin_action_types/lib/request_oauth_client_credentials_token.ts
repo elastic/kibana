@@ -7,6 +7,7 @@
 import { Logger } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { OAuthTokenResponse, requestOAuthToken } from './request_oauth_token';
+import { RewriteResponseCase } from '../../../../actions/common';
 
 export const OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE = 'client_credentials';
 
@@ -15,6 +16,16 @@ export interface ClientCredentialsOAuthRequestParams {
   clientId?: string;
   clientSecret?: string;
 }
+
+const rewriteBodyRequest: RewriteResponseCase<ClientCredentialsOAuthRequestParams> = ({
+  clientId,
+  clientSecret,
+  ...res
+}) => ({
+  ...res,
+  client_id: clientId,
+  client_secret: clientSecret,
+});
 
 export async function requestOAuthClientCredentialsToken(
   tokenUrl: string,
@@ -27,6 +38,7 @@ export async function requestOAuthClientCredentialsToken(
     params,
     OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,
     configurationUtilities,
-    logger
+    logger,
+    rewriteBodyRequest
   );
 }
