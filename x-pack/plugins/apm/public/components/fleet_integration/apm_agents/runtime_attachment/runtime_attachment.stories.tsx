@@ -25,11 +25,26 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
+const excludeOptions = [
+  { value: 'main', label: 'main class / jar name' },
+  { value: 'vmarg', label: 'vmarg' },
+  { value: 'user', label: 'user' },
+];
+const includeOptions = [{ value: 'all', label: 'All' }, ...excludeOptions];
+
 export const RuntimeAttachmentExample: Story = () => {
   return (
     <RuntimeAttachment
-      operations={['Include', 'Exclude']}
-      types={['main', 'pid']}
+      operationTypes={[
+        {
+          operation: { value: 'include', label: 'Include' },
+          types: includeOptions,
+        },
+        {
+          operation: { value: 'exclude', label: 'Exclude' },
+          types: excludeOptions,
+        },
+      ]}
       onChange={() => {}}
       toggleDescription="Attach the Java agent to running and starting Java applications."
       discoveryRulesDescription="For every running JVM, the discovery rules are evaluated in the order they are provided. The first matching rule determines the outcome. Learn more in the docs"

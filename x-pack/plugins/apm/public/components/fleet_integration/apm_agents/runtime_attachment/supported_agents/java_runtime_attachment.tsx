@@ -12,11 +12,27 @@ interface Props {
   // onChange: PackagePolicyEditExtensionComponentProps['onChange'];
   onChange?: () => void;
 }
+
+const excludeOptions = [
+  { value: 'main', label: 'main class / jar name' },
+  { value: 'vmarg', label: 'vmarg' },
+  { value: 'user', label: 'user' },
+];
+const includeOptions = [{ value: 'all', label: 'All' }, ...excludeOptions];
+
 export function JavaRuntimeAttachment(props: Props) {
   return (
     <RuntimeAttachment
-      operations={['Include', 'Exclude']}
-      types={['main', 'pid']}
+      operationTypes={[
+        {
+          operation: { value: 'include', label: 'Include' },
+          types: includeOptions,
+        },
+        {
+          operation: { value: 'exclude', label: 'Exclude' },
+          types: excludeOptions,
+        },
+      ]}
       onChange={(...args) => {
         if (props.onChange) {
           props.onChange(...args);
@@ -27,13 +43,13 @@ export function JavaRuntimeAttachment(props: Props) {
       showUnsavedWarning={true}
       initialDiscoveryRules={[
         {
-          operation: 'Include',
+          operation: 'include',
           type: 'main',
           probe: 'java-opbeans-10010',
         },
         {
-          operation: 'Exclude',
-          type: 'pid',
+          operation: 'exclude',
+          type: 'vmarg',
           probe: '10948653898867',
         },
       ]}

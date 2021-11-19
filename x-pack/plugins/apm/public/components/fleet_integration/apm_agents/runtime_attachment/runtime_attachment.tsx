@@ -24,7 +24,7 @@ import React, { ReactNode } from 'react';
 import { DiscoveryRule } from './discovery_rule';
 import { DefaultDiscoveryRule } from './default_discovery_rule';
 import { EditDiscoveryRule } from './edit_discovery_rule';
-import { IDiscoveryRuleList } from '.';
+import { IDiscoveryRuleList, Operation } from '.';
 
 interface Props {
   isEnabled: boolean;
@@ -43,8 +43,7 @@ interface Props {
   onCancel: () => void;
   onSubmit: () => void;
   onAddRule: () => void;
-  operations: string[];
-  types: string[];
+  operationTypes: Operation[];
   toggleDescription: ReactNode;
   discoveryRulesDescription: ReactNode;
   showUnsavedWarning?: boolean;
@@ -67,8 +66,7 @@ export function RuntimeAttachment({
   onCancel,
   onSubmit,
   onAddRule,
-  operations,
-  types,
+  operationTypes,
   toggleDescription,
   discoveryRulesDescription,
   showUnsavedWarning,
@@ -157,8 +155,7 @@ export function RuntimeAttachment({
                         probe={stagedProbeText}
                         onCancel={onCancel}
                         onSubmit={onSubmit}
-                        operations={operations}
-                        types={types}
+                        operationTypes={operationTypes}
                       />
                     ) : (
                       <DiscoveryRule
@@ -170,6 +167,7 @@ export function RuntimeAttachment({
                         providedDragHandleProps={provided.dragHandleProps}
                         onDelete={onDelete}
                         onEdit={onEdit}
+                        operationTypes={operationTypes}
                       />
                     )
                   }

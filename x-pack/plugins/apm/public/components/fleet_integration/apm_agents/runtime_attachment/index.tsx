@@ -3,6 +3,7 @@ import React, { useState, useCallback, ReactNode } from 'react';
 import { RuntimeAttachment as RuntimeAttachmentStateless } from './runtime_attachment';
 
 export const STAGED_DISCOVERY_RULE_ID = 'STAGED_DISCOVERY_RULE_ID';
+export const DISCOVERY_RULE_TYPE_ALL = 'all';
 
 interface IDiscoveryRule {
   operation: string;
@@ -16,13 +17,22 @@ export type IDiscoveryRuleList = Array<{
 }>;
 
 interface Props {
-  operations: string[];
-  types: string[];
   onChange?: () => void;
   toggleDescription: ReactNode;
   discoveryRulesDescription: ReactNode;
   showUnsavedWarning?: boolean;
   initialDiscoveryRules?: IDiscoveryRule[];
+  operationTypes: Operation[];
+}
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+export interface Operation {
+  operation: Option;
+  types: Option[];
 }
 
 export function RuntimeAttachment(props: Props) {
@@ -73,16 +83,32 @@ export function RuntimeAttachment(props: Props) {
   );
 
   const [stagedOperationText, setStagedOperationText] = useState('');
-  const onChangeOperation = useCallback((operationText: string) => {
-    setStagedOperationText(operationText);
-  }, []);
-
   const [stagedTypeText, setStagedTypeText] = useState('');
+  const [stagedProbeText, setStagedProbeText] = useState('');
+
+  const onChangeOperation = useCallback(
+    (operationText: string) => {
+      setStagedOperationText(operationText);
+      const selectedOperationTypes = props.operationTypes.find(
+        ({ operation }) => operationText === operation.value
+      );
+      const selectedTypeAvailable = selectedOperationTypes?.types.some(
+        ({ value }) => stagedTypeText === value
+      );
+      if (!selectedTypeAvailable) {
+        setStagedTypeText(selectedOperationTypes?.types[0].value ?? '');
+      }
+    },
+    [props.operationTypes, stagedTypeText]
+  );
+
   const onChangeType = useCallback((operationText: string) => {
     setStagedTypeText(operationText);
+    if (operationText === DISCOVERY_RULE_TYPE_ALL) {
+      setStagedProbeText('');
+    }
   }, []);
 
-  const [stagedProbeText, setStagedProbeText] = useState('');
   const onChangeProbe = useCallback((operationText: string) => {
     setStagedProbeText(operationText);
   }, []);
@@ -125,8 +151,9 @@ export function RuntimeAttachment(props: Props) {
   ]);
 
   const onAddRule = useCallback(() => {
-    const operationText = props.operations[0];
-    const typeText = props.types[0];
+    const firstOperationType = props.operationTypes[0];
+    const operationText = firstOperationType.operation.value;
+    const typeText = firstOperationType.types[0].value;
     const valueText = '';
     setStagedOperationText(operationText);
     setStagedTypeText(typeText);
@@ -163,8 +190,7 @@ export function RuntimeAttachment(props: Props) {
       onCancel={onCancel}
       onSubmit={onSubmit}
       onAddRule={onAddRule}
-      operations={props.operations}
-      types={props.types}
+      operationTypes={props.operationTypes}
       toggleDescription={props.toggleDescription}
       discoveryRulesDescription={props.discoveryRulesDescription}
       showUnsavedWarning={props.showUnsavedWarning}

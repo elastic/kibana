@@ -7,7 +7,8 @@ import {
   EuiPanel,
   DraggableProvidedDragHandleProps,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Operation } from '.';
 
 interface Props {
   id: string;
@@ -18,6 +19,7 @@ interface Props {
   providedDragHandleProps?: DraggableProvidedDragHandleProps;
   onDelete: (discoveryItemId: string) => void;
   onEdit: (discoveryItemId: string) => void;
+  operationTypes: Operation[];
 }
 
 export function DiscoveryRule({
@@ -29,7 +31,22 @@ export function DiscoveryRule({
   providedDragHandleProps,
   onDelete,
   onEdit,
+  operationTypes,
 }: Props) {
+  const operationTypesLabels = useMemo(() => {
+    return operationTypes.reduce((acc, { operation, types }) => {
+      return {
+        ...acc,
+        [operation.value]: {
+          label: operation.label,
+          types: types.reduce((memo, { value, label }) => {
+            return { ...memo, [value]: label };
+          }, {}),
+        },
+      };
+    }, {} as { [operationValue: string]: { label: string; types: { [typeValue: string]: string } } });
+  }, [operationTypes]);
+
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup>
@@ -44,17 +61,15 @@ export function DiscoveryRule({
               <EuiBadge>{order}</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {operation === 'Include' ? (
-                <EuiBadge color="success">Include</EuiBadge>
-              ) : (
-                <EuiBadge color="danger">Exclude</EuiBadge>
-              )}
+              <EuiBadge color={operation === 'exclude' ? 'danger' : 'success'}>
+                {operationTypesLabels[operation].label}
+              </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiText>
-                    <h4>{type}</h4>
+                    <h4>{operationTypesLabels[operation].types[type]}</h4>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
