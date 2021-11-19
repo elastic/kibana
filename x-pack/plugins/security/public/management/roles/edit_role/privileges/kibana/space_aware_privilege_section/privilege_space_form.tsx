@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../../../../../../spaces/public';
+import { ALL_SPACES_ID } from '../../../../../../../common/constants';
 import type { Role } from '../../../../../../../common/model';
 import { copyRole } from '../../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../../model';
@@ -261,6 +262,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           privilegeIndex={this.state.privilegeIndex}
           canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
           disabled={this.state.selectedBasePrivilege.length > 0 || !hasSelectedSpaces}
+          allSpacesSelected={this.state.selectedSpaceIds.includes(ALL_SPACES_ID)}
         />
 
         {this.requiresGlobalPrivilegeWarning() && (

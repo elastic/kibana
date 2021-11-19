@@ -7,7 +7,7 @@
 
 import './feature_table.scss';
 
-import type { EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps, EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonGroup,
@@ -44,6 +44,7 @@ interface Props {
   onChange: (featureId: string, privileges: string[]) => void;
   onChangeAll: (privileges: string[]) => void;
   canCustomizeSubFeaturePrivileges: boolean;
+  allSpacesSelected: boolean;
   disabled?: boolean;
 }
 
@@ -272,18 +273,22 @@ export class FeatureTable extends Component<Props, {}> {
         this.props.privilegeIndex
       );
 
-    const options = primaryFeaturePrivileges.map((privilege) => {
-      return {
-        id: `${feature.id}_${privilege.id}`,
-        label: privilege.name,
-        isDisabled: this.props.disabled,
-      };
-    });
+    const options: EuiButtonGroupOptionProps[] = primaryFeaturePrivileges
+      .filter((privilege) => !privilege.disabled) // Don't show buttons for privileges that are disabled
+      .map((privilege) => {
+        const disabledDueToSpaceSelection =
+          privilege.requireAllSpaces && !this.props.allSpacesSelected;
+        return {
+          id: `${feature.id}_${privilege.id}`,
+          label: privilege.name,
+          isDisabled: this.props.disabled || disabledDueToSpaceSelection,
+        };
+      });
 
     options.push({
       id: `${feature.id}_${NO_PRIVILEGE_VALUE}`,
       label: 'None',
-      isDisabled: this.props.disabled,
+      isDisabled: this.props.disabled ?? false,
     });
 
     let warningIcon = <EuiIconTip type="empty" content={null} />;
