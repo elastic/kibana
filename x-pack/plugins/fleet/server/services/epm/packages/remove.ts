@@ -62,9 +62,9 @@ export async function removeInstallation(options: {
   // could also update with [] or some other state
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
 
-  // recreate or delete index patterns when a package is uninstalled
+  // delete the index patterns if no packages are installed
   // this must be done after deleting the saved object for the current package otherwise it will retrieve the package
-  // from the registry again and reinstall the index patterns
+  // from the registry again and keep the index patterns
   await removeUnusedIndexPatterns(savedObjectsClient);
 
   // remove the package archive and its contents from the cache so that a reinstall fetches
