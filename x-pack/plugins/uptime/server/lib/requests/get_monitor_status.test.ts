@@ -105,6 +105,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -241,6 +246,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -414,6 +424,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -580,6 +595,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -721,6 +741,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
