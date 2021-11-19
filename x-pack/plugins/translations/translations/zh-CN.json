@@ -496,7 +496,6 @@
     "core.euiStyleSelector.labelExpanded": "扩展密度",
     "core.euiStyleSelector.labelNormal": "正常密度",
     "core.euiSuperDatePicker.showDatesButtonLabel": "显示日期",
-    "core.euiSuperSelect.screenReaderAnnouncement": "您位于包含 {optionsCount} 个项目的表单选择器中，必须选择单个选项。使用向上和向下箭头键导航，使用 Esc 键关闭。",
     "core.euiSuperSelectControl.selectAnOption": "选择选项：{selectedValue} 已选",
     "core.euiSuperUpdateButton.cannotUpdateTooltip": "无法更新",
     "core.euiSuperUpdateButton.clickToApplyTooltip": "单击以应用",
