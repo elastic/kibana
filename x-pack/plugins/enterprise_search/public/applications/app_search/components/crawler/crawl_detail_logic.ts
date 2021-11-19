@@ -17,12 +17,12 @@ import { crawlRequestServerToClient } from './utils';
 
 export interface CrawlDetailValues {
   dataLoading: boolean;
-  isFlyoutOpen: boolean;
+  flyoutHidden: boolean;
   request: CrawlRequest | null;
 }
 
 interface CrawlDetailActions {
-  closeFlyout(): void;
+  hideFlyout(): void;
   fetchCrawlRequest(requestId: string): { requestId: string };
   onRecieveCrawlRequest(request: CrawlRequest): { request: CrawlRequest };
 }
@@ -30,7 +30,7 @@ interface CrawlDetailActions {
 export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetailActions>>({
   path: ['enterprise_search', 'app_search', 'crawl_detail_logic'],
   actions: {
-    closeFlyout: true,
+    hideFlyout: true,
     fetchCrawlRequest: (requestId) => ({ requestId }),
     onRecieveCrawlRequest: (request) => ({ request }),
   },
@@ -48,11 +48,11 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
         onRecieveCrawlRequest: (_, { request }) => request,
       },
     ],
-    isFlyoutOpen: [
-      false,
+    flyoutHidden: [
+      true,
       {
-        fetchCrawlRequest: () => true,
-        closeFlyout: () => false,
+        fetchCrawlRequest: () => false,
+        hideFlyout: () => true,
       },
     ],
   },

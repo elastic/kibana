@@ -20,7 +20,7 @@ import { crawlRequestServerToClient } from './utils';
 
 const DEFAULT_VALUES: CrawlDetailValues = {
   dataLoading: true,
-  isFlyoutOpen: false,
+  flyoutHidden: true,
   request: null,
 };
 
@@ -49,15 +49,15 @@ describe('CrawlDetailLogic', () => {
   });
 
   describe('reducers', () => {
-    describe('closeFlyout', () => {
+    describe('hideFlyout', () => {
       it('closes the flyout', () => {
-        mount({ isFlyoutOpen: true });
+        mount({ flyoutHidden: false });
 
-        CrawlDetailLogic.actions.closeFlyout();
+        CrawlDetailLogic.actions.hideFlyout();
 
         expect(CrawlDetailLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          isFlyoutOpen: false,
+          flyoutHidden: true,
         });
       });
     });
@@ -65,8 +65,8 @@ describe('CrawlDetailLogic', () => {
     describe('fetchCrawlRequest', () => {
       it('opens the flyout and sets loading to true', () => {
         mount({
-          isFlyoutOpen: false,
           dataLoading: false,
+          flyoutHidden: true,
         });
 
         CrawlDetailLogic.actions.fetchCrawlRequest('12345');
@@ -74,7 +74,7 @@ describe('CrawlDetailLogic', () => {
         expect(CrawlDetailLogic.values).toEqual({
           ...DEFAULT_VALUES,
           dataLoading: true,
-          isFlyoutOpen: true,
+          flyoutHidden: false,
         });
       });
     });
