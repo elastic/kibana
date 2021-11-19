@@ -357,6 +357,65 @@ describe('disable()', () => {
     });
   });
 
+  test('disables the rule even if unable to retrieve task manager doc to generate recovery event log events', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '123',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
+    });
+    taskManager.get.mockRejectedValueOnce(new Error('Fail'));
+    await rulesClient.disable({ id: '1' });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        consumer: 'myApp',
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        enabled: false,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+        scheduledTaskId: null,
+        apiKey: null,
+        apiKeyOwner: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      {
+        version: '123',
+      }
+    );
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
+    expect(
+      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
+    ).toBe('123');
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(0);
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+      `rulesClient.disable('1') - Could not write recovery events - Fail`
+    );
+  });
+
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
