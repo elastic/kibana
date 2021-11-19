@@ -298,7 +298,11 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
         {filteredDeprecations.length === 0 ? (
           <EuiTableBody>
             <EuiTableRow data-test-subj="noDeprecationsRow">
-              <EuiTableRowCell align="center" colSpan={cellTypes.length} isMobileFullWidth={true}>
+              <EuiTableRowCell
+                align="center"
+                colSpan={cellTypes.length}
+                mobileOptions={{ width: '100%' }}
+              >
                 {i18nTexts.noDeprecationsMessage}
               </EuiTableRowCell>
             </EuiTableRow>
