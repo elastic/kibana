@@ -14,23 +14,23 @@ import useAsync from 'react-use/lib/useAsync';
 import { AlertStatus } from '@kbn/rule-data-utils/alerts_as_data_status';
 import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
 
-import { AlertStatusFilterButton } from '../../../common/typings';
-import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
-import { ExperimentalBadge } from '../../components/shared/experimental_badge';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useFetcher } from '../../hooks/use_fetcher';
-import { useHasData } from '../../hooks/use_has_data';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useTimefilterService } from '../../hooks/use_timefilter_service';
-import { callObservabilityApi } from '../../services/call_observability_api';
-import { getNoDataConfig } from '../../utils/no_data_config';
-import { LoadingObservability } from '../overview/loading_observability';
-import { AlertsSearchBar } from './alerts_search_bar';
-import { AlertsTableTGrid } from './alerts_table_t_grid';
-import { Provider, alertsPageStateContainer, useAlertsPageStateContainer } from './state_container';
+import { AlertStatusFilterButton } from '../../../../../common/typings';
+import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
+import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
+import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useHasData } from '../../../../hooks/use_has_data';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { useTimefilterService } from '../../../../hooks/use_timefilter_service';
+import { callObservabilityApi } from '../../../../services/call_observability_api';
+import { getNoDataConfig } from '../../../../utils/no_data_config';
+import { LoadingObservability } from '../../../overview/loading_observability';
+import { AlertsSearchBar } from '../../components/alerts_search_bar';
+import { AlertsTableTGrid } from '../alerts_table_t_grid/alerts_table_t_grid';
+import { Provider, alertsPageStateContainer, useAlertsPageStateContainer } from '../state_container';
 import './styles.scss';
-import { AlertsStatusFilter } from './alerts_status_filter';
-import { AlertsDisclaimer } from './alerts_disclaimer';
+import { AlertsStatusFilter } from '../../components/alerts_status_filter';
+import { AlertsDisclaimer } from '../../components/alerts_disclaimer';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -243,12 +243,10 @@ function AlertsPage() {
   );
 }
 
-function WrappedAlertsPage() {
+export function WrappedAlertsPage() {
   return (
     <Provider value={alertsPageStateContainer}>
       <AlertsPage />
     </Provider>
   );
 }
-
-export { WrappedAlertsPage as AlertsPage };
