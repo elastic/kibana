@@ -7,20 +7,22 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function upgradeAssistantOverviewPageFunctionalTests({
+export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
-  const retry = getService('retry');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
+  const es = getService('es');
 
-  describe('Overview Page', function () {
+  describe('ES deprecation logs page', function () {
     this.tags('skipFirefox');
 
     before(async () => {
       await security.testUser.setRoles(['superuser']);
+      // Access to system indices will be deprecated and should generate a deprecation log
+      await es.indices.get({ index: '.kibana' });
     });
 
     after(async () => {
@@ -28,17 +30,16 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
     });
 
     beforeEach(async () => {
-      await PageObjects.upgradeAssistant.navigateToPage();
-
-      await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
-        return testSubjects.exists('overview');
-      });
+      await PageObjects.upgradeAssistant.navigateToEsDeprecationLogs();
     });
 
-    it('Should render all steps', async () => {
-      testSubjects.exists('backupStep-incomplete');
-      testSubjects.exists('fixIssuesStep-incomplete');
-      testSubjects.exists('upgradeStep');
+    it('Shows warnings callout if there are deprecations', async () => {
+      testSubjects.exists('hasWarningsCallout');
+    });
+
+    it('Shows no warnings callout if there are no deprecations', async () => {
+      await PageObjects.upgradeAssistant.clickResetLastCheckpointButton();
+      testSubjects.exists('noWarningsCallout');
     });
   });
 }

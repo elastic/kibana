@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -54,13 +54,11 @@ const i18nTexts = {
 interface Props {
   checkpoint: string;
   setCheckpoint: (value: string) => void;
-  setHasNoDeprecationLogs: (hasNoLogs: boolean) => void;
 }
 
 export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   checkpoint,
   setCheckpoint,
-  setHasNoDeprecationLogs,
 }) => {
   const [isDeletingCache, setIsDeletingCache] = useState(false);
   const {
@@ -95,16 +93,6 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_RESET_LOGS_COUNTER_CLICK);
     setCheckpoint(now);
   };
-
-  useEffect(() => {
-    // Loading shouldn't invalidate the previous state.
-    if (!isLoading) {
-      // An error should invalidate the previous state.
-      setHasNoDeprecationLogs(!error && !hasLogs);
-    }
-    // Depending upon setHasNoDeprecationLogs would create an infinite loop.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error, isLoading, hasLogs]);
 
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent lines={6} />;
