@@ -28,11 +28,12 @@ export const wrapHitsFactory =
   }): WrapHits =>
   (events, buildReasonMessage) => {
     const wrappedDocs = events.map((event) => {
+      const timestampKey = completeRule.ruleParams.timestampOverride ?? '@timestamp';
+      const timestampValue = String(event[timestampKey] ?? '');
       const id = generateId(
         event._index,
         event._id,
-        String(event._seq_no),
-        String(event._primary_term),
+        timestampValue,
         `${spaceId}:${completeRule.alertId}`
       );
       return {

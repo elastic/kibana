@@ -337,11 +337,9 @@ export const sortExceptionItems = (exceptions: ExceptionListItemSchema[]): SortE
 export const generateId = (
   docIndex: string,
   docId: string,
-  seqNo: string,
-  primaryTerm: string,
+  timestamp: string,
   ruleId: string
-): string =>
-  createHash('sha256').update(docIndex.concat(docId, seqNo, primaryTerm, ruleId)).digest('hex');
+): string => createHash('sha256').update(docIndex.concat(docId, timestamp, ruleId)).digest('hex');
 
 // TODO: do we need to include version in the id? If it does matter then we should include it in signal.parents as well
 export const generateSignalId = (signal: Signal) =>

@@ -25,19 +25,23 @@ export const wrapHitsFactory =
     ignoreFields: ConfigType['alertIgnoreFields'];
   }): WrapHits =>
   (events, buildReasonMessage) => {
-    const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
-      {
-        _index: signalsIndex,
-        _id: generateId(
-          doc._index,
-          doc._id,
-          String(doc._seq_no),
-          String(doc._primary_term),
-          completeRule.alertId ?? ''
-        ),
-        _source: buildBulkBody(completeRule, doc, mergeStrategy, ignoreFields, buildReasonMessage),
-      },
-    ]);
+    const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => {
+      const timestampKey = completeRule.ruleParams.timestampOverride ?? '@timestamp';
+      const timestampValue = String(doc[timestampKey] ?? '');
+      return [
+        {
+          _index: signalsIndex,
+          _id: generateId(doc._index, doc._id, timestampValue, completeRule.alertId ?? ''),
+          _source: buildBulkBody(
+            completeRule,
+            doc,
+            mergeStrategy,
+            ignoreFields,
+            buildReasonMessage
+          ),
+        },
+      ];
+    });
 
     return filterDuplicateSignals(completeRule.alertId, wrappedDocs, false);
   };
