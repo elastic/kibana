@@ -29,7 +29,7 @@ exports.downloadSnapshot = async function installSnapshot({
   basePath = BASE_PATH,
   installPath = path.resolve(basePath, version),
   log = defaultLog,
-  useCached = false
+  useCached = false,
 }) {
   log.info('version: %s', chalk.bold(version));
   log.info('install path: %s', chalk.bold(installPath));
@@ -63,7 +63,7 @@ exports.installSnapshot = async function installSnapshot({
   installPath = path.resolve(basePath, version),
   log = defaultLog,
   esArgs,
-  useCached = false
+  useCached = false,
 }) {
   const { downloadPath } = await exports.downloadSnapshot({
     license,
@@ -71,7 +71,7 @@ exports.installSnapshot = async function installSnapshot({
     basePath,
     installPath,
     log,
-    useCached
+    useCached,
   });
 
   return await installArchive(downloadPath, {

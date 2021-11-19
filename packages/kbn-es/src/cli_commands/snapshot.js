@@ -52,7 +52,7 @@ exports.run = async (defaults = {}) => {
       installPath: 'install-path',
       dataArchive: 'data-archive',
       esArgs: 'E',
-      useCached: 'use-cached'
+      useCached: 'use-cached',
     },
 
     string: ['version'],
@@ -61,7 +61,6 @@ exports.run = async (defaults = {}) => {
 
     default: defaults,
   });
-
 
   const cluster = new Cluster({ ssl: options.ssl });
   if (options['download-only']) {

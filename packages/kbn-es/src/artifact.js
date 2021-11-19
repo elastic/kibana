@@ -200,7 +200,10 @@ exports.Artifact = class Artifact {
       const tmpPath = `${dest}.tmp`;
 
       if (useCached && cacheMeta.exists) {
-        this._log.info('use-cached passed, forcing to use existing snapshot', chalk.bold(cacheMeta.ts));
+        this._log.info(
+          'use-cached passed, forcing to use existing snapshot',
+          chalk.bold(cacheMeta.ts)
+        );
         return;
       }
 
