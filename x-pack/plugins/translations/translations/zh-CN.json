@@ -25477,7 +25477,7 @@
     "xpack.upgradeAssistant.overview.deprecationLogs.reloadButtonLabel": "重试",
     "xpack.upgradeAssistant.overview.deprecationLogs.updateErrorMessage": "无法更新日志记录状态。",
     "xpack.upgradeAssistant.overview.documentationLinkText": "文档",
-    "xpack.upgradeAssistant.overview.identifyStepTitle": "识别已弃用 API 的使用并更新您的应用程序",
+    "xpack.upgradeAssistant.overview.fixIssuesStepTitle": "识别已弃用 API 的使用并更新您的应用程序",
     "xpack.upgradeAssistant.overview.loadingLogsLabel": "正在加载日志收集状态……",
     "xpack.upgradeAssistant.overview.observe.discoveryDescription": "搜索并筛选弃用日志以了解需要进行的更改类型。",
     "xpack.upgradeAssistant.overview.observe.observabilityDescription": "深入了解正在使用哪些已弃用 API 以及需要更新哪些应用程序。",
