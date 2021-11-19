@@ -41,12 +41,13 @@ export function alertInstanceSummaryFromEventLog(
     instances: {},
     executionDuration: {
       average: 0,
-      values: [],
+      valuesWithTimestamp: {},
     },
   };
 
   const instances = new Map<string, AlertInstanceStatus>();
   const eventDurations: number[] = [];
+  const eventDurationsWithTimestamp: Record<string, number> = {};
 
   // loop through the events
   // should be sorted newest to oldest, we want oldest to newest, so reverse
@@ -75,7 +76,11 @@ export function alertInstanceSummaryFromEventLog(
       }
 
       if (event?.event?.duration) {
-        eventDurations.push(event?.event?.duration / Millis2Nanos);
+        const eventDirationMillis = event?.event?.duration / Millis2Nanos;
+        eventDurations.push(eventDirationMillis);
+        if (event?.['@timestamp']) {
+          eventDurationsWithTimestamp[event?.['@timestamp']] = eventDirationMillis;
+        }
       }
 
       continue;
@@ -126,7 +131,7 @@ export function alertInstanceSummaryFromEventLog(
   if (eventDurations.length > 0) {
     alertInstanceSummary.executionDuration = {
       average: Math.round(mean(eventDurations)),
-      values: eventDurations,
+      valuesWithTimestamp: eventDurationsWithTimestamp,
     };
   }
 

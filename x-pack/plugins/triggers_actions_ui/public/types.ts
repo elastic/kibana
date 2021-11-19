@@ -50,6 +50,7 @@ export type {
   AlertTaskState,
   AlertInstanceSummary,
   AlertInstanceStatus,
+  ExecutionDuration,
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,

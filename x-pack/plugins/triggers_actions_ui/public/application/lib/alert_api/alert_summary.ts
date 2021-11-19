@@ -6,8 +6,16 @@
  */
 import { HttpSetup } from 'kibana/public';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { AlertInstanceSummary } from '../../../types';
+import { AlertInstanceSummary, ExecutionDuration } from '../../../types';
 import { RewriteRequestCase, AsApiContract } from '../../../../../actions/common';
+
+const transformExecutionDuration: RewriteRequestCase<ExecutionDuration> = ({
+  values_with_timestamp: valuesWithTimestamp,
+  ...rest
+}) => ({
+  valuesWithTimestamp,
+  ...rest,
+});
 
 const rewriteBodyRes: RewriteRequestCase<AlertInstanceSummary> = ({
   alerts,
@@ -28,7 +36,7 @@ const rewriteBodyRes: RewriteRequestCase<AlertInstanceSummary> = ({
   errorMessages,
   lastRun,
   instances: alerts,
-  executionDuration,
+  executionDuration: executionDuration ? transformExecutionDuration(executionDuration) : undefined,
 });
 
 export async function loadAlertInstanceSummary({
