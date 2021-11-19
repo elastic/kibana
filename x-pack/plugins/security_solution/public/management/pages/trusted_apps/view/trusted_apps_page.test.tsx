@@ -17,11 +17,6 @@ import {
   TrustedApp,
 } from '../../../../../common/endpoint/types';
 import { HttpFetchOptions, HttpFetchOptionsWithPath } from 'kibana/public';
-import {
-  GetPackagePoliciesResponse,
-  PACKAGE_POLICY_API_ROUTES,
-} from '../../../../../../fleet/common';
-import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
@@ -53,8 +48,6 @@ describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
     'Add a trusted application to improve performance or alleviate conflicts with other ' +
     'applications running on your hosts.';
-
-  const generator = new EndpointDocGenerator('policy-list');
 
   let mockedContext: AppContextTestRender;
   let history: AppContextTestRender['history'];
@@ -541,9 +534,8 @@ describe('When on the Trusted Apps Page', () => {
         let releasePostCreateApi: () => void;
 
         beforeEach(async () => {
-          // Mock the http.post() call and expose `resolveHttpPost()` method so that
-          // we can control when the API call response is returned, which will allow us
-          // to test the UI behaviours while the API call is in flight
+          // Add a delay to the create api response provider and expose a function that allows
+          // us to release it at the right time.
           mockedApis.responseProvider.trustedAppCreate.mockDelay.mockReturnValue(
             new Promise((resolve) => {
               releasePostCreateApi = resolve as typeof releasePostCreateApi;
@@ -728,26 +720,22 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and there are no trusted apps', () => {
-    const releaseExistsResponse: jest.MockedFunction<() => FoundExceptionListItemSchema> = jest.fn(
-      async () => {
-        return {
-          data: [],
-          total: 0,
-          page: 1,
-          per_page: 1,
-        };
-      }
-    );
-    const releaseListResponse: jest.MockedFunction<() => FoundExceptionListItemSchema> = jest.fn(
-      () => {
-        return {
-          data: [],
-          total: 0,
-          page: 1,
-          per_page: 20,
-        };
-      }
-    );
+    const releaseExistsResponse = jest.fn((): FoundExceptionListItemSchema => {
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+      };
+    });
+    const releaseListResponse = jest.fn((): FoundExceptionListItemSchema => {
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      };
+    });
 
     beforeEach(() => {
       mockedApis.responseProvider.trustedAppsList.mockImplementation(({ query }) => {
@@ -785,13 +773,13 @@ describe('When on the Trusted Apps Page', () => {
         await waitForAction('trustedAppsExistStateChanged');
       });
       expect(await renderResult.findByTestId('trustedAppEmptyState')).not.toBeNull();
-      releaseListResponse.mockResolvedValueOnce({
+      releaseListResponse.mockReturnValueOnce({
         data: [mockedApis.responseProvider.trustedApp({ query: {} } as HttpFetchOptionsWithPath)],
         total: 1,
         page: 1,
         per_page: 20,
       });
-      releaseExistsResponse.mockResolvedValueOnce({
+      releaseExistsResponse.mockReturnValueOnce({
         data: [mockedApis.responseProvider.trustedApp({ query: {} } as HttpFetchOptionsWithPath)],
         total: 1,
         page: 1,
@@ -809,13 +797,13 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     it('should should show empty prompt once the last trusted app entry is deleted', async () => {
-      releaseListResponse.mockResolvedValueOnce({
+      releaseListResponse.mockReturnValueOnce({
         data: [mockedApis.responseProvider.trustedApp({ query: {} } as HttpFetchOptionsWithPath)],
         total: 1,
         page: 1,
         per_page: 20,
       });
-      releaseExistsResponse.mockResolvedValueOnce({
+      releaseExistsResponse.mockReturnValueOnce({
         data: [mockedApis.responseProvider.trustedApp({ query: {} } as HttpFetchOptionsWithPath)],
         total: 1,
         page: 1,
@@ -829,19 +817,6 @@ describe('When on the Trusted Apps Page', () => {
       });
 
       expect(await renderResult.findByTestId('trustedAppsListPageContent')).not.toBeNull();
-
-      releaseListResponse.mockResolvedValueOnce({
-        data: [],
-        total: 0,
-        page: 1,
-        per_page: 20,
-      });
-      releaseExistsResponse.mockResolvedValueOnce({
-        data: [],
-        total: 0,
-        page: 1,
-        per_page: 1,
-      });
 
       await act(async () => {
         mockedContext.store.dispatch({
@@ -889,28 +864,6 @@ describe('When on the Trusted Apps Page', () => {
   describe('and the back button is present', () => {
     let renderResult: ReturnType<AppContextTestRender['render']>;
     beforeEach(async () => {
-      // Ensure implementation is defined before render to avoid undefined responses from hidden api calls
-      const priorMockImplementation = coreStart.http.get.getMockImplementation();
-      // @ts-expect-error TS7006
-      coreStart.http.get.mockImplementation((path, options) => {
-        if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
-          const policy = generator.generatePolicyPackagePolicy();
-          policy.name = 'test policy A';
-          policy.id = 'abc123';
-
-          const response: GetPackagePoliciesResponse = {
-            items: [policy],
-            page: 1,
-            perPage: 1000,
-            total: 1,
-          };
-          return response;
-        }
-        if (priorMockImplementation) {
-          return priorMockImplementation(path);
-        }
-      });
-
       renderResult = render();
       await act(async () => {
         await waitForAction('trustedAppsListResourceStateChanged');
