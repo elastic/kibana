@@ -94,6 +94,14 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
       async (ctx, req, res) => {
+        const transaction = apmAgent.startTransaction();
+        const subscription = req.events.completed$.subscribe(() => {
+          setTimeout(() => {
+            transaction?.end();
+            subscription.unsubscribe();
+          }, 1_000);
+        });
+
         logger.info('>>> emit_log_with_trace_id', {
           // @ts-expect-error
           started: apmAgent.isStarted(),
