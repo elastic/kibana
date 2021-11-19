@@ -33,7 +33,8 @@ import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
 import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
-import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import {
   ControlColumnProps,
   KueryFilterQueryKind,
@@ -60,7 +61,6 @@ import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
-
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
   width: 100%;
@@ -206,7 +206,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [activeFilterManager, uiSettings]
   );
 
-  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
