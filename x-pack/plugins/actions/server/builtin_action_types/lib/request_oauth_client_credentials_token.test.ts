@@ -11,13 +11,19 @@ jest.mock('axios', () => ({
 import axios from 'axios';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
+import { requestOAuthToken } from './request_oauth_token';
 import { actionsConfigMock } from '../../actions_config.mock';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = jest.fn();
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+
+interface ClientCredentialsOAuthRequestParams {
+  scope?: string;
+  clientId?: string;
+  clientSecret?: string;
+}
 
 describe('requestOAuthClientCredentialsToken', () => {
   beforeEach(() => {
@@ -34,15 +40,16 @@ describe('requestOAuthClientCredentialsToken', () => {
         expiresIn: 123,
       },
     });
-    await requestOAuthClientCredentialsToken(
+    await requestOAuthToken<ClientCredentialsOAuthRequestParams>(
       'https://test',
-      mockLogger,
       {
         scope: 'test',
         clientId: '123456',
         clientSecret: 'secrert123',
       },
-      configurationUtilities
+      'client_credentials',
+      configurationUtilities,
+      mockLogger
     );
 
     expect(axiosInstanceMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -106,15 +113,16 @@ describe('requestOAuthClientCredentialsToken', () => {
     });
 
     await expect(
-      requestOAuthClientCredentialsToken(
+      requestOAuthToken<ClientCredentialsOAuthRequestParams>(
         'https://test',
-        mockLogger,
         {
           scope: 'test',
           clientId: '123456',
           clientSecret: 'secrert123',
         },
-        configurationUtilities
+        'client_credentials',
+        configurationUtilities,
+        mockLogger
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       '"{\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter \'scope\' is not valid.\\"}"'
