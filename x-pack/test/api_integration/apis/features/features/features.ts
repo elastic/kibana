@@ -117,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
             'osquery',
             'uptime',
             'siem',
+            'securitySolutionEndpoint',
             'securitySolutionCases',
             'fleet',
           ].sort()

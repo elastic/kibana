@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
 import {
@@ -17,7 +18,7 @@ import {
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
-import { Logger, SavedObjectsClient } from '../../../../src/core/server';
+import { Logger, SavedObjectsClient, DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
 
 import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
@@ -45,7 +46,12 @@ import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../common/constants';
+import {
+  APP_ID,
+  ENDPOINT_FEATURE_ID,
+  SERVER_APP_ID,
+  LEGACY_NOTIFICATIONS_ID,
+} from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
@@ -90,6 +96,83 @@ import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
+const registerKibanaFeaturesForPlugin = (
+  features: SecuritySolutionPluginSetupDependencies['features']
+) => {
+  features.registerKibanaFeature({
+    id: ENDPOINT_FEATURE_ID,
+    name: i18n.translate('xpack.securitySolution.features.endpointFeatureName', {
+      defaultMessage: 'Endpoint',
+    }),
+    category: DEFAULT_APP_CATEGORIES.security,
+    app: [ENDPOINT_FEATURE_ID, 'kibana'],
+    catalogue: [ENDPOINT_FEATURE_ID],
+    order: 2300,
+    excludeFromBasePrivileges: true,
+    privileges: {
+      all: {
+        api: [`${ENDPOINT_FEATURE_ID}-read`, `${ENDPOINT_FEATURE_ID}-write`],
+        app: [ENDPOINT_FEATURE_ID, 'kibana'],
+        catalogue: [ENDPOINT_FEATURE_ID],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: ['write'],
+      },
+      read: {
+        api: [`${ENDPOINT_FEATURE_ID}-read`],
+        app: [ENDPOINT_FEATURE_ID, 'kibana'],
+        catalogue: [ENDPOINT_FEATURE_ID],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: ['read'],
+      },
+    },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.securitySolution.features.endpointActionsSubFeatureName', {
+          defaultMessage: 'Host Isolation',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                api: [
+                  `${ENDPOINT_FEATURE_ID}-writeIsolationActions`,
+                  `${ENDPOINT_FEATURE_ID}-readIsolationActionsAndResponses`,
+                ],
+                id: 'isolation_all',
+                includeIn: 'all',
+                name: 'All',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: ['writeIsolationActions', 'readIsolationActionsAndResponses'],
+              },
+              {
+                api: [`${ENDPOINT_FEATURE_ID}-readIsolationActionsAndResponses`],
+                id: 'isolation_read',
+                includeIn: 'read',
+                name: 'Read',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: ['readIsolationActionsAndResponses'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+};
+
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
   private readonly config: ConfigType;
@@ -128,7 +211,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreSetupDependencies,
     plugins: SecuritySolutionPluginSetupDependencies
   ): SecuritySolutionPluginSetup {
-    this.logger.debug('plugin setup');
+    this.logger.debug(`${APP_ID}: plugin setup`);
+
+    registerKibanaFeaturesForPlugin(plugins.features);
 
     const { appClientFactory, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
