@@ -392,6 +392,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         <EuiDataGrid
           {
             // we control the key when pagination is on to circumvent an EUI rendering bug
+            // see https://github.com/elastic/eui/issues/5391
             ...(pagination
               ? {
                   key: columns.map(({ id }) => id).join('-') + '-' + pagination.pageSize,
