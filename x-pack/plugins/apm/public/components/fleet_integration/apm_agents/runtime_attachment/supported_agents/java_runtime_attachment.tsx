@@ -10,7 +10,7 @@ interface Props {
   // policy: PackagePolicy;
   // newPolicy: NewPackagePolicy;
   // onChange: PackagePolicyEditExtensionComponentProps['onChange'];
-  onChange?: () => void;
+  onChange?: (settings: any) => void;
 }
 
 const excludeOptions = [
@@ -41,6 +41,7 @@ export function JavaRuntimeAttachment(props: Props) {
       toggleDescription="Attach the Java agent to running and starting Java applications."
       discoveryRulesDescription="For every running JVM, the discovery rules are evaluated in the order they are provided. The first matching rule determines the outcome. Learn more in the docs"
       showUnsavedWarning={true}
+      initialIsEnabled={true}
       initialDiscoveryRules={[
         {
           operation: 'include',

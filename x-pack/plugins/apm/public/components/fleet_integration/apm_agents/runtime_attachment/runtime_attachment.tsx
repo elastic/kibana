@@ -18,7 +18,6 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiIcon,
-  euiDragDropReorder,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { DiscoveryRule } from './discovery_rule';
@@ -47,6 +46,7 @@ interface Props {
   toggleDescription: ReactNode;
   discoveryRulesDescription: ReactNode;
   showUnsavedWarning?: boolean;
+  onDragEnd: (dropResult: DropResult) => void;
 }
 
 export function RuntimeAttachment({
@@ -70,18 +70,8 @@ export function RuntimeAttachment({
   toggleDescription,
   discoveryRulesDescription,
   showUnsavedWarning,
+  onDragEnd,
 }: Props) {
-  const onDragEnd = ({ source, destination }: DropResult) => {
-    if (source && destination) {
-      const items = euiDragDropReorder(
-        discoveryRuleList,
-        source.index,
-        destination.index
-      );
-
-      setDiscoveryRuleList(items);
-    }
-  };
   return (
     <div>
       {showUnsavedWarning && (

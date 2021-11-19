@@ -1,4 +1,4 @@
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, euiDragDropReorder, DropResult } from '@elastic/eui';
 import React, { useState, useCallback, ReactNode } from 'react';
 import { RuntimeAttachment as RuntimeAttachmentStateless } from './runtime_attachment';
 
@@ -16,11 +16,17 @@ export type IDiscoveryRuleList = Array<{
   discoveryRule: IDiscoveryRule;
 }>;
 
+export interface RuntimeAttachmentSettings {
+  enabled: boolean;
+  discoveryRules: IDiscoveryRule[];
+}
+
 interface Props {
-  onChange?: () => void;
+  onChange?: (runtimeAttachmentSettings: RuntimeAttachmentSettings) => void;
   toggleDescription: ReactNode;
   discoveryRulesDescription: ReactNode;
   showUnsavedWarning?: boolean;
+  initialIsEnabled?: boolean;
   initialDiscoveryRules?: IDiscoveryRule[];
   operationTypes: Operation[];
 }
@@ -36,8 +42,8 @@ export interface Operation {
 }
 
 export function RuntimeAttachment(props: Props) {
-  const { initialDiscoveryRules = [] } = props;
-  const [isEnabled, setIsEnabled] = useState(true);
+  const { initialDiscoveryRules = [], onChange = () => {} } = props;
+  const [isEnabled, setIsEnabled] = useState(Boolean(props.initialIsEnabled));
   const [discoveryRuleList, setDiscoveryRuleList] =
     useState<IDiscoveryRuleList>(
       initialDiscoveryRules.map((discoveryRule) => ({
@@ -52,7 +58,11 @@ export function RuntimeAttachment(props: Props) {
   const onToggleEnable = useCallback(() => {
     setIsEnabled(!isEnabled);
     setDiscoveryRuleList([]);
-  }, [isEnabled]);
+    onChange({
+      enabled: !isEnabled,
+      discoveryRules: [],
+    });
+  }, [isEnabled, onChange]);
 
   const onDelete = useCallback(
     (discoveryRuleId: string) => {
@@ -60,8 +70,14 @@ export function RuntimeAttachment(props: Props) {
         ({ id }) => id !== discoveryRuleId
       );
       setDiscoveryRuleList(filteredDiscoveryRuleList);
+      onChange({
+        enabled: isEnabled,
+        discoveryRules: filteredDiscoveryRuleList.map(
+          ({ discoveryRule }) => discoveryRule
+        ),
+      });
     },
-    [discoveryRuleList]
+    [isEnabled, discoveryRuleList, onChange]
   );
 
   const onEdit = useCallback(
@@ -142,12 +158,20 @@ export function RuntimeAttachment(props: Props) {
     ];
     setDiscoveryRuleList(nextDiscoveryRuleList);
     setEditDiscoveryRuleId(null);
+    onChange({
+      enabled: isEnabled,
+      discoveryRules: nextDiscoveryRuleList.map(
+        ({ discoveryRule }) => discoveryRule
+      ),
+    });
   }, [
+    isEnabled,
     editDiscoveryRuleId,
     stagedOperationText,
     stagedTypeText,
     stagedProbeText,
     discoveryRuleList,
+    onChange,
   ]);
 
   const onAddRule = useCallback(() => {
@@ -172,6 +196,27 @@ export function RuntimeAttachment(props: Props) {
     setDiscoveryRuleList(nextDiscoveryRuleList);
     setEditDiscoveryRuleId(STAGED_DISCOVERY_RULE_ID);
   }, [discoveryRuleList]);
+
+  const onDragEnd = useCallback(
+    ({ source, destination }: DropResult) => {
+      if (source && destination) {
+        const nextDiscoveryRuleList = euiDragDropReorder(
+          discoveryRuleList,
+          source.index,
+          destination.index
+        );
+        setDiscoveryRuleList(nextDiscoveryRuleList);
+        onChange({
+          enabled: isEnabled,
+          discoveryRules: nextDiscoveryRuleList.map(
+            ({ discoveryRule }) => discoveryRule
+          ),
+        });
+      }
+    },
+    [isEnabled, discoveryRuleList, onChange]
+  );
+
   return (
     <RuntimeAttachmentStateless
       isEnabled={isEnabled}
@@ -194,6 +239,7 @@ export function RuntimeAttachment(props: Props) {
       toggleDescription={props.toggleDescription}
       discoveryRulesDescription={props.discoveryRulesDescription}
       showUnsavedWarning={props.showUnsavedWarning}
+      onDragEnd={onDragEnd}
     />
   );
 }
