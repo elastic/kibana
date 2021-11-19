@@ -65,3 +65,36 @@ exports[`ServerStatus renders correctly for red state 2`] = `
   </EuiInnerText>
 </EuiBadge>
 `;
+
+exports[`ServerStatus renders correctly for yellow state 2`] = `
+<EuiBadge
+  aria-label="Yellow"
+  color="success"
+  data-test-subj="serverStatusTitleBadge"
+>
+  <EuiInnerText>
+    <span
+      aria-label="Yellow"
+      className="euiBadge euiBadge--iconLeft"
+      data-test-subj="serverStatusTitleBadge"
+      style={
+        Object {
+          "backgroundColor": "#6dccb1",
+          "color": "#000",
+        }
+      }
+      title="Yellow"
+    >
+      <span
+        className="euiBadge__content"
+      >
+        <span
+          className="euiBadge__text"
+        >
+          Yellow
+        </span>
+      </span>
+    </span>
+  </EuiInnerText>
+</EuiBadge>
+`;
