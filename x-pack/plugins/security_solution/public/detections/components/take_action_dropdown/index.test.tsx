@@ -192,20 +192,22 @@ describe('take action dropdown', () => {
       },
     });
 
-    const modifiedMockDetailsData = mockAlertDetailsData.map((obj) => {
-      if (obj.field === 'kibana.alert.rule.uuid') {
-        return null;
-      }
-      if (obj.field === 'event.kind') {
-        return {
-          category: 'event', 
-          field: 'event.kind', 
-          values: ['event'], 
-          originalValue: 'event',
-        };
-      }
-      return obj;
-    }).filter(obj => obj) as TimelineEventsDetailsItem[];
+    const modifiedMockDetailsData = mockAlertDetailsData
+      .map((obj) => {
+        if (obj.field === 'kibana.alert.rule.uuid') {
+          return null;
+        }
+        if (obj.field === 'event.kind') {
+          return {
+            category: 'event',
+            field: 'event.kind',
+            values: ['event'],
+            originalValue: 'event',
+          };
+        }
+        return obj;
+      })
+      .filter((obj) => obj) as TimelineEventsDetailsItem[];
 
     test('should enable the "Add Endpoint event filter" button if provided endpoint event', async () => {
       wrapper = mount(
@@ -219,7 +221,9 @@ describe('take action dropdown', () => {
       );
       wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
       await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()).toBeEnabled();
+        expect(
+          wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
+        ).toBeEnabled();
       });
     });
 
@@ -235,7 +239,9 @@ describe('take action dropdown', () => {
       );
       wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
       await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()).toBeDisabled();
+        expect(
+          wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
+        ).toBeDisabled();
       });
     });
   });
