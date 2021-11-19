@@ -10,11 +10,11 @@ import { Route, Redirect, Switch, useRouteMatch } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
+import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
-
-import { isVersionMismatch, VersionMismatchPage } from '../shared/version_mismatch';
+import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { AppLogic } from './app_logic';
 import { WorkplaceSearchHeaderActions } from './components/layout';

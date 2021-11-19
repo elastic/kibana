@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isVersionMismatch } from './is_version_mismatch';
+import { isVersionMismatch } from './index';
 
 describe('isVersionMismatch', () => {
   it('no mismatch if major and minor are the same', () => {

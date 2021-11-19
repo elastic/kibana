@@ -7,4 +7,3 @@
 
 export { VersionMismatchPage } from './version_mismatch_page';
 export { VersionMismatchError } from './version_mismatch_error';
-export { isVersionMismatch } from './is_version_mismatch';
