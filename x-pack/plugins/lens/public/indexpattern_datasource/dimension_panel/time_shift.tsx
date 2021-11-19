@@ -14,7 +14,7 @@ import { Query } from 'src/plugins/data/public';
 import { parseTimeShift } from '../../../../../../src/plugins/data/common';
 import {
   adjustTimeScaleLabelSuffix,
-  IndexPatternColumn,
+  GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
 import { IndexPattern, IndexPatternLayer } from '../types';
@@ -70,7 +70,7 @@ export function TimeShift({
   activeData,
   layerId,
 }: {
-  selectedColumn: IndexPatternColumn;
+  selectedColumn: GenericIndexPatternColumn;
   indexPattern: IndexPattern;
   columnId: string;
   layer: IndexPatternLayer;
