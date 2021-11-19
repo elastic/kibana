@@ -62,7 +62,7 @@ const StepsWithLessPadding = styled(EuiSteps)`
   }
 
   // compensating for EuiBottomBar hiding the content
-  @media (max-width: 767px) {
+  @media (max-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
     margin-bottom: 100px;
   }
 `;
