@@ -199,7 +199,7 @@ class UntrackSearchCommand implements SearchSessionStateCommand {
     expect(model.pendingSearches).toEqual(state.pendingSearches);
   }
   toString(): string {
-    return `TrackSearchCommand(${JSON.stringify(this.value)})`;
+    return `UntrackSearchCommand(${JSON.stringify(this.value)})`;
   }
 }
 
