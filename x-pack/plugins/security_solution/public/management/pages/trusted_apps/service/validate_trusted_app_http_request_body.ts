@@ -57,6 +57,4 @@ export const validateTrustedAppHttpRequestBody = async (
   if (failedValidations.length) {
     throw new HttpRequestValidationError(failedValidations);
   }
-
-  return true;
 };
