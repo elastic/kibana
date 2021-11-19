@@ -46,6 +46,7 @@ import {
   createLoadingResourceState,
   isLoadingResourceState,
   isUninitialisedResourceState,
+  isLoadedResourceState,
 } from '../../../../../state';
 import { parseQueryFilterToKQL } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../trusted_apps/constants';
@@ -143,10 +144,17 @@ const checkIfAnyTrustedApp = async (
   if (getDoesAnyTrustedAppExistsIsLoading(state)) {
     return;
   }
-  store.dispatch({
-    type: 'policyArtifactsDeosAnyTrustedAppExists',
-    payload: createLoadingResourceState<boolean>(),
-  });
+  if (isLoadedResourceState(state.artifacts.doesAnyTrustedAppExists)) {
+    store.dispatch({
+      type: 'policyArtifactsDeosAnyTrustedAppExists',
+      payload: createLoadingResourceState(state.artifacts.doesAnyTrustedAppExists),
+    });
+  } else {
+    store.dispatch({
+      type: 'policyArtifactsDeosAnyTrustedAppExists',
+      payload: createLoadingResourceState<GetTrustedAppsListResponse>(),
+    });
+  }
   try {
     const trustedApps = await trustedAppsService.getTrustedAppsList({
       page: 1,
@@ -155,12 +163,12 @@ const checkIfAnyTrustedApp = async (
 
     store.dispatch({
       type: 'policyArtifactsDeosAnyTrustedAppExists',
-      payload: createLoadedResourceState(!isEmpty(trustedApps.data)),
+      payload: createLoadedResourceState(trustedApps),
     });
   } catch (err) {
     store.dispatch({
       type: 'policyArtifactsDeosAnyTrustedAppExists',
-      payload: createFailedResourceState<boolean>(err.body ?? err),
+      payload: createFailedResourceState<GetTrustedAppsListResponse>(err.body ?? err),
     });
   }
 };
@@ -265,12 +273,19 @@ const fetchPolicyTrustedAppsIfNeeded = async (
     try {
       const urlLocationData = getCurrentUrlLocationPaginationParams(state);
       const policyId = policyIdFromParams(state);
+      const kuery = [
+        `((exception-list-agnostic.attributes.tags:"policy:${policyId}") OR (exception-list-agnostic.attributes.tags:"policy:all"))`,
+      ];
+
+      if (urlLocationData.filter) {
+        const filterKuery =
+          parseQueryFilterToKQL(urlLocationData.filter, SEARCHABLE_FIELDS) || undefined;
+        if (filterKuery) kuery.push(filterKuery);
+      }
       const fetchResponse = await trustedAppsService.getTrustedAppsList({
         page: urlLocationData.page_index + 1,
         per_page: urlLocationData.page_size,
-        kuery: `((exception-list-agnostic.attributes.tags:"policy:${policyId}") OR (exception-list-agnostic.attributes.tags:"policy:all"))${
-          urlLocationData.filter ? ` AND (${urlLocationData.filter})` : ''
-        }`,
+        kuery: kuery.join(' AND '),
       });
 
       dispatch({
@@ -280,7 +295,10 @@ const fetchPolicyTrustedAppsIfNeeded = async (
           artifacts: fetchResponse,
         }),
       });
-      if (!fetchResponse.total) {
+      if (
+        !fetchResponse.total ||
+        isUninitialisedResourceState(state.artifacts.doesAnyTrustedAppExists)
+      ) {
         await checkIfAnyTrustedApp({ getState, dispatch }, trustedAppsService);
       }
     } catch (error) {

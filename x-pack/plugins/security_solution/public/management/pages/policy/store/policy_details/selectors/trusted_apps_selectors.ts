@@ -114,7 +114,7 @@ export const getUpdateArtifacts = (
 export const getDoesTrustedAppExists = (state: Immutable<PolicyDetailsState>): boolean => {
   return (
     isLoadedResourceState(state.artifacts.doesAnyTrustedAppExists) &&
-    state.artifacts.doesAnyTrustedAppExists.data
+    !!state.artifacts.doesAnyTrustedAppExists.data
   );
 };
 
@@ -130,6 +130,11 @@ export const getCurrentPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
   PolicyArtifactsState['assignedList']
 > = (state) => {
   return state.artifacts.assignedList;
+};
+
+/** Returns curreent filter value */
+export const getCurrentPolicyArtifactsFilter: PolicyDetailsSelector<string> = (state) => {
+  return state.artifacts.location.filter;
 };
 
 export const getLatestLoadedPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
@@ -182,6 +187,18 @@ export const getPolicyTrustedAppsListPagination: PolicyDetailsSelector<Paginatio
     };
   }
 );
+
+export const getTotalPolicyTrustedAppsListPagination = (
+  state: Immutable<PolicyDetailsState>
+): number => {
+  return isLoadedResourceState(state.artifacts.doesAnyTrustedAppExists)
+    ? state.artifacts.doesAnyTrustedAppExists.data.total
+    : isLoadingResourceState(state.artifacts.doesAnyTrustedAppExists) &&
+      state.artifacts.doesAnyTrustedAppExists.previousState &&
+      isLoadedResourceState(state.artifacts.doesAnyTrustedAppExists.previousState)
+    ? state.artifacts.doesAnyTrustedAppExists.previousState.data.total
+    : 0;
+};
 
 export const getTrustedAppsPolicyListState: PolicyDetailsSelector<
   PolicyDetailsState['artifacts']['policies']

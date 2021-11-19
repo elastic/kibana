@@ -25,7 +25,7 @@ import {
   policyDetails,
   doesPolicyHaveTrustedApps,
   doesTrustedAppExistsLoading,
-  getPolicyTrustedAppsListPagination,
+  getTotalPolicyTrustedAppsListPagination,
 } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
@@ -44,9 +44,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
   const navigateCallback = usePolicyDetailsNavigateCallback();
   const hasAssignedTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
   const { isPlatinumPlus } = useEndpointPrivileges();
-  const totalAssignedCount = usePolicyDetailsSelector(
-    getPolicyTrustedAppsListPagination
-  ).totalItemCount;
+  const totalAssignedCount = usePolicyDetailsSelector(getTotalPolicyTrustedAppsListPagination);
 
   const showListFlyout = location.show === 'list';
 
@@ -75,19 +73,16 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
 
   const displaysEmptyState = useMemo(
     () =>
+      !doesTrustedAppExists &&
       !isDoesTrustedAppExistsLoading &&
       !hasAssignedTrustedApps.loading &&
       !hasAssignedTrustedApps.hasTrustedApps,
     [
+      doesTrustedAppExists,
       hasAssignedTrustedApps.hasTrustedApps,
       hasAssignedTrustedApps.loading,
       isDoesTrustedAppExistsLoading,
     ]
-  );
-
-  const displaysEmptyStateIsLoading = useMemo(
-    () => isDoesTrustedAppExistsLoading || hasAssignedTrustedApps.loading,
-    [hasAssignedTrustedApps.loading, isDoesTrustedAppExistsLoading]
   );
 
   const aboutInfo = useMemo(() => {
@@ -114,7 +109,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
 
   return policyItem ? (
     <div>
-      {!displaysEmptyStateIsLoading && !displaysEmptyState ? (
+      {doesTrustedAppExists || (!hasAssignedTrustedApps.loading && !displaysEmptyState) ? (
         <>
           <EuiPageHeader alignItems="center">
             <EuiPageHeaderSection>
@@ -139,7 +134,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
             <EuiPageHeaderSection>{isPlatinumPlus && assignTrustedAppButton}</EuiPageHeaderSection>
           </EuiPageHeader>
 
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
         </>
       ) : null}
       <EuiPageContent
@@ -149,7 +144,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         color="transparent"
         borderRadius="none"
       >
-        {displaysEmptyState ? (
+        {displaysEmptyState && !isDoesTrustedAppExistsLoading ? (
           doesTrustedAppExists ? (
             <PolicyTrustedAppsEmptyUnassigned
               policyId={policyItem.id}
@@ -162,7 +157,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
             />
           )
         ) : (
-          <PolicyTrustedAppsList hideTotalShowingLabel={true} />
+          <PolicyTrustedAppsList />
         )}
       </EuiPageContent>
       {isPlatinumPlus && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
