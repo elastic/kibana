@@ -6,7 +6,7 @@
  */
 
 import { ResponseErrorAttributes } from 'kibana/server';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { FieldSpec } from '../../../../../src/plugins/data_views/common';
 
 export interface ServerApiError {
