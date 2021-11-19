@@ -21,7 +21,10 @@ export const advancedFilter: RendererFactory<{}> = () => ({
   height: 50,
   render(domNode, _, handlers) {
     ReactDOM.render(
-      <AdvancedFilter commit={handlers.setFilter} value={handlers.getFilter()} />,
+      <AdvancedFilter
+        commit={(filter) => handlers.event({ name: 'applyFilterAction', data: filter })}
+        value={handlers.getFilter()}
+      />,
       domNode,
       () => handlers.done()
     );

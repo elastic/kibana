@@ -44,7 +44,7 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
 
       if (filterExpression === undefined || filterExpression.indexOf('timefilter') !== 0) {
         filterExpression = defaultTimeFilterExpression;
-        handlers.setFilter(filterExpression);
+        handlers.event({ name: 'applyFilterAction', data: filterExpression });
       } else if (filterExpression !== '') {
         // NOTE: setFilter() will cause a data refresh, avoid calling unless required
         // compare expression and filter, update filter if needed
@@ -54,13 +54,13 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
         ]);
 
         if (changed) {
-          handlers.setFilter(toExpression(newAst));
+          handlers.event({ name: 'applyFilterAction', data: toExpression(newAst) });
         }
       }
 
       ReactDOM.render(
         <TimeFilter
-          commit={handlers.setFilter}
+          commit={(filter) => handlers.event({ name: 'applyFilterAction', data: filter })}
           filter={filterExpression}
           commonlyUsedRanges={customQuickRanges}
           dateFormat={customDateFormat}

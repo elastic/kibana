@@ -52,20 +52,20 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
       (filterExpression === undefined || !filterExpression.includes('exactly'))
     ) {
       filterExpression = '';
-      handlers.setFilter(filterExpression);
+      handlers.event({ name: 'applyFilterAction', data: filterExpression });
     } else if (filterExpression !== '') {
       // NOTE: setFilter() will cause a data refresh, avoid calling unless required
       // compare expression and filter, update filter if needed
       const { changed, newAst } = syncFilterExpression(config, filterExpression, ['filterGroup']);
 
       if (changed) {
-        handlers.setFilter(toExpression(newAst));
+        handlers.event({ name: 'applyFilterAction', data: toExpression(newAst) });
       }
     }
 
     const commit = (commitValue: string) => {
       if (commitValue === '%%CANVAS_MATCH_ALL%%') {
-        handlers.setFilter('');
+        handlers.event({ name: 'applyFilterAction', data: '' });
       } else {
         const newFilterAST: Ast = {
           type: 'expression',
@@ -83,7 +83,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
         };
 
         const newFilter = toExpression(newFilterAST);
-        handlers.setFilter(newFilter);
+        handlers.event({ name: 'applyFilterAction', data: newFilter });
       }
     };
 
