@@ -238,7 +238,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     toolsRight: [
       <EuiButton
         key="reloadButton"
-        color="secondary"
+        color="success"
         iconType="refresh"
         onClick={reload}
         data-test-subj="reloadButton"
