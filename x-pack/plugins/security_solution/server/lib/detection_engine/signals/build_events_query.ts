@@ -117,6 +117,7 @@ export const buildEventsSearchQuery = ({
     size,
     ignore_unavailable: true,
     track_total_hits: trackTotalHits,
+    seq_no_primary_term: true,
     body: {
       query: {
         bool: {

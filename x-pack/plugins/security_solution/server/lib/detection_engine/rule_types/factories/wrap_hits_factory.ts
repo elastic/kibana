@@ -31,7 +31,8 @@ export const wrapHitsFactory =
       const id = generateId(
         event._index,
         event._id,
-        String(event._version),
+        String(event._seq_no),
+        String(event._primary_term),
         `${spaceId}:${completeRule.alertId}`
       );
       return {

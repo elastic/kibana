@@ -28,7 +28,13 @@ export const wrapHitsFactory =
     const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
       {
         _index: signalsIndex,
-        _id: generateId(doc._index, doc._id, String(doc._version), completeRule.alertId ?? ''),
+        _id: generateId(
+          doc._index,
+          doc._id,
+          String(doc._seq_no),
+          String(doc._primary_term),
+          completeRule.alertId ?? ''
+        ),
         _source: buildBulkBody(completeRule, doc, mergeStrategy, ignoreFields, buildReasonMessage),
       },
     ]);

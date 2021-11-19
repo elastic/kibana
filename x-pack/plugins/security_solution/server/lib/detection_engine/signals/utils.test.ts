@@ -90,12 +90,12 @@ describe('utils', () => {
 
   describe('generateId', () => {
     test('it generates expected output', () => {
-      const id = generateId('index-123', 'doc-123', 'version-123', 'rule-123');
+      const id = generateId('index-123', 'doc-123', '123', '123', 'rule-123');
       expect(id).toEqual('10622e7d06c9e38a532e71fc90e3426c1100001fb617aec8cb974075da52db06');
     });
 
     test('expected output is a hex', () => {
-      const id = generateId('index-123', 'doc-123', 'version-123', 'rule-123');
+      const id = generateId('index-123', 'doc-123', '123', '123', 'rule-123');
       expect(id).toMatch(/[a-f0-9]+/);
     });
   });
