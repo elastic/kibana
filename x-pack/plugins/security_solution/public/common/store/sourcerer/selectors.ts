@@ -26,8 +26,8 @@ export const sourcererDefaultDataViewSelector = ({
   sourcerer,
 }: State): SourcererModel['defaultDataView'] => sourcerer.defaultDataView;
 
-export const dataViewSelector = ({ sourcerer }: State, id: string): SourcererDataView =>
-  sourcerer.kibanaDataViews.find((dataView) => dataView.id === id) ?? sourcerer.defaultDataView;
+export const dataViewSelector = ({ sourcerer }: State, id: string): SourcererDataView | undefined =>
+  sourcerer.kibanaDataViews.find((dataView) => dataView.id === id);
 
 export const sourcererScopeIdSelector = (
   { sourcerer }: State,
@@ -54,7 +54,7 @@ export const sourcererDataViewSelector = () =>
   createSelector(dataViewSelector, (dataView) => dataView);
 
 export interface SourcererScopeSelector extends Omit<SourcererModel, 'sourcererScopes'> {
-  sourcererDataView: SourcererDataView;
+  selectedDataView: SourcererDataView | undefined;
   sourcererScope: SourcererScope;
 }
 
@@ -70,13 +70,13 @@ export const getSourcererScopeSelector = () => {
     const defaultDataView = getDefaultDataViewSelector(state);
     const signalIndexName = getSignalIndexNameSelector(state);
     const scope = getScopeSelector(state, scopeId);
-    const sourcererDataView = getSourcererDataViewSelector(state, scope.selectedDataViewId);
+    const selectedDataView = getSourcererDataViewSelector(state, scope.selectedDataViewId);
 
     return {
       defaultDataView,
       kibanaDataViews,
       signalIndexName,
-      sourcererDataView,
+      selectedDataView,
       sourcererScope: scope,
     };
   };

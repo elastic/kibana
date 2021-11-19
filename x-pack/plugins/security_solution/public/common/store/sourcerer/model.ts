@@ -54,6 +54,7 @@ export interface KibanaDataView {
  * DataView from Kibana + timelines/index_fields enhanced field data
  */
 export interface SourcererDataView extends KibanaDataView {
+  id: string;
   /** we need this for @timestamp data */
   browserFields: BrowserFields;
   /** we need this for @timestamp data */
@@ -75,7 +76,7 @@ export interface SourcererDataView extends KibanaDataView {
  */
 export interface SelectedDataView {
   browserFields: SourcererDataView['browserFields'];
-  dataViewId: SourcererDataView['id'];
+  dataViewId: string | null; // null if legacy pre-8.0 timeline
   docValueFields: SourcererDataView['docValueFields'];
   /**
    * DataViewBase with enhanced index fields used in timelines
@@ -97,7 +98,7 @@ export interface SelectedDataView {
  */
 export interface SourcererModel {
   /** default security-solution data view */
-  defaultDataView: SourcererDataView & { error?: unknown };
+  defaultDataView: SourcererDataView & { id: string; error?: unknown };
   /** all Kibana data views, including security-solution */
   kibanaDataViews: SourcererDataView[];
   /** security solution signals index name */

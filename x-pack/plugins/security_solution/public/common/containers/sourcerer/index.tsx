@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import { SelectedDataView, SourcererScopeName } from '../../store/sourcerer/model';
+import {
+  SelectedDataView,
+  SourcererDataView,
+  SourcererScopeName,
+} from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import {
@@ -28,6 +32,7 @@ import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
+import { useFetchIndex } from '../source';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -259,7 +264,7 @@ export const useSourcererDataView = (
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
     signalIndexName,
-    sourcererDataView: selectedDataView,
+    selectedDataView,
     sourcererScope: { selectedPatterns: scopeSelectedPatterns, loading },
   }: sourcererSelectors.SourcererScopeSelector = useDeepEqualSelector((state) =>
     sourcererScopeSelector(state, scopeId)
@@ -273,29 +278,67 @@ export const useSourcererDataView = (
     [scopeSelectedPatterns]
   );
 
+  const [legacyPatterns, setLegacyPatterns] = useState<string[]>([]);
+
+  const [indexPatternsLoading, fetchIndexReturn] = useFetchIndex(legacyPatterns);
+
+  const legacyDataView: Omit<SourcererDataView, 'id'> & { id: null } = useMemo(() => {
+    // console.log({
+    //   sourcererDataView: selectedDataView == null ? legacyDataView : selectedDataView,
+    //   selectedDataView,
+    //   legacyDataView,
+    // });
+    return {
+      ...fetchIndexReturn,
+      runtimeMappings: {},
+      title: '',
+      id: null,
+      loading: indexPatternsLoading,
+      patternList: fetchIndexReturn.indexes,
+      indexFields: fetchIndexReturn.indexPatterns
+        .fields as SelectedDataView['indexPattern']['fields'],
+    };
+  }, [fetchIndexReturn, indexPatternsLoading]);
+
+  useEffect(() => {
+    if (selectedDataView == null) {
+      // old way of fetching indices, legacy timeline
+      setLegacyPatterns(selectedPatterns);
+    }
+  }, [selectedDataView, selectedPatterns]);
+
+  const sourcererDataView = useMemo(() => {
+    // console.log({
+    //   sourcererDataView: selectedDataView == null ? legacyDataView : selectedDataView,
+    //   selectedDataView,
+    //   legacyDataView,
+    // });
+    return selectedDataView == null ? legacyDataView : selectedDataView;
+  }, [legacyDataView, selectedDataView]);
+
   return useMemo(
     () => ({
-      browserFields: selectedDataView.browserFields,
-      dataViewId: selectedDataView.id,
-      docValueFields: selectedDataView.docValueFields,
+      browserFields: sourcererDataView.browserFields,
+      dataViewId: sourcererDataView.id,
+      docValueFields: sourcererDataView.docValueFields,
       indexPattern: {
-        fields: selectedDataView.indexFields,
+        fields: sourcererDataView.indexFields,
         title: selectedPatterns.join(','),
       },
       indicesExist:
         scopeId === SourcererScopeName.detections
-          ? selectedDataView.patternList.includes(`${signalIndexName}`)
+          ? sourcererDataView.patternList.includes(`${signalIndexName}`)
           : scopeId === SourcererScopeName.default
-          ? selectedDataView.patternList.filter((i) => i !== signalIndexName).length > 0
-          : selectedDataView.patternList.length > 0,
-      loading: loading || selectedDataView.loading,
-      runtimeMappings: selectedDataView.runtimeMappings,
+          ? sourcererDataView.patternList.filter((i) => i !== signalIndexName).length > 0
+          : sourcererDataView.patternList.length > 0,
+      loading: loading || sourcererDataView.loading,
+      runtimeMappings: sourcererDataView.runtimeMappings,
       // all active & inactive patterns in DATA_VIEW
-      patternList: selectedDataView.title.split(','),
+      patternList: sourcererDataView.title.split(','),
       // selected patterns in DATA_VIEW
       selectedPatterns: selectedPatterns.sort(),
     }),
-    [loading, selectedPatterns, signalIndexName, scopeId, selectedDataView]
+    [loading, selectedPatterns, signalIndexName, scopeId, sourcererDataView]
   );
 };
 

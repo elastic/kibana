@@ -7,7 +7,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { SourcererDataView, SourcererScopeName } from './model';
+import { SelectedDataView, SourcererDataView, SourcererScopeName } from './model';
 import { SecurityDataView } from '../../containers/sourcerer/api';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
@@ -38,7 +38,7 @@ export const setSourcererScopeLoading = actionCreator<{
 
 export interface SelectedDataViewPayload {
   id: SourcererScopeName;
-  selectedDataViewId: string;
-  selectedPatterns: string[];
+  selectedDataViewId: SelectedDataView['dataViewId'];
+  selectedPatterns: SelectedDataView['selectedPatterns'];
 }
 export const setSelectedDataView = actionCreator<SelectedDataViewPayload>('SET_SELECTED_DATA_VIEW');
