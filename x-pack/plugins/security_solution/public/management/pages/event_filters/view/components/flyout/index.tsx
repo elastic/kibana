@@ -129,8 +129,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           payload: { entry: getInitialExceptionFromEvent(enrichedData) },
         });
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [enrichedData]);
+    }, [dispatch, enrichedData]);
 
     const handleOnCancel = useCallback(() => {
       if (creationInProgress) return;
