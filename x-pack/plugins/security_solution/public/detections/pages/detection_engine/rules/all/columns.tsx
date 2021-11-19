@@ -9,7 +9,6 @@ import {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
   EuiText,
-  EuiHealth,
   EuiToolTip,
   EuiIcon,
   EuiLink,
@@ -27,9 +26,9 @@ import { FormattedRelativePreferenceDate } from '../../../../../common/component
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { ActionToaster } from '../../../../../common/components/toasters';
 import { PopoverItems, PopoverItemsProps } from '../../../../../common/components/popover_items';
-import { getStatusColor } from '../../../../components/rules/rule_status/helpers';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
+import { RuleExecutionStatus } from '../../../../components/rules/rule_execution_status';
 import * as i18n from '../translations';
 import {
   deleteRulesAction,
@@ -41,8 +40,7 @@ import { RulesTableAction } from '../../../../containers/detection_engine/rules/
 import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { PopoverTooltip } from './popover_tooltip';
-import { getCapitalizedRuleStatusText } from '../../../../../../common/detection_engine/utils';
-import { RuleExecutionStatus } from  '../../../../../../common/detection_engine/schemas/common/schemas';
+
 import {
   APP_UI_ID,
   SecurityPageName,
@@ -146,12 +144,6 @@ interface GetColumns {
         [x: string]: boolean;
       }>;
 }
-
-const LastResponse = ({ status } : { status?: RuleExecutionStatus | null }) => (
-  <EuiHealth color={getStatusColor(status ?? null)}>
-    {getCapitalizedRuleStatusText(status) ?? getEmptyTagValue()}
-  </EuiHealth>
-);
 
 export const getColumns = ({
   dispatch,
@@ -258,7 +250,7 @@ export const getColumns = ({
     {
       field: 'status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: Rule['status']) => <LastResponse status={value} />,
+      render: (value: Rule['status']) => <RuleExecutionStatus status={value} />,
       width: '16%',
       truncateText: true,
     },
@@ -448,7 +440,9 @@ export const getMonitoringColumns = (
     {
       field: 'current_status.status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: RuleStatus['current_status']['status']) => <LastResponse status={value} />,
+      render: (value: RuleStatus['current_status']['status']) => (
+        <RuleExecutionStatus status={value} />
+      ),
       width: '12%',
       truncateText: true,
     },
