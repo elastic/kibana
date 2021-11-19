@@ -1872,7 +1872,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
-    it('if session does not exist and providers is empty, returns whatever authentication provider returns.', async () => {
+    it('if session does not exist and providers is empty, redirects to default logout path.', async () => {
       const request = httpServerMock.createKibanaRequest();
       mockOptions.session.get.mockResolvedValue(null);
       mockOptions.config.authc = {
