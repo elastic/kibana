@@ -23,7 +23,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('Add documents to tune relevance');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining(`${docLinks.appSearchRelevance}`)
+      expect.stringContaining(docLinks.appSearchRelevance)
     );
   });
 });
