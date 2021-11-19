@@ -20,12 +20,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('status_page');
     });
 
-    it('should show the build hash and number', async () => {
-      const buildNumberText = await testSubjects.getVisibleText('statusBuildNumber');
-      expect(buildNumberText).to.contain('BUILD ');
+    it('should show the build version', async () => {
+      const buildVersionText = await testSubjects.getVisibleText('statusBuildVersion');
+      expect(buildVersionText).to.contain('VERSION: ');
+    });
 
+    it('should show the build number', async () => {
+      const buildNumberText = await testSubjects.getVisibleText('statusBuildNumber');
+      expect(buildNumberText).to.contain('BUILD: ');
+    });
+
+    it('should show the build hash', async () => {
       const hashText = await testSubjects.getVisibleText('statusBuildHash');
-      expect(hashText).to.contain('COMMIT ');
+      expect(hashText).to.contain('COMMIT: ');
     });
 
     it('should display the server metrics', async () => {
