@@ -523,7 +523,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                         onClick={() => {
                           setAggFieldPopoverOpen(true);
                         }}
-                        color={watch.aggField ? 'secondary' : 'danger'}
+                        color={watch.aggField ? 'success' : 'danger'}
                       />
                     }
                     isOpen={aggFieldPopoverOpen}
@@ -617,7 +617,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       }}
                       color={
                         watch.groupBy === 'all' || (watch.termSize && watch.termField)
-                          ? 'secondary'
+                          ? 'success'
                           : 'danger'
                       }
                     />
@@ -730,7 +730,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       color={
                         errors.threshold0.length || (errors.threshold1 && errors.threshold1.length)
                           ? 'danger'
-                          : 'secondary'
+                          : 'success'
                       }
                     />
                   }
@@ -816,7 +816,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       onClick={() => {
                         setWatchDurationPopoverOpen(true);
                       }}
-                      color={watch.timeWindowSize ? 'secondary' : 'danger'}
+                      color={watch.timeWindowSize ? 'success' : 'danger'}
                     />
                   }
                   isOpen={watchDurationPopoverOpen}
@@ -890,7 +890,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
-                  color="secondary"
+                  color="success"
                   data-test-subj="saveWatchButton"
                   type="submit"
                   iconType="check"
