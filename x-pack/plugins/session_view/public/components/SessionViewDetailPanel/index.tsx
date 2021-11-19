@@ -6,7 +6,7 @@
  */
 import React, { useState, useEffect, ReactNode } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiSplitPanel, EuiTitle, EuiTabs, EuiTab } from '@elastic/eui';
 import { Process } from '../../hooks/use_process_tree';
 import { useStyles } from './styles';
@@ -25,22 +25,6 @@ interface ProcessEventTabData {
   content: ReactNode;
 }
 
-const DETAIL_PANEL_COMMAND = i18n.translate('xpack.sessionView.detailPanel.detailPanelCommand', {
-  defaultMessage: 'Command detail',
-});
-
-const DETAIL_PANEL_SESSION = i18n.translate('xpack.sessionView.detailPanel.detailPanelSession', {
-  defaultMessage: 'Session detail',
-});
-
-const DETAIL_PANEL_SERVER = i18n.translate('xpack.sessionView.detailPanel.detailPanelServer', {
-  defaultMessage: 'Server detail',
-});
-
-const DETAIL_PANEL_ALERT = i18n.translate('xpack.sessionView.detailPanel.detailPanelAlert', {
-  defaultMessage: 'Alert detail',
-});
-
 /**
  * Detail panel in the session view.
  */
@@ -49,7 +33,6 @@ export const SessionViewDetailPanel = ({
   height,
   selectedProcess,
   setIsDetailOpen,
-  session,
 }: SessionViewDetailPanelDeps) => {
   const [selectedDetailTab, setSelectedDetailTab] = useState<string | number>('');
   const [processEventsTabs, setProcessEventsTabs] = useState<ProcessEventTabData[]>([]);
@@ -77,7 +60,7 @@ export const SessionViewDetailPanel = ({
     }));
 
     setProcessEventsTabs(selectedProcessEvents);
-    setSelectedDetailTab(selectedProcessEvents?.[0].id || '');
+    setSelectedDetailTab(selectedProcessEvents?.[0]?.id || '');
   }, [selectedProcess]);
 
   const handleAnimationEnd = () => {
@@ -91,7 +74,12 @@ export const SessionViewDetailPanel = ({
       return (
         <div>
           <EuiTitle size="s">
-            <span>{DETAIL_PANEL_COMMAND}</span>
+            <span>
+              <FormattedMessage
+                id="kbn.sessionView.commandDetail"
+                defaultMessage="Command detail"
+              />
+            </span>
           </EuiTitle>
           <EuiSpacer />
           <EuiTabs>
@@ -121,26 +109,23 @@ export const SessionViewDetailPanel = ({
     >
       {renderSelectedProcessEvents()}
       <EuiTitle size="s">
-        <span>{DETAIL_PANEL_SESSION}</span>
+        <span>
+          <FormattedMessage id="kbn.sessionView.sessionDetail" defaultMessage="Session detail" />
+        </span>
       </EuiTitle>
-      <EuiSpacer />
-      <MonacoEditor
-        height={400}
-        language="json"
-        options={{
-          lineNumbers: 'on',
-          readOnly: true,
-        }}
-        value={JSON.stringify(session || {}, null, 4)}
-      />
+      {/* Add session detail */}
       <EuiSpacer size="xxl" />
       <EuiTitle size="s">
-        <span>{DETAIL_PANEL_SERVER}</span>
+        <span>
+          <FormattedMessage id="kbn.sessionView.serverDetail" defaultMessage="Server detail" />
+        </span>
       </EuiTitle>
       {/* Add server detail */}
       <EuiSpacer size="xxl" />
       <EuiTitle size="s">
-        <span>{DETAIL_PANEL_ALERT}</span>
+        <span>
+          <FormattedMessage id="kbn.sessionView.alertDetail" defaultMessage="Alert detail" />
+        </span>
       </EuiTitle>
       {/* Add alert detail conditionally */}
     </EuiSplitPanel.Inner>
