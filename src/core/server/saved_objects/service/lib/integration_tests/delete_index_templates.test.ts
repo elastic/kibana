@@ -38,11 +38,11 @@ describe('deleteIndexTemplates', () => {
     await root.shutdown();
   });
 
-  it('does not fail when no templates are present', async () => {
+  it('does not fail when no templates match', async () => {
     const log = root.logger.get('');
     const client = start.elasticsearch.client.asInternalUser;
 
-    await expect(deleteIndexTemplates({ log, client })).resolves.toBeUndefined();
+    await expect(deleteIndexTemplates({ log, client })).resolves.toBeDefined();
   });
 
   it('only deletes the `kibana_index_template*` templates', async () => {
@@ -62,11 +62,9 @@ describe('deleteIndexTemplates', () => {
 
     await deleteIndexTemplates({ log, client });
 
-    const { body: templates } = await client.cat.templates({
-      format: 'json',
-    });
+    const { body: templates } = await client.indices.getTemplate({});
 
-    const templateNames = templates.map((template) => template.name);
+    const templateNames = Object.keys(templates);
 
     expect(templateNames.includes('kibana_index_template:.kibana')).toBe(false);
     expect(templateNames.includes('another_template')).toBe(true);

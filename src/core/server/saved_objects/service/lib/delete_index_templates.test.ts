@@ -7,6 +7,7 @@
  */
 
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { estypes } from '@elastic/elasticsearch';
 import { loggerMock } from '../../../logging/logger.mock';
 import { deleteIndexTemplates } from './delete_index_templates';
 
@@ -19,22 +20,21 @@ describe('deleteIndexTemplates', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
   });
 
-  it('calls `client.cat.templates` with the correct parameters', async () => {
+  it('calls `client.indices.getTemplate` with the correct parameters', async () => {
     await deleteIndexTemplates({ client, log });
 
-    expect(client.cat.templates).toHaveBeenCalledTimes(1);
-    expect(client.cat.templates).toHaveBeenCalledWith({
-      format: 'json',
+    expect(client.indices.getTemplate).toHaveBeenCalledTimes(1);
+    expect(client.indices.getTemplate).toHaveBeenCalledWith({
       name: 'kibana_index_template*',
     });
   });
 
   it('calls `client.indices.deleteTemplate` for each template', async () => {
-    client.cat.templates.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise([
-        { name: 'kibana_index_template:.kibana' },
-        { name: 'kibana_index_template:.another-template' },
-      ])
+    client.indices.getTemplate.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        'kibana_index_template:.kibana': {} as estypes.IndicesTemplateMapping,
+        'kibana_index_template:.another-template': {} as estypes.IndicesTemplateMapping,
+      })
     );
 
     await deleteIndexTemplates({ client, log });
@@ -48,12 +48,27 @@ describe('deleteIndexTemplates', () => {
     });
   });
 
+  it('does not throw if `client.indices.deleteTemplate` throws', async () => {
+    client.indices.getTemplate.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        'kibana_index_template:.kibana': {} as estypes.IndicesTemplateMapping,
+        'kibana_index_template:.another-template': {} as estypes.IndicesTemplateMapping,
+      })
+    );
+
+    client.indices.deleteTemplate.mockImplementation(() => {
+      return elasticsearchClientMock.createErrorTransportRequestPromise('oups');
+    });
+
+    await expect(deleteIndexTemplates({ client, log })).resolves.toBeDefined();
+  });
+
   it('logs a debug message with the name of the templates', async () => {
-    client.cat.templates.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise([
-        { name: 'template1' },
-        { name: 'template2' },
-      ])
+    client.indices.getTemplate.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        template1: {} as estypes.IndicesTemplateMapping,
+        template2: {} as estypes.IndicesTemplateMapping,
+      })
     );
 
     await deleteIndexTemplates({ client, log });

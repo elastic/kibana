@@ -18,25 +18,24 @@ interface DeleteIndexTemplatesOptions {
  * Deletes old index templates that were used in 6.x as those will no longer be supported in ES 8.
  */
 export const deleteIndexTemplates = async ({ client, log }: DeleteIndexTemplatesOptions) => {
-  const { body: templates } = await client.cat.templates({
-    format: 'json',
-    name: 'kibana_index_template*',
-  });
+  const { body } = await client.indices.getTemplate(
+    {
+      name: 'kibana_index_template*',
+    },
+    { ignore: [404] }
+  );
 
-  if (!templates.length) {
-    return;
-  }
-  const templateNames = templates
-    .filter((template) => template.name)
-    .map((template) => template.name!);
+  const templateNames = Object.keys(body);
 
   log.debug(`Deleting index templates: ${templateNames.join(', ')}`);
 
   return await Promise.all(
     templateNames.map((templateName) => {
-      return client.indices.deleteTemplate({
-        name: templateName,
-      });
+      return client.indices
+        .deleteTemplate({
+          name: templateName,
+        })
+        .catch(() => undefined);
     })
   );
 };
