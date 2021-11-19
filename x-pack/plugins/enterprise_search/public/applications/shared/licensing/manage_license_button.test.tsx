@@ -37,7 +37,7 @@ describe('ManageLicenseButton', () => {
       const wrapper = shallow(<ManageLicenseButton />);
 
       expect(wrapper.find(EuiButton).prop('href')).toEqual(
-        expect.stringContaining(`${docLinks.licenseManagement}`)
+        expect.stringContaining(docLinks.licenseManagement)
       );
     });
   });
