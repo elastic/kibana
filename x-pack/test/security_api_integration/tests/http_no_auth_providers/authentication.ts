@@ -11,25 +11,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const es = getService('es');
-
-  async function createToken() {
-    const { access_token: accessToken, authentication } = await es.security.getToken({
-      body: {
-        grant_type: 'password',
-        ...adminTestUser,
-      },
-    });
-
-    return {
-      accessToken,
-      expectedUser: {
-        ...authentication,
-        authentication_provider: { name: '__http__', type: 'http' },
-        authentication_type: 'realm',
-      },
-    };
-  }
 
   describe('authorization', () => {
     it('fail request without authorization request header', async () => {
@@ -37,19 +18,22 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('accept request with authorization request header', async () => {
-      const { expectedUser } = await createToken();
-      const accessToken = Buffer.from(
+      const credentials = Buffer.from(
         `${adminTestUser.username}:${adminTestUser.password}`
       ).toString('base64');
 
-      const response = await supertest
+      const { body: user, headers } = await supertest
         .get('/internal/security/me')
-        .set('kbn-xsrf', 'true')
-        .set('Authorization', `Basic ${accessToken}`)
-        .expect(200, expectedUser);
+        .set('kbn-xsrf', 'xxx')
+        .set('Authorization', `Basic ${credentials}`)
+        .expect(200);
+
+      expect(user.username).to.eql(adminTestUser.username);
+      expect(user.authentication_provider).to.eql({ type: 'http', name: '__http__' });
+      expect(user.authentication_type).to.eql('realm');
 
       // Make sure we don't automatically create a session
-      expect(response.headers['set-cookie']).to.be(undefined);
+      expect(headers['set-cookie']).to.be(undefined);
     });
   });
 }

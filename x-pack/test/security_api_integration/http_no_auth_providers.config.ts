@@ -20,14 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName: 'X-Pack Security API Integration Tests (HTTP without providers)',
     },
 
-    esTestCluster: {
-      ...xPackAPITestsConfig.get('esTestCluster'),
-      serverArgs: [
-        ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
-        'xpack.security.authc.token.enabled=true',
-        'xpack.security.authc.token.timeout=15s',
-      ],
-    },
+    esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
 
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
