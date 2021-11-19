@@ -61,7 +61,7 @@ export const HostIsolationExceptionsFormFlyout = memo(
       },
     });
 
-    // load the list of policies
+    // load the list of policies>
     const policiesRequest = useGetEndpointSpecificPolicies({
       onError: (error) => {
         toasts.addWarning(getLoadErrorMessage(error));
@@ -138,6 +138,11 @@ export const HostIsolationExceptionsFormFlyout = memo(
       [formHasError, handleOnSubmit, isEditing, mutation.isLoading]
     );
 
+    const handleFormChange = (
+      change: Partial<CreateExceptionListItemSchema> | Partial<UpdateExceptionListItemSchema>
+    ) => {
+      setException(Object.assign(exception, change));
+    };
     return exception && policiesRequest.data?.items ? (
       <EuiFlyout
         size="m"
@@ -167,7 +172,7 @@ export const HostIsolationExceptionsFormFlyout = memo(
         <EuiFlyoutBody>
           <HostIsolationExceptionsForm
             policies={policiesRequest.data?.items}
-            onChange={setException}
+            onChange={handleFormChange}
             exception={exception}
             onError={setFormHasError}
           />
