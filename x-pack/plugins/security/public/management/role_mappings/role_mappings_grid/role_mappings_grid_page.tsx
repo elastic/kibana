@@ -255,7 +255,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       ) : undefined,
       toolsRight: (
         <EuiButton
-          color="secondary"
+          color="success"
           iconType="refresh"
           onClick={() => this.reloadRoleMappings()}
           data-test-subj="reloadButton"
