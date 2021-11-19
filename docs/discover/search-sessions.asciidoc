@@ -80,7 +80,7 @@ Some visualization features do not fully support background search sessions. Whe
 you restore a dashboard, panels with unsupported features won't load immediately, but instead
 send out additional
 data requests, which can take a while to complete.
-The warning *Your search session is still running* appears.
+The *Your search session is still running* warning appears.
 You can either wait for these additional requests to complete or come back to the dashboard later
 when all data requests have finished.
 
