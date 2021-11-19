@@ -23,14 +23,27 @@ import { i18n } from '@kbn/i18n';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
-import { PolicyData } from '../../../../../../../common/endpoint/types';
-import { getPolicyDetailPath } from '../../../../../common/routing';
-import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
-import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
-import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+import { PolicyData } from '../../../../common/endpoint/types';
+import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
+import { getPolicyDetailPath } from '../../common/routing';
+import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useAppUrl } from '../../../common/lib/kibana/hooks';
 
 const NOOP = () => {};
 const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = { bordered: true, showIcons: false };
+const SEARCH_PROPS = { className: 'effected-policies-search' };
+
+const StyledEuiSelectable = styled.div`
+  .effected-policies-search {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .euiSelectableList {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top-width: 0;
+  }
+`;
 
 const EffectivePolicyFormContainer = styled.div`
   .policy-name .euiSelectableListItem__text {
@@ -57,6 +70,7 @@ export type EffectedPolicySelectProps = Omit<
   options: PolicyData[];
   isGlobal: boolean;
   isPlatinumPlus: boolean;
+  description?: string;
   onChange: (selection: EffectedPolicySelection) => void;
   selected?: PolicyData[];
 };
@@ -64,6 +78,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   ({
     isGlobal,
     isPlatinumPlus,
+    description,
     onChange,
     listProps,
     options,
@@ -79,7 +94,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       () => [
         {
           id: 'globalPolicy',
-          label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.global', {
+          label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.global', {
             defaultMessage: 'Global',
           }),
           iconType: isGlobal ? 'checkInCircleFilled' : '',
@@ -87,7 +102,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         },
         {
           id: 'perPolicy',
-          label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.perPolicy', {
+          label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.perPolicy', {
             defaultMessage: 'Per Policy',
           }),
           iconType: !isGlobal ? 'checkInCircleFilled' : '',
@@ -169,7 +184,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         <EuiText size="xs">
           <h3>
             <FormattedMessage
-              id="xpack.securitySolution.trustedapps.policySelect.assignmentSectionTitle"
+              id="xpack.securitySolution.effectedPolicySelect.assignmentSectionTitle"
               defaultMessage="Assignment"
             />
           </h3>
@@ -179,10 +194,15 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           <EuiFlexItem grow={2}>
             <EuiText size="s">
               <p>
-                {i18n.translate('xpack.securitySolution.trustedApps.assignmentSectionDescription', {
-                  defaultMessage:
-                    'Assign this trusted application globally across all policies, or assign it to specific policies.',
-                })}
+                {description
+                  ? description
+                  : i18n.translate(
+                      'xpack.securitySolution.effectedPolicySelect.assignmentSectionDescription',
+                      {
+                        defaultMessage:
+                          'Assign globally across all policies, or assign it to specific policies.',
+                      }
+                    )}
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -202,16 +222,19 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         <EuiSpacer />
         {!isGlobal && (
           <EuiFormRow fullWidth>
-            <EuiSelectable<OptionPolicyData>
-              {...otherSelectableProps}
-              options={selectableOptions}
-              listProps={listProps || DEFAULT_LIST_PROPS}
-              onChange={handleOnPolicySelectChange}
-              searchable={true}
-              data-test-subj={getTestId('policiesSelectable')}
-            >
-              {listBuilderCallback}
-            </EuiSelectable>
+            <StyledEuiSelectable>
+              <EuiSelectable<OptionPolicyData>
+                {...otherSelectableProps}
+                options={selectableOptions}
+                listProps={listProps || DEFAULT_LIST_PROPS}
+                onChange={handleOnPolicySelectChange}
+                searchProps={SEARCH_PROPS}
+                searchable={true}
+                data-test-subj={getTestId('policiesSelectable')}
+              >
+                {listBuilderCallback}
+              </EuiSelectable>
+            </StyledEuiSelectable>
           </EuiFormRow>
         )}
       </EffectivePolicyFormContainer>
