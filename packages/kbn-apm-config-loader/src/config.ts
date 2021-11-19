@@ -13,6 +13,7 @@ import { execSync } from 'child_process';
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
 import type { AgentConfigOptions } from 'elastic-apm-node';
+import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
 const DEFAULT_CONFIG: AgentConfigOptions = {
@@ -23,7 +24,7 @@ const DEFAULT_CONFIG: AgentConfigOptions = {
   globalLabels: {},
 };
 
-const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions = {
+const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfigOptions = {
   serverUrl: 'https://kibana-cloud-apm.apm.us-east-1.aws.found.io',
 
   // The secretToken below is intended to be hardcoded in this file even though
@@ -37,6 +38,7 @@ const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions = {
   captureSpanStackTraces: false,
   centralConfig: false,
   metricsInterval: '30s',
+  propagateTracestate: true,
   transactionSampleRate: 1.0,
 };
 
