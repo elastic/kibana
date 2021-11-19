@@ -136,11 +136,7 @@ export function useGetHostIsolationExceptionFormEntry({
   );
 }
 
-export function useGetEndpointSpecificPolicies({
-  onSuccess,
-}: {
-  onSuccess: (data: GetPolicyListResponse) => void;
-}): QueryObserverResult<GetPolicyListResponse> {
+export function useGetEndpointSpecificPolicies(): QueryObserverResult<GetPolicyListResponse> {
   const http = useHttp();
   return useQuery<GetPolicyListResponse>(
     ['hostIsolationExceptions', 'policies'],
@@ -155,7 +151,6 @@ export function useGetEndpointSpecificPolicies({
     {
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
-      onSuccess,
     }
   );
 }

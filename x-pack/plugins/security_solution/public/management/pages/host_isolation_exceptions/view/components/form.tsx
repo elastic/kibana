@@ -20,7 +20,8 @@ import {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { PolicyData } from '../../../../../../common/endpoint/types';
 import {
   EffectedPolicySelect,
   EffectedPolicySelection,
@@ -28,11 +29,9 @@ import {
 } from '../../../../components/effected_policy_select';
 import {
   getArtifactTagsByEffectedPolicySelection,
-  getEffectedPolicySelectionByTags,
   isGlobalPolicyEffected,
 } from '../../../../components/effected_policy_select/utils';
 import { isValidIPv4OrCIDR } from '../../utils';
-import { useGetEndpointSpecificPolicies } from '../hooks';
 import {
   DESCRIPTION_LABEL,
   DESCRIPTION_PLACEHOLDER,
@@ -53,9 +52,10 @@ interface ExceptionIpEntry {
 
 export const HostIsolationExceptionsForm: React.FC<{
   exception: CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
+  policies: PolicyData[];
   onError: (error: boolean) => void;
   onChange: (exception: CreateExceptionListItemSchema | UpdateExceptionListItemSchema) => void;
-}> = memo(({ exception, onError, onChange }) => {
+}> = memo(({ exception, onError, policies, onChange }) => {
   const ipEntry = exception.entries[0] as ExceptionIpEntry;
   const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
   const [hasBeenInputIpVisited, setHasBeenInputIpVisited] = useState(false);
@@ -66,17 +66,6 @@ export const HostIsolationExceptionsForm: React.FC<{
   const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
     isGlobal,
     selected: [],
-  });
-
-  const policiesRequest = useGetEndpointSpecificPolicies({
-    onSuccess: (data) => {
-      if (isGlobalPolicyEffected(exception.tags)) {
-        setIsGlobal(true);
-      } else {
-        setIsGlobal(false);
-        setSelectedPolicies(getEffectedPolicySelectionByTags(exception.tags || [], data.items));
-      }
-    },
   });
 
   useEffect(() => {
@@ -138,72 +127,63 @@ export const HostIsolationExceptionsForm: React.FC<{
     [exception, onChange]
   );
 
-  const nameInput = useMemo(
-    () => (
-      <EuiFormRow
-        label={NAME_LABEL}
+  const nameInput = (
+    <EuiFormRow
+      label={NAME_LABEL}
+      fullWidth
+      isInvalid={hasNameError && hasBeenInputNameVisited}
+      error={NAME_ERROR}
+    >
+      <EuiFieldText
+        id="eventFiltersFormInputName"
+        placeholder={NAME_PLACEHOLDER}
+        defaultValue={exception.name ?? ''}
+        onChange={handleOnChangeName}
         fullWidth
-        isInvalid={hasNameError && hasBeenInputNameVisited}
-        error={NAME_ERROR}
-      >
-        <EuiFieldText
-          id="eventFiltersFormInputName"
-          placeholder={NAME_PLACEHOLDER}
-          defaultValue={exception.name ?? ''}
-          onChange={handleOnChangeName}
-          fullWidth
-          aria-label={NAME_PLACEHOLDER}
-          required={hasBeenInputNameVisited}
-          maxLength={256}
-          data-test-subj="hostIsolationExceptions-form-name-input"
-          onBlur={() => !hasBeenInputNameVisited && setHasBeenInputNameVisited(true)}
-        />
-      </EuiFormRow>
-    ),
-    [hasNameError, hasBeenInputNameVisited, exception.name, handleOnChangeName]
+        aria-label={NAME_PLACEHOLDER}
+        required={hasBeenInputNameVisited}
+        maxLength={256}
+        data-test-subj="hostIsolationExceptions-form-name-input"
+        onBlur={() => !hasBeenInputNameVisited && setHasBeenInputNameVisited(true)}
+      />
+    </EuiFormRow>
   );
 
-  const ipInput = useMemo(
-    () => (
-      <EuiFormRow
-        label={IP_LABEL}
+  const ipInput = (
+    <EuiFormRow
+      label={IP_LABEL}
+      fullWidth
+      isInvalid={hasIpError && hasBeenInputIpVisited}
+      error={IP_ERROR}
+    >
+      <EuiFieldText
+        id="eventFiltersFormInputName"
+        placeholder={IP_PLACEHOLDER}
+        defaultValue={(exception.entries?.[0] as ExceptionIpEntry)?.value ?? ''}
+        onChange={handleOnIpChange}
         fullWidth
-        isInvalid={hasIpError && hasBeenInputIpVisited}
-        error={IP_ERROR}
-      >
-        <EuiFieldText
-          id="eventFiltersFormInputName"
-          placeholder={IP_PLACEHOLDER}
-          defaultValue={(exception.entries?.[0] as ExceptionIpEntry)?.value ?? ''}
-          onChange={handleOnIpChange}
-          fullWidth
-          aria-label={IP_PLACEHOLDER}
-          required={hasBeenInputIpVisited}
-          maxLength={256}
-          data-test-subj="hostIsolationExceptions-form-ip-input"
-          onBlur={() => !hasBeenInputIpVisited && setHasBeenInputIpVisited(true)}
-        />
-      </EuiFormRow>
-    ),
-    [hasIpError, hasBeenInputIpVisited, exception.entries, handleOnIpChange]
+        aria-label={IP_PLACEHOLDER}
+        required={hasBeenInputIpVisited}
+        maxLength={256}
+        data-test-subj="hostIsolationExceptions-form-ip-input"
+        onBlur={() => !hasBeenInputIpVisited && setHasBeenInputIpVisited(true)}
+      />
+    </EuiFormRow>
   );
 
-  const descriptionInput = useMemo(
-    () => (
-      <EuiFormRow label={DESCRIPTION_LABEL} fullWidth>
-        <EuiTextArea
-          id="eventFiltersFormInputName"
-          placeholder={DESCRIPTION_PLACEHOLDER}
-          defaultValue={exception.description ?? ''}
-          onChange={handleOnDescriptionChange}
-          fullWidth
-          data-test-subj="hostIsolationExceptions-form-description-input"
-          aria-label={DESCRIPTION_PLACEHOLDER}
-          maxLength={256}
-        />
-      </EuiFormRow>
-    ),
-    [exception.description, handleOnDescriptionChange]
+  const descriptionInput = (
+    <EuiFormRow label={DESCRIPTION_LABEL} fullWidth>
+      <EuiTextArea
+        id="eventFiltersFormInputName"
+        placeholder={DESCRIPTION_PLACEHOLDER}
+        defaultValue={exception.description ?? ''}
+        onChange={handleOnDescriptionChange}
+        fullWidth
+        data-test-subj="hostIsolationExceptions-form-description-input"
+        aria-label={DESCRIPTION_PLACEHOLDER}
+        maxLength={256}
+      />
+    </EuiFormRow>
   );
 
   return (
@@ -249,9 +229,8 @@ export const HostIsolationExceptionsForm: React.FC<{
           isGlobal={isGlobal}
           isPlatinumPlus={true}
           selected={selectedPolicies.selected}
-          options={policiesRequest.data?.items || []}
+          options={policies}
           onChange={handlePolicySelectChange}
-          isLoading={policiesRequest.isLoading}
           data-test-subj={'effectedPolicies-select'}
         />
       </EuiFormRow>

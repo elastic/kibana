@@ -30,7 +30,7 @@ import {
   createHostIsolationExceptionItem,
   updateOneHostIsolationExceptionItem,
 } from '../../service';
-import { useGetHostIsolationExceptionFormEntry } from '../hooks';
+import { useGetEndpointSpecificPolicies, useGetHostIsolationExceptionFormEntry } from '../hooks';
 import { HostIsolationExceptionsForm } from './form';
 import {
   getCreateErrorMessage,
@@ -62,6 +62,8 @@ export const HostIsolationExceptionsFormFlyout = memo(
         onCancel();
       },
     });
+
+    const policiesRequest = useGetEndpointSpecificPolicies();
 
     const mutation = useMutation(
       () => {
@@ -132,7 +134,7 @@ export const HostIsolationExceptionsFormFlyout = memo(
       [formHasError, handleOnSubmit, isEditing, mutation.isLoading]
     );
 
-    return exception ? (
+    return exception && policiesRequest.data?.items ? (
       <EuiFlyout
         size="m"
         onClose={handleOnCancel}
@@ -160,6 +162,7 @@ export const HostIsolationExceptionsFormFlyout = memo(
 
         <EuiFlyoutBody>
           <HostIsolationExceptionsForm
+            policies={policiesRequest.data?.items}
             onChange={setException}
             exception={exception}
             onError={setFormHasError}
