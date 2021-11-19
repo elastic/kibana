@@ -6,29 +6,33 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import * as ast from '../ast';
-import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
+import type { DataViewBase, DslQuery, KueryQueryOptions } from '../..';
+import type { KqlFunctionNode } from '../node_types/function';
+import { nodeTypes } from '../..';
 
-export function buildNodeParams(children: KueryNode[]) {
-  return {
-    arguments: children,
-  };
+export const KQL_FUNCTION_NAME_OR = 'or';
+
+export interface KqlOrFunctionNode extends KqlFunctionNode {
+  function: typeof KQL_FUNCTION_NAME_OR;
+  arguments: KqlFunctionNode[]; // Sub-queries
+}
+
+export function isNode(node: KqlFunctionNode): node is KqlOrFunctionNode {
+  return node.function === KQL_FUNCTION_NAME_OR;
 }
 
 export function toElasticsearchQuery(
-  node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  { arguments: nodes = [] }: KqlOrFunctionNode,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-): estypes.QueryDslQueryContainer {
-  const children = node.arguments || [];
-
+): DslQuery {
+  const clause = nodes.map((node) => {
+    return nodeTypes.function.toElasticsearchQuery(node, indexPattern, config, context);
+  });
   return {
     bool: {
-      should: children.map((child: KueryNode) => {
-        return ast.toElasticsearchQuery(child, indexPattern, config, context);
-      }),
+      should: clause,
       minimum_should_match: 1,
     },
   };

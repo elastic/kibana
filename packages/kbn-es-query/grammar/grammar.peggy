@@ -8,11 +8,15 @@
 
 // Initialization block
 {
-  const { parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
-  const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
-  const buildLiteralNode = nodeTypes.literal.buildNode;
-  const buildWildcardNode = nodeTypes.wildcard.buildNode;
-  const { wildcardSymbol } = nodeTypes.wildcard;
+  const {
+    parseCursor = false, // Whether or not to parse the location of the cursor (used for suggestions)
+    cursorSymbol = '@kuery-cursor@', // The symbol representing the placement of the cursor
+    wildcardSymbol = '@kuery-wildcard@', // The symbol representing where a wildcard character is found
+  } = options;
+
+  const buildLiteralNode = (value) => ({ type: 'literal', value });
+  const buildWildcardNode = (value) => ({ type: 'wildcard', value });
+  const buildFunctionNode = (fn, args) => ({ type: 'function', function: fn, arguments: args });
 }
 
 start
@@ -24,7 +28,7 @@ start
       };
     }
     if (query !== null) return query;
-    return nodeTypes.function.buildNode('is', '*', '*');
+    return buildFunctionNode('and', []);
   }
 
 OrQuery
@@ -188,11 +192,6 @@ Value "value"
   }
   / value:UnquotedLiteral {
     if (value.type === 'cursor') return value;
-
-    if (!allowLeadingWildcards && value.type === 'wildcard' && nodeTypes.wildcard.hasLeadingWildcard(value)) {
-      error('Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.');
-    }
-
     const isPhrase = buildLiteralNode(false);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
@@ -306,10 +305,10 @@ HexDigit
   = [0-9a-f]i
 
 RangeOperator
-  = '<=' { return 'lte'; }
-  / '>=' { return 'gte'; }
-  / '<' { return 'lt'; }
-  / '>' { return 'gt'; }
+  = '<=' { return buildLiteralNode('lte'); }
+  / '>=' { return buildLiteralNode('gte'); }
+  / '<' { return buildLiteralNode('lt'); }
+  / '>' { return buildLiteralNode('gt'); }
 
 Space "whitespace"
   = [\ \t\r\n\u00A0]

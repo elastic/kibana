@@ -9,18 +9,17 @@
 import * as functionType from './function';
 import * as literal from './literal';
 import * as wildcard from './wildcard';
-import { NodeTypes } from './types';
+import { KQL_NODE_TYPE_FUNCTION } from './function';
+import { KQL_NODE_TYPE_LITERAL } from './literal';
+import { KQL_NODE_TYPE_WILDCARD } from './wildcard';
 
-export type { NodeTypes };
 export { nodeBuilder } from './node_builder';
 
 /**
  * @public
  */
-export const nodeTypes: NodeTypes = {
-  // This requires better typing of the different typings and their return types.
-  // @ts-ignore
-  function: functionType,
-  literal,
-  wildcard,
+export const nodeTypes = {
+  [KQL_NODE_TYPE_FUNCTION]: functionType,
+  [KQL_NODE_TYPE_LITERAL]: literal,
+  [KQL_NODE_TYPE_WILDCARD]: wildcard,
 };

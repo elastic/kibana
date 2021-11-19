@@ -7,14 +7,6 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SerializableRecord } from '@kbn/utility-types';
-import { NodeTypes } from './node_types';
-
-/** @public */
-export interface KueryNode {
-  type: keyof NodeTypes;
-  [key: string]: any;
-}
 
 /**
  * @public
@@ -23,7 +15,6 @@ export type DslQuery = estypes.QueryDslQueryContainer;
 
 /** @internal */
 export interface KueryParseOptions {
-  helpers: SerializableRecord;
   startRule: string;
   allowLeadingWildcards: boolean;
   cursorSymbol?: string;

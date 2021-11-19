@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { KueryNode, nodeTypes } from '../types';
+import { nodeTypes } from '../types';
+import { KqlNode } from './types';
 
 export const nodeBuilder = {
-  is: (fieldName: string, value: string | KueryNode) => {
-    return nodeTypes.function.buildNodeWithArgumentNodes('is', [
+  is: (fieldName: string, value: string | KqlNode) => {
+    return nodeTypes.function.buildNode('is', [
       nodeTypes.literal.buildNode(fieldName),
       typeof value === 'string' ? nodeTypes.literal.buildNode(value) : value,
       nodeTypes.literal.buildNode(false),
     ]);
   },
-  or: (nodes: KueryNode[]): KueryNode => {
+  or: (nodes: KqlNode[]): KqlNode => {
     return nodes.length > 1 ? nodeTypes.function.buildNode('or', nodes) : nodes[0];
   },
-  and: (nodes: KueryNode[]): KueryNode => {
+  and: (nodes: KqlNode[]): KqlNode => {
     return nodes.length > 1 ? nodeTypes.function.buildNode('and', nodes) : nodes[0];
   },
 };

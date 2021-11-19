@@ -8,8 +8,11 @@
 
 import { nodeTypes } from './index';
 
-import { buildNode, buildNodeWithArgumentNodes, toElasticsearchQuery } from './function';
-import { toElasticsearchQuery as isFunctionToElasticsearchQuery } from '../functions/is';
+import { buildNode, toElasticsearchQuery } from './function';
+import {
+  KqlIsFunctionNode,
+  toElasticsearchQuery as isFunctionToElasticsearchQuery,
+} from '../functions/is';
 import { DataViewBase } from '../../es_query';
 import { fields } from '../../filters/stubs/fields.mocks';
 
@@ -27,21 +30,11 @@ describe('kuery node types', () => {
     });
 
     describe('buildNode', () => {
-      test('should return a node representing the given kuery function', () => {
-        const result = buildNode('is', 'extension', 'jpg');
-
-        expect(result).toHaveProperty('type', 'function');
-        expect(result).toHaveProperty('function', 'is');
-        expect(result).toHaveProperty('arguments');
-      });
-    });
-
-    describe('buildNodeWithArgumentNodes', () => {
       test('should return a function node with the given argument list untouched', () => {
         const fieldNameLiteral = nodeTypes.literal.buildNode('extension');
         const valueLiteral = nodeTypes.literal.buildNode('jpg');
         const argumentNodes = [fieldNameLiteral, valueLiteral];
-        const result = buildNodeWithArgumentNodes('is', argumentNodes);
+        const result = buildNode('is', argumentNodes);
 
         expect(result).toHaveProperty('type', 'function');
         expect(result).toHaveProperty('function', 'is');
@@ -53,7 +46,11 @@ describe('kuery node types', () => {
 
     describe('toElasticsearchQuery', () => {
       test("should return the given function type's ES query representation", () => {
-        const node = buildNode('is', 'extension', 'jpg');
+        const fieldNameLiteral = nodeTypes.literal.buildNode('extension');
+        const valueLiteral = nodeTypes.literal.buildNode('jpg');
+        const isPhraseLiteral = nodeTypes.literal.buildNode(false);
+        const argumentNodes = [fieldNameLiteral, valueLiteral, isPhraseLiteral];
+        const node = buildNode('is', argumentNodes) as KqlIsFunctionNode;
         const expected = isFunctionToElasticsearchQuery(node, indexPattern);
         const result = toElasticsearchQuery(node, indexPattern);
 

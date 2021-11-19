@@ -6,11 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { fromLiteralExpression } from '../ast/ast';
-import { WildcardTypeBuildNode } from './types';
-import { KueryNode } from '..';
+import { KqlNode } from './types';
+import { KqlLiteralNode } from './literal';
 
-export const wildcardSymbol = '@kuery-wildcard@';
+export const KQL_NODE_TYPE_WILDCARD = 'wildcard';
+export const KQL_WILDCARD_SYMBOL = '@kuery-wildcard@';
+
+export interface KqlWildcardNode extends KqlNode {
+  type: typeof KQL_NODE_TYPE_WILDCARD;
+  value: string;
+}
+
+export function isNode(node: KqlNode): node is KqlWildcardNode {
+  return node.type === KQL_NODE_TYPE_WILDCARD;
+}
+
+export function buildNode(value: string): KqlWildcardNode {
+  return {
+    type: KQL_NODE_TYPE_WILDCARD,
+    value: `${value}`,
+  };
+}
+
+export function toElasticsearchQuery(node: KqlWildcardNode) {
+  const { value } = node;
+  return value.split(KQL_WILDCARD_SYMBOL).join('*');
+}
 
 // Copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
 function escapeRegExp(str: string) {
@@ -22,37 +43,21 @@ function escapeQueryString(str: string) {
   return str.replace(/[+-=&|><!(){}[\]^"~*?:\\/]/g, '\\$&'); // $& means the whole matched string
 }
 
-export function buildNode(value: string): WildcardTypeBuildNode | KueryNode {
-  if (!value.includes(wildcardSymbol)) {
-    return fromLiteralExpression(value);
-  }
-
-  return {
-    type: 'wildcard',
-    value,
-  };
-}
-
-export function test(node: any, str: string): boolean {
-  const { value } = node;
-  const regex = value.split(wildcardSymbol).map(escapeRegExp).join('[\\s\\S]*');
+export function test(node: KqlLiteralNode | KqlWildcardNode, str: string): boolean {
+  const value = `${node.value}`;
+  const regex = `${value}`.split(KQL_WILDCARD_SYMBOL).map(escapeRegExp).join('[\\s\\S]*');
   const regexp = new RegExp(`^${regex}$`);
   return regexp.test(str);
 }
 
-export function toElasticsearchQuery(node: any): string {
-  const { value } = node;
-  return value.split(wildcardSymbol).join('*');
+export function toQueryStringQuery(node: KqlLiteralNode | KqlWildcardNode): string {
+  const value = `${node.value}`;
+  return value.split(KQL_WILDCARD_SYMBOL).map(escapeQueryString).join('*');
 }
 
-export function toQueryStringQuery(node: any): string {
-  const { value } = node;
-  return value.split(wildcardSymbol).map(escapeQueryString).join('*');
-}
-
-export function hasLeadingWildcard(node: any): boolean {
-  const { value } = node;
+export function hasLeadingWildcard(node: KqlLiteralNode | KqlWildcardNode): boolean {
+  const value = `${node.value}`;
   // A lone wildcard turns into an `exists` query, so we're only concerned with
   // leading wildcards followed by additional characters.
-  return value.startsWith(wildcardSymbol) && value.replace(wildcardSymbol, '').length > 0;
+  return value.startsWith(KQL_WILDCARD_SYMBOL) && value.replace(KQL_WILDCARD_SYMBOL, '').length > 0;
 }

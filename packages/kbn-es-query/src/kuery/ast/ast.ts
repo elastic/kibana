@@ -6,47 +6,48 @@
  * Side Public License, v 1.
  */
 
-import { JsonObject } from '@kbn/utility-types';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataViewBase } from '../..';
+import type { KqlNode } from '../node_types/types';
+import type { KueryParseOptions, KueryQueryOptions } from '../types';
 import { nodeTypes } from '../node_types/index';
 import { KQLSyntaxError } from '../kuery_syntax_error';
-import { KueryNode, KueryParseOptions, KueryQueryOptions } from '../types';
-
-import { parse as parseKuery } from '../grammar';
-import { IndexPatternBase } from '../..';
+import { parse } from '../grammar';
 
 const fromExpression = (
-  expression: string | estypes.QueryDslQueryContainer,
-  parseOptions: Partial<KueryParseOptions> = {},
-  parse: Function = parseKuery
-): KueryNode => {
+  expression: string,
+  parseOptions: Partial<KueryParseOptions> = {}
+): KqlNode => {
   if (typeof expression === 'undefined') {
     throw new Error('expression must be a string, got undefined instead');
   }
 
-  return parse(expression, { ...parseOptions, helpers: { nodeTypes } });
+  return parse(expression, parseOptions);
 };
 
+/**
+ * Generates the KQL AST from the given literal expression
+ * @see "Literal" rule in grammar.peggy
+ */
 export const fromLiteralExpression = (
-  expression: string | estypes.QueryDslQueryContainer,
+  expression: string,
   parseOptions: Partial<KueryParseOptions> = {}
-): KueryNode => {
-  return fromExpression(
-    expression,
-    {
-      ...parseOptions,
-      startRule: 'Literal',
-    },
-    parseKuery
-  );
+): KqlNode => {
+  return fromExpression(expression, {
+    ...parseOptions,
+    startRule: 'Literal',
+  });
 };
 
+/**
+ * Generates the KQL AST from the given expression
+ * @see grammar.peggy
+ */
 export const fromKueryExpression = (
-  expression: string | estypes.QueryDslQueryContainer,
+  expression: string,
   parseOptions: Partial<KueryParseOptions> = {}
-): KueryNode => {
+): KqlNode => {
   try {
-    return fromExpression(expression, parseOptions, parseKuery);
+    return fromExpression(expression, parseOptions);
   } catch (error) {
     if (error.name === 'SyntaxError') {
       throw new KQLSyntaxError(error, expression);
@@ -57,24 +58,20 @@ export const fromKueryExpression = (
 };
 
 /**
- * @params {String} indexPattern
- * @params {Object} config - contains the dateFormatTZ
- *
  * IndexPattern isn't required, but if you pass one in, we can be more intelligent
  * about how we craft the queries (e.g. scripted fields)
- *
  */
 export const toElasticsearchQuery = (
-  node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  node: KqlNode,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context?: Record<string, any>
-): JsonObject => {
-  if (!node || !node.type || !nodeTypes[node.type]) {
-    return toElasticsearchQuery(nodeTypes.function.buildNode('and', []), indexPattern);
+) => {
+  if (nodeTypes.function.isNode(node)) {
+    return nodeTypes.function.toElasticsearchQuery(node, indexPattern, config, context);
+  } else if (nodeTypes.literal.isNode(node)) {
+    return nodeTypes.literal.toElasticsearchQuery(node);
+  } else if (nodeTypes.wildcard.isNode(node)) {
+    return nodeTypes.wildcard.toElasticsearchQuery(node);
   }
-
-  // TODO: the return type of this function might be incorrect and it works only because of this casting
-  const nodeType = nodeTypes[node.type] as unknown as any;
-  return nodeType.toElasticsearchQuery(node, indexPattern, config, context);
 };

@@ -6,49 +6,68 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import type { DataViewBase, KueryQueryOptions } from '../..';
+import type { KqlNode } from './types';
+import {
+  functions,
+  KQL_FUNCTION_NAME_AND,
+  KQL_FUNCTION_NAME_EXISTS,
+  KQL_FUNCTION_NAME_IS,
+  KQL_FUNCTION_NAME_NESTED,
+  KQL_FUNCTION_NAME_NOT,
+  KQL_FUNCTION_NAME_OR,
+  KQL_FUNCTION_NAME_RANGE,
+} from '../functions';
 
-import { functions } from '../functions';
-import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
-import { FunctionName, FunctionTypeBuildNode } from './types';
+export const KQL_NODE_TYPE_FUNCTION = 'function';
 
-export function buildNode(functionName: FunctionName, ...args: any[]) {
-  const kueryFunction = functions[functionName];
-  if (_.isUndefined(kueryFunction)) {
-    throw new Error(`Unknown function "${functionName}"`);
-  }
+export type KqlFunctionName =
+  | typeof KQL_FUNCTION_NAME_AND
+  | typeof KQL_FUNCTION_NAME_EXISTS
+  | typeof KQL_FUNCTION_NAME_IS
+  | typeof KQL_FUNCTION_NAME_NESTED
+  | typeof KQL_FUNCTION_NAME_NOT
+  | typeof KQL_FUNCTION_NAME_OR
+  | typeof KQL_FUNCTION_NAME_RANGE;
 
-  return {
-    type: 'function' as 'function',
-    function: functionName,
-    // This requires better typing of the different typings and their return types.
-    // @ts-ignore
-    ...kueryFunction.buildNodeParams(...args),
-  };
+export interface KqlFunctionNode extends KqlNode {
+  type: typeof KQL_NODE_TYPE_FUNCTION;
+  function: KqlFunctionName;
+  arguments: KqlNode[];
 }
 
-// Mainly only useful in the grammar where we'll already have real argument nodes in hand
-export function buildNodeWithArgumentNodes(
-  functionName: FunctionName,
-  args: any[]
-): FunctionTypeBuildNode {
-  if (_.isUndefined(functions[functionName])) {
-    throw new Error(`Unknown function "${functionName}"`);
-  }
+export function isNode(node: KqlNode): node is KqlFunctionNode {
+  return node.type === KQL_NODE_TYPE_FUNCTION;
+}
 
+export function buildNode(fnName: KqlFunctionName, args: KqlNode[]): KqlFunctionNode {
   return {
-    type: 'function',
-    function: functionName,
+    type: KQL_NODE_TYPE_FUNCTION,
+    function: fnName,
     arguments: args,
   };
 }
 
 export function toElasticsearchQuery(
-  node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  node: KqlFunctionNode,
+  indexPattern?: DataViewBase,
   config?: KueryQueryOptions,
   context?: Record<string, any>
 ) {
-  const kueryFunction = functions[node.function as FunctionName];
-  return kueryFunction.toElasticsearchQuery(node, indexPattern, config, context);
+  if (functions.and.isNode(node)) {
+    return functions.and.toElasticsearchQuery(node, indexPattern, config, context);
+  } else if (functions.exists.isNode(node)) {
+    return functions.exists.toElasticsearchQuery(node, indexPattern, config, context);
+  } else if (functions.is.isNode(node)) {
+    return functions.is.toElasticsearchQuery(node, indexPattern, config, context);
+  } else if (functions.nested.isNode(node)) {
+    return functions.nested.toElasticsearchQuery(node, indexPattern, config, context);
+  } else if (functions.not.isNode(node)) {
+    return functions.not.toElasticsearchQuery(node, indexPattern, config, context);
+  } else if (functions.or.isNode(node)) {
+    return functions.or.toElasticsearchQuery(node, indexPattern, config, context);
+  } else if (functions.range.isNode(node)) {
+    return functions.range.toElasticsearchQuery(node, indexPattern, config, context);
+  }
+  throw new Error(`Unsupported KQL function: ${node.function}`);
 }

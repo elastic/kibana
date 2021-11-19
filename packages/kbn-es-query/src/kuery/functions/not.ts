@@ -6,32 +6,31 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import * as ast from '../ast';
-import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
+import type { DataViewBase, DslQuery, KueryQueryOptions } from '../..';
+import type { KqlFunctionNode } from '../node_types/function';
+import { nodeTypes } from '../..';
 
-export function buildNodeParams(child: KueryNode) {
-  return {
-    arguments: [child],
-  };
+export const KQL_FUNCTION_NAME_NOT = 'not';
+
+export interface KqlNotFunctionNode extends KqlFunctionNode {
+  function: typeof KQL_FUNCTION_NAME_NOT;
+  arguments: [KqlFunctionNode]; // Sub-query
+}
+
+export function isNode(node: KqlFunctionNode): node is KqlNotFunctionNode {
+  return node.function === KQL_FUNCTION_NAME_NOT;
 }
 
 export function toElasticsearchQuery(
-  node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  { arguments: [node] }: KqlNotFunctionNode,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-): estypes.QueryDslQueryContainer {
-  const [argument] = node.arguments;
-
+): DslQuery {
+  const clause = nodeTypes.function.toElasticsearchQuery(node, indexPattern, config, context);
   return {
     bool: {
-      must_not: ast.toElasticsearchQuery(
-        argument,
-        indexPattern,
-        config,
-        context
-      ) as estypes.QueryDslQueryContainer,
+      must_not: clause,
     },
   };
 }

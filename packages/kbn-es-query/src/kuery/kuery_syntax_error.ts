@@ -43,7 +43,14 @@ const getItemText = (item: KQLSyntaxErrorExpected): string => {
 interface KQLSyntaxErrorData extends Error {
   found: string;
   expected: KQLSyntaxErrorExpected[] | null;
-  location: any;
+  location: {
+    start: {
+      offset: number;
+    };
+    end: {
+      offset: number;
+    };
+  };
 }
 
 interface KQLSyntaxErrorExpected {
@@ -59,7 +66,7 @@ interface KQLSyntaxErrorExpected {
 export class KQLSyntaxError extends Error {
   shortMessage: string;
 
-  constructor(error: KQLSyntaxErrorData, expression: any) {
+  constructor(error: KQLSyntaxErrorData, expression: string) {
     let message = error.message;
     if (error.expected) {
       const translatedExpectations = error.expected.map((expected) => {

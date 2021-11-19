@@ -7,12 +7,14 @@
  */
 
 import { getFields } from './get_fields';
-import { IndexPatternBase, IndexPatternFieldBase, KueryNode } from '../../..';
+import { DataViewBase, DataViewFieldBase, KueryNode } from '../../..';
 import { getDataViewFieldSubtypeNested } from '../../../utils';
+import { KqlLiteralNode } from '../../node_types/literal';
+import { KqlWildcardNode } from '../../node_types/wildcard';
 
 export function getFullFieldNameNode(
-  rootNameNode: any,
-  indexPattern?: IndexPatternBase,
+  rootNameNode: KqlLiteralNode | KqlWildcardNode,
+  indexPattern?: DataViewBase,
   nestedPath?: string
 ): KueryNode {
   const fullFieldNameNode = {
@@ -28,7 +30,7 @@ export function getFullFieldNameNode(
   }
   const fields = getFields(fullFieldNameNode, indexPattern);
 
-  const errors = fields!.reduce((acc: any, field: IndexPatternFieldBase) => {
+  const errors = fields!.reduce((acc: any, field: DataViewFieldBase) => {
     const subTypeNested = getDataViewFieldSubtypeNested(field);
     const nestedPathFromField = subTypeNested?.nested.path;
 

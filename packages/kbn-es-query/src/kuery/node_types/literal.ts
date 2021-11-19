@@ -6,15 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { LiteralTypeBuildNode } from './types';
+import { KqlNode } from './types';
 
-export function buildNode(value: LiteralTypeBuildNode['value']): LiteralTypeBuildNode {
+export const KQL_NODE_TYPE_LITERAL = 'literal';
+
+export type KqlLiteralType = null | boolean | number | string;
+
+export interface KqlLiteralNode extends KqlNode {
+  type: typeof KQL_NODE_TYPE_LITERAL;
+  value: KqlLiteralType;
+}
+
+export function isNode(node: KqlNode): node is KqlLiteralNode {
+  return node.type === KQL_NODE_TYPE_LITERAL;
+}
+
+export function buildNode(value: KqlLiteralType): KqlLiteralNode {
   return {
-    type: 'literal',
+    type: KQL_NODE_TYPE_LITERAL,
     value,
   };
 }
 
-export function toElasticsearchQuery(node: LiteralTypeBuildNode): LiteralTypeBuildNode['value'] {
-  return node.value;
+export function toElasticsearchQuery({ value }: KqlLiteralNode) {
+  return value;
 }

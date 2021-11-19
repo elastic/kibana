@@ -6,36 +6,41 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IndexPatternFieldBase, IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
-import * as literal from '../node_types/literal';
+import type { DataViewBase, DataViewFieldBase, DslQuery, KueryQueryOptions } from '../..';
+import type { KqlFunctionNode } from '../node_types/function';
+import type { KqlLiteralNode } from '../node_types/literal';
+import type { KqlWildcardNode } from '../node_types/wildcard';
+import * as ast from '../ast';
 
-export function buildNodeParams(fieldName: string) {
-  return {
-    arguments: [literal.buildNode(fieldName)],
-  };
+export const KQL_FUNCTION_NAME_EXISTS = 'exists';
+
+export interface KqlExistsFunctionNode extends KqlFunctionNode {
+  function: typeof KQL_FUNCTION_NAME_EXISTS;
+  arguments: [
+    KqlLiteralNode | KqlWildcardNode // Field name
+  ];
+}
+
+export function isNode(node: KqlFunctionNode): node is KqlExistsFunctionNode {
+  return node.function === KQL_FUNCTION_NAME_EXISTS;
 }
 
 export function toElasticsearchQuery(
-  node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  { arguments: [fieldNameArg] }: KqlExistsFunctionNode,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-): estypes.QueryDslQueryContainer {
-  const {
-    arguments: [fieldNameArg],
-  } = node;
+): DslQuery {
   const fullFieldNameArg = {
     ...fieldNameArg,
     value: context?.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
   };
-  const fieldName = literal.toElasticsearchQuery(fullFieldNameArg) as string;
-  const field = indexPattern?.fields?.find((fld: IndexPatternFieldBase) => fld.name === fieldName);
+  const fieldName = `${ast.toElasticsearchQuery(fullFieldNameArg)}`;
+  const field = indexPattern?.fields?.find((fld: DataViewFieldBase) => fld.name === fieldName);
 
   if (field?.scripted) {
     throw new Error(`Exists query does not support scripted fields`);
   }
-  return {
-    exists: { field: fieldName },
-  };
+
+  return { exists: { field: fieldName } };
 }

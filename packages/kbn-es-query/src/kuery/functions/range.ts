@@ -6,33 +6,36 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { nodeTypes } from '../node_types';
+import type { DataViewBase, DslQuery, KueryQueryOptions } from '../..';
+import type { KqlFunctionNode } from '../node_types/function';
+import type { KqlLiteralNode } from '../node_types/literal';
 import * as ast from '../ast';
-import { getRangeScript, RangeFilterParams } from '../../filters';
-import { getFields } from './utils/get_fields';
+import { getRangeScript } from '../../filters';
 import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
+import { getFields } from './utils/get_fields';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import type { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
 
-export function buildNodeParams(
-  fieldName: string,
-  operator: keyof Pick<RangeFilterParams, 'gt' | 'gte' | 'lt' | 'lte'>,
-  value: number | string
-) {
-  // Run through the parser instead treating it as a literal because it may contain wildcards
-  const fieldNameArg = ast.fromLiteralExpression(fieldName);
-  const valueArg = nodeTypes.literal.buildNode(value);
-  return { arguments: [fieldNameArg, operator, valueArg] };
+export const KQL_FUNCTION_NAME_RANGE = 'range';
+
+export interface KqlRangeFunctionNode extends KqlFunctionNode {
+  function: typeof KQL_FUNCTION_NAME_RANGE;
+  arguments: [
+    KqlLiteralNode, // Field name
+    KqlLiteralNode, // Operator ('gt', 'gte', 'lt', 'lte')
+    KqlLiteralNode // Value
+  ];
+}
+
+export function isNode(node: KqlFunctionNode): node is KqlRangeFunctionNode {
+  return node.function === KQL_FUNCTION_NAME_RANGE;
 }
 
 export function toElasticsearchQuery(
-  node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  { arguments: [fieldNameArg, operator, valueArg] }: KqlRangeFunctionNode,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-): estypes.QueryDslQueryContainer {
-  const [fieldNameArg, operatorArg, valueArg] = node.arguments;
+): DslQuery {
   const fullFieldNameArg = getFullFieldNameNode(
     fieldNameArg,
     indexPattern,
@@ -72,7 +75,7 @@ export function toElasticsearchQuery(
     };
 
     const queryParams = {
-      [operatorArg]: ast.toElasticsearchQuery(valueArg),
+      [operator]: ast.toElasticsearchQuery(valueArg),
     };
 
     if (field.scripted) {

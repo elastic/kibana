@@ -7,50 +7,40 @@
  */
 
 import { isUndefined } from 'lodash';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataViewBase, DataViewFieldBase, DslQuery, KueryQueryOptions } from '../..';
+import type { KqlFunctionNode } from '../node_types/function';
+import type { KqlLiteralNode } from '../node_types/literal';
 import { getPhraseScript } from '../../filters';
-import { getFields } from './utils/get_fields';
-import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';
-import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IndexPatternBase, KueryNode, IndexPatternFieldBase, KueryQueryOptions } from '../..';
-
+import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
 import * as ast from '../ast';
+import { KQL_WILDCARD_SYMBOL, KqlWildcardNode, toQueryStringQuery } from '../node_types/wildcard';
+import { getFields } from './utils/get_fields';
+import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 
-import * as literal from '../node_types/literal';
-import * as wildcard from '../node_types/wildcard';
+export const KQL_FUNCTION_NAME_IS = 'is';
 
-export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean = false) {
-  if (isUndefined(fieldName)) {
-    throw new Error('fieldName is a required argument');
-  }
-  if (isUndefined(value)) {
-    throw new Error('value is a required argument');
-  }
-  const fieldNode =
-    typeof fieldName === 'string'
-      ? ast.fromLiteralExpression(fieldName)
-      : literal.buildNode(fieldName);
-  const valueNode =
-    typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
-  const isPhraseNode = literal.buildNode(isPhrase);
-  return {
-    arguments: [fieldNode, valueNode, isPhraseNode],
-  };
+export interface KqlIsFunctionNode extends KqlFunctionNode {
+  function: typeof KQL_FUNCTION_NAME_IS;
+  arguments: [
+    KqlLiteralNode | KqlWildcardNode, // Field name
+    KqlLiteralNode | KqlWildcardNode, // Value
+    KqlLiteralNode // Is this a "phrase" value? (surrounded in quotes)
+  ];
+}
+
+export function isNode(node: KqlFunctionNode): node is KqlIsFunctionNode {
+  return node.function === KQL_FUNCTION_NAME_IS;
 }
 
 export function toElasticsearchQuery(
-  node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  { arguments: [fieldNameArg, valueArg, isPhraseArg] }: KqlIsFunctionNode,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-): estypes.QueryDslQueryContainer {
-  const {
-    arguments: [fieldNameArg, valueArg, isPhraseArg],
-  } = node;
-
-  const isExistsQuery = valueArg.type === 'wildcard' && valueArg.value === wildcard.wildcardSymbol;
+): DslQuery {
+  const isExistsQuery = valueArg.type === 'wildcard' && valueArg.value === KQL_WILDCARD_SYMBOL;
   const isAllFieldsQuery =
-    fieldNameArg.type === 'wildcard' && fieldNameArg.value === wildcard.wildcardSymbol;
+    fieldNameArg.type === 'wildcard' && fieldNameArg.value === KQL_WILDCARD_SYMBOL;
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
   if (isMatchAllQuery) {
@@ -68,7 +58,7 @@ export function toElasticsearchQuery(
     if (valueArg.type === 'wildcard') {
       return {
         query_string: {
-          query: wildcard.toQueryStringQuery(valueArg),
+          query: toQueryStringQuery(valueArg),
         },
       };
     }
@@ -101,7 +91,7 @@ export function toElasticsearchQuery(
     return { match_all: {} };
   }
 
-  const queries = fields!.reduce((accumulator: any, field: IndexPatternFieldBase) => {
+  const queries = fields!.reduce((accumulator: any, field: DataViewFieldBase) => {
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
@@ -146,7 +136,7 @@ export function toElasticsearchQuery(
         wrapWithNestedQuery({
           query_string: {
             fields: [field.name],
-            query: wildcard.toQueryStringQuery(valueArg),
+            query: toQueryStringQuery(valueArg),
           },
         }),
       ];
