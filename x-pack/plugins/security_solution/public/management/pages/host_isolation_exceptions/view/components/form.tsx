@@ -21,6 +21,20 @@ import {
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useQuery } from 'react-query';
+import { useHttp } from '../../../../../common/lib/kibana';
+import {
+  EffectedPolicySelect,
+  EffectedPolicySelection,
+  EffectedPolicySelectProps,
+} from '../../../../components/effected_policy_select';
+import {
+  getArtifactTagsByEffectedPolicySelection,
+  getEffectedPolicySelectionByTags,
+  isGlobalPolicyEffected,
+} from '../../../../components/effected_policy_select/utils';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies';
+import { GetPolicyListResponse } from '../../../policy/types';
 import { isValidIPv4OrCIDR } from '../../utils';
 import {
   DESCRIPTION_LABEL,
@@ -50,6 +64,31 @@ export const HostIsolationExceptionsForm: React.FC<{
   const [hasBeenInputIpVisited, setHasBeenInputIpVisited] = useState(false);
   const [hasNameError, setHasNameError] = useState(!exception.name);
   const [hasIpError, setHasIpError] = useState(!ipEntry.value);
+  const http = useHttp();
+
+  const policiesRequest = useQuery<GetPolicyListResponse>(
+    ['hostIsolationExceptions', 'policies'],
+    () => {
+      return sendGetEndpointSpecificPackagePolicies(http, {
+        query: {
+          page: 1,
+          perPage: 1000,
+        },
+      });
+    },
+    {
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      onSuccess: (data) => {
+        if (isGlobalPolicyEffected(exception.tags)) {
+          setIsGlobal(true);
+        } else {
+          setIsGlobal(false);
+          setSelectedPolicies(getEffectedPolicySelectionByTags(exception.tags || [], data.items));
+        }
+      },
+    }
+  );
 
   useEffect(() => {
     onError(hasNameError || hasIpError);
@@ -86,6 +125,25 @@ export const HostIsolationExceptionsForm: React.FC<{
             value: ip,
           },
         ],
+      });
+    },
+    [exception, onChange]
+  );
+
+  const [isGlobal, setIsGlobal] = useState(true);
+
+  const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
+    isGlobal,
+    selected: [],
+  });
+
+  const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
+    (selection) => {
+      setIsGlobal(selection.isGlobal);
+      setSelectedPolicies(() => selection);
+      onChange({
+        ...exception,
+        tags: getArtifactTagsByEffectedPolicySelection(selection),
       });
     },
     [exception, onChange]
@@ -203,6 +261,18 @@ export const HostIsolationExceptionsForm: React.FC<{
       </EuiText>
       <EuiSpacer size="m" />
       {ipInput}
+      <EuiHorizontalRule />
+      <EuiFormRow data-test-subj={'effectedPolicies-container'}>
+        <EffectedPolicySelect
+          isGlobal={isGlobal}
+          isPlatinumPlus={true}
+          selected={selectedPolicies.selected}
+          options={policiesRequest.data?.items || []}
+          onChange={handlePolicySelectChange}
+          isLoading={policiesRequest.isLoading}
+          data-test-subj={'effectedPolicies-select'}
+        />
+      </EuiFormRow>
     </EuiForm>
   );
 });
