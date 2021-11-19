@@ -10,6 +10,7 @@ import React from 'react';
 import { PopoverItems, PopoverItemsProps } from '.';
 import { TestProviders } from '../../mock';
 import { render, screen } from '@testing-library/react';
+import { within } from '@testing-library/dom';
 
 const mockTags = ['Elastic', 'Endpoint', 'Data Protection', 'ML', 'Continuous Monitoring'];
 
@@ -30,6 +31,9 @@ const renderHelper = (props: Partial<PopoverItemsProps<unknown>> = {}) =>
     </TestProviders>
   );
 
+const getButton = () => screen.getByRole('button', { name: 'show mocks' });
+const withinPopover = () => within(screen.getByTestId('tagsDisplayPopoverWrapper'));
+
 describe('Component PopoverItems', () => {
   it('shoud render only 2 first items in display and rest in popup', async () => {
     renderHelper({ numberOfItemsToDisplay: 2 });
@@ -42,12 +46,12 @@ describe('Component PopoverItems', () => {
       expect(screen.queryByText(tag)).toBeNull();
     });
 
-    screen.getByRole('button', { name: 'show mocks' }).click();
-    expect(await screen.findByTestId('tags-display-popover-wrapper')).toBeInTheDocument();
+    getButton().click();
+    expect(await screen.findByTestId('tagsDisplayPopoverWrapper')).toBeInTheDocument();
 
     // items rendered in popup
     mockTags.slice(2).forEach((tag) => {
-      expect(screen.getByText(tag)).toBeInTheDocument();
+      expect(withinPopover().getByText(tag)).toBeInTheDocument();
     });
   });
 
@@ -56,23 +60,21 @@ describe('Component PopoverItems', () => {
     mockTags.forEach((tag) => {
       expect(screen.queryByText(tag)).toBeNull();
     });
-    screen.getByRole('button', { name: 'show mocks' }).click();
+    getButton().click();
 
     mockTags.forEach((tag) => {
-      expect(screen.queryByText(tag)).toBeInTheDocument();
+      expect(withinPopover().queryByText(tag)).toBeInTheDocument();
     });
 
-    expect(screen.queryByTestId('tags-display-popover-title')).toBeNull();
+    expect(screen.queryByTestId('tagsDisplayPopoverTitle')).toBeNull();
   });
 
   it('shoud render popover title', async () => {
     renderHelper({ popoverTitle: 'Tags popover title' });
 
-    screen.getByRole('button', { name: 'show mocks' }).click();
+    getButton().click();
 
-    expect(await screen.findByTestId('tags-display-popover-wrapper')).toBeInTheDocument();
-    expect(screen.getByTestId('tags-display-popover-title')).toHaveTextContent(
-      'Tags popover title'
-    );
+    expect(await screen.findByTestId('tagsDisplayPopoverWrapper')).toBeInTheDocument();
+    expect(screen.getByTestId('tagsDisplayPopoverTitle')).toHaveTextContent('Tags popover title');
   });
 });

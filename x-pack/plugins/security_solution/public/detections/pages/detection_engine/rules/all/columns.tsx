@@ -193,7 +193,7 @@ export const getColumns = ({
         }
 
         const renderItem = (tag: string, i: number) => (
-          <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tags-popover-item">
+          <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tag">
             {tag}
           </EuiBadge>
         );

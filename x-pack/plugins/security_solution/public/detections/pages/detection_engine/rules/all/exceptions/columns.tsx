@@ -73,7 +73,7 @@ export const getAllExceptionListsColumns = (
             <>
               <SpacedLinkAnchor
                 key={id}
-                data-test-subj="rule-name"
+                data-test-subj="ruleNameLink"
                 onClick={(ev: { preventDefault: () => void }) => {
                   ev.preventDefault();
                   navigateToUrl(ruleHref);
@@ -95,6 +95,7 @@ export const getAllExceptionListsColumns = (
           popoverTitle={i18n.RULES_ASSIGNED_TO_TITLE}
           popoverButtonTitle={i18n.showMoreRules(rules.length - 1)}
           renderItem={renderItem as PopoverItemsProps<unknown>['renderItem']}
+          dataTestPrefix="rules"
         />
       );
     },
