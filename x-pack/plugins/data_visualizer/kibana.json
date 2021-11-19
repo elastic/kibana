@@ -25,7 +25,8 @@
     "kibanaReact",
     "maps",
     "esUiShared",
-    "fieldFormats"
+    "fieldFormats",
+    "charts"
   ],
   "extraPublicDirs": [
     "common"

@@ -1158,7 +1158,7 @@ exports[`Inspector Data View component should render single table without select
                             textOnly={false}
                           >
                             <td
-                              className="euiTableRowCell"
+                              className="euiTableRowCell euiTableRowCell--middle"
                               style={
                                 Object {
                                   "width": undefined,
@@ -2744,7 +2744,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                             textOnly={false}
                           >
                             <td
-                              className="euiTableRowCell"
+                              className="euiTableRowCell euiTableRowCell--middle"
                               style={
                                 Object {
                                   "width": undefined,

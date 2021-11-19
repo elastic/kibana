@@ -556,7 +556,7 @@ describe('HasDataContextProvider', () => {
             status: 'success',
           },
         },
-        hasAnyData: false,
+        hasAnyData: true,
         isAllRequestsComplete: true,
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),

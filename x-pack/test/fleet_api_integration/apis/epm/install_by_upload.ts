@@ -74,7 +74,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/gzip')
         .send(buf)
         .expect(200);
-      expect(res.body.response.length).to.be(29);
+      expect(res.body.response.length).to.be(27);
     });
 
     it('should install a zip archive correctly and package info should return correctly after validation', async function () {
@@ -85,7 +85,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.response.length).to.be(29);
+      expect(res.body.response.length).to.be(27);
 
       const packageInfoRes = await supertest
         .get(`/api/fleet/epm/packages/${testPkgKey}`)

@@ -68,7 +68,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'filetest-1',
+          name: 'filetest',
           description: '',
           namespace: 'default',
           policy_id: hostedPolicy.id,
@@ -85,7 +85,7 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(responseWithoutForce.statusCode).to.be(400);
       expect(responseWithoutForce.message).to.contain(
-        'Cannot add integrations to hosted agent policy'
+        'Cannot update integrations of hosted agent policy'
       );
 
       // try same request with `force: true`
@@ -122,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'filetest-1',
+          name: 'filetest-2',
           description: '',
           namespace: 'default',
           policy_id: agentPolicyId,
@@ -199,7 +199,8 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
-    it('should not allow multiple limited packages on the same agent policy', async function () {
+    // https://github.com/elastic/kibana/issues/118257
+    it.skip('should not allow multiple limited packages on the same agent policy', async function () {
       await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -262,6 +263,54 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'same-name-test-1',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+    });
+
+    it('should return a 400 if there is a package policy with the same name on a different policy', async function () {
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy 2',
+          namespace: 'default',
+        });
+      const otherAgentPolicyId = agentPolicyResponse.item.id;
+
+      await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'same-name-test-2',
+          description: '',
+          namespace: 'default',
+          policy_id: otherAgentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+      await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'same-name-test-2',
           description: '',
           namespace: 'default',
           policy_id: agentPolicyId,

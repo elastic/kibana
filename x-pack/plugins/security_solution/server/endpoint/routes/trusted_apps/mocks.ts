@@ -66,7 +66,7 @@ export const getPutTrustedAppByPolicyMock = function (): ExceptionListItemSchema
 export const getPackagePoliciesResponse = function (): PackagePolicy[] {
   return [
     // Next line is ts-ignored as this is the response when the policy doesn't exists but the type is complaining about it.
-    // @ts-ignore
+    // @ts-expect-error TS2740
     { id: '9da95be9-9bee-4761-a8c4-28d6d9bd8c71', version: undefined },
     {
       id: 'e5cbb9cf-98aa-4303-a04b-6a1165915079',

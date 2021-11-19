@@ -29,7 +29,7 @@ export async function shortenUrl(
     params: { url: relativeUrl },
   });
 
-  const resp = await post('/api/short_url', {
+  const resp = await post<{ id: string }>('/api/short_url', {
     body,
   });
 

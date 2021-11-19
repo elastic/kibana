@@ -11,7 +11,7 @@ import { partition } from 'lodash';
 import { Fields } from '../../lib/entity';
 import { ElasticsearchOutputWriteTargets } from '../../lib/output/to_elasticsearch_output';
 import { Scenario } from './get_scenario';
-import { Logger } from './logger';
+import { Logger } from '../../lib/utils/create_logger';
 import { uploadEvents } from './upload_events';
 
 export function startLiveDataUpload({

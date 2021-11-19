@@ -7,6 +7,8 @@ Object {
 }
 `;
 
+exports[`Error AGENT_EPHEMERAL_ID 1`] = `undefined`;
+
 exports[`Error AGENT_NAME 1`] = `"java"`;
 
 exports[`Error AGENT_VERSION 1`] = `"agent version"`;
@@ -254,6 +256,8 @@ Object {
 }
 `;
 
+exports[`Span AGENT_EPHEMERAL_ID 1`] = `undefined`;
+
 exports[`Span AGENT_NAME 1`] = `"java"`;
 
 exports[`Span AGENT_VERSION 1`] = `"agent version"`;
@@ -492,6 +496,8 @@ Object {
   "version": "agent version",
 }
 `;
+
+exports[`Transaction AGENT_EPHEMERAL_ID 1`] = `undefined`;
 
 exports[`Transaction AGENT_NAME 1`] = `"java"`;
 

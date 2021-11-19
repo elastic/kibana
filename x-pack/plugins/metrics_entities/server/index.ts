@@ -18,7 +18,7 @@ export const plugin = (initializerContext: PluginInitializerContext): MetricsEnt
   return new MetricsEntitiesPlugin(initializerContext);
 };
 
-export { MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart } from './types';
+export type { MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart } from './types';
 
 export const config = {
   schema: schema.object({

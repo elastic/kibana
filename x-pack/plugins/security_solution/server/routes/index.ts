@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { StartServicesAccessor } from 'kibana/server';
 import { Logger } from 'src/core/server';
 import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
 
@@ -36,6 +37,7 @@ import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/per
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
+import { findRuleStatusInternalRoute } from '../lib/detection_engine/routes/rules/find_rule_status_internal_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import {
   createTimelinesRoute,
@@ -55,7 +57,7 @@ import { persistNoteRoute } from '../lib/timeline/routes/notes';
 
 import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
-import { SetupPlugins } from '../plugin';
+import { SetupPlugins, StartPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { TelemetryEventsSender } from '../lib/telemetry/sender';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
@@ -63,6 +65,7 @@ import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_
 import { CreateRuleOptions } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
+import { createSourcererDataViewRoute } from '../lib/sourcerer/routes';
 import { createPreviewIndexRoute } from '../lib/detection_engine/routes/index/create_preview_index_route';
 
 export const initRoutes = (
@@ -75,7 +78,8 @@ export const initRoutes = (
   ruleDataService: RuleDataPluginService,
   logger: Logger,
   ruleDataClient: IRuleDataClient | null,
-  ruleOptions: CreateRuleOptions
+  ruleOptions: CreateRuleOptions,
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   const isRuleRegistryEnabled = ruleDataClient != null;
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
@@ -122,6 +126,7 @@ export const initRoutes = (
   persistPinnedEventRoute(router, config, security);
 
   findRulesStatusesRoute(router);
+  findRuleStatusInternalRoute(router);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
@@ -147,4 +152,7 @@ export const initRoutes = (
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);
+
+  // Sourcerer API to generate default pattern
+  createSourcererDataViewRoute(router, getStartServices);
 };

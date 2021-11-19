@@ -338,6 +338,36 @@ describe('static_value', () => {
       expect(input.prop('value')).toEqual('23');
     });
 
+    it('should allow 0 as initial value', () => {
+      const updateLayerSpy = jest.fn();
+      const zeroLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col2: {
+            ...layer.columns.col2,
+            operationType: 'static_value',
+            references: [],
+            params: {
+              value: '0',
+            },
+          },
+        },
+      } as IndexPatternLayer;
+      const instance = shallow(
+        <ParamEditor
+          {...defaultProps}
+          layer={zeroLayer}
+          updateLayer={updateLayerSpy}
+          columnId="col2"
+          currentColumn={zeroLayer.columns.col2 as StaticValueIndexPatternColumn}
+        />
+      );
+
+      const input = instance.find('[data-test-subj="lns-indexPattern-static_value-input"]');
+      expect(input.prop('value')).toEqual('0');
+    });
+
     it('should update state on change', async () => {
       const updateLayerSpy = jest.fn();
       const instance = mount(

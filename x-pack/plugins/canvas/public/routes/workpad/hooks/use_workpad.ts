@@ -35,7 +35,7 @@ export const useWorkpad = (
   const [error, setError] = useState<string | Error | undefined>(undefined);
 
   const [resolveInfo, setResolveInfo] = useState<
-    { aliasId: string | undefined; outcome: string } | undefined
+    { id: string; aliasId: string | undefined; outcome: string } | undefined
   >(undefined);
 
   useEffect(() => {
@@ -47,31 +47,38 @@ export const useWorkpad = (
           workpad: { assets, ...workpad },
         } = await workpadResolve(workpadId);
 
-        setResolveInfo({ aliasId, outcome });
+        setResolveInfo({ aliasId, outcome, id: workpadId });
 
-        if (outcome === 'conflict') {
+        // If it's an alias match, we know we are going to redirect so don't even dispatch that we got the workpad
+        if (storedWorkpad.id !== workpadId && outcome !== 'aliasMatch') {
           workpad.aliasId = aliasId;
-        }
 
-        dispatch(setAssets(assets));
-        dispatch(setWorkpad(workpad, { loadPages }));
-        dispatch(setZoomScale(1));
+          dispatch(setAssets(assets));
+          dispatch(setWorkpad(workpad, { loadPages }));
+          dispatch(setZoomScale(1));
+        }
       } catch (e) {
         setError(e as Error | string);
       }
     })();
-  }, [workpadId, dispatch, setError, loadPages, workpadResolve]);
+  }, [workpadId, dispatch, setError, loadPages, workpadResolve, storedWorkpad.id]);
 
   useEffect(() => {
-    (() => {
+    // If the resolved info is not for the current workpad id, bail out
+    if (resolveInfo && resolveInfo.id !== workpadId) {
+      return;
+    }
+
+    (async () => {
       if (!resolveInfo) return;
 
       const { aliasId, outcome } = resolveInfo;
       if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
-        platformService.redirectLegacyUrl(`#${getRedirectPath(aliasId)}`, getWorkpadLabel());
+        const redirectPath = getRedirectPath(aliasId);
+        await platformService.redirectLegacyUrl(`#${redirectPath}`, getWorkpadLabel());
       }
     })();
-  }, [resolveInfo, getRedirectPath, platformService]);
+  }, [workpadId, resolveInfo, getRedirectPath, platformService]);
 
   return [storedWorkpad.id === workpadId ? storedWorkpad : undefined, error];
 };

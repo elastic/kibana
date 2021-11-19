@@ -23,7 +23,7 @@ import {
   TimelineStatus,
   TimelineTabs,
 } from '../../../../common/types/timeline';
-import { ISearchStart } from '../../../../../../../src/plugins/data/public';
+import type { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
@@ -76,7 +76,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -92,7 +91,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -142,6 +140,7 @@ describe('alert actions', () => {
             ],
             defaultColumns: defaultHeaders,
             dataProviders: [],
+            dataViewId: '',
             dateRange: {
               end: '2018-11-05T19:03:25.937Z',
               start: '2018-11-05T18:58:25.937Z',
@@ -248,7 +247,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -266,7 +264,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -300,7 +297,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -326,7 +322,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -356,7 +351,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -397,7 +391,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });

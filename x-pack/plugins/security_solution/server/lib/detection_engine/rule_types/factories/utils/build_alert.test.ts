@@ -31,14 +31,14 @@ import {
   ANCHOR_DATE,
 } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_ORIGINAL_EVENT,
-  ALERT_ORIGINAL_TIME,
-} from '../../field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import { EVENT_DATASET } from '../../../../../../common/cti/constants';
+import {
+  ALERT_ANCESTORS,
+  ALERT_ORIGINAL_TIME,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_EVENT,
+} from '../../../../../../common/field_maps/field_names';
 
 type SignalDoc = SignalSourceHit & {
   _source: Required<SignalSourceHit>['_source'] & { [TIMESTAMP]: string };
