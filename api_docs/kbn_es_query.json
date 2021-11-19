@@ -977,7 +977,7 @@
           "\nCreates a filter corresponding to a raw Elasticsearch query DSL object"
         ],
         "signature": [
-          "(query: (Record<string, any> & { query_string?: { query: string; } | undefined; }) | undefined, index: string, alias: string) => ",
+          "(query: (Record<string, any> & { query_string?: { query: string; fields?: string[] | undefined; } | undefined; }) | undefined, index: string, alias: string) => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -997,7 +997,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              "(Record<string, any> & { query_string?: { query: string; } | undefined; }) | undefined"
+              "(Record<string, any> & { query_string?: { query: string; fields?: string[] | undefined; } | undefined; }) | undefined"
             ],
             "path": "packages/kbn-es-query/src/filters/build_filters/query_string_filter.ts",
             "deprecated": false,
@@ -4101,7 +4101,7 @@
             "section": "def-common.FilterMeta",
             "text": "FilterMeta"
           },
-          "; query?: { query_string?: { query: string; } | undefined; } | undefined; }"
+          "; query?: { query_string?: { query: string; fields?: string[] | undefined; } | undefined; } | undefined; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/query_string_filter.ts",
         "deprecated": false,

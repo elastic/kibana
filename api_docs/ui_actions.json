@@ -656,11 +656,11 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/embeddable/search_embeddable_factory.ts"
+                "path": "src/plugins/discover/public/embeddable/search_embeddable_factory.ts"
               },
               {
                 "plugin": "discover",
@@ -688,7 +688,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/target/types/public/application/embeddable/search_embeddable_factory.d.ts"
+                "path": "src/plugins/discover/target/types/public/embeddable/search_embeddable_factory.d.ts"
               }
             ],
             "children": [

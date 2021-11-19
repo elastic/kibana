@@ -158,7 +158,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"top\" | \"bottom\" | \"left\" | \"right\""
+              "\"top\" | \"left\" | \"bottom\" | \"right\""
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false
@@ -813,7 +813,7 @@
             "section": "def-public.SchemaConfig",
             "text": "SchemaConfig"
           },
-          ", \"label\" | \"format\" | \"accessor\" | \"aggType\"> & { params: {} | ",
+          ", \"format\" | \"label\" | \"accessor\" | \"aggType\"> & { params: {} | ",
           "DateHistogramParams",
           " | ",
           "HistogramParams",

@@ -1863,7 +1863,7 @@
             "section": "def-public.ToastsApi",
             "text": "ToastsApi"
           },
-          ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">; history?: ",
+          ", \"add\" | \"get$\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">; history?: ",
           "History",
           "<any> | undefined; getHistory?: (() => ",
           "History",
@@ -1970,17 +1970,7 @@
                   "\nToast notifications service to show toasts in error cases."
                 ],
                 "signature": [
-                  "{ get$: () => ",
-                  "Observable",
-                  "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "[]>; add: (toastOrTitle: ",
+                  "{ add: (toastOrTitle: ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -1996,7 +1986,17 @@
                     "section": "def-public.Toast",
                     "text": "Toast"
                   },
-                  "; remove: (toastOrId: string | ",
+                  "; get$: () => ",
+                  "Observable",
+                  "<",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.Toast",
+                    "text": "Toast"
+                  },
+                  "[]>; remove: (toastOrId: string | ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -3373,7 +3373,7 @@
             "section": "def-public.ToastsApi",
             "text": "ToastsApi"
           },
-          ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">; onBeforeRedirect?: ((error: ",
+          ", \"add\" | \"get$\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">; onBeforeRedirect?: ((error: ",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -3516,17 +3516,7 @@
                   "\nToast notifications service to show toasts in error cases."
                 ],
                 "signature": [
-                  "{ get$: () => ",
-                  "Observable",
-                  "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "[]>; add: (toastOrTitle: ",
+                  "{ add: (toastOrTitle: ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -3542,7 +3532,17 @@
                     "section": "def-public.Toast",
                     "text": "Toast"
                   },
-                  "; remove: (toastOrId: string | ",
+                  "; get$: () => ",
+                  "Observable",
+                  "<",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.Toast",
+                    "text": "Toast"
+                  },
+                  "[]>; remove: (toastOrId: string | ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -4389,7 +4389,7 @@
             "section": "def-public.ToastsApi",
             "text": "ToastsApi"
           },
-          ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">) => { onGetError: (error: Error) => void; onSetError: (error: Error) => void; }"
+          ", \"add\" | \"get$\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">) => { onGetError: (error: Error) => void; onSetError: (error: Error) => void; }"
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
         "deprecated": false,
@@ -4410,7 +4410,7 @@
                 "section": "def-public.ToastsApi",
                 "text": "ToastsApi"
               },
-              ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">"
+              ", \"add\" | \"get$\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">"
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
             "deprecated": false,

@@ -259,7 +259,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"order\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">,",
+          "<FactoryContext>, \"id\" | \"order\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -2267,7 +2267,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"order\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">>,",
+          "<FactoryContext>, \"id\" | \"order\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">>,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -3416,7 +3416,7 @@
         },
         ">>,Pick<",
         "UiActionsServiceEnhancements",
-        ", \"telemetry\" | \"extract\" | \"inject\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
+        ", \"telemetry\" | \"inject\" | \"extract\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
       ],
       "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,

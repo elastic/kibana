@@ -1055,7 +1055,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -2890,7 +2890,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -3290,6 +3290,9 @@
         "tags": [],
         "label": "MlJobBlocked",
         "description": [],
+        "signature": [
+          "MlJobBlocked"
+        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -3359,7 +3362,7 @@
         "label": "ModuleSetupPayload",
         "description": [],
         "signature": [
-          "Readonly<{} & { moduleId: string; }> & Readonly<{ start?: number | undefined; query?: any; prefix?: string | undefined; end?: number | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; jobOverrides?: any; datafeedOverrides?: any; estimateModelMemory?: boolean | undefined; applyToAllSpaces?: boolean | undefined; } & {}>"
+          "Readonly<{} & { moduleId: string; }> & Readonly<{ query?: any; start?: number | undefined; prefix?: string | undefined; end?: number | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; jobOverrides?: any; datafeedOverrides?: any; estimateModelMemory?: boolean | undefined; applyToAllSpaces?: boolean | undefined; } & {}>"
         ],
         "path": "x-pack/plugins/ml/server/shared_services/providers/modules.ts",
         "deprecated": false,

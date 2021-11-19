@@ -193,7 +193,7 @@
               "ExternalsFunctionElement",
               " | ",
               "ExternalsElement",
-              "[] | undefined; target?: \"web\" | \"node\" | \"webworker\" | \"async-node\" | \"node-webkit\" | \"atom\" | \"electron\" | \"electron-renderer\" | \"electron-preload\" | \"electron-main\" | ((compiler?: any) => void) | undefined; bail?: boolean | undefined; profile?: boolean | undefined; cache?: boolean | object | undefined; watch?: boolean | undefined; watchOptions?: ",
+              "[] | undefined; target?: \"node\" | \"web\" | \"webworker\" | \"async-node\" | \"node-webkit\" | \"atom\" | \"electron\" | \"electron-renderer\" | \"electron-preload\" | \"electron-main\" | ((compiler?: any) => void) | undefined; bail?: boolean | undefined; profile?: boolean | undefined; cache?: boolean | object | undefined; watch?: boolean | undefined; watchOptions?: ",
               "ICompiler",
               ".WatchOptions | undefined; node?: false | ",
               "Node",

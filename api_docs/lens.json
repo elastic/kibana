@@ -152,6 +152,19 @@
             ],
             "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DatatableVisualizationState.fitRowToContent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fitRowToContent",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -207,6 +220,40 @@
               "{ interval: string; }"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.FieldBasedIndexPatternColumn",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldBasedIndexPatternColumn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FieldBasedIndexPatternColumn",
+            "text": "FieldBasedIndexPatternColumn"
+          },
+          " extends ",
+          "BaseIndexPatternColumn"
+        ],
+        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.FieldBasedIndexPatternColumn.sourceField",
+            "type": "string",
+            "tags": [],
+            "label": "sourceField",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
             "deprecated": false
           }
         ],
@@ -327,12 +374,12 @@
           {
             "parentPluginId": "lens",
             "id": "def-public.IncompleteColumn.operationType",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "operationType",
             "description": [],
             "signature": [
-              "\"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"overall_sum\" | \"overall_min\" | \"overall_max\" | \"overall_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\" | \"static_value\" | undefined"
+              "string | undefined"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
             "deprecated": false
@@ -469,7 +516,7 @@
               "\nPosition of the legend relative to the chart"
             ],
             "signature": [
-              "\"top\" | \"bottom\" | \"left\" | \"right\""
+              "\"top\" | \"left\" | \"bottom\" | \"right\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
             "deprecated": false
@@ -878,6 +925,47 @@
             ],
             "path": "x-pack/plugins/lens/common/expressions/metric_chart/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricState.colorMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "colorMode",
+            "description": [],
+            "signature": [
+              "\"None\" | \"Background\" | \"Labels\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/metric_chart/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricState.palette",
+            "type": "Object",
+            "tags": [],
+            "label": "palette",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
+              "<",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/metric_chart/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1153,7 +1241,7 @@
             "label": "numberDisplay",
             "description": [],
             "signature": [
-              "\"percent\" | \"hidden\" | \"value\""
+              "\"hidden\" | \"value\" | \"percent\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
             "deprecated": false
@@ -1192,7 +1280,7 @@
             "label": "legendPosition",
             "description": [],
             "signature": [
-              "\"top\" | \"bottom\" | \"left\" | \"right\" | undefined"
+              "\"top\" | \"left\" | \"bottom\" | \"right\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
             "deprecated": false
@@ -1725,7 +1813,7 @@
             "label": "axisMode",
             "description": [],
             "signature": [
-              "\"bottom\" | \"left\" | \"right\" | \"auto\" | undefined"
+              "\"auto\" | \"left\" | \"bottom\" | \"right\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
             "deprecated": false
@@ -1790,7 +1878,7 @@
             "label": "fill",
             "description": [],
             "signature": [
-              "\"above\" | \"below\" | \"none\" | undefined"
+              "\"none\" | \"above\" | \"below\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
             "deprecated": false
@@ -1803,7 +1891,7 @@
             "label": "iconPosition",
             "description": [],
             "signature": [
-              "\"above\" | \"below\" | \"left\" | \"right\" | \"auto\" | undefined"
+              "\"auto\" | \"left\" | \"right\" | \"above\" | \"below\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
             "deprecated": false
@@ -1948,7 +2036,7 @@
         "signature": [
           "(Pick<",
           "LensByValueInput",
-          ", \"palette\" | \"id\" | \"title\" | \"timeRange\" | \"syncColors\" | \"viewMode\" | \"filters\" | \"query\" | \"executionContext\" | \"hidePanelTitles\" | \"lastReloadRequestTime\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"searchSessionId\" | \"className\" | \"style\" | \"onLoad\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
+          ", \"title\" | \"query\" | \"filters\" | \"viewMode\" | \"id\" | \"timeRange\" | \"className\" | \"style\" | \"onLoad\" | \"searchSessionId\" | \"executionContext\" | \"lastReloadRequestTime\" | \"hidePanelTitles\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"syncColors\" | \"palette\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -1984,197 +2072,25 @@
       },
       {
         "parentPluginId": "lens",
-        "id": "def-public.FieldBasedIndexPatternColumn",
+        "id": "def-public.GenericIndexPatternColumn",
         "type": "Type",
         "tags": [],
-        "label": "FieldBasedIndexPatternColumn",
+        "label": "GenericIndexPatternColumn",
         "description": [],
         "signature": [
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.RangeIndexPatternColumn",
-            "text": "RangeIndexPatternColumn"
-          },
+          "BaseIndexPatternColumn",
           " | ",
           {
             "pluginId": "lens",
             "scope": "public",
             "docId": "kibLensPluginApi",
-            "section": "def-public.TermsIndexPatternColumn",
-            "text": "TermsIndexPatternColumn"
+            "section": "def-public.FieldBasedIndexPatternColumn",
+            "text": "FieldBasedIndexPatternColumn"
           },
           " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.DateHistogramIndexPatternColumn",
-            "text": "DateHistogramIndexPatternColumn"
-          },
-          " | MetricColumn<\"min\"> | MetricColumn<\"max\"> | MetricColumn<\"average\"> | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.CardinalityIndexPatternColumn",
-            "text": "CardinalityIndexPatternColumn"
-          },
-          " | MetricColumn<\"sum\"> | MetricColumn<\"median\"> | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.PercentileIndexPatternColumn",
-            "text": "PercentileIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.CountIndexPatternColumn",
-            "text": "CountIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.LastValueIndexPatternColumn",
-            "text": "LastValueIndexPatternColumn"
-          }
+          "ReferenceBasedIndexPatternColumn"
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-public.IndexPatternColumn",
-        "type": "Type",
-        "tags": [],
-        "label": "IndexPatternColumn",
-        "description": [
-          "\nA union type of all available column types. If a column is of an unknown type somewhere\nwithing the indexpattern data source it should be typed as `IndexPatternColumn` to make\ntypeguards possible that consider all available column types."
-        ],
-        "signature": [
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.FiltersIndexPatternColumn",
-            "text": "FiltersIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.RangeIndexPatternColumn",
-            "text": "RangeIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.TermsIndexPatternColumn",
-            "text": "TermsIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.DateHistogramIndexPatternColumn",
-            "text": "DateHistogramIndexPatternColumn"
-          },
-          " | MetricColumn<\"min\"> | MetricColumn<\"max\"> | MetricColumn<\"average\"> | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.CardinalityIndexPatternColumn",
-            "text": "CardinalityIndexPatternColumn"
-          },
-          " | MetricColumn<\"sum\"> | MetricColumn<\"median\"> | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.PercentileIndexPatternColumn",
-            "text": "PercentileIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.CountIndexPatternColumn",
-            "text": "CountIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.LastValueIndexPatternColumn",
-            "text": "LastValueIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.CumulativeSumIndexPatternColumn",
-            "text": "CumulativeSumIndexPatternColumn"
-          },
-          " | OverallMetricIndexPatternColumn<\"overall_sum\"> | OverallMetricIndexPatternColumn<\"overall_min\"> | OverallMetricIndexPatternColumn<\"overall_max\"> | OverallMetricIndexPatternColumn<\"overall_average\"> | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.CounterRateIndexPatternColumn",
-            "text": "CounterRateIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.DerivativeIndexPatternColumn",
-            "text": "DerivativeIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.MovingAverageIndexPatternColumn",
-            "text": "MovingAverageIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.MathIndexPatternColumn",
-            "text": "MathIndexPatternColumn"
-          },
-          " | ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.FormulaIndexPatternColumn",
-            "text": "FormulaIndexPatternColumn"
-          },
-          " | ",
-          "StaticValueIndexPatternColumn"
-        ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
+        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2290,7 +2206,7 @@
           "\nA union type of all available operation types. The operation type is a unique id of an operation.\nEach column is assigned to exactly one operation type."
         ],
         "signature": [
-          "\"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"overall_sum\" | \"overall_min\" | \"overall_max\" | \"overall_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\" | \"static_value\""
+          "string"
         ],
         "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
         "deprecated": false,
@@ -2326,8 +2242,8 @@
             "pluginId": "lens",
             "scope": "public",
             "docId": "kibLensPluginApi",
-            "section": "def-public.IndexPatternColumn",
-            "text": "IndexPatternColumn"
+            "section": "def-public.GenericIndexPatternColumn",
+            "text": "GenericIndexPatternColumn"
           },
           ">; columnOrder: string[]; incompleteColumns?: Record<string, ",
           {
@@ -2415,7 +2331,7 @@
         "signature": [
           "Pick<",
           "LensByValueInput",
-          ", \"palette\" | \"id\" | \"title\" | \"timeRange\" | \"syncColors\" | \"viewMode\" | \"filters\" | \"query\" | \"executionContext\" | \"hidePanelTitles\" | \"lastReloadRequestTime\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"searchSessionId\" | \"className\" | \"style\" | \"onLoad\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
+          ", \"title\" | \"query\" | \"filters\" | \"viewMode\" | \"id\" | \"timeRange\" | \"className\" | \"style\" | \"onLoad\" | \"searchSessionId\" | \"executionContext\" | \"lastReloadRequestTime\" | \"hidePanelTitles\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"syncColors\" | \"palette\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -2477,7 +2393,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"bottom\" | \"left\" | \"right\" | \"auto\""
+          "\"auto\" | \"left\" | \"bottom\" | \"right\""
         ],
         "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
         "deprecated": false,
@@ -2911,7 +2827,7 @@
             "label": "state",
             "description": [],
             "signature": [
-              "{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }; }; visualization: VisualizationState; query: ",
+              "{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }>; }; }; visualization: VisualizationState; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3212,7 +3128,7 @@
             "section": "def-server.LensDocShapePost712",
             "text": "LensDocShapePost712"
           },
-          "<unknown>, \"title\" | \"expression\" | \"visualizationType\"> & { state: Pick<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }; }; visualization: unknown; query: ",
+          "<unknown>, \"title\" | \"expression\" | \"visualizationType\"> & { state: Pick<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }>; }; }; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -3228,7 +3144,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; }, \"filters\" | \"query\" | \"visualization\" | \"datasourceMetaData\"> & { datasourceStates: { indexpattern: Pick<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }, \"currentIndexPatternId\"> & { layers: Record<string, Pick<{ columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }, never> & { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; } | { operationType: \"date_histogram\"; params: { interval: string; timeZone?: string | undefined; }; }>; }>; }; }; }; }"
+          "[]; }, \"query\" | \"filters\" | \"visualization\" | \"datasourceMetaData\"> & { datasourceStates: { indexpattern: Pick<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }>; }, \"currentIndexPatternId\"> & { layers: Record<string, Pick<{ columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }, never> & { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; } | { operationType: \"date_histogram\"; params: { interval: string; timeZone?: string | undefined; }; }>; }>; }; }; }; }"
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -3250,7 +3166,7 @@
             "section": "def-server.LensDocShapePost712",
             "text": "LensDocShapePost712"
           },
-          "<unknown>, \"title\" | \"expression\" | \"visualizationType\"> & { state: Pick<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }; }; visualization: unknown; query: ",
+          "<unknown>, \"title\" | \"expression\" | \"visualizationType\"> & { state: Pick<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }>; }; }; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -3266,7 +3182,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; }, \"filters\" | \"query\" | \"visualization\" | \"datasourceMetaData\"> & { datasourceStates: { indexpattern: Pick<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }>; }, \"currentIndexPatternId\"> & { layers: Record<string, Pick<{ columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; }>; }, never> & { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\"; } | { operationType: \"date_histogram\"; params: { interval: string; }; }>; }>; }; }; }; }"
+          "[]; }, \"query\" | \"filters\" | \"visualization\" | \"datasourceMetaData\"> & { datasourceStates: { indexpattern: Pick<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }>; }, \"currentIndexPatternId\"> & { layers: Record<string, Pick<{ columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }, never> & { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; } | { operationType: \"date_histogram\"; params: { interval: string; }; }>; }>; }; }; }; }"
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -3280,7 +3196,7 @@
         "label": "OperationTypePost712",
         "description": [],
         "signature": [
-          "\"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\""
+          "\"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -3294,7 +3210,7 @@
         "label": "OperationTypePre712",
         "description": [],
         "signature": [
-          "\"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"percentile\" | \"range\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"cardinality\" | \"counter_rate\" | \"last_value\""
+          "\"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"percentile\" | \"range\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"cardinality\" | \"last_value\" | \"counter_rate\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -3660,7 +3576,7 @@
             "label": "continuity",
             "description": [],
             "signature": [
-              "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
+              "\"none\" | \"all\" | \"above\" | \"below\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -4222,6 +4138,27 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-common.CustomPaletteParamsConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "CustomPaletteParamsConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
+          " & { maxSteps?: number | undefined; }"
+        ],
+        "path": "x-pack/plugins/lens/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-common.DOC_TYPE",
         "type": "string",
         "tags": [],
@@ -4380,23 +4317,15 @@
         "label": "RequiredPaletteParamTypes",
         "description": [],
         "signature": [
-          "{ name: string; reverse: boolean; rangeType: \"number\" | \"percent\"; continuity: \"above\" | \"below\" | \"all\" | \"none\"; progression: \"fixed\"; rangeMin: number; rangeMax: number; stops: ",
+          "Required<",
           {
             "pluginId": "lens",
             "scope": "common",
             "docId": "kibLensPluginApi",
-            "section": "def-common.ColorStop",
-            "text": "ColorStop"
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
           },
-          "[]; colorStops: ",
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.ColorStop",
-            "text": "ColorStop"
-          },
-          "[]; steps: number; }"
+          "> & { maxSteps?: number | undefined; }"
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,

@@ -7974,6 +7974,10 @@
             "references": [
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/functions/filters.ts"
               },
               {
@@ -9487,7 +9491,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -9500,7 +9504,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -10395,7 +10399,7 @@
             "label": "padding",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | undefined"
+              "\"s\" | \"m\" | \"l\" | \"xs\" | \"xl\" | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
             "deprecated": false
@@ -10517,6 +10521,36 @@
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ReactExpressionRendererProps.onRender$",
+            "type": "Function",
+            "tags": [],
+            "label": "onRender$",
+            "description": [],
+            "signature": [
+              "((item: number) => void) | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ReactExpressionRendererProps.onRender$.$1",
+                "type": "number",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -10930,16 +10964,16 @@
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpression",
-            "text": "ExpressionAstExpression"
+            "section": "def-common.ExpressionAstFunction",
+            "text": "ExpressionAstFunction"
           },
           " | ",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstFunction",
-            "text": "ExpressionAstFunction"
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
           }
         ],
         "path": "src/plugins/expressions/common/ast/types.ts",
@@ -11229,7 +11263,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -11245,7 +11279,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -11334,7 +11368,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"y\" | \"x\" | \"size\" | \"text\""
+          "\"size\" | \"y\" | \"color\" | \"x\" | \"text\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -17946,6 +17980,10 @@
             "references": [
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/functions/filters.ts"
               },
               {
@@ -18978,7 +19016,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -18991,7 +19029,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -19867,16 +19905,16 @@
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpression",
-            "text": "ExpressionAstExpression"
+            "section": "def-common.ExpressionAstFunction",
+            "text": "ExpressionAstFunction"
           },
           " | ",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstFunction",
-            "text": "ExpressionAstFunction"
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
           }
         ],
         "path": "src/plugins/expressions/common/ast/types.ts",
@@ -20094,7 +20132,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -20110,7 +20148,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -20199,7 +20237,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"y\" | \"x\" | \"size\" | \"text\""
+          "\"size\" | \"y\" | \"color\" | \"x\" | \"text\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -23618,16 +23656,16 @@
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstExpression",
-                "text": "ExpressionAstExpression"
+                "section": "def-common.ExpressionAstFunction",
+                "text": "ExpressionAstFunction"
               },
               " | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstFunction",
-                "text": "ExpressionAstFunction"
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
               }
             ],
             "path": "src/plugins/expressions/common/util/expressions_inspector_adapter.ts",
@@ -27201,7 +27239,7 @@
             "label": "fontFamily",
             "description": [],
             "signature": [
-              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\" | undefined"
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\" | undefined"
             ],
             "path": "src/plugins/expressions/common/types/style.ts",
             "deprecated": false
@@ -29839,6 +29877,10 @@
             "references": [
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/functions/filters.ts"
               },
               {
@@ -31735,7 +31777,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -31748,7 +31790,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -31807,7 +31849,7 @@
             "label": "family",
             "description": [],
             "signature": [
-              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\" | undefined"
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\" | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
             "deprecated": false
@@ -31880,6 +31922,19 @@
                 "text": "FontWeight"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.FontArguments.sizeUnit",
+            "type": "string",
+            "tags": [],
+            "label": "sizeUnit",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
             "deprecated": false
@@ -32807,6 +32862,17 @@
       },
       {
         "parentPluginId": "expressions",
+        "id": "def-common.FontSizeUnit",
+        "type": "Enum",
+        "tags": [],
+        "label": "FontSizeUnit",
+        "description": [],
+        "path": "src/plugins/expressions/common/types/style.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
         "id": "def-common.FontStyle",
         "type": "Enum",
         "tags": [],
@@ -33244,16 +33310,16 @@
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpression",
-            "text": "ExpressionAstExpression"
+            "section": "def-common.ExpressionAstFunction",
+            "text": "ExpressionAstFunction"
           },
           " | ",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstFunction",
-            "text": "ExpressionAstFunction"
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
           }
         ],
         "path": "src/plugins/expressions/common/ast/types.ts",
@@ -34033,7 +34099,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -34049,7 +34115,7 @@
           "\nA collection of supported fonts."
         ],
         "signature": [
-          "({ label: \"Open Sans\"; value: \"'Open Sans', Helvetica, Arial, sans-serif\"; } | { label: \"American Typewriter\"; value: \"'American Typewriter', 'Courier New', Courier, Monaco, mono\"; } | { label: \"Arial\"; value: \"Arial, sans-serif\"; } | { label: \"Baskerville\"; value: \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Book Antiqua\"; value: \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Brush Script\"; value: \"'Brush Script MT', 'Comic Sans', sans-serif\"; } | { label: \"Chalkboard\"; value: \"Chalkboard, 'Comic Sans', sans-serif\"; } | { label: \"Didot\"; value: \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Futura\"; value: \"Futura, Impact, Helvetica, Arial, sans-serif\"; } | { label: \"Gill Sans\"; value: \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Helvetica Neue\"; value: \"'Helvetica Neue', Helvetica, Arial, sans-serif\"; } | { label: \"Hoefler Text\"; value: \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\"; } | { label: \"Lucida Grande\"; value: \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Myriad\"; value: \"Myriad, Helvetica, Arial, sans-serif\"; } | { label: \"Optima\"; value: \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Palatino\"; value: \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; })[]"
+          "({ label: \"Open Sans\"; value: \"'Open Sans', Helvetica, Arial, sans-serif\"; } | { label: \"American Typewriter\"; value: \"'American Typewriter', 'Courier New', Courier, Monaco, mono\"; } | { label: \"Arial\"; value: \"Arial, sans-serif\"; } | { label: \"Baskerville\"; value: \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Book Antiqua\"; value: \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Brush Script\"; value: \"'Brush Script MT', 'Comic Sans', sans-serif\"; } | { label: \"Chalkboard\"; value: \"Chalkboard, 'Comic Sans', sans-serif\"; } | { label: \"Didot\"; value: \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Futura\"; value: \"Futura, Impact, Helvetica, Arial, sans-serif\"; } | { label: \"Gill Sans\"; value: \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Helvetica Neue\"; value: \"'Helvetica Neue', Helvetica, Arial, sans-serif\"; } | { label: \"Hoefler Text\"; value: \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\"; } | { label: \"Inter\"; value: \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\"; } | { label: \"Lucida Grande\"; value: \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Myriad\"; value: \"Myriad, Helvetica, Arial, sans-serif\"; } | { label: \"Optima\"; value: \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Palatino\"; value: \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; })[]"
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -34065,7 +34131,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -34232,7 +34298,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"y\" | \"x\" | \"size\" | \"text\""
+          "\"size\" | \"y\" | \"color\" | \"x\" | \"text\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -37324,6 +37390,64 @@
               },
               {
                 "parentPluginId": "expressions",
+                "id": "def-common.font.args.sizeUnit",
+                "type": "Object",
+                "tags": [],
+                "label": "sizeUnit",
+                "description": [],
+                "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.font.args.sizeUnit.default",
+                    "type": "string",
+                    "tags": [],
+                    "label": "default",
+                    "description": [],
+                    "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.font.args.sizeUnit.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.font.args.sizeUnit.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.font.args.sizeUnit.options",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "options",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "expressions",
                 "id": "def-common.font.args.underline",
                 "type": "Object",
                 "tags": [],
@@ -37672,6 +37796,20 @@
       },
       {
         "parentPluginId": "expressions",
+        "id": "def-common.inter",
+        "type": "Object",
+        "tags": [],
+        "label": "inter",
+        "description": [],
+        "signature": [
+          "{ label: \"Inter\"; value: \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\"; }"
+        ],
+        "path": "src/plugins/expressions/common/fonts.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
         "id": "def-common.lucidaGrande",
         "type": "Object",
         "tags": [],
@@ -37906,7 +38044,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\" | \"boolean\" | \"null\")[]"
+                      "(\"string\" | \"boolean\" | \"number\" | \"null\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false
