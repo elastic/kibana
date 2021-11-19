@@ -87,6 +87,12 @@ export const TakeActionDropdown = React.memo(
     );
     const isEvent = actionsData.eventKind === 'event';
 
+    const isAgentEndpoint = useMemo(() => ecsData?.agent?.type?.includes('endpoint'), [ecsData]);
+
+    const disableEventFilterAction = useMemo(() => {
+      return !isEvent && !isAgentEndpoint;
+     }, [isEvent, isAgentEndpoint]);
+
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
     }, [isPopoverOpen]);
@@ -135,6 +141,7 @@ export const TakeActionDropdown = React.memo(
 
     const { eventFilterActionItems } = useEventFilterAction({
       onAddEventFilterClick: handleOnAddEventFilterClick,
+      disabled: disableEventFilterAction,
     });
 
     const afterCaseSelection = useCallback(() => {

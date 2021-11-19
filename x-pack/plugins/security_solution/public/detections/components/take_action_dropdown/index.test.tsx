@@ -181,4 +181,51 @@ describe('take action dropdown', () => {
       });
     });
   });
+
+  describe('should correctly enable/disable the "Add Endpoint event filter" button', () => {
+    let wrapper: ReactWrapper;
+
+    const getEcsDataWithAgentType = (agentType: string) => ({
+      ...mockEcsDataWithAlert,
+      agent: {
+        type: [agentType],
+      },
+    });
+
+    const modifiedMockDetailsData = mockAlertDetailsData.filter((obj) => {
+      return obj.field !== 'kibana.alert.rule.uuid';
+    }) as TimelineEventsDetailsItem[];
+
+    test('should enable the "Add Endpoint event filter" button if ECS data is endpoint', async () => {
+      wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown
+            {...defaultProps}
+            detailsData={modifiedMockDetailsData}
+            ecsData={getEcsDataWithAgentType('endpoint')}
+          />
+        </TestProviders>
+      );
+      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()).toBeEnabled();
+      })
+    })
+
+    test('should disable the "Add Endpoint event filter" button if ECS data is not event and not endpoint', async () => {
+      wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown
+            {...defaultProps}
+            detailsData={modifiedMockDetailsData}
+            ecsData={getEcsDataWithAgentType('filesbeat')}
+          />
+        </TestProviders>
+      );
+      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()).toBeDisabled();
+      })
+    });
+  });
 });
