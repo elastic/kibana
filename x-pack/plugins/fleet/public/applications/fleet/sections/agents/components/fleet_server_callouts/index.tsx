@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export * from './loading';
-export * from './agent_reassign_policy_modal';
-export * from './agent_health';
-export * from './agent_unenroll_modal';
-export * from './agent_upgrade_modal';
-export * from './fleet_server_callouts';
+export * from './fleet_server_cloud_unhealthy_callout';
+export * from './fleet_server_on_prem_unhealthy_callout';
+export * from './fleet_server_on_prem_required_callout';
