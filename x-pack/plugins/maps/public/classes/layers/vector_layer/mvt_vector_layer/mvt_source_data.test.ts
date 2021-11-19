@@ -51,22 +51,21 @@ const mockSource = {
 } as unknown as ITiledSingleLayerVectorSource;
 
 describe('syncMvtSourceData', () => {
-  test('Should sync source data when no previous data request', async () => {
+  test('Should sync source data when there are no previous data request', async () => {
     const syncContext = new MockSyncContext({ dataFilters: {} });
-    const prevRequestMeta = {
-      ...syncContext.dataFilters,
-      applyGlobalQuery: true,
-      applyGlobalTime: true,
-      applyForceRefresh: true,
-      fieldNames: [],
-      sourceMeta: {},
-      isForceRefresh: false,
-    };
-
+    
     await syncMvtSourceData({
       layerId: 'layer1',
       prevDataRequest: undefined,
-      requestMeta: { ...prevRequestMeta },
+      requestMeta: {
+        ...syncContext.dataFilters,
+        applyGlobalQuery: true,
+        applyGlobalTime: true,
+        applyForceRefresh: true,
+        fieldNames: [],
+        sourceMeta: {},
+        isForceRefresh: false,
+      },
       source: mockSource,
       syncContext,
     });
