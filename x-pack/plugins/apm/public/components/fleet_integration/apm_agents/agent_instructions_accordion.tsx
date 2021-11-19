@@ -16,18 +16,24 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { CreateAgentInstructions } from './agent_instructions_mappings';
+import React, { ReactElement } from 'react';
+import {
+  AgentRuntimeAttachmentProps,
+  CreateAgentInstructions,
+} from './agent_instructions_mappings';
 import {
   Markdown,
   useKibana,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { AgentIcon } from '../../shared/agent_icon';
-import { NewPackagePolicy } from '../apm_policy_form/typings';
+import {
+  NewPackagePolicy,
+  PackagePolicy,
+  PackagePolicyEditExtensionComponentProps,
+} from '../apm_policy_form/typings';
 import { getCommands } from '../../../tutorial/config_agent/commands/get_commands';
 import { replaceTemplateStrings } from './replace_template_strings';
-import { JavaRuntimeAttachment } from './runtime_attachment/supported_agents/java_runtime_attachment';
 
 function AccordionButtonContent({
   agentName,
@@ -100,19 +106,25 @@ function TutorialConfigAgent({
 }
 
 interface Props {
+  policy: PackagePolicy;
   newPolicy: NewPackagePolicy;
+  onChange: PackagePolicyEditExtensionComponentProps['onChange'];
   agentName: AgentName;
   title: string;
   variantId: string;
   createAgentInstructions: CreateAgentInstructions;
+  AgentRuntimeAttachment?: (props: AgentRuntimeAttachmentProps) => ReactElement;
 }
 
 export function AgentInstructionsAccordion({
+  policy,
   newPolicy,
+  onChange,
   agentName,
   title,
   createAgentInstructions,
   variantId,
+  AgentRuntimeAttachment,
 }: Props) {
   const docLinks = useKibana().services.docLinks;
   const vars = newPolicy?.inputs?.[0]?.vars;
@@ -176,6 +188,14 @@ export function AgentInstructionsAccordion({
       );
     }
   );
+
+  const manualInstrumentationContent = (
+    <>
+      <EuiSpacer />
+      {stepsElements}
+    </>
+  );
+
   return (
     <EuiAccordion
       id={agentName}
@@ -183,42 +203,47 @@ export function AgentInstructionsAccordion({
         <AccordionButtonContent agentName={agentName} title={title} />
       }
     >
-      <EuiSpacer />
-      <EuiTabbedContent
-        tabs={[
-          {
-            id: 'manual-instrumentation',
-            name: 'Manual instrumentation',
-            content: (
-              <>
-                <EuiSpacer />
-                {stepsElements}
-              </>
-            ),
-          },
-          {
-            id: 'auto-attachment',
-            name: (
-              <EuiFlexGroup
-                justifyContent="flexStart"
-                alignItems="baseline"
-                gutterSize="s"
-              >
-                <EuiFlexItem grow={false}>Auto-Attachment</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBetaBadge label="BETA" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-            content: (
-              <>
-                <EuiSpacer />
-                <JavaRuntimeAttachment />
-              </>
-            ),
-          },
-        ]}
-      />
+      {AgentRuntimeAttachment ? (
+        <>
+          <EuiSpacer />
+          <EuiTabbedContent
+            tabs={[
+              {
+                id: 'manual-instrumentation',
+                name: 'Manual instrumentation',
+                content: manualInstrumentationContent,
+              },
+              {
+                id: 'auto-attachment',
+                name: (
+                  <EuiFlexGroup
+                    justifyContent="flexStart"
+                    alignItems="baseline"
+                    gutterSize="s"
+                  >
+                    <EuiFlexItem grow={false}>Auto-Attachment</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBetaBadge label="BETA" />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+                content: (
+                  <>
+                    <EuiSpacer />
+                    <AgentRuntimeAttachment
+                      policy={policy}
+                      newPolicy={newPolicy}
+                      onChange={onChange}
+                    />
+                  </>
+                ),
+              },
+            ]}
+          />
+        </>
+      ) : (
+        manualInstrumentationContent
+      )}
     </EuiAccordion>
   );
 }

@@ -1,16 +1,15 @@
 import React from 'react';
 import { RuntimeAttachment } from '..';
-// import {
-//   NewPackagePolicy,
-//   PackagePolicy,
-//   PackagePolicyEditExtensionComponentProps,
-// } from '../apm_policy_form/typings';
+import {
+  NewPackagePolicy,
+  PackagePolicy,
+  PackagePolicyEditExtensionComponentProps,
+} from '../../../apm_policy_form/typings';
 
 interface Props {
-  // policy: PackagePolicy;
-  // newPolicy: NewPackagePolicy;
-  // onChange: PackagePolicyEditExtensionComponentProps['onChange'];
-  onChange?: (settings: any) => void;
+  policy: PackagePolicy;
+  newPolicy: NewPackagePolicy;
+  onChange: PackagePolicyEditExtensionComponentProps['onChange'];
 }
 
 const excludeOptions = [
@@ -21,6 +20,7 @@ const excludeOptions = [
 const includeOptions = [{ value: 'all', label: 'All' }, ...excludeOptions];
 
 export function JavaRuntimeAttachment(props: Props) {
+  console.log(props);
   return (
     <RuntimeAttachment
       operationTypes={[
@@ -34,12 +34,12 @@ export function JavaRuntimeAttachment(props: Props) {
         },
       ]}
       onChange={(...args) => {
-        if (props.onChange) {
-          props.onChange(...args);
-        }
+        // if (props.onChange) {
+        //   props.onChange(...args);
+        // }
       }}
       toggleDescription="Attach the Java agent to running and starting Java applications."
-      discoveryRulesDescription="For every running JVM, the discovery rules are evaluated in the order they are provided. The first matching rule determines the outcome. Learn more in the docs"
+      discoveryRulesDescription="For every running JVM, the discovery rules are evaluated in the order they are provided. The first matching rule determines the outcome. Learn more in the docs."
       showUnsavedWarning={true}
       initialIsEnabled={true}
       initialDiscoveryRules={[
