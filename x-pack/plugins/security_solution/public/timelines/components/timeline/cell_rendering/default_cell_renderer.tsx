@@ -20,7 +20,7 @@ import {
 } from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
 
 const hasCellActions = (columnId?: string) => {
-  return columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
+  return columnId && !FIELDS_WITHOUT_CELL_ACTIONS.includes(columnId);
 };
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
