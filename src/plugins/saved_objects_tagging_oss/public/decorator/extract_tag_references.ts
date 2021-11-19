@@ -18,7 +18,7 @@ export const extractTagReferences: Required<SavedObjectConfig>['extractReference
   references,
 }) => {
   const { __tags, ...otherAttributes } = attributes;
-  const tags = (__tags as string[]) ?? [];
+  const tags = [...new Set(__tags as string[])] ?? [];
   return {
     attributes: otherAttributes,
     references: [
