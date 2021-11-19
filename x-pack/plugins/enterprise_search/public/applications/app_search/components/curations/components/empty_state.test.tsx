@@ -23,7 +23,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('Create your first curation');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining(`${docLinks.appSearchCurations}`)
+      expect.stringContaining(docLinks.appSearchCurations)
     );
   });
 });
