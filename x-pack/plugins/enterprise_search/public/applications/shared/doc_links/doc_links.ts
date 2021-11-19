@@ -146,7 +146,7 @@ class DocLinks {
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
-    this.enterpriseSearchMailService = doclinks.links.enterpriseSearch.mailService;
+    this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
