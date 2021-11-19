@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Logger } from '@kbn/logging';
 import { CoreContext } from '../core_context';
 import { InternalPrebootServicePreboot } from './types';
 
@@ -14,7 +15,7 @@ export class PrebootService {
   private readonly promiseList: Array<Promise<{ shouldReloadConfig: boolean } | undefined>> = [];
   private waitUntilCanSetupPromise?: Promise<{ shouldReloadConfig: boolean }>;
   private isSetupOnHold = false;
-  private readonly log;
+  private readonly log: Logger;
 
   constructor(private readonly core: CoreContext) {
     this.log = this.core.logger.get('preboot');

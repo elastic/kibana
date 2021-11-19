@@ -27,12 +27,13 @@ export interface HomeServerPluginSetupDependencies {
 }
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
-  constructor(private readonly initContext: PluginInitializerContext) {
-    this.sampleDataRegistry = new SampleDataRegistry(this.initContext);
-  }
   private readonly tutorialsRegistry = new TutorialsRegistry();
   private readonly sampleDataRegistry: SampleDataRegistry;
   private customIntegrations?: CustomIntegrationsPluginSetup;
+
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.sampleDataRegistry = new SampleDataRegistry(this.initContext);
+  }
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
     this.customIntegrations = plugins.customIntegrations;

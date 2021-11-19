@@ -1713,6 +1713,23 @@ export enum PluginType {
     standard = "standard"
 }
 
+// @public (undocumented)
+export const pollEsNodesVersion: ({ internalClient, log, kibanaVersion, ignoreVersionMismatch, esVersionCheckInterval: healthCheckInterval, }: PollEsNodesVersionOptions) => Observable<NodesVersionCompatibility>;
+
+// @public (undocumented)
+export interface PollEsNodesVersionOptions {
+    // (undocumented)
+    esVersionCheckInterval: number;
+    // (undocumented)
+    ignoreVersionMismatch: boolean;
+    // (undocumented)
+    internalClient: ElasticsearchClient;
+    // (undocumented)
+    kibanaVersion: string;
+    // (undocumented)
+    log: Logger;
+}
+
 // @public
 export interface PrebootPlugin<TSetup = void, TPluginsSetup extends object = object> {
     // (undocumented)

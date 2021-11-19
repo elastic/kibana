@@ -43,7 +43,7 @@ type ModuleFactory = (data: RequestData, callback: Callback<BundleRefModule>) =>
 export class BundleRefsPlugin {
   private readonly resolvedRefEntryCache = new Map<BundleRef, Promise<string>>();
   private readonly resolvedRequestCache = new Map<string, Promise<string | undefined>>();
-  private readonly ignorePrefix;
+  private readonly ignorePrefix: string;
   private allowedBundleIds = new Set<string>();
 
   constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {

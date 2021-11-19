@@ -19,10 +19,10 @@ export class LifecyclePhase<Args extends readonly any[]> {
 
   public triggered = false;
 
-  private readonly beforeSubj: Rx.Subject<void> | Rx.BehaviorSubject<undefined>;
+  private readonly beforeSubj: Rx.Subject<void>;
   public readonly before$: Rx.Observable<void>;
 
-  private readonly afterSubj: Rx.Subject<void> | Rx.BehaviorSubject<undefined>;
+  private readonly afterSubj: Rx.Subject<void>;
   public readonly after$: Rx.Observable<void>;
 
   constructor(
@@ -30,10 +30,10 @@ export class LifecyclePhase<Args extends readonly any[]> {
       singular?: boolean;
     } = {}
   ) {
-    this.beforeSubj = options.singular ? new Rx.BehaviorSubject(undefined) : new Rx.Subject<void>();
+    this.beforeSubj = new Rx.Subject<void>();
     this.before$ = this.beforeSubj.asObservable();
 
-    this.afterSubj = options.singular ? new Rx.BehaviorSubject(undefined) : new Rx.Subject<void>();
+    this.afterSubj = this.options.singular ? new Rx.ReplaySubject<void>(1) : new Rx.Subject<void>();
     this.after$ = this.afterSubj.asObservable();
   }
 

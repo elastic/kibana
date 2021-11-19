@@ -197,7 +197,7 @@ export class Authenticator {
   /**
    * Session instance.
    */
-  private readonly session: PublicMethodsOf<Session>;
+  private readonly session: AuthenticatorOptions['session'];
 
   /**
    * Internal authenticator logger.
@@ -810,10 +810,7 @@ export class Authenticator {
    * @param providerType Type of the provider that handles logout. If not specified, then the first
    * provider in the chain (default) is assumed.
    */
-  private getLoggedOutURL(
-    request: KibanaRequest,
-    providerType: string = this.options.config.authc.sortedProviders[0].type
-  ) {
+  private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
     // The app that handles logout needs to know the reason of the logout and the URL we may need to
     // redirect user to once they log in again (e.g. when session expires).
     const searchParams = new URLSearchParams();
@@ -829,7 +826,12 @@ export class Authenticator {
 
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
-    return this.options.config.authc.selector.enabled || shouldProviderUseLoginForm(providerType)
+    return this.options.config.authc.selector.enabled ||
+      (providerType
+        ? shouldProviderUseLoginForm(providerType)
+        : this.options.config.authc.sortedProviders.length > 0
+        ? shouldProviderUseLoginForm(this.options.config.authc.sortedProviders[0].type)
+        : false)
       ? `${this.options.basePath.serverBasePath}/login?${searchParams.toString()}`
       : `${this.options.basePath.serverBasePath}/security/logged_out?${searchParams.toString()}`;
   }

@@ -5198,6 +5198,10 @@
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"
   integrity sha512-fj1hi+ZSW0xPLrJJD+YNwIh9GZbyaIepG26E/gXvp8nCa2pYokxUYO1sK9qjGxp2g8ryZYuon7wmjpwE2cyASQ==
 
+"@types/elastic__apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/elastic__datemath@link:bazel-bin/packages/elastic-datemath/npm_module_types":
   version "0.0.0"
   uid ""
@@ -5590,6 +5594,10 @@
   version "0.0.30"
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.30.tgz#44cb52f32a809734ca562e685c6473b5754a7818"
   integrity sha512-sqm9g7mHlPY/43fcSNrCYfOeX9zkTTK+euO5E6+CVijSMm5tTjkVdwdqRkY3ljjIAf8679vps5jKUoJBCLsMDA==
+
+"@types/kbn__ace@link:bazel-bin/packages/kbn-ace/npm_module_types":
+  version "0.0.0"
+  uid ""
 
 "@types/keyv@*":
   version "3.1.1"

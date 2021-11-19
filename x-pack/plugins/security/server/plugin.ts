@@ -201,6 +201,21 @@ export class SecurityPlugin
       this.getConfig
     );
     this.logger = this.initializerContext.logger.get();
+
+    this.authenticationService = new AuthenticationService(
+      this.initializerContext.logger.get('authentication')
+    );
+    this.auditService = new AuditService(this.initializerContext.logger.get('audit'));
+    this.elasticsearchService = new ElasticsearchService(
+      this.initializerContext.logger.get('elasticsearch')
+    );
+    this.sessionManagementService = new SessionManagementService(
+      this.initializerContext.logger.get('session')
+    );
+    this.anonymousAccessService = new AnonymousAccessService(
+      this.initializerContext.logger.get('anonymous-access'),
+      this.getConfig
+    );
   }
 
   public setup(

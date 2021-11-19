@@ -107,6 +107,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
       .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
+    this.prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
+    this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
   }
 
   public async discover({ environment }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {

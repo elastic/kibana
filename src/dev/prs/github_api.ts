@@ -25,13 +25,13 @@ const isRateLimitError = (error: any) =>
 export class GithubApi {
   private api: AxiosInstance;
 
-  constructor(accessToken?: string) {
+  constructor(private accessToken?: string) {
     this.api = axios.create({
       baseURL: 'https://api.github.com/',
       headers: {
         Accept: 'application/vnd.github.v3+json',
         'User-Agent': 'kibana/update_prs_cli',
-        ...(accessToken ? { Authorization: `token ${accessToken} ` } : {}),
+        ...(this.accessToken ? { Authorization: `token ${this.accessToken} ` } : {}),
       },
     });
   }

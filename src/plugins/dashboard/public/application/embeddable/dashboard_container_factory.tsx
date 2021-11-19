@@ -48,11 +48,13 @@ export class DashboardContainerFactoryDefinition
 
   public extract: EmbeddablePersistableStateService['extract'];
 
+  public inject: EmbeddablePersistableStateService['inject'];
+  public extract: EmbeddablePersistableStateService['extract'];
+
   constructor(
     private readonly getStartServices: () => Promise<DashboardContainerServices>,
-    persistableStateService: EmbeddablePersistableStateService
+    private readonly persistableStateService: EmbeddablePersistableStateService
   ) {
-    this.persistableStateService = persistableStateService;
     this.inject = createInject(this.persistableStateService);
     this.extract = createExtract(this.persistableStateService);
   }

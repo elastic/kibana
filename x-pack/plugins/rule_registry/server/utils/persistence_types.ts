@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/elasticsearch';
-import { BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/logging';
 import {
   AlertExecutorOptions,
@@ -19,13 +17,17 @@ import {
 import { WithoutReservedActionGroups } from '../../../alerting/common';
 import { IRuleDataClient } from '../rule_data_client';
 
-export type PersistenceAlertService = (
+export type PersistenceAlertService = <T>(
   alerts: Array<{
-    id: string;
-    fields: Record<string, unknown>;
+    _id: string;
+    _source: T;
   }>,
   refresh: boolean | 'wait_for'
-) => Promise<TransportResult<BulkResponse, unknown> | undefined>;
+) => Promise<PersistenceAlertServiceResult<T>>;
+
+export interface PersistenceAlertServiceResult<T> {
+  createdAlerts: Array<T & { _id: string; _index: string }>;
+}
 
 export interface PersistenceServices {
   alertWithPersistence: PersistenceAlertService;

@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { UiComponent, CollectConfigProps } from 'src/plugins/kibana_utils/public';
+import type { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
 import { uiToReactComponent } from '../../../../../src/plugins/kibana_react/public';
-import type { UiActionsPresentable as Presentable } from '../../../../../src/plugins/ui_actions/public';
+import type {
+  UiActionsPresentable as Presentable,
+  ActionMenuItemProps,
+} from '../../../../../src/plugins/ui_actions/public';
 import type { ActionFactoryDefinition } from './action_factory_definition';
 import type { Configurable } from '../../../../../src/plugins/kibana_utils/public';
 import type {
@@ -19,11 +23,7 @@ import type {
 import type { ILicense, LicensingPluginStart, LicenseType } from '../../../licensing/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 import type { SavedObjectReference } from '../../../../../src/core/types';
-import type {
-  MigrateFunctionsObject,
-  PersistableState,
-  UiComponent,
-} from '../../../../../src/plugins/kibana_utils/common';
+import type { PersistableState } from '../../../../../src/plugins/kibana_utils/common';
 
 export interface ActionFactoryDeps {
   readonly getLicense?: () => ILicense;
@@ -44,10 +44,11 @@ export class ActionFactory<
   public readonly minimalLicense?: LicenseType;
   public readonly licenseFeatureName?: string;
   public readonly order: number;
-  public readonly MenuItem?: UiComponent;
-  public readonly ReactMenuItem?: FC;
-  public readonly CollectConfig: UiComponent;
-  public readonly ReactCollectConfig: FC<Record<string, unknown>>;
+  public readonly MenuItem?: UiComponent<ActionMenuItemProps<FactoryContext>>;
+  public readonly ReactMenuItem?: React.FC<ActionMenuItemProps<FactoryContext>>;
+
+  public readonly CollectConfig: UiComponent<CollectConfigProps<Config, FactoryContext>>;
+  public readonly ReactCollectConfig: React.FC<CollectConfigProps<Config, FactoryContext>>;
   public readonly createConfig: (context: FactoryContext) => Config;
   public readonly isConfigValid: (config: Config, context: FactoryContext) => boolean;
   public readonly migrations: MigrateFunctionsObject;
@@ -56,24 +57,24 @@ export class ActionFactory<
     protected readonly def: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>,
     protected readonly deps: ActionFactoryDeps
   ) {
-    this.id = def.id;
-    this.isBeta = def.isBeta ?? false;
-    this.minimalLicense = def.minimalLicense;
-    this.licenseFeatureName = def.licenseFeatureName;
-    this.order = def.order || 0;
-    this.MenuItem = def.MenuItem;
-    this.ReactMenuItem = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
-    this.CollectConfig = def.CollectConfig;
-    this.ReactCollectConfig = uiToReactComponent(this.CollectConfig);
-    this.createConfig = def.createConfig;
-    this.isConfigValid = def.isConfigValid;
-    this.migrations = def.migrations || {};
-
     if (def.minimalLicense && !def.licenseFeatureName) {
       throw new Error(
         `ActionFactory [actionFactory.id = ${def.id}] "licenseFeatureName" is required, if "minimalLicense" is provided`
       );
     }
+
+    this.id = this.def.id;
+    this.isBeta = this.def.isBeta ?? false;
+    this.minimalLicense = this.def.minimalLicense;
+    this.licenseFeatureName = this.def.licenseFeatureName;
+    this.order = this.def.order || 0;
+    this.MenuItem = this.def.MenuItem;
+    this.ReactMenuItem = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
+    this.CollectConfig = this.def.CollectConfig;
+    this.ReactCollectConfig = uiToReactComponent(this.CollectConfig);
+    this.createConfig = this.def.createConfig;
+    this.isConfigValid = this.def.isConfigValid;
+    this.migrations = this.def.migrations || {};
   }
 
   public getIconType(context: FactoryContext): string | undefined {

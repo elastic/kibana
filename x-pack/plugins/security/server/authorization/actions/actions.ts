@@ -19,21 +19,13 @@ import { UIActions } from './ui';
  */
 export class Actions {
   public readonly api: ApiActions;
-
   public readonly app: AppActions;
-
   public readonly cases: CasesActions;
-
-  public readonly login = 'login:';
-
+  public readonly login: string;
   public readonly savedObject: SavedObjectActions;
-
   public readonly alerting: AlertingActions;
-
   public readonly space: SpaceActions;
-
   public readonly ui: UIActions;
-
   public readonly version: string;
 
   constructor(private readonly versionNumber: string) {
@@ -44,6 +36,7 @@ export class Actions {
     this.api = new ApiActions(this.versionNumber);
     this.app = new AppActions(this.versionNumber);
     this.cases = new CasesActions(this.versionNumber);
+    this.login = 'login:';
     this.savedObject = new SavedObjectActions(this.versionNumber);
     this.alerting = new AlertingActions(this.versionNumber);
     this.space = new SpaceActions(this.versionNumber);

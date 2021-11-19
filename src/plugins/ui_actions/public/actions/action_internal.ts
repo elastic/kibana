@@ -7,9 +7,9 @@
  */
 
 // @ts-ignore
-import { FC, React } from 'react';
-import { UiComponent } from 'src/plugins/kibana_utils/public';
-import { Action, ActionContext as Context, ActionDefinition } from './action';
+import React from 'react';
+import type { UiComponent } from 'src/plugins/kibana_utils/public';
+import { Action, ActionContext as Context, ActionDefinition, ActionMenuItemProps } from './action';
 import { Presentable, PresentableGrouping } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
 
@@ -22,8 +22,8 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   public readonly id: string;
   public readonly type: string;
   public readonly order: number;
-  public readonly MenuItem?: UiComponent;
-  public readonly ReactMenuItem?: FC;
+  public readonly MenuItem?: UiComponent<ActionMenuItemProps<Context<A>>>;
+  public readonly ReactMenuItem?: React.FC<ActionMenuItemProps<Context<A>>>;
   public readonly grouping?: PresentableGrouping<Context<A>>;
 
   constructor(public readonly definition: A) {

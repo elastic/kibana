@@ -137,6 +137,10 @@ export class DrilldownManagerState {
       (factory) => !factory.isCompatibleLicense
     );
 
+    this.events$ = new BehaviorSubject<DrilldownTableItem[]>(
+      this.deps.dynamicActionManager.state.get().events.map(this.mapEventToDrilldownItem)
+    );
+
     deps.dynamicActionManager.state.state$
       .pipe(map((state) => state.events.map(this.mapEventToDrilldownItem)))
       .subscribe(this.events$);
