@@ -79,6 +79,14 @@ const rules = {
         },
       },
     },
+    boxplot: {
+      __template: {
+        field: '',
+      },
+      field: '{field}',
+      compression: 100,
+      missing: 0,
+    },
     t_test: {
       a: {
         field: '{field}',

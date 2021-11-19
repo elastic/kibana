@@ -74,6 +74,7 @@ filegroup(
 filegroup(
   name = "build_pkg_types",
   srcs = [
+      "//packages/elastic-apm-synthtrace:build_types",
       "//packages/elastic-datemath:build_types",
   ],
 )
