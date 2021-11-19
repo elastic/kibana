@@ -27,7 +27,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('Create a schema');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining(`${docLinks.appSearchIndexingDocsSchema}`)
+      expect.stringContaining(docLinks.appSearchIndexingDocsSchema)
     );
   });
 
