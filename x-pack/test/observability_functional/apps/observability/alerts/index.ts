@@ -16,7 +16,7 @@ async function asyncForEach<T>(array: T[], callback: (item: T, index: number) =>
 
 const ACTIVE_ALERTS_CELL_COUNT = 78;
 const RECOVERED_ALERTS_CELL_COUNT = 120;
-const TOTAL_ALERTS_CELL_COUNT = 198;
+const TOTAL_ALERTS_CELL_COUNT = 165;
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
