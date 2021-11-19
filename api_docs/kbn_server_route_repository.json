@@ -490,7 +490,7 @@
         "signature": [
           "Pick<",
           "Type",
-          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>, \"pipe\" | \"name\" | \"is\" | \"_A\" | \"_O\" | \"validate\" | \"_I\" | \"asDecoder\" | \"decode\"> & { encode: ",
+          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>, \"name\" | \"is\" | \"pipe\" | \"_A\" | \"_O\" | \"validate\" | \"_I\" | \"asDecoder\" | \"decode\"> & { encode: ",
           "Encode",
           "<any, any>; asEncoder: () => ",
           "Encoder",
