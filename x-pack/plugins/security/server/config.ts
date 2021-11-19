@@ -12,7 +12,7 @@ import path from 'path';
 import type { Type, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { getDataPath } from '@kbn/utils';
+import { getLogsPath } from '@kbn/utils';
 import type { AppenderConfigType, Logger } from 'src/core/server';
 
 import { config as coreConfig } from '../../../../src/core/server';
@@ -378,7 +378,7 @@ export function createConfig(
     config.audit.appender ??
     ({
       type: 'rolling-file',
-      fileName: path.join(getDataPath(), 'audit.log'),
+      fileName: path.join(getLogsPath(), 'audit.log'),
       layout: {
         type: 'json',
       },

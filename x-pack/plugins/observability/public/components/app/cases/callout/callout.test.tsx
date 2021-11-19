@@ -32,25 +32,25 @@ describe('Callout', () => {
 
   it('renders the callout', () => {
     const wrapper = mount(<CallOut {...defaultProps} />);
-    expect(wrapper.find(`[data-test-subj="case-callout-md5-hex"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="callout-messages-md5-hex"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="callout-dismiss-md5-hex"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseCallout-md5-hex"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="calloutMessages-md5-hex"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="calloutDismiss-md5-hex"]`).exists()).toBeTruthy();
   });
 
   it('hides the callout', () => {
     const wrapper = mount(<CallOut {...defaultProps} showCallOut={false} />);
-    expect(wrapper.find(`[data-test-subj="case-callout-md5-hex"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="caseCallout-md5-hex"]`).exists()).toBeFalsy();
   });
 
   it('does not show any messages when the list is empty', () => {
     const wrapper = mount(<CallOut {...defaultProps} messages={[]} />);
-    expect(wrapper.find(`[data-test-subj="callout-messages-md5-hex"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="calloutMessages-md5-hex"]`).exists()).toBeFalsy();
   });
 
   it('transform the button color correctly - primary', () => {
     const wrapper = mount(<CallOut {...defaultProps} />);
     const className =
-      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="calloutDismiss-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--primary')).toBeTruthy();
   });
@@ -58,15 +58,15 @@ describe('Callout', () => {
   it('transform the button color correctly - success', () => {
     const wrapper = mount(<CallOut {...defaultProps} type={'success'} />);
     const className =
-      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="calloutDismiss-md5-hex"]`).first().prop('className') ??
       '';
-    expect(className.includes('euiButton--secondary')).toBeTruthy();
+    expect(className.includes('euiButton--success')).toBeTruthy();
   });
 
   it('transform the button color correctly - warning', () => {
     const wrapper = mount(<CallOut {...defaultProps} type={'warning'} />);
     const className =
-      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="calloutDismiss-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--warning')).toBeTruthy();
   });
@@ -74,15 +74,15 @@ describe('Callout', () => {
   it('transform the button color correctly - danger', () => {
     const wrapper = mount(<CallOut {...defaultProps} type={'danger'} />);
     const className =
-      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="calloutDismiss-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--danger')).toBeTruthy();
   });
 
   it('dismiss the callout correctly', () => {
     const wrapper = mount(<CallOut {...defaultProps} />);
-    expect(wrapper.find(`[data-test-subj="callout-dismiss-md5-hex"]`).exists()).toBeTruthy();
-    wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).simulate('click');
+    expect(wrapper.find(`[data-test-subj="calloutDismiss-md5-hex"]`).exists()).toBeTruthy();
+    wrapper.find(`button[data-test-subj="calloutDismiss-md5-hex"]`).simulate('click');
     wrapper.update();
 
     expect(defaultProps.handleDismissCallout).toHaveBeenCalledWith('md5-hex', 'primary');

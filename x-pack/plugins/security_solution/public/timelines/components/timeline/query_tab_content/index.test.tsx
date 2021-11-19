@@ -108,7 +108,6 @@ describe('Timeline', () => {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
-      eventType: 'all',
       expandedDetail: {},
       filters: [],
       timelineId: TimelineId.test,
@@ -126,7 +125,6 @@ describe('Timeline', () => {
       start: startDate,
       status: TimelineStatus.active,
       timerangeKind: 'absolute',
-      updateEventTypeAndIndexesName: jest.fn(),
       activeTab: TimelineTabs.query,
       show: true,
     };

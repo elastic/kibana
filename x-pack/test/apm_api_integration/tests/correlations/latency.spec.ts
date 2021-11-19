@@ -209,7 +209,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         // Fetched 95th percentile value of 1309695.875 based on 1244 documents.
         expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
         expect(finalRawResponse?.overallHistogram?.length).to.be(101);
-        expect(finalRawResponse?.fieldStats?.length).to.be(12);
+        expect(finalRawResponse?.fieldStats?.length).to.be(fieldsToSample.size);
 
         // Identified 13 significant correlations out of 379 field/value pairs.
         expect(finalRawResponse?.latencyCorrelations?.length).to.eql(

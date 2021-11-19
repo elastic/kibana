@@ -44,7 +44,7 @@ import {
 
 import { isColumnInvalid, isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
-import { IndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
+import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -57,11 +57,14 @@ import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
-
-export type { OperationType, IndexPatternColumn } from './operations';
+import { getPrecisionErrorWarningMessages } from './utils';
+export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
-export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
+export function columnToOperation(
+  column: GenericIndexPatternColumn,
+  uniqueLabel?: string
+): Operation {
   const { dataType, label, isBucketed, scale } = column;
   return {
     dataType: normalizeOperationDataType(dataType),
@@ -502,7 +505,12 @@ export function getIndexPatternDatasource({
       });
       return messages.length ? messages : undefined;
     },
-    getWarningMessages: getStateTimeShiftWarningMessages,
+    getWarningMessages: (state, frame) => {
+      return [
+        ...(getStateTimeShiftWarningMessages(state, frame) || []),
+        ...getPrecisionErrorWarningMessages(state, frame, core.docLinks),
+      ];
+    },
     checkIntegrity: (state) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !state.indexPatterns[id]);

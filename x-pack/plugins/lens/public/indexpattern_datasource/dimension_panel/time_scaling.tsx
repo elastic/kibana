@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   adjustTimeScaleLabelSuffix,
-  IndexPatternColumn,
+  GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
 import type { TimeScaleUnit } from '../../../common/expressions';
@@ -60,7 +60,7 @@ export function TimeScaling({
   layer,
   updateLayer,
 }: {
-  selectedColumn: IndexPatternColumn;
+  selectedColumn: GenericIndexPatternColumn;
   columnId: string;
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
