@@ -23,6 +23,8 @@ import {
 } from '../../../common/constants';
 import { getHostIsolationExceptionsListPath } from '../../../common/routing';
 import { parseQueryFilterToKQL } from '../../../common/utils';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies';
+import { GetPolicyListResponse } from '../../policy/types';
 import {
   getHostIsolationExceptionItems,
   getHostIsolationExceptionSummary,
@@ -130,6 +132,30 @@ export function useGetHostIsolationExceptionFormEntry({
       refetchOnWindowFocus: false,
       onSuccess,
       onError,
+    }
+  );
+}
+
+export function useGetEndpointSpecificPolicies({
+  onSuccess,
+}: {
+  onSuccess: (data: GetPolicyListResponse) => void;
+}): QueryObserverResult<GetPolicyListResponse> {
+  const http = useHttp();
+  return useQuery<GetPolicyListResponse>(
+    ['hostIsolationExceptions', 'policies'],
+    () => {
+      return sendGetEndpointSpecificPackagePolicies(http, {
+        query: {
+          page: 1,
+          perPage: 1000,
+        },
+      });
+    },
+    {
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      onSuccess,
     }
   );
 }

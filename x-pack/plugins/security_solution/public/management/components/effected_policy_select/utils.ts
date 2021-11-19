@@ -25,7 +25,7 @@ export function getEffectedPolicySelectionByTags(
   tags: string[],
   policies: PolicyData[]
 ): EffectedPolicySelection {
-  if (tags.find((tag) => tag === GLOBAL_POLICY_TAG)) {
+  if (tags.length === 0 || tags.find((tag) => tag === GLOBAL_POLICY_TAG)) {
     return {
       isGlobal: true,
       selected: [],
