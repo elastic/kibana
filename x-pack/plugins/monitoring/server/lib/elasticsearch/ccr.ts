@@ -11,12 +11,19 @@ import { checkParam } from '../error_missing_required';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 // @ts-ignore
-import { createQuery } from '../create_query';
+import { createNewQuery } from '../create_query';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
-export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string) {
-  checkParam(esIndexPattern, 'esIndexPattern in checkCcrEnabled');
+export async function checkCcrEnabled(req: LegacyRequest) {
+  const datasets = ['cluster_stats'];
+  const productType = 'elasticsearch';
+  const indexPatterns = getNewIndexPatterns({
+    server: req.server,
+    productType,
+    datasets,
+  });
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
@@ -25,12 +32,13 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
   const metricFields = ElasticsearchMetric.getMetricFields();
 
   const params = {
-    index: esIndexPattern,
+    index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
     body: {
-      query: createQuery({
-        type: 'cluster_stats',
+      query: createNewQuery({
+        productType,
+        types: ['cluster_stats'],
         start,
         end,
         clusterUuid,

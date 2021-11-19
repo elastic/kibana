@@ -39,7 +39,7 @@ export function appendMetricbeatIndex(
   return `${indexPattern},${mbIndex}`;
 }
 
-export function getCcs(config: Config): boolean | string {
+export function getConfigCcs(config: Config): boolean | string {
   let ccsEnabled = false;
   // TODO: NP
   // This function is called with both NP config and LP config
@@ -61,13 +61,8 @@ export function getCcs(config: Config): boolean | string {
  * @param  {String} ccs The optional cluster-prefix to prepend.
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(
-  config: Config,
-  indexPattern: string,
-  ccs?: string,
-  monitoringIndicesOnly: boolean = false
-) {
-  const ccsEnabled = getCcs(config);
+export function prefixIndexPattern(config: Config, indexPattern: string, ccs?: string) {
+  const ccsEnabled = getConfigCcs(config);
   if (!ccsEnabled || !ccs) {
     return indexPattern;
   }

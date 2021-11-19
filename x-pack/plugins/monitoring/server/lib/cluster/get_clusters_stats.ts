@@ -12,7 +12,7 @@ import { createNewQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 // @ts-ignore
-import { getCcs } from '../../../common/ccs_utils';
+import { getConfigCcs } from '../../../common/ccs_utils';
 import { getClustersState } from './get_clusters_state';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
@@ -119,7 +119,7 @@ export function handleClusterStats(response: ElasticsearchResponse, req: LegacyR
 
       if (cluster) {
         // use CCS whenever we come across it so that we can avoid talking to other monitoring clusters whenever possible
-        const ccs = getCcs(req.server.config());
+        const ccs = getConfigCcs(req.server.config());
         if (typeof ccs === 'string') {
           cluster.ccs = ccs;
         }

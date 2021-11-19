@@ -25,6 +25,7 @@ export function clusterRoute(server: LegacyServer) {
           clusterUuid: schema.string(),
         }),
         payload: schema.object({
+          // should we be using ccs to pass along?
           ccs: schema.maybe(schema.string()),
           timeRange: schema.object({
             min: schema.string(),

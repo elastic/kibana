@@ -57,7 +57,6 @@ export function getLegacyIndexPattern({ productType }: { productType: string }) 
   return indexPattern;
 }
 
-// ***** Move out of clusters??
 export function getDsIndexPattern({
   type = DS_INDEX_PATTERN_METRICS,
   productType,

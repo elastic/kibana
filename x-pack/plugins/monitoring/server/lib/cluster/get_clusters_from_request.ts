@@ -98,7 +98,7 @@ export async function getClustersFromRequest(
 
     // add ml jobs and alerts data
     const mlJobs = isInCodePath(codePaths, [CODE_PATH_ML])
-      ? await getMlJobsForCluster(req, esIndexPattern, cluster)
+      ? await getMlJobsForCluster(req, cluster)
       : null;
     if (mlJobs !== null) {
       cluster.ml = { jobs: mlJobs };
@@ -114,7 +114,7 @@ export async function getClustersFromRequest(
   } else if (!isStandaloneCluster) {
     // get all clusters
     if (!clusters || clusters.length === 0) {
-      // we do NOT throw 404 here so that the no-data page can use this to check for data
+      // we do NOT thooo 404 here so that the no-data page can use this to check for data
       // we should look at having a standalone function for that lookup
       return [];
     }
@@ -235,7 +235,7 @@ export async function getClustersFromRequest(
   });
 
   // check ccr configuration
-  const isCcrEnabled = await checkCcrEnabled(req, esIndexPattern);
+  const isCcrEnabled = await checkCcrEnabled(req);
 
   const kibanaUuid = config.get('server.uuid')!;
 
