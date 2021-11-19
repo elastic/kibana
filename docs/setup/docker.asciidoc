@@ -58,7 +58,14 @@ If you need to reset the password for the `elastic` user or other
 built-in users, run the {ref}/reset-password.html[`elasticsearch-reset-password`]
 tool. To generate new enrollment tokens for {kib} or {es} nodes, run the
 {ref}/create-enrollment-token.html[`elasticsearch-create-enrollment-token`] tool.
-These tools are available in the {es} `bin` directory.
+These tools are available in the {es} `bin` directory of the Docker container.
+
+For example:
+
+[source,sh]
+----
+docker exec -it es-node01 /usr/share/elasticsearch/bin/reset-elastic-password
+----
 ====
 
 . In a new terminal session, start {kib} and connect it to your {es} container:
