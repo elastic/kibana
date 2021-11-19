@@ -117,6 +117,21 @@ export class TaskRunner<
     this.cancelled = false;
   }
 
+  async isRuleEnabled(ruleId: string, spaceId: string) {
+    const namespace = this.context.spaceIdToNamespace(spaceId);
+    // Only fetch encrypted attributes here, we'll create a saved objects client
+    // scoped with the API key to fetch the remaining data.
+    const {
+      attributes: { enabled },
+    } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+      'alert',
+      ruleId,
+      { namespace }
+    );
+
+    return enabled;
+  }
+
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
     const namespace = this.context.spaceIdToNamespace(spaceId);
     // Only fetch encrypted attributes here, we'll create a saved objects client
@@ -563,6 +578,21 @@ export class TaskRunner<
     const runDate = new Date();
     const runDateString = runDate.toISOString();
     this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDateString}`);
+
+    try {
+      const enabled = await this.isRuleEnabled(alertId, spaceId);
+      if (!enabled) {
+        this.logger.debug(
+          `skipping execution for rule ${this.alertType.id}:${alertId} at ${runDateString} because rule is disabled`
+        );
+        return {
+          state: originalState,
+          schedule: { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL },
+        };
+      }
+    } catch (err) {
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
+    }
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;

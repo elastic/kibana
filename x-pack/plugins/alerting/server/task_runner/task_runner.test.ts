@@ -212,6 +212,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -399,6 +400,7 @@ describe('Task Runner', () => {
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -642,6 +644,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -842,6 +845,7 @@ describe('Task Runner', () => {
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -913,6 +917,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -1090,6 +1095,7 @@ describe('Task Runner', () => {
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -1158,6 +1164,7 @@ describe('Task Runner', () => {
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -1199,11 +1206,12 @@ describe('Task Runner', () => {
           customTaskRunnerFactoryInitializerParams
         );
         rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
-        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
           id: '1',
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -1514,6 +1522,7 @@ describe('Task Runner', () => {
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -1872,6 +1881,7 @@ describe('Task Runner', () => {
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -1994,6 +2004,7 @@ describe('Task Runner', () => {
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -2097,6 +2108,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2295,11 +2307,12 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2323,11 +2336,12 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2356,10 +2370,12 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
-      attributes: {},
+      attributes: {
+        enabled: true,
+      },
       references: [],
     });
 
@@ -2391,11 +2407,12 @@ describe('Task Runner', () => {
       ...mockedAlertTypeSavedObject,
       schedule: { interval: '30s' },
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2436,11 +2453,12 @@ describe('Task Runner', () => {
     );
 
     rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2542,8 +2560,22 @@ describe('Task Runner', () => {
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when fetching the encrypted attributes', async () => {
+    let calls = 0;
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockImplementation(() => {
-      throw new Error('OMG');
+      if (++calls >= 2) {
+        throw new Error('OMG');
+      }
+      return new Promise((resolve) => {
+        resolve({
+          id: '1',
+          type: 'alert',
+          attributes: {
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
+          },
+          references: [],
+        });
+      });
     });
 
     const taskRunner = new TaskRunner(
@@ -2667,6 +2699,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2784,6 +2817,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2900,6 +2934,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3015,11 +3050,12 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3070,6 +3106,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3103,6 +3140,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3144,6 +3182,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3200,6 +3239,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3486,6 +3526,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3692,6 +3733,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3889,6 +3931,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -4092,6 +4135,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -4266,6 +4310,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -4400,5 +4445,34 @@ describe('Task Runner', () => {
       },
       { refresh: false, namespace: undefined }
     );
+  });
+
+  test('successfully bails on execution if the rule is disabled', async () => {
+    const state = {
+      ...mockedTaskInstance.state,
+      previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+    };
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state,
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: false,
+      },
+      references: [],
+    });
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.state.previousStartedAt?.toISOString()).toBe(state.previousStartedAt);
+    expect(runnerResult.schedule).toStrictEqual(mockedTaskInstance.schedule);
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
   });
 });
