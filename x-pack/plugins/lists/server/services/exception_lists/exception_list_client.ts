@@ -12,6 +12,7 @@ import type {
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
+  ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
@@ -34,6 +35,7 @@ import {
   GetExceptionListItemOptions,
   GetExceptionListOptions,
   GetExceptionListSummaryOptions,
+  ImportExceptionListAndItemsOptions,
   UpdateEndpointListItemOptions,
   UpdateExceptionListItemOptions,
   UpdateExceptionListOptions,
@@ -59,6 +61,7 @@ import {
 } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
+import { importExceptions } from './import_exception_list_and_items';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -510,6 +513,22 @@ export class ExceptionListClient {
       listId,
       namespaceType,
       savedObjectsClient,
+    });
+  };
+
+  public importExceptionListAndItems = async ({
+    fileToImport,
+    maxExceptionsImportSize,
+    overwrite,
+  }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
+    const { savedObjectsClient, user } = this;
+
+    return importExceptions({
+      fileToImport,
+      maxExceptionsImportSize,
+      overwrite,
+      savedObjectsClient,
+      user,
     });
   };
 }

@@ -14,16 +14,13 @@ import {
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaDecodedMock,
   getImportExceptionsListSchemaMock,
-} from '../../../common/schemas/request/import_exceptions_schema.mock';
-import { getExceptionListClientMock } from '../../services/exception_lists/exception_list_client.mock';
-import { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
+} from '../../../../common/schemas/request/import_exceptions_schema.mock';
 
 import {
   PromiseStream,
   createRulesStreamFromNdJson,
   getTupleErrorsAndUniqueExceptionListItems,
   getTupleErrorsAndUniqueExceptionLists,
-  importExceptionLists,
 } from './import_exceptions_utils';
 
 describe('import_exceptions_utils', () => {
@@ -297,94 +294,6 @@ describe('import_exceptions_utils', () => {
           getImportExceptionsListItemSchemaDecodedMock('2'),
         ],
       ]);
-    });
-  });
-
-  describe('importExceptionLists', () => {
-    let exceptionListsClient: ExceptionListClient;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      jest.resetAllMocks();
-
-      exceptionListsClient = getExceptionListClientMock();
-    });
-
-    test('it reports errors on creation', async () => {
-      jest.spyOn(exceptionListsClient, 'getExceptionList').mockResolvedValueOnce(null);
-
-      jest
-        .spyOn(exceptionListsClient, 'createExceptionList')
-        .mockRejectedValue(() => new Error('error in creation'));
-      const result = await importExceptionLists({
-        exceptionListsClient,
-        isOverwrite: false,
-        listsChunks: [[getImportExceptionsListSchemaDecodedMock()]],
-      });
-
-      expect(result).toEqual({
-        errors: [{ error: { message: undefined, status_code: 400 }, list_id: 'detection_list_id' }],
-        success: false,
-        success_count: 0,
-      });
-    });
-
-    test('it reports errors on list overwrite', async () => {
-      jest
-        .spyOn(exceptionListsClient, 'deleteExceptionList')
-        .mockRejectedValue(() => new Error('error in list deletion'));
-      const result = await importExceptionLists({
-        exceptionListsClient,
-        isOverwrite: true,
-        listsChunks: [[getImportExceptionsListSchemaDecodedMock()]],
-      });
-
-      expect(result).toEqual({
-        errors: [{ error: { message: undefined, status_code: 400 }, list_id: 'detection_list_id' }],
-        success: false,
-        success_count: 0,
-      });
-    });
-
-    test('it reports a conflict back if matching list found and "isOverwrite" is false', async () => {
-      const result = await importExceptionLists({
-        exceptionListsClient,
-        isOverwrite: false,
-        listsChunks: [[getImportExceptionsListSchemaDecodedMock()]],
-      });
-
-      expect(result).toEqual({
-        errors: [
-          {
-            error: { message: 'list_id: "detection_list_id" already exists', status_code: 409 },
-            list_id: 'detection_list_id',
-          },
-        ],
-        success: false,
-        success_count: 0,
-      });
-    });
-
-    test('it creates list if no matching list found', async () => {
-      const result = await importExceptionLists({
-        exceptionListsClient,
-        isOverwrite: true,
-        listsChunks: [[getImportExceptionsListSchemaDecodedMock()]],
-      });
-
-      expect(result).toEqual({ errors: [], success: true, success_count: 1 });
-    });
-
-    test('it overwrites list if matching list found and "isOverwrite" is true', async () => {
-      jest.spyOn(exceptionListsClient, 'getExceptionList').mockResolvedValueOnce(null);
-
-      const result = await importExceptionLists({
-        exceptionListsClient,
-        isOverwrite: true,
-        listsChunks: [[getImportExceptionsListSchemaDecodedMock()]],
-      });
-
-      expect(result).toEqual({ errors: [], success: true, success_count: 1 });
     });
   });
 });

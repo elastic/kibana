@@ -10,7 +10,7 @@ import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysoluti
 import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
 import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import {
-  exceptionsToNdJsonString,
+  toNdJsonString,
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
 } from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
@@ -27,6 +27,23 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllExceptions(supertest, log);
     });
 
+    it('should reject with an error if the file type is not that of a ndjson', async () => {
+      const { body } = await supertest
+        .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
+        .set('kbn-xsrf', 'true')
+        .attach(
+          'file',
+          toNdJsonString([getImportExceptionsListSchemaMock('some-list-id')]),
+          'exceptions.txt'
+        )
+        .expect(400);
+
+      expect(body).to.eql({
+        status_code: 400,
+        message: 'Invalid file extension .txt',
+      });
+    });
+
     describe('"overwrite" is false', () => {
       it('should report duplicate error when importing exception list matches an existing list with same "list_id"', async () => {
         await supertest
@@ -40,7 +57,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([getImportExceptionsListSchemaMock('some-list-id')]),
+            toNdJsonString([getImportExceptionsListSchemaMock('some-list-id')]),
             'exceptions.ndjson'
           )
           .expect('Content-Type', 'application/json; charset=utf-8')
@@ -50,7 +67,8 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [
             {
               error: {
-                message: 'list_id: "some-list-id" already exists',
+                message:
+                  'Found that list_id: "some-list-id" already exists. Import of list_id: "some-list-id" skipped.',
                 status_code: 409,
               },
               list_id: 'some-list-id',
@@ -71,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListSchemaMock(),
               getImportExceptionsListSchemaMock(),
             ]),
@@ -106,7 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([getImportExceptionsListSchemaMock()]),
+            toNdJsonString([getImportExceptionsListSchemaMock()]),
             'exceptions.ndjson'
           )
           .expect('Content-Type', 'application/json; charset=utf-8')
@@ -129,7 +147,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListSchemaMock('test_list_id'),
               getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
             ]),
@@ -155,7 +173,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListSchemaMock('test_list_id'),
               getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
               getImportExceptionsListItemSchemaMock('test_item_id-2', 'test_list_id'),
@@ -182,7 +200,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListSchemaMock(),
               getImportExceptionsListSchemaMock('test_list_id'),
             ]),
@@ -208,7 +226,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListSchemaMock('test_list_id'),
               getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
               getImportExceptionsListItemSchemaMock('test_item_id_2', 'test_list_id'),
@@ -238,7 +256,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([getImportExceptionsListItemSchemaMock('1', 'some-list-id')]),
+            toNdJsonString([getImportExceptionsListItemSchemaMock('1', 'some-list-id')]),
             'exceptions.ndjson'
           )
           .expect('Content-Type', 'application/json; charset=utf-8')
@@ -280,7 +298,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([getImportExceptionsListSchemaMock('some-list-id')]),
+            toNdJsonString([getImportExceptionsListSchemaMock('some-list-id')]),
             'exceptions.ndjson'
           )
           .expect('Content-Type', 'application/json; charset=utf-8')
@@ -322,7 +340,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListItemSchemaMock('some-list-item-id', 'some-list-id'),
             ]),
             'exceptions.ndjson'
@@ -335,7 +353,7 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               error: {
                 message:
-                  'Error trying to update item_id: "some-list-item-id". The item already exists under list_id: a_list_id',
+                  'Error trying to update item_id: "some-list-item-id" and list_id: "some-list-id". The item already exists under list_id: a_list_id',
                 status_code: 409,
               },
               item_id: 'some-list-item-id',
@@ -371,7 +389,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListItemSchemaMock('some-list-item-id', 'some-list-id'),
             ]),
             'exceptions.ndjson'
@@ -396,7 +414,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListSchemaMock(),
               getImportExceptionsListSchemaMock(),
             ]),
@@ -431,7 +449,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([getImportExceptionsListSchemaMock()]),
+            toNdJsonString([getImportExceptionsListSchemaMock()]),
             'exceptions.ndjson'
           )
           .expect('Content-Type', 'application/json; charset=utf-8')
@@ -454,7 +472,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListSchemaMock('test_list_id'),
               getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
             ]),
@@ -480,7 +498,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListSchemaMock('test_list_id'),
               getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
               getImportExceptionsListItemSchemaMock('test_item_id-2', 'test_list_id'),
@@ -507,7 +525,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListSchemaMock(),
               getImportExceptionsListSchemaMock('test_list_id'),
             ]),
@@ -533,7 +551,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([
+            toNdJsonString([
               getImportExceptionsListSchemaMock('test_list_id'),
               getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
               getImportExceptionsListItemSchemaMock('test_item_id_2', 'test_list_id'),
@@ -563,7 +581,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            exceptionsToNdJsonString([getImportExceptionsListItemSchemaMock('1', 'some-list-id')]),
+            toNdJsonString([getImportExceptionsListItemSchemaMock('1', 'some-list-id')]),
             'exceptions.ndjson'
           )
           .expect('Content-Type', 'application/json; charset=utf-8')

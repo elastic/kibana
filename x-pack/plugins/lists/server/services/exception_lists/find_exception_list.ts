@@ -19,7 +19,7 @@ import { SavedObjectType, getSavedObjectTypes } from '@kbn/securitysolution-list
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { transformSavedObjectsToFoundExceptionList } from './utils';
+import { transformSavedObjectsToFoundExceptionList } from './utils/utils';
 
 interface FindExceptionListOptions {
   namespaceType: NamespaceTypeArray;

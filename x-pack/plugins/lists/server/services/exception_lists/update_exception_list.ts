@@ -15,7 +15,6 @@ import type {
   MetaOrUndefined,
   NameOrUndefined,
   NamespaceType,
-  OsTypeArray,
   TagsOrUndefined,
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -24,7 +23,7 @@ import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { transformSavedObjectUpdateToExceptionList } from './utils';
+import { transformSavedObjectUpdateToExceptionList } from './utils/utils';
 import { getExceptionList } from './get_exception_list';
 
 interface UpdateExceptionListOptions {
@@ -34,7 +33,6 @@ interface UpdateExceptionListOptions {
   description: DescriptionOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
-  osTypes: OsTypeArray;
   listId: ListIdOrUndefined;
   meta: MetaOrUndefined;
   user: string;

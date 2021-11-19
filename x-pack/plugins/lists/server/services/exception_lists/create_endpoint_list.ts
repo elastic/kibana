@@ -18,7 +18,7 @@ import {
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { transformSavedObjectToExceptionList } from './utils';
+import { transformSavedObjectToExceptionList } from './utils/utils';
 
 interface CreateEndpointListOptions {
   savedObjectsClient: SavedObjectsClientContract;

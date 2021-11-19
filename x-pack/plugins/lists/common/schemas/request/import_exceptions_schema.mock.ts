@@ -61,12 +61,10 @@ export const getImportExceptionsListItemSchemaDecodedMock = (
 
 /**
  * Given an array of exception lists and items, builds a stream
- * @param exceptionListAndItems Array of exception lists and items objects with which to generate JSON
+ * @param items Array of exception lists and items objects with which to generate JSON
  */
-export const exceptionsToNdJsonString = (
-  exceptionListAndItems: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>
-): Buffer => {
-  const stringOfExceptions = exceptionListAndItems.map((exception) => JSON.stringify(exception));
+export const toNdJsonString = (items: unknown[]): Buffer => {
+  const stringOfExceptions = items.map((item) => JSON.stringify(item));
 
   return Buffer.from(stringOfExceptions.join('\n'));
 };

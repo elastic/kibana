@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+
 import { SavedObjectsClientContract } from 'kibana/server';
 import type {
   CreateCommentsArray,
@@ -45,6 +47,12 @@ import {
   Version,
   VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-types';
+
+export interface HapiReadableStream extends Readable {
+  hapi: {
+    filename: string;
+  };
+}
 
 export interface ConstructorOptions {
   user: string;
@@ -231,4 +239,10 @@ export interface ExportExceptionListAndItemsOptions {
 export interface ExportExceptionListAndItemsReturn {
   exportData: string;
   exportDetails: ExportExceptionDetails;
+}
+
+export interface ImportExceptionListAndItemsOptions {
+  fileToImport: HapiReadableStream;
+  maxExceptionsImportSize: number;
+  overwrite: boolean;
 }

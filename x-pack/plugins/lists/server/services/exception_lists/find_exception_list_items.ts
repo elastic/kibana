@@ -29,7 +29,7 @@ import {
 import { escapeQuotes } from '../utils/escape_query';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { transformSavedObjectsToFoundExceptionListItem } from './utils';
+import { transformSavedObjectsToFoundExceptionListItem } from './utils/utils';
 import { getExceptionList } from './get_exception_list';
 
 interface FindExceptionListItemsOptions {

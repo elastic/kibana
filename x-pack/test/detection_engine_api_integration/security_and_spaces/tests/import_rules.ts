@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -20,6 +22,12 @@ import {
   removeServerGeneratedProperties,
   ruleToNdjson,
 } from '../../utils';
+import {
+  toNdJsonString,
+  getImportExceptionsListItemSchemaMock,
+  getImportExceptionsListSchemaMock,
+} from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
+import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -474,6 +482,93 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             },
           ],
+        });
+      });
+
+      describe('importing with exceptions', () => {
+        beforeEach(async () => {
+          await deleteAllExceptions(supertest, log);
+        });
+
+        it('should be able to import a rule and an exception list', async () => {
+          const simpleRule = getSimpleRule('rule-1');
+
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .attach(
+              'file',
+              toNdJsonString([
+                simpleRule,
+                getImportExceptionsListSchemaMock('test_list_id'),
+                getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
+              ]),
+              'rules.ndjson'
+            )
+            .expect(200);
+          expect(body).to.eql({ success: true, success_count: 3, errors: [] });
+        });
+
+        it('should should only remove non existent exception list references from rule', async () => {
+          // create an exception list
+          const { body: exceptionBody } = await supertest
+            .post(EXCEPTION_LIST_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ ...getCreateExceptionListMinimalSchemaMock(), list_id: 'i_exist' })
+            .expect(200);
+
+          const simpleRule: ReturnType<typeof getSimpleRule> = {
+            ...getSimpleRule('rule-1'),
+            exceptions_list: [
+              {
+                id: exceptionBody.id,
+                list_id: 'i_exist',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+              {
+                id: 'i_dont_exist',
+                list_id: '123',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+            ],
+          };
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+            .expect(200);
+
+          const { body: ruleResponse } = await supertest
+            .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
+            .send()
+            .expect(200);
+
+          const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
+          expect(bodyToCompare.exceptions_list).to.eql([
+            {
+              id: exceptionBody.id,
+              list_id: 'i_exist',
+              namespace_type: 'single',
+              type: 'detection',
+            },
+          ]);
+
+          expect(body).to.eql({
+            success: false,
+            success_count: 1,
+            errors: [
+              {
+                rule_id: 'rule-1',
+                error: {
+                  message:
+                    'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "123" and id: "i_dont_exist". Reference has been removed.',
+                  status_code: 400,
+                },
+              },
+            ],
+          });
         });
       });
     });

@@ -32,7 +32,14 @@ import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import uuid from 'uuid';
 
-import { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
+import { createExceptionList } from '../create_exception_list';
+import { updateExceptionList } from '../update_exception_list';
+import { getExceptionList } from '../get_exception_list';
+import { deleteExceptionListItemByList } from '../delete_exception_list_items_by_list';
+import { SavedObjectsClientContract } from '../../../../../../../src/core/server/';
+import { getExceptionListItem } from '../get_exception_list_item';
+import { createExceptionListItem } from '../create_exception_list_item';
+import { updateExceptionListItem } from '../update_exception_list_item';
 
 export interface ImportExceptionListsOk {
   list_id: string;
@@ -313,13 +320,15 @@ export const getTupleErrorsAndUniqueExceptionListItems = (
  * @returns {Object} returns counts of successful imports and any errors found
  */
 export const importExceptionLists = async ({
-  exceptionListsClient,
-  listsChunks,
   isOverwrite,
+  listsChunks,
+  savedObjectsClient,
+  user,
 }: {
-  exceptionListsClient: ExceptionListClient;
-  listsChunks: ImportExceptionListSchemaDecoded[][];
   isOverwrite: boolean;
+  listsChunks: ImportExceptionListSchemaDecoded[][];
+  savedObjectsClient: SavedObjectsClientContract;
+  user: string;
 }): Promise<ImportDataResponse> => {
   let importExceptionListsResponse: ImportListsResponse[] = [];
 
@@ -332,6 +341,7 @@ export const importExceptionLists = async ({
             async (resolve, reject): Promise<void> => {
               try {
                 const {
+                  _version,
                   description,
                   meta,
                   list_id: listId,
@@ -342,22 +352,25 @@ export const importExceptionLists = async ({
                   version,
                 } = parsedExceptionList;
                 try {
-                  const list = await exceptionListsClient.getExceptionList({
+                  const list = await getExceptionList({
                     id: undefined,
                     listId,
                     namespaceType,
+                    savedObjectsClient,
                   });
 
                   if (list == null) {
-                    await exceptionListsClient.createExceptionList({
+                    await createExceptionList({
                       description,
                       immutable: false,
                       listId,
                       meta,
                       name,
                       namespaceType,
+                      savedObjectsClient,
                       tags,
                       type,
+                      user,
                       version,
                     });
                     resolve({
@@ -365,24 +378,30 @@ export const importExceptionLists = async ({
                       status_code: 200,
                     });
                   } else if (list != null && isOverwrite) {
-                    // If overwrite is true, assume user wants to overwrite
-                    // entire list and items, so first need to clean up both
-                    await exceptionListsClient.deleteExceptionList({
-                      id: undefined,
+                    // If overwrite is true, we want to overwrite
+                    // list items. We may want to change this in the future
+                    // so that a user could choose to overwrite the list vs
+                    // the items, but that also feels like leaking a bit of
+                    // architecture in a way that adds complexity for the user
+                    await deleteExceptionListItemByList({
                       listId,
                       namespaceType,
+                      savedObjectsClient,
                     });
 
-                    // Create list anew and items will be attached to it
-                    await exceptionListsClient.createExceptionList({
+                    // Update list
+                    await updateExceptionList({
+                      _version,
                       description,
-                      immutable: false,
+                      id: list.id,
                       listId,
                       meta,
                       name,
                       namespaceType,
+                      savedObjectsClient,
                       tags,
                       type,
+                      user,
                       version,
                     });
                     resolve({
@@ -392,7 +411,7 @@ export const importExceptionLists = async ({
                   } else if (list != null) {
                     resolve({
                       error: {
-                        message: `list_id: "${listId}" already exists`,
+                        message: `Found that list_id: "${listId}" already exists. Import of list_id: "${listId}" skipped.`,
                         status_code: 409,
                       },
                       list_id: listId,
@@ -439,19 +458,22 @@ export const importExceptionLists = async ({
 
 /**
  * Helper with logic determining when to create or update on exception list items import
- * @param exceptionListsClient - exceptions client
+ * @param savedObjectsClient
  * @param itemsChunks - exception list items being imported
  * @param isOverwrite - if matching item_id found, should item be overwritten
+ * @param user - username
  * @returns {Object} returns counts of successful imports and any errors found
  */
 export const importExceptionListItems = async ({
-  exceptionListsClient,
   itemsChunks,
   isOverwrite,
+  savedObjectsClient,
+  user,
 }: {
-  exceptionListsClient: ExceptionListClient;
   itemsChunks: ImportExceptionListItemSchemaDecoded[][];
   isOverwrite: boolean;
+  savedObjectsClient: SavedObjectsClientContract;
+  user: string;
 }): Promise<ImportDataResponse> => {
   let importExceptionListItemsResponse: ImportItemsResponse[] = [];
 
@@ -461,13 +483,16 @@ export const importExceptionListItems = async ({
   // with the same item_id, it would sometimes create under List A and error on List B
   // and sometimes create under List B and error on List A
   for await (const itemsChunk of itemsChunks) {
-    const b = await itemsChunk.reduce<Promise<ImportItemsResponse[]>>((previousPromise, chunk) => {
-      return previousPromise.then((resp) => {
-        return createExceptionListPromise(exceptionListsClient, chunk, isOverwrite, resp);
-      });
-    }, Promise.resolve([]));
+    const response = await itemsChunk.reduce<Promise<ImportItemsResponse[]>>(
+      (previousPromise, chunk) => {
+        return previousPromise.then((resp) => {
+          return createExceptionListPromise(savedObjectsClient, chunk, isOverwrite, user, resp);
+        });
+      },
+      Promise.resolve([])
+    );
 
-    importExceptionListItemsResponse = [...importExceptionListItemsResponse, ...b];
+    importExceptionListItemsResponse = [...importExceptionListItemsResponse, ...response];
   }
 
   const errorsResp = importExceptionListItemsResponse.filter((resp) =>
@@ -490,16 +515,17 @@ export const importExceptionListItems = async ({
 
 /**
  * Creates promises of the exceptions to be exported and returns them.
- * @param exceptionsListClient Exception Lists client
+ * @param savedObjectsClient
  * @param itemChunk The exception item being imported
  * @param isOverwrite Whether exception list item should be overwritten
  * @param importResponses Cumulative import responses
  * @returns Promise of exception item to be imported
  */
 export const createExceptionListPromise = (
-  exceptionsListClient: ExceptionListClient,
+  savedObjectsClient: SavedObjectsClientContract,
   itemChunk: ImportExceptionListItemSchemaDecoded,
   isOverwrite: boolean,
+  user: string,
   importResponses: ImportItemsResponse[]
 ): Promise<ImportItemsResponse[]> =>
   new Promise(async (resolve, reject) => {
@@ -520,15 +546,17 @@ export const createExceptionListPromise = (
       } = itemChunk;
 
       try {
-        const list = await exceptionsListClient.getExceptionList({
+        const list = await getExceptionList({
           id: undefined,
           listId,
           namespaceType,
+          savedObjectsClient,
         });
-        const item = await exceptionsListClient.getExceptionListItem({
+        const item = await getExceptionListItem({
           id: undefined,
           itemId,
           namespaceType,
+          savedObjectsClient,
         });
 
         if (list == null) {
@@ -544,7 +572,7 @@ export const createExceptionListPromise = (
             },
           ]);
         } else if (item == null) {
-          await exceptionsListClient.createExceptionListItem({
+          await createExceptionListItem({
             comments,
             description,
             entries,
@@ -554,8 +582,10 @@ export const createExceptionListPromise = (
             name,
             namespaceType,
             osTypes,
+            savedObjectsClient,
             tags,
             type,
+            user,
           });
 
           resolve([
@@ -568,7 +598,7 @@ export const createExceptionListPromise = (
           ]);
         } else if (item != null && isOverwrite) {
           if (item.list_id === listId) {
-            await exceptionsListClient.updateExceptionListItem({
+            await updateExceptionListItem({
               _version,
               comments,
               description,
@@ -579,8 +609,10 @@ export const createExceptionListPromise = (
               name,
               namespaceType,
               osTypes,
+              savedObjectsClient,
               tags,
               type,
+              user,
             });
 
             resolve([
@@ -609,7 +641,7 @@ export const createExceptionListPromise = (
               ...importResponses,
               {
                 error: {
-                  message: `Error trying to update item_id: "${itemId}". The item already exists under list_id: ${item.list_id}`,
+                  message: `Error trying to update item_id: "${itemId}" and list_id: "${listId}". The item already exists under list_id: ${item.list_id}`,
                   status_code: 409,
                 },
                 item_id: itemId,
@@ -622,7 +654,7 @@ export const createExceptionListPromise = (
             ...importResponses,
             {
               error: {
-                message: `item_id: "${itemId}" already exists`,
+                message: `Found that item_id: "${itemId}" already exists. Import of item_id: "${itemId}" skipped.`,
                 status_code: 409,
               },
               item_id: itemId,

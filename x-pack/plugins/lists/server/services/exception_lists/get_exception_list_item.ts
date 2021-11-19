@@ -19,7 +19,7 @@ import {
 } from '../../../../../../src/core/server/';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { transformSavedObjectToExceptionListItem } from './utils';
+import { transformSavedObjectToExceptionListItem } from './utils/utils';
 
 interface GetExceptionListItemOptions {
   id: IdOrUndefined;

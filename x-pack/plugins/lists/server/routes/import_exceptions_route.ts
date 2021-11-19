@@ -5,44 +5,20 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import { extname } from 'path';
 
-import { chunk } from 'lodash/fp';
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { createPromiseFromStreams } from '@kbn/utils';
-import {
-  ImportExceptionListItemSchemaDecoded,
-  ImportExceptionListSchemaDecoded,
-  importExceptionsResponseSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import { importExceptionsResponseSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
 import type { ListsPluginRouter } from '../types';
 import { ConfigType } from '../config';
+import { HapiReadableStream } from '../services/exception_lists/exception_list_client_types';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
-import {
-  createRulesStreamFromNdJson,
-  getTupleErrorsAndUniqueExceptionListItems,
-  getTupleErrorsAndUniqueExceptionLists,
-  importExceptionListItems,
-  importExceptionLists,
-} from './utils/import_exceptions_utils';
-
-interface HapiReadableStream extends Readable {
-  hapi: {
-    filename: string;
-  };
-}
-interface PromiseFromStreams {
-  lists: Array<ImportExceptionListSchemaDecoded | Error>;
-  items: Array<ImportExceptionListItemSchemaDecoded | Error>;
-}
-
-const CHUNK_PARSED_OBJECT_SIZE = 50;
 
 export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigType): void => {
   router.post(
@@ -67,63 +43,21 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
       const siemResponse = buildSiemResponse(response);
 
       try {
-        // validation of import and sorting of lists and items
-        const readStream = createRulesStreamFromNdJson(config.maxExceptionsImportSize);
-        const [parsedObjects] = await createPromiseFromStreams<PromiseFromStreams[]>([
-          request.body.file as HapiReadableStream,
-          ...readStream,
-        ]);
+        const { filename } = (request.body.file as HapiReadableStream).hapi;
+        const fileExtension = extname(filename).toLowerCase();
+        if (fileExtension !== '.ndjson') {
+          return siemResponse.error({
+            body: `Invalid file extension ${fileExtension}`,
+            statusCode: 400,
+          });
+        }
 
-        // removal of duplicates
-        const [exceptionListDuplicateErrors, uniqueExceptionLists] =
-          getTupleErrorsAndUniqueExceptionLists(parsedObjects.lists);
-        const [exceptionListItemsDuplicateErrors, uniqueExceptionListItems] =
-          getTupleErrorsAndUniqueExceptionListItems(parsedObjects.items);
-
-        // chunking of validated import stream
-        const chunkParsedListObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueExceptionLists);
-        const chunkParsedItemsObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueExceptionListItems);
-
-        // where the magic happens
-        const importExceptionListsResponse = await importExceptionLists({
-          exceptionListsClient,
-          isOverwrite: request.query.overwrite,
-          listsChunks: chunkParsedListObjects,
+        const importsSummary = await exceptionListsClient.importExceptionListAndItems({
+          fileToImport: request.body.file as HapiReadableStream,
+          maxExceptionsImportSize: config.maxExceptionsImportSize,
+          overwrite: request.query.overwrite,
         });
-        const importExceptionListItemsResponse = await importExceptionListItems({
-          exceptionListsClient,
-          isOverwrite: request.query.overwrite,
-          itemsChunks: chunkParsedItemsObjects,
-        });
-
-        const importsSummary = {
-          errors: [
-            ...importExceptionListsResponse.errors,
-            ...exceptionListDuplicateErrors,
-            ...importExceptionListItemsResponse.errors,
-            ...exceptionListItemsDuplicateErrors,
-          ],
-          success_count_exception_list_items: importExceptionListItemsResponse.success_count,
-          success_count_exception_lists: importExceptionListsResponse.success_count,
-          success_exception_list_items:
-            importExceptionListItemsResponse.errors.length === 0 &&
-            exceptionListItemsDuplicateErrors.length === 0,
-          success_exception_lists:
-            importExceptionListsResponse.errors.length === 0 &&
-            exceptionListDuplicateErrors.length === 0,
-        };
-
-        const [validated, errors] = validate(
-          {
-            ...importsSummary,
-            success:
-              importsSummary.success_exception_list_items && importsSummary.success_exception_lists,
-            success_count:
-              importsSummary.success_count_exception_lists +
-              importsSummary.success_count_exception_list_items,
-          },
-          importExceptionsResponseSchema
-        );
+        const [validated, errors] = validate(importsSummary, importExceptionsResponseSchema);
 
         if (errors != null) {
           return siemResponse.error({ body: errors, statusCode: 500 });
