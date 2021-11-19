@@ -337,8 +337,8 @@ export class LensPlugin {
       formatFactory,
     };
     this.indexpatternDatasource.setup(core, dependencies);
-    this.esdslDatasource.setup(core, dependencies);
-    this.essqlDatasource.setup(core, dependencies);
+    // this.esdslDatasource.setup(core, dependencies);
+    // this.essqlDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);

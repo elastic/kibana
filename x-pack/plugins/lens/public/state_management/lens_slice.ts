@@ -23,6 +23,7 @@ import {
   Suggestion,
 } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
+import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -94,6 +95,7 @@ export const updateDatasourceState = createAction<{
   updater: unknown | ((prevState: unknown) => unknown);
   datasourceId: string;
   clearStagedPreview?: boolean;
+  forceApply?: boolean;
 }>('lens/updateDatasourceState');
 export const updateVisualizationState = createAction<{
   visualizationId: string;
@@ -270,21 +272,40 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           updater: unknown | ((prevState: unknown) => unknown);
           datasourceId: string;
           clearStagedPreview?: boolean;
+          forceApply?: boolean;
         };
       }
     ) => {
+      const newDatasourceState =
+        typeof payload.updater === 'function'
+          ? payload.updater(current(state).datasourceStates[payload.datasourceId].state)
+          : payload.updater;
+      const newStateMap = {
+        ...state.datasourceStates,
+        [payload.datasourceId]: {
+          state: newDatasourceState,
+          isLoading: false,
+        },
+      };
+      const activeVisualization = visualizationMap[state.visualization.activeId!];
+      const visState = state.visualization;
+      if (payload.forceApply) {
+        const suggestions = getSuggestions({
+          datasourceMap,
+          datasourceStates: newStateMap,
+          visualizationMap,
+          activeVisualization,
+          visualizationState: visState.state,
+        });
+        if (suggestions.length > 0) {
+          visState.activeId = suggestions[0].visualizationId;
+          visState.state = suggestions[0].visualizationState;
+        }
+      }
       return {
         ...state,
-        datasourceStates: {
-          ...state.datasourceStates,
-          [payload.datasourceId]: {
-            state:
-              typeof payload.updater === 'function'
-                ? payload.updater(current(state).datasourceStates[payload.datasourceId].state)
-                : payload.updater,
-            isLoading: false,
-          },
-        },
+        visualization: visState,
+        datasourceStates: newStateMap,
         stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
       };
     },

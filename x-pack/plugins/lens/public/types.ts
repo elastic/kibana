@@ -309,6 +309,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
   dragDropContext: DragContextState;
   setState: StateSetter<T>;
+  setStateAndForceApply: StateSetter<T>;
   showNoDataPopover: () => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;

@@ -25,6 +25,7 @@ import {
   selectDatasourceStates,
 } from '../../state_management';
 import { initializeDatasources } from './state_helpers';
+import { getSuggestions } from './suggestion_helpers';
 
 interface DataPanelWrapperProps {
   datasourceMap: DatasourceMap;
@@ -83,6 +84,16 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dragDropContext: useContext(DragContext),
     state: activeDatasourceId ? datasourceStates[activeDatasourceId].state : null,
     setState: setDatasourceState,
+    setStateAndForceApply: (updater) => {
+      dispatchLens(
+        updateDatasourceState({
+          updater,
+          datasourceId: activeDatasourceId!,
+          clearStagedPreview: true,
+          forceApply: true,
+        })
+      );
+    },
     core: props.core,
     showNoDataPopover: props.showNoDataPopover,
     dropOntoWorkspace: props.dropOntoWorkspace,

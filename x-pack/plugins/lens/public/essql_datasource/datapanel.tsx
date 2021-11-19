@@ -29,6 +29,7 @@ import {
   EuiCodeEditor,
   EuiAccordion,
   EuiPanel,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -221,6 +222,7 @@ export function EsSQLDataPanel({
 
 export function EsSQLHorizontalDataPanel({
   setState,
+  setStateAndForceApply,
   state,
   dragDropContext,
   core,
@@ -230,6 +232,7 @@ export function EsSQLHorizontalDataPanel({
   dateRange,
   expressions,
 }: Props) {
+  const [autoMap, setAutoMap] = useState(false);
   const [localState, setLocalState] = useState(state);
 
   useEffect(() => {
@@ -291,51 +294,73 @@ export function EsSQLHorizontalDataPanel({
             </EuiPanel>
           </EuiFlexItem>
         ))}
-        {state !== localState && (
-          <EuiFlexItem>
-            <EuiButton
-              onClick={async () => {
-                try {
-                  const responses = await Promise.all(
-                    Object.entries(localState.layers).map(([id, layer]) => {
-                      const ast = {
-                        type: 'expression',
-                        chain: [
-                          buildExpressionFunction<any>('essql', {
-                            query: layer.query,
-                          }).toAst(),
-                        ],
-                      };
-                      return expressions.run(ast, null).toPromise();
-                    })
-                  );
-                  const cachedFieldList: Record<
-                    string,
-                    { fields: Array<{ name: string; type: string }>; singleRow: boolean }
-                  > = {};
-                  responses.forEach((response, index) => {
-                    const layerId = Object.keys(localState.layers)[index];
-                    // @ts-expect-error this is hacky, should probably run expression instead
-                    const { rows, columns } = response.result;
-                    // todo hack some logic in for dates
-                    cachedFieldList[layerId] = { fields: columns, singleRow: rows.length === 1 };
-                  });
-                  setState({
-                    ...localState,
-                    cachedFieldList,
-                  });
-                } catch (e) {
-                  core.notifications.toasts.addError(e, {
-                    title: 'Request failed',
-                    toastMessage: e.body?.message,
-                  });
-                }
-              }}
-            >
-              Apply changes
-            </EuiButton>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiCheckbox
+                id={'myId'}
+                label="Auto map columns"
+                checked={autoMap}
+                onChange={(e) => setAutoMap(!autoMap)}
+              />
+            </EuiFlexItem>
+            {state !== localState && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={async () => {
+                    try {
+                      const responses = await Promise.all(
+                        Object.entries(localState.layers).map(([id, layer]) => {
+                          const ast = {
+                            type: 'expression',
+                            chain: [
+                              buildExpressionFunction<any>('essql', {
+                                query: layer.query,
+                              }).toAst(),
+                            ],
+                          };
+                          return expressions.run(ast, null).toPromise();
+                        })
+                      );
+                      const cachedFieldList: Record<
+                        string,
+                        { fields: Array<{ name: string; type: string }>; singleRow: boolean }
+                      > = {};
+                      responses.forEach((response, index) => {
+                        const layerId = Object.keys(localState.layers)[index];
+                        // @ts-expect-error this is hacky, should probably run expression instead
+                        const { rows, columns } = response.result;
+                        // todo hack some logic in for dates
+                        cachedFieldList[layerId] = {
+                          fields: columns,
+                          singleRow: rows.length === 1,
+                        };
+                      });
+                      if (autoMap) {
+                        setStateAndForceApply({
+                          ...localState,
+                          cachedFieldList,
+                        });
+                      } else {
+                        setState({
+                          ...localState,
+                          cachedFieldList,
+                        });
+                      }
+                    } catch (e) {
+                      core.notifications.toasts.addError(e, {
+                        title: 'Request failed',
+                        toastMessage: e.body?.message,
+                      });
+                    }
+                  }}
+                >
+                  Apply changes
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </KibanaContextProvider>
   );
