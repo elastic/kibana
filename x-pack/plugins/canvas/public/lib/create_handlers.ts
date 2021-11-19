@@ -15,6 +15,7 @@ import { RendererHandlers, CanvasElement } from '../../types';
 import { pluginServices } from '../services';
 import { clearValue } from '../state/actions/resolved_args';
 
+const expressionsService = pluginServices.getServices().expressions;
 // This class creates stub handlers to ensure every element and renderer fulfills the contract.
 // TODO: consider warning if these methods are invoked but not implemented by the renderer...?
 
@@ -88,7 +89,7 @@ export const createDispatchedHandlerFactory = (
             this.onEmbeddableInputChange(event.data);
             break;
           case 'applyFilterAction':
-            pluginServices.getServices().expressions.setFilter(element.id, event.data);
+            expressionsService.setFilter(element.id, event.data);
             break;
           case 'onComplete':
             this.onComplete(event.data);

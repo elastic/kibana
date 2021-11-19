@@ -16,7 +16,10 @@ import { CoreStart, AppUpdater, PluginInitializerContext } from 'src/core/public
  * The `StartParameters` generic determines what parameters are expected to
  * create the service.
  */
-export type PluginServiceFactory<Service, Parameters = {}> = (params: Parameters) => Service;
+export type PluginServiceFactory<Service, Parameters = {}, RequiredServices = {}> = (
+  params: Parameters,
+  requiredServices?: RequiredServices
+) => Service;
 
 /**
  * Parameters necessary to create a Kibana-based service, (e.g. during Plugin

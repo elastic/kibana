@@ -19,7 +19,7 @@ export interface Options {
   castToRender?: boolean;
 }
 
-export class BaseExpressionsService {
+export class CoreExpressionsService {
   constructor(private readonly expressions: ExpressionsServiceStart) {}
 
   async interpretAst(

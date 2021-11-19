@@ -10,16 +10,16 @@ import { buildEmbeddableFilters } from '../../../../common/lib/build_embeddable_
 import { ExpressionsServiceStart } from '../../../../../../../src/plugins/expressions/public';
 import { KibanaPluginServiceFactory } from '../../../../../../../src/plugins/presentation_util/public';
 import { CanvasStartDeps } from '../../../plugin';
-import { BaseExpressionsService } from './expressions';
+import { CoreExpressionsService } from './expressions';
 import type { Options } from './expressions';
 import { FiltersService } from './filters';
 
 export class ExpressionsService {
-  private expressionsService: BaseExpressionsService;
+  private expressionsService: CoreExpressionsService;
   private filtersService: FiltersService;
 
   constructor(expressions: ExpressionsServiceStart) {
-    this.expressionsService = new BaseExpressionsService(expressions);
+    this.expressionsService = new CoreExpressionsService(expressions);
     this.filtersService = new FiltersService();
   }
 
