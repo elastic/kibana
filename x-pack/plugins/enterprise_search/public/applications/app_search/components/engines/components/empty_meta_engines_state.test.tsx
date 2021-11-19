@@ -23,7 +23,7 @@ describe('EmptyMetaEnginesState', () => {
 
     expect(wrapper.find('h3').text()).toEqual('Create your first meta engine');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining(`${docLinks.appSearchMetaEngines}`)
+      expect.stringContaining(docLinks.appSearchMetaEngines)
     );
   });
 });
