@@ -77,6 +77,7 @@ export interface ThreatIndicatorRule extends CustomRule {
   indicatorIndexPattern: string[];
   indicatorMappingField: string;
   indicatorIndexField: string;
+  threatIndicatorPath: string;
   type?: string;
   atomic?: string;
 }
@@ -405,6 +406,7 @@ export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
   timeline: getIndicatorMatchTimelineTemplate(),
   maxSignals: 100,
+  threatIndicatorPath: 'threat.indicator',
 });
 
 export const duplicatedRuleName = `${getNewThreatIndicatorRule().name} [Duplicate]`;
