@@ -17,7 +17,6 @@ import {
   EuiSpacer,
   EuiScreenReaderOnly,
   htmlIdGenerator,
-  EuiToolTip,
 } from '@elastic/eui';
 import useUnmount from 'react-use/lib/useUnmount';
 import { DEFAULT_COLOR } from './constants';
@@ -102,42 +101,6 @@ export const CustomStops = ({
   });
 
   const rangeType = paletteConfiguration?.rangeType || 'percent';
-
-  const addNewButton = (
-    <EuiButtonEmpty
-      data-test-subj={`${dataTestPrefix}_dynamicColoring_addStop`}
-      iconType="plusInCircle"
-      color="primary"
-      aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
-        defaultMessage: 'Add color stop',
-      })}
-      size="xs"
-      isDisabled={shouldDisableAdd}
-      flush="left"
-      onClick={() => {
-        const newColorStops = [...localColorStops];
-        const length = newColorStops.length;
-        const { max } = getDataMinMax(rangeType, dataBounds);
-        const step = getStepValue(
-          colorStops,
-          newColorStops.map(({ color, stop }) => ({ color, stop: Number(stop) })),
-          max
-        );
-        const prevColor = localColorStops[length - 1].color || DEFAULT_COLOR;
-        const newStop = step + Number(localColorStops[length - 1].stop);
-        newColorStops.push({
-          color: prevColor,
-          stop: String(newStop),
-          id: idGeneratorFn(),
-        });
-        setLocalColorStops(newColorStops);
-      }}
-    >
-      {i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
-        defaultMessage: 'Add color stop',
-      })}
-    </EuiButtonEmpty>
-  );
 
   return (
     <>
@@ -297,18 +260,51 @@ export const CustomStops = ({
 
       <EuiSpacer size="s" />
 
-      {shouldDisableAdd ? (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.lens.dynamicColoring.customPalette.maximumStepsApplied', {
+      <TooltipWrapper
+        tooltipContent={i18n.translate(
+          'xpack.lens.dynamicColoring.customPalette.maximumStepsApplied',
+          {
             defaultMessage: `You've applied the maximum number of steps`,
+          }
+        )}
+        condition={shouldDisableAdd}
+        position="top"
+        delay="regular"
+      >
+        <EuiButtonEmpty
+          data-test-subj={`${dataTestPrefix}_dynamicColoring_addStop`}
+          iconType="plusInCircle"
+          color="primary"
+          aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
+            defaultMessage: 'Add color stop',
           })}
+          size="xs"
+          isDisabled={shouldDisableAdd}
+          flush="left"
+          onClick={() => {
+            const newColorStops = [...localColorStops];
+            const length = newColorStops.length;
+            const { max } = getDataMinMax(rangeType, dataBounds);
+            const step = getStepValue(
+              colorStops,
+              newColorStops.map(({ color, stop }) => ({ color, stop: Number(stop) })),
+              max
+            );
+            const prevColor = localColorStops[length - 1].color || DEFAULT_COLOR;
+            const newStop = step + Number(localColorStops[length - 1].stop);
+            newColorStops.push({
+              color: prevColor,
+              stop: String(newStop),
+              id: idGeneratorFn(),
+            });
+            setLocalColorStops(newColorStops);
+          }}
         >
-          {addNewButton}
-        </EuiToolTip>
-      ) : (
-        addNewButton
-      )}
+          {i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
+            defaultMessage: 'Add color stop',
+          })}
+        </EuiButtonEmpty>
+      </TooltipWrapper>
     </>
   );
 };
