@@ -125,7 +125,7 @@ export interface FieldEdiorProps {
 export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState> {
   static contextType = contextType;
 
-  // @ts-ignore 4.3.5 upgrade - using declare requires Babel config changes
+  // @ts-expect-error 4.3.5 upgrade - using declare requires Babel config changes
   public readonly context: IndexPatternManagmentContextValue;
 
   supportedLangs: estypes.ScriptLanguage[] = [];

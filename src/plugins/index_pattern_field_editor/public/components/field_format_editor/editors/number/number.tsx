@@ -26,7 +26,7 @@ export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorPa
   static contextType = contextType;
   static formatId = formatId;
 
-  // @ts-ignore 4.3.5 upgrade - using declare requires Babel config changes
+  // @ts-expect-error 4.3.5 upgrade - using declare requires Babel config changes
   context: React.ContextType<typeof contextType>;
   state = {
     ...defaultState,

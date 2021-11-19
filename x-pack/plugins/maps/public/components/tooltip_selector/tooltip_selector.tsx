@@ -117,7 +117,7 @@ export class TooltipSelector extends Component<Props, State> {
       return field.name === propertyName;
     });
 
-    // @ts-ignore 4.3.5 upgrade
+    // @ts-expect-error 4.3.5 upgrade
     return prop ? prop!.label : propertyName;
   };
 
