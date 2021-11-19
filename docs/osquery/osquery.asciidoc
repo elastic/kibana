@@ -76,7 +76,7 @@ image::images/live-query-check-results.png[Results of OSquery]
 [[osquery-schedule-query]]
 == Schedule queries with packs
 
-Create packs to organize sets of queries. For example, you might create a pack that checks
+Create packs to organize sets of queries. For example, you might create one pack that checks
 for IT compliance-type issues, and another pack that monitors for evidence of malware. 
 You can schedule packs to run for one or more agent policies. When scheduled, queries in the pack are run at the set intervals for all agents in those policies. Scheduling packs is optional. 
 
