@@ -225,7 +225,7 @@ describe('LayerPanel', () => {
 
       const group = instance
         .find(EuiFormRow)
-        .findWhere((e) => e.prop('error') === 'Required dimension');
+        .findWhere((e) => e.prop('error') === 'Requires field');
 
       expect(group).toHaveLength(1);
     });
@@ -258,7 +258,7 @@ describe('LayerPanel', () => {
 
       const group = instance
         .find(EuiFormRow)
-        .findWhere((e) => e.prop('error') === 'Required 2 dimensions');
+        .findWhere((e) => e.prop('error') === 'Requires 2 fields');
 
       expect(group).toHaveLength(1);
     });
