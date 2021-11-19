@@ -23,7 +23,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('Add your first documents');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining(`${docLinks.appSearchIndexingDocs}`)
+      expect.stringContaining(docLinks.appSearchIndexingDocs)
     );
   });
 });
