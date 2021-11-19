@@ -423,6 +423,7 @@ export interface OperationMetadata {
   // A bucketed operation is grouped by duplicate values, otherwise each row is
   // treated as unique
   isBucketed: boolean;
+  noBucketInfo?: boolean;
   /**
    * ordinal: Each name is a unique value, but the names are in sorted order, like "Top values"
    * interval: Histogram data, like date or number histograms

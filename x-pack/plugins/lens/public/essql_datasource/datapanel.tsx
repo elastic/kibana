@@ -301,7 +301,11 @@ export function EsSQLHorizontalDataPanel({
                 id={'myId'}
                 label="Auto map columns"
                 checked={autoMap}
-                onChange={(e) => setAutoMap(!autoMap)}
+                onChange={(e) => {
+                  setAutoMap(!autoMap);
+                  setLocalState({ ...localState, autoMap: !autoMap });
+                  setState({ ...state, autoMap: !autoMap });
+                }}
               />
             </EuiFlexItem>
             {state !== localState && (

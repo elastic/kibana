@@ -288,7 +288,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         },
       };
       const activeVisualization = visualizationMap[state.visualization.activeId!];
-      const visState = state.visualization;
+      const visState = { ...state.visualization };
       if (payload.forceApply) {
         const suggestions = getSuggestions({
           datasourceMap,
@@ -297,9 +297,25 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           activeVisualization,
           visualizationState: visState.state,
         });
-        if (suggestions.length > 0) {
-          visState.activeId = suggestions[0].visualizationId;
-          visState.state = suggestions[0].visualizationState;
+        const sameTypeVisAndSubVis = suggestions.find(
+          (s) =>
+            s.visualizationId === state.visualization.activeId &&
+            visualizationMap[s.visualizationId].getVisualizationTypeId(s.visualizationState) ===
+              visualizationMap[s.visualizationId].getVisualizationTypeId(state.visualization.state)
+        );
+        const sameTypeVis = suggestions.find(
+          (s) => s.visualizationId === state.visualization.activeId
+        );
+        const mainSuggestion = sameTypeVisAndSubVis ?? sameTypeVis ?? suggestions[0];
+        if (mainSuggestion) {
+          visState.activeId = mainSuggestion.visualizationId;
+          visState.state = mainSuggestion.visualizationState;
+          if (mainSuggestion.datasourceState) {
+            newStateMap[payload.datasourceId] = {
+              isLoading: false,
+              state: mainSuggestion.datasourceState!,
+            };
+          }
         }
       }
       return {

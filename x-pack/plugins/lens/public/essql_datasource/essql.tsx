@@ -128,7 +128,10 @@ export function getEsSQLDatasource({
           ...state.layers,
           [newLayerId]: removedLayer
             ? removedLayer.layer
-            : blankLayer(state.indexPatternRefs[0].id),
+            : blankLayer(
+                JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
+                  state.indexPatternRefs[0].id
+              ),
         },
         removedLayers: newRemovedList,
       };
@@ -332,6 +335,7 @@ export function getEsSQLDatasource({
               dataType: overwrite || (field?.meta?.type as DataType),
               label: field?.name,
               isBucketed: false,
+              noBucketInfo: true,
             };
           }
           return null;
@@ -352,29 +356,62 @@ export function getEsSQLDatasource({
             [id]: state.layers[id],
           },
         };
-        return {
-          state: reducedState,
-          table: {
-            changeType: 'unchanged',
-            isMultiRow: !state.cachedFieldList[id].singleRow,
-            layerId: id,
-            columns: layer.columns.map((column) => {
-              const field = state.cachedFieldList[id].fields.find(
-                (f) => f.name === column.fieldName
-              )!;
-              const operation = {
-                dataType: field?.type as DataType,
-                label: field?.name,
-                isBucketed: false,
-              };
-              return {
-                columnId: column.columnId,
-                operation,
-              };
-            }),
-          },
-          keptLayerIds: [id],
-        };
+        return !state.autoMap
+          ? {
+              state: reducedState,
+              table: {
+                changeType: 'unchanged',
+                isMultiRow: !state.cachedFieldList[id].singleRow,
+                layerId: id,
+                columns: layer.columns.map((column) => {
+                  const field = state.cachedFieldList[id].fields.find(
+                    (f) => f.name === column.fieldName
+                  )!;
+                  const operation = {
+                    dataType: field?.meta.type as DataType,
+                    label: field?.name,
+                    isBucketed: false,
+                    noBucketInfo: true,
+                  };
+                  return {
+                    columnId: column.columnId,
+                    operation,
+                  };
+                }),
+              },
+              keptLayerIds: [id],
+            }
+          : {
+              state: {
+                ...reducedState,
+                layers: {
+                  [id]: {
+                    ...state.layers[id],
+                    columns: state.cachedFieldList[id].fields.map((f) => ({
+                      columnId: f.name,
+                      fieldName: f.name,
+                    })),
+                  },
+                },
+              },
+              table: {
+                changeType: 'unchanged',
+                isMultiRow: !state.cachedFieldList[id].singleRow,
+                layerId: id,
+                columns: state.cachedFieldList[id].fields.map((f) => {
+                  return {
+                    columnId: f.name,
+                    operation: {
+                      dataType: f.meta.type,
+                      label: f.name,
+                      isBucketed: false,
+                      noBucketInfo: true,
+                    },
+                  };
+                }),
+              },
+              keptLayerIds: [id],
+            };
       });
     },
   };

@@ -98,7 +98,10 @@ function getSuggestionForColumns(
   seriesType?: SeriesType,
   mainPalette?: PaletteOutput
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
-  const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
+  const noBucketInfo = table.columns.some((c) => c.operation.noBucketInfo);
+  const [buckets, values] = partition(table.columns, (col) =>
+    noBucketInfo ? col.operation.dataType !== 'number' : col.operation.isBucketed
+  );
 
   if (buckets.length === 1 || buckets.length === 2) {
     const [x, splitBy] = getBucketMappings(table, currentState);
@@ -155,7 +158,9 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentLayer =
     currentState && currentState.layers.find(({ layerId }) => layerId === table.layerId);
 
-  const buckets = table.columns.filter((col) => col.operation.isBucketed);
+  const buckets = table.columns.filter((col) =>
+    col.operation.noBucketInfo ? col.operation.dataType !== 'number' : col.operation.isBucketed
+  );
   // reverse the buckets before prioritization to always use the most inner
   // bucket of the highest-prioritized group as x value (don't use nested
   // buckets as split series)

@@ -19,6 +19,7 @@ export interface EsSQLPersistedState {
 
 export type EsSQLPrivateState = EsSQLPersistedState & {
   indexPatternRefs: IndexPatternRef[];
+  autoMap?: boolean;
   cachedFieldList: Record<
     string,
     { fields: Array<{ name: string; type: string }>; singleRow: boolean }

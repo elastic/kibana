@@ -41,7 +41,7 @@ export const createGridColumns = (
   const columnsReverseLookup = table.columns.reduce<
     Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
   >((memo, { id, name, meta }, i) => {
-    memo[id] = { name, index: i, meta };
+    memo[id] = { name: name ?? id, index: i, meta };
     return memo;
   }, {});
 

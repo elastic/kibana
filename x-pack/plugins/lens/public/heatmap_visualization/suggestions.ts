@@ -41,7 +41,9 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
    */
   let score = 0;
 
-  const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
+  const [groups, metrics] = partition(table.columns, (col) =>
+    col.operation.noBucketInfo ? col.operation.dataType !== 'number' : col.operation.isBucketed
+  );
 
   if (groups.length >= 3) {
     return [];
