@@ -8,7 +8,7 @@
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AlertWorkflowStatus } from '../../../common/typings';
+import type { AlertWorkflowStatus } from '../../../../../common/typings';
 
 export interface WorkflowStatusFilterProps {
   status: AlertWorkflowStatus;
