@@ -137,6 +137,7 @@ const executeQueryParams = async ({
             fields: {
               top_hits: {
                 size: 1,
+                sort: [{ '@timestamp': 'desc' }],
               },
             },
           },
