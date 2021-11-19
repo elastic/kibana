@@ -321,8 +321,8 @@ slows requests when working on big documents.
 
 [[doctable-legacy]]`doc_table:legacy`::
 Controls the way the document table looks and works.
-To use the new Document Explorer instead of the classic view, turn off this option.
-The Document Explorer offers better data sorting, resizable columns, and a full screen view.
+To use the new *Document Explorer* instead of the classic view, turn off this option.
+The *Document Explorer* offers better data sorting, resizable columns, and a full screen view.
 
 [float]
 [[kibana-ml-settings]]
