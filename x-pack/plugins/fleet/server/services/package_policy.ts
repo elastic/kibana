@@ -428,7 +428,6 @@ class PackagePolicyService {
           currentVersion: currentVersion || 'unknown',
           newVersion: packagePolicy.package.version,
           status: 'success',
-          dryRun: false,
           eventType: 'package-policy-upgrade' as UpdateEventType,
         };
         sendTelemetryEvents(

@@ -124,11 +124,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('dry run', function () {
         it('returns a valid diff', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
-            .post(`/api/fleet/package_policies/upgrade`)
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: true,
               packageVersion: '0.2.0-add-non-required-test-var',
             })
             .expect(200);
@@ -145,14 +144,12 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('upgrade', function () {
-        it('should respond with an error when "dryRun: false" is provided', async function () {
+        it('should respond with an error', async function () {
           await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: false,
-              packageVersion: '0.2.0-add-non-required-test-var',
             })
             .expect(400);
         });
@@ -234,11 +231,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('dry run', function () {
         it('returns a valid diff', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
-            .post(`/api/fleet/package_policies/upgrade`)
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: true,
             })
             .expect(200);
 
@@ -265,7 +261,6 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: false,
             })
             .expect(200);
 
@@ -345,11 +340,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('dry run', function () {
         it('returns a valid diff', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
-            .post(`/api/fleet/package_policies/upgrade`)
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: true,
             })
             .expect(200);
 
@@ -371,7 +365,6 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: false,
             })
             .expect(200);
 
@@ -455,11 +448,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('dry run', function () {
         it('returns a valid diff', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
-            .post(`/api/fleet/package_policies/upgrade`)
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: true,
             })
             .expect(200);
 
@@ -476,7 +468,6 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: false,
             })
             .expect(200);
 
@@ -556,11 +547,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('dry run', function () {
         it('returns a diff with errors', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
-            .post(`/api/fleet/package_policies/upgrade`)
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: true,
             })
             .expect(200);
 
@@ -575,7 +565,6 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: false,
             })
             .expect(400);
         });
@@ -656,11 +645,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('dry run', function () {
         it('returns a diff with errors', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
-            .post(`/api/fleet/package_policies/upgrade`)
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: true,
             })
             .expect(200);
 
@@ -675,7 +663,6 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: false,
             })
             .expect(400);
         });
@@ -756,11 +743,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('dry run', function () {
         it('returns a valid diff', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
-            .post(`/api/fleet/package_policies/upgrade`)
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: true,
             })
             .expect(200);
 
@@ -775,7 +761,6 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: false,
             })
             .expect(200);
 
@@ -884,11 +869,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('dry run', function () {
         it('returns a valid diff', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
-            .post(`/api/fleet/package_policies/upgrade`)
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: true,
             })
             .expect(200);
 
@@ -903,7 +887,6 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: false,
             })
             .expect(200);
 
@@ -981,11 +964,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('dry run', function () {
         it('returns a valid diff', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
-            .post(`/api/fleet/package_policies/upgrade`)
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: true,
             })
             .expect(200);
 
@@ -1023,7 +1005,6 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: false,
             })
             .expect(200);
 
@@ -1033,24 +1014,22 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('when package policy is not found', function () {
-      it('should return an 200 with errors when "dryRun:true" is provided', async function () {
+      it('should return an 200 with errors when performing a dryrun', async function () {
         await supertest
-          .post(`/api/fleet/package_policies/upgrade`)
+          .post(`/api/fleet/package_policies/upgrade/dryrun`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             packagePolicyIds: ['xxxx', 'yyyy'],
-            dryRun: true,
           })
           .expect(404);
       });
 
-      it('should return a 200 with errors and "success:false" when "dryRun:false" is provided', async function () {
+      it('should return a 200 with errors and "success:false" when trying to upgrade', async function () {
         await supertest
           .post(`/api/fleet/package_policies/upgrade`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             packagePolicyIds: ['xxxx', 'yyyy'],
-            dryRun: false,
           })
           .expect(404);
       });
@@ -1126,11 +1105,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('dry run', function () {
         it('should respond with a bad request', async function () {
           await supertest
-            .post(`/api/fleet/package_policies/upgrade`)
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: true,
               packageVersion: '0.1.0',
             })
             .expect(400);
@@ -1144,8 +1122,6 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
-              dryRun: false,
-              packageVersion: '0.1.0',
             })
             .expect(400);
         });

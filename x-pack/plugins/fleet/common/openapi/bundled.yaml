@@ -8,9 +8,9 @@ info:
     name: Fleet Team
   license:
     name: Elastic License 2.0
-    url: 'https://www.elastic.co/licensing/elastic-license'
+    url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: 'http://localhost:5601/api/fleet'
+  - url: http://localhost:5601/api/fleet
     description: local
 paths:
   /setup:
@@ -99,7 +99,7 @@ paths:
                   $ref: '#/components/schemas/search_result'
       operationId: list-all-packages
     parameters: []
-  '/epm/packages/{pkgkey}':
+  /epm/packages/{pkgkey}:
     get:
       summary: Packages - Info
       tags: []
@@ -361,7 +361,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/bulk_upgrade_agents'
-  '/agents/{agentId}':
+  /agents/{agentId}:
     parameters:
       - schema:
           type: string
@@ -422,7 +422,7 @@ paths:
       operationId: delete-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  '/agents/{agentId}/reassign':
+  /agents/{agentId}/reassign:
     parameters:
       - schema:
           type: string
@@ -453,7 +453,7 @@ paths:
                   type: string
               required:
                 - policy_id
-  '/agents/{agentId}/unenroll':
+  /agents/{agentId}/unenroll:
     parameters:
       - schema:
           type: string
@@ -498,7 +498,7 @@ paths:
                   type: boolean
                 force:
                   type: boolean
-  '/agents/{agentId}/upgrade':
+  /agents/{agentId}/upgrade:
     parameters:
       - schema:
           type: string
@@ -666,7 +666,7 @@ paths:
       security: []
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  '/agent_policies/{agentPolicyId}':
+  /agent_policies/{agentPolicyId}:
     parameters:
       - schema:
           type: string
@@ -714,7 +714,7 @@ paths:
               $ref: '#/components/schemas/new_agent_policy'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  '/agent_policies/{agentPolicyId}/copy':
+  /agent_policies/{agentPolicyId}/copy:
     parameters:
       - schema:
           type: string
@@ -832,7 +832,7 @@ paths:
       operationId: create-enrollment-api-keys
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  '/enrollment-api-keys/{keyId}':
+  /enrollment-api-keys/{keyId}:
     parameters:
       - schema:
           type: string
@@ -973,7 +973,75 @@ paths:
                     - success
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  '/package_policies/{packagePolicyId}':
+  /package_policies/upgrade:
+    post:
+      summary: Package policy - Upgrade
+      operationId: upgrade-package-policy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                packagePolicyIds:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - packagePolicyIds
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    success:
+                      type: boolean
+                  required:
+                    - id
+                    - success
+  /package_policies/upgrade/dryrun:
+    post:
+      summary: Package policy - Upgrade Dry run
+      operationId: upgrade-package-policy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                packagePolicyIds:
+                  type: array
+                  items:
+                    type: string
+                packageVersion:
+                  type: string
+              required:
+                - packagePolicyIds
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hasErrors:
+                    type: boolean
+                  diff:
+                    schema: null
+                    $ref: '#/components/schemas/upgrade_diff'
+                  required:
+                    - hasErrors
+  /package_policies/{packagePolicyId}:
     get:
       summary: Package policy - Info
       tags: []
@@ -1044,7 +1112,51 @@ paths:
                   perPage:
                     type: integer
       operationId: get-outputs
-  '/outputs/{outputId}':
+    post:
+      summary: Outputs
+      description: Create a new output
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/output'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - elasticsearch
+                is_default:
+                  type: boolean
+                is_default_monitoring:
+                  type: boolean
+                hosts:
+                  type: array
+                  items:
+                    type: string
+                ca_sha256:
+                  type: string
+                config_yaml:
+                  type: string
+              required:
+                - name
+                - type
+      operationId: post-outputs
+  /outputs/{outputId}:
     get:
       summary: Output - Info
       tags: []
@@ -1067,6 +1179,23 @@ paths:
         name: outputId
         in: path
         required: true
+    delete:
+      summary: Output - Delete
+      operationId: delete-output
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Output - Update
       operationId: update-output
@@ -1076,14 +1205,27 @@ paths:
             schema:
               type: object
               properties:
-                hosts:
+                name:
                   type: string
+                type:
+                  type: string
+                  enum:
+                    - elasticsearch
+                is_default:
+                  type: boolean
+                is_default_monitoring:
+                  type: boolean
+                hosts:
+                  type: array
+                  items:
+                    type: string
                 ca_sha256:
                   type: string
-                config:
-                  type: object
                 config_yaml:
                   type: string
+              required:
+                - name
+                - type
       responses:
         '200':
           description: OK
@@ -1098,7 +1240,7 @@ paths:
                   - item
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  '/epm/packages/{pkgName}/stats':
+  /epm/packages/{pkgName}/stats:
     get:
       summary: Get stats for a package
       tags: []
@@ -1653,6 +1795,10 @@ components:
         - api_key
         - active
         - created_at
+    upgrade_diff:
+      title: Package policy Upgrade dryrun
+      type: array
+      items: {}
     update_package_policy:
       title: Update package policy
       allOf:
@@ -1668,6 +1814,8 @@ components:
         id:
           type: string
         is_default:
+          type: boolean
+        is_default_monitoring:
           type: boolean
         name:
           type: string
