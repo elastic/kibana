@@ -24,7 +24,7 @@ import { getAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
-import { CustomRequestError } from '../../../utils/custom_request_error';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
 let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
@@ -34,11 +34,7 @@ describe.each([
 ])('utils - %s', (_, isRuleRegistryEnabled) => {
   describe('transformBulkError', () => {
     test('returns transformed object if it is a custom error object', () => {
-      const customError = new CustomRequestError({
-        name: 'Bad Request',
-        message: 'some custom error message',
-        statusCode: 400,
-      });
+      const customError = new CustomHttpRequestError('some custom error message', 400);
       const transformed = transformBulkError('rule-1', customError);
       const expected: BulkError = {
         rule_id: 'rule-1',

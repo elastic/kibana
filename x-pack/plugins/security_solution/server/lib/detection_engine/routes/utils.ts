@@ -18,7 +18,7 @@ import { RulesClient } from '../../../../../alerting/server';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
 import { RuleParams } from '../schemas/rule_schemas';
-import { CustomRequestError } from '../../../utils/custom_request_error';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
 export interface OutputError {
   message: string;
@@ -104,7 +104,7 @@ export const transformBulkError = (
   ruleId: string,
   err: Error & { statusCode?: number }
 ): BulkError => {
-  if (err instanceof CustomRequestError) {
+  if (err instanceof CustomHttpRequestError) {
     return createBulkErrorObject({
       ruleId,
       statusCode: err.statusCode ?? 400,
@@ -254,7 +254,7 @@ export const getFailingRules = async (
         };
       }, {});
   } catch (exc) {
-    if (exc instanceof CustomRequestError) {
+    if (exc instanceof CustomHttpRequestError) {
       throw exc;
     }
     throw new Error(`Failed to get executionStatus with RulesClient: ${(exc as Error).message}`);

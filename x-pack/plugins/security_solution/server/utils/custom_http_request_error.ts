@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export class CustomRequestError extends Error {
-  constructor({ message, name }: { message: string; name: string; readonly statusCode: number }) {
+export class CustomHttpRequestError extends Error {
+  constructor(message: string, public readonly statusCode: number = 500) {
     super(message);
-    this.name = name;
+    // For debugging - capture name of subclasses
+    this.name = this.constructor.name;
     this.message = message;
   }
 }

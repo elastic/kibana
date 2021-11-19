@@ -40,6 +40,7 @@ import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
 import { queryResponseToHostListResult } from './support/query_strategies';
 import { EndpointError, NotFoundError } from '../../errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -59,6 +60,13 @@ const errorHandler = <E extends Error>(
   error: E
 ): IKibanaResponse => {
   logger.error(error);
+
+  if (error instanceof CustomHttpRequestError) {
+    return res.customError({
+      statusCode: error.statusCode,
+      body: error,
+    });
+  }
 
   if (error instanceof NotFoundError) {
     return res.notFound({ body: error });
