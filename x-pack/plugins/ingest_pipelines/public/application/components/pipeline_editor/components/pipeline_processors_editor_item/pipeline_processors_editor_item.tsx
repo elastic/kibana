@@ -139,7 +139,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       const disabled = isEditorNotInIdleMode && !isMovingThisProcessor;
       const moveButton = (
         <EuiButtonIcon
-          color={isMovingThisProcessor ? 'primary' : 'subdued'}
+          color={isMovingThisProcessor ? 'primary' : 'text'}
           iconType={icon}
           data-test-subj={dataTestSubj}
           size="s"

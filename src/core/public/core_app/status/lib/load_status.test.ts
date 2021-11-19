@@ -174,7 +174,7 @@ describe('response processing', () => {
           id: 'available',
           title: 'Green',
           message: 'Elasticsearch is available',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
         original: mockedResponse.status.core.elasticsearch,
       },
@@ -184,7 +184,7 @@ describe('response processing', () => {
           id: 'available',
           title: 'Green',
           message: 'SavedObjects service has completed migrations and is available',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
         original: mockedResponse.status.core.savedObjects,
       },
@@ -197,7 +197,7 @@ describe('response processing', () => {
     expect(data.pluginStatus).toEqual([
       {
         id: 'plugin1',
-        state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'secondary' },
+        state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'success' },
         original: mockedResponse.status.plugins.plugin1,
       },
       {

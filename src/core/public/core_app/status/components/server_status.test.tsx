@@ -14,7 +14,7 @@ import { StatusState } from '../lib';
 const getStatus = (parts: Partial<StatusState> = {}): StatusState => ({
   id: 'available',
   title: 'Green',
-  uiColor: 'secondary',
+  uiColor: 'success',
   message: '',
   ...parts,
 });

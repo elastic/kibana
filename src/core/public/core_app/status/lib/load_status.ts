@@ -132,7 +132,7 @@ export const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevel, StatusUIAttribute
     title: i18n.translate('core.status.greenTitle', {
       defaultMessage: 'Green',
     }),
-    uiColor: 'secondary',
+    uiColor: 'success',
   },
 };
 

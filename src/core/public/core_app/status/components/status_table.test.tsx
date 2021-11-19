@@ -13,7 +13,7 @@ import { StatusTable } from './status_table';
 
 const state = {
   id: 'available' as const,
-  uiColor: 'secondary',
+  uiColor: 'success',
   message: 'Ready',
   title: 'green',
 };

@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 import { EffectedPolicySelect, EffectedPolicySelectProps } from './effected_policy_select';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
 import React from 'react';
 import { forceHTMLElementOffsetWidth } from './test_utils';
 import { fireEvent, act } from '@testing-library/react';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
 
 describe('when using EffectedPolicySelect component', () => {
   const generator = new EndpointDocGenerator('effected-policy-select');
