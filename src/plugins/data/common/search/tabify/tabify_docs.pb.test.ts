@@ -7,19 +7,38 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import fc from 'fast-check';
-import { tabifyDocs } from './tabify_docs';
+import { tabifyDocs, TabifyDocsOptions, VALID_META_FIELD_NAMES } from './tabify_docs';
+import { DataViewSpec, DataView } from 'src/plugins/data_views/common';
+
+const option = <T>(arb: fc.Arbitrary<T>): fc.Arbitrary<T | undefined> =>
+  fc.option(arb, { nil: undefined });
+
+function arbitraryDataViewInputs() {
+  return fc.record({
+    spec: fc.record<DataViewSpec>({
+      allowNoIndex: fc.boolean(),
+    }),
+    shortDotsEnable: option(fc.boolean()),
+    metaFields: option(fc.array(fc.constantFrom(...VALID_META_FIELD_NAMES))),
+  });
+}
 
 function arbitraryHits(): fc.Arbitrary<estypes.SearchResponse['hits']['hits']> {
   return fc.array(
     fc.record<estypes.SearchHit>({
       _id: fc.string(),
       _index: fc.string(),
-      fields: fc.object(),
+      fields: fc.object({
+        key: fc.string({ minLength: 1, maxLength: 10 }),
+        maxDepth: 2,
+        maxKeys: 25,
+      }),
       _type: fc.string(),
       _seq_no: fc.integer(),
     }),
-    { minLength: 1000 }
+    { maxLength: 500 }
   );
 }
 
@@ -49,15 +68,43 @@ function arbitraryEsResponse(
   });
 }
 
+function arbitraryTabifyDocsOptions(): fc.Arbitrary<TabifyDocsOptions> {
+  return fc.record({
+    shallow: option(fc.boolean()),
+    includeIgnoredValues: option(fc.boolean()),
+    source: option(fc.boolean()),
+  });
+}
+
 describe('Tabify docs', () => {
   it('does not throw for expected inputs', () => {
     fc.assert(
       fc.property(
         arbitraryHits().chain((hits) => arbitraryEsResponse(hits)),
-        (esResponse) => {
-          expect(() => tabifyDocs(esResponse)).not.toThrow();
+        arbitraryDataViewInputs(),
+        arbitraryTabifyDocsOptions(),
+        (esResponse, dataViewInputs, options) => {
+          const indexPattern = new DataView({ ...dataViewInputs, fieldFormats: fieldFormatsMock });
+          expect(() => tabifyDocs(esResponse, indexPattern, options)).not.toThrow();
         }
       )
+    );
+  });
+
+  it('returns the same number of rows as hits', () => {
+    fc.assert(
+      fc.property(
+        arbitraryHits().chain((hits) => arbitraryEsResponse(hits)),
+        arbitraryDataViewInputs(),
+        arbitraryTabifyDocsOptions(),
+        (esResponse, dataViewInputs, options) => {
+          const indexPattern = new DataView({ ...dataViewInputs, fieldFormats: fieldFormatsMock });
+          expect(tabifyDocs(esResponse, indexPattern, options).rows.length).toBe(
+            esResponse.hits.hits.length
+          );
+        }
+      ),
+      { numRuns: 10 }
     );
   });
 });

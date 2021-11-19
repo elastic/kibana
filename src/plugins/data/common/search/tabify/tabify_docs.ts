@@ -26,7 +26,9 @@ type ValidMetaFieldNames = keyof Pick<
   | '_type'
   | '_version'
 >;
-const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
+
+/** @internal */
+export const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
   '_id',
   '_ignored',
   '_index',
