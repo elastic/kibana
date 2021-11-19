@@ -29,6 +29,7 @@ exports.help = (defaults = {}) => {
       -E                Additional key=value settings to pass to Elasticsearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on Elasticsearch
+      --use-cached      Skips cache verification and use cached ES snapshot.
 
     Example:
 
@@ -51,14 +52,16 @@ exports.run = async (defaults = {}) => {
       installPath: 'install-path',
       dataArchive: 'data-archive',
       esArgs: 'E',
+      useCached: 'use-cached'
     },
 
     string: ['version'],
 
-    boolean: ['download-only'],
+    boolean: ['download-only', 'use-cached'],
 
     default: defaults,
   });
+
 
   const cluster = new Cluster({ ssl: options.ssl });
   if (options['download-only']) {
