@@ -275,6 +275,7 @@ export const useTimelineEvents = ({
         filterQuery: createFilter(filterQuery),
         querySize: limit,
         sort,
+        runtimeMappings,
         timerange: {
           interval: '12h',
           from: startDate,
