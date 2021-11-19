@@ -1697,10 +1697,10 @@ export enum PluginType {
     standard = "standard"
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export const pollEsNodesVersion: ({ internalClient, log, kibanaVersion, ignoreVersionMismatch, esVersionCheckInterval: healthCheckInterval, }: PollEsNodesVersionOptions) => Observable<NodesVersionCompatibility>;
 
-// @internal (undocumented)
+// @public (undocumented)
 export interface PollEsNodesVersionOptions {
     // (undocumented)
     esVersionCheckInterval: number;
