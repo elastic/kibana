@@ -25,24 +25,23 @@ jest.mock('../common/lib/kibana');
 
 describe('useGetCases', () => {
   const abortCtrl = new AbortController();
+
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
+    const { result } = renderHook<string, UseGetCases>(() => useGetCases(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
 
-      await waitForNextUpdate();
+    await act(async () => {
       expect(result.current).toEqual({
         data: initialData,
         dispatchUpdateCaseProperty: result.current.dispatchUpdateCaseProperty,
         filterOptions: DEFAULT_FILTER_OPTIONS,
         isError: false,
-        loading: [],
+        loading: ['cases'],
         queryParams: DEFAULT_QUERY_PARAMS,
         refetchCases: result.current.refetchCases,
         selectedCases: [],
@@ -60,7 +59,6 @@ describe('useGetCases', () => {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
-      await waitForNextUpdate();
       expect(spyOnGetCases).toBeCalledWith({
         filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
         queryParams: DEFAULT_QUERY_PARAMS,
@@ -74,7 +72,6 @@ describe('useGetCases', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
         data: allCases,
@@ -106,7 +103,6 @@ describe('useGetCases', () => {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
-      await waitForNextUpdate();
       result.current.dispatchUpdateCaseProperty(updateCase);
       expect(result.current.loading).toEqual(['caseUpdate']);
       expect(spyOnPatchCase).toBeCalledWith(
@@ -125,7 +121,6 @@ describe('useGetCases', () => {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
-      await waitForNextUpdate();
       result.current.refetchCases();
       expect(spyOnGetCases).toHaveBeenCalledTimes(2);
     });
@@ -136,7 +131,6 @@ describe('useGetCases', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.refetchCases();
 
@@ -154,7 +148,6 @@ describe('useGetCases', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
@@ -187,7 +180,6 @@ describe('useGetCases', () => {
       });
 
       await waitForNextUpdate();
-      await waitForNextUpdate();
       result.current.setFilters(newFilters);
       await waitForNextUpdate();
 
@@ -215,7 +207,6 @@ describe('useGetCases', () => {
       });
 
       await waitForNextUpdate();
-      await waitForNextUpdate();
       result.current.setQueryParams(newQueryParams);
       await waitForNextUpdate();
 
@@ -236,7 +227,6 @@ describe('useGetCases', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.setSelectedCases(selectedCases);
       expect(result.current.selectedCases).toEqual(selectedCases);
