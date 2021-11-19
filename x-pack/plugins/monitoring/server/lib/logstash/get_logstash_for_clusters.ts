@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { LOGSTASH } from '../../../common/constants';
 import { checkParam } from '../error_missing_required';
-import { createQuery } from '../create_query';
+import { createNewQuery } from '../create_query';
 import { LogstashClusterMetric } from '../metrics';
 
 const { MEMORY, PERSISTED } = LOGSTASH.QUEUE_TYPES;
@@ -55,7 +55,8 @@ export function getLogstashForClusters(
         size: 0,
         ignore_unavailable: true,
         body: {
-          query: createQuery({
+          query: createNewQuery({
+            productType: 'logstash',
             types: ['stats', 'logstash_stats'],
             start,
             end,

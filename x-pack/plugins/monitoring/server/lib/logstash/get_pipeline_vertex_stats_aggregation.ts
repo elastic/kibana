@@ -6,7 +6,7 @@
  */
 
 import { LegacyRequest, PipelineVersion } from '../../types';
-import { createQuery } from '../create_query';
+import { createNewQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 
 function scalarCounterAggregation(
@@ -226,7 +226,8 @@ export function getPipelineVertexStatsAggregation({
   const start = version.firstSeen;
   const end = version.lastSeen;
 
-  const query = createQuery({
+  const query = createNewQuery({
+    productType: 'logstash',
     types: ['stats', 'logstash_stats'],
     start,
     end,
