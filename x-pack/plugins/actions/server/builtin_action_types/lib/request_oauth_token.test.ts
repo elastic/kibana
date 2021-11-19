@@ -50,7 +50,7 @@ describe('requestOAuthToken', () => {
       ...res,
       client_id: clientId,
       client_secret: clientSecret,
-      some_additional_param: someAdditionalParam
+      some_additional_param: someAdditionalParam,
     });
 
     await requestOAuthToken<TestOAuthRequestParams>(
@@ -134,7 +134,7 @@ describe('requestOAuthToken', () => {
       ...res,
       client_id: clientId,
       client_secret: clientSecret,
-      some_additional_param: someAdditionalParam
+      some_additional_param: someAdditionalParam,
     });
 
     await expect(
