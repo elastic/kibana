@@ -8,6 +8,7 @@
 import {
   ElasticsearchClient,
   IScopedClusterClient,
+  KibanaRequest,
   SavedObjectsClientContract,
 } from '../../../../../../../src/core/server';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
@@ -78,6 +79,7 @@ export async function getAgentPolicySummary(
   endpointAppContext: EndpointAppContext,
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
+  request: KibanaRequest,
   packageName: string,
   policyId?: string,
   pageSize: number = 1000
@@ -89,6 +91,7 @@ export async function getAgentPolicySummary(
         endpointAppContext,
         soClient,
         esClient,
+        request,
         `${agentQuery} AND policy_id:${policyId}`,
         pageSize
       )
@@ -96,7 +99,7 @@ export async function getAgentPolicySummary(
   }
 
   return transformAgentVersionMap(
-    await agentVersionsMap(endpointAppContext, soClient, esClient, agentQuery, pageSize)
+    await agentVersionsMap(endpointAppContext, soClient, esClient, request, agentQuery, pageSize)
   );
 }
 
@@ -104,6 +107,7 @@ export async function agentVersionsMap(
   endpointAppContext: EndpointAppContext,
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
+  request: KibanaRequest,
   kqlQuery: string,
   pageSize: number = 1000
 ): Promise<Map<string, number>> {
@@ -123,7 +127,8 @@ export async function agentVersionsMap(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const queryResult = await endpointAppContext.service
       .getAgentService()!
-      .listAgents(esClient, searchOptions(page++));
+      .asScoped(request)
+      .listAgents(searchOptions(page++));
     queryResult.agents.forEach((agent: Agent) => {
       const agentVersion = agent.local_metadata?.elastic?.agent?.version;
       if (result.has(agentVersion)) {

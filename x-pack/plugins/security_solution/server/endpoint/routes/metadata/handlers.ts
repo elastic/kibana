@@ -145,6 +145,7 @@ export const getMetadataListRequestHandler = function (
       const pagingProperties = await getPagingProperties(request, endpointAppContext);
       const { data, total } = await endpointMetadataService.getHostMetadataList(
         context.core.elasticsearch.client.asCurrentUser,
+        request,
         {
           page: pagingProperties.pageIndex,
           pageSize: pagingProperties.pageSize,
@@ -227,6 +228,7 @@ export function getMetadataListRequestHandlerV2(
     try {
       const { data, total } = await endpointMetadataService.getHostMetadataList(
         context.core.elasticsearch.client.asCurrentUser,
+        request,
         request.query
       );
 
@@ -260,6 +262,7 @@ export const getMetadataRequestHandler = function (
       return response.ok({
         body: await endpointMetadataService.getEnrichedHostMetadata(
           context.core.elasticsearch.client.asCurrentUser,
+          request,
           request.params.id
         ),
       });
@@ -351,13 +354,9 @@ async function findAgent(
       throw new Error('esClient not found');
     }
 
-    const esClient = (metadataRequestContext?.esClient ??
-      metadataRequestContext.requestHandlerContext?.core.elasticsearch
-        .client) as IScopedClusterClient;
-
-    return await metadataRequestContext.endpointAppContextService
-      ?.getAgentService()
-      ?.getAgent(esClient.asCurrentUser, hostMetadata.elastic.agent.id);
+    return await metadataRequestContext.requestHandlerContext?.fleet?.agentClient.asCurrentUser.getAgent(
+      hostMetadata.elastic.agent.id
+    );
   } catch (e) {
     if (e instanceof AgentNotFoundError) {
       metadataRequestContext.logger.warn(
@@ -425,10 +424,6 @@ export async function enrichHostMetadata(
     throw e;
   }
 
-  const esClient = (metadataRequestContext?.esClient ??
-    metadataRequestContext.requestHandlerContext?.core.elasticsearch
-      .client) as IScopedClusterClient;
-
   const esSavedObjectClient =
     metadataRequestContext?.savedObjectsClient ??
     (metadataRequestContext.requestHandlerContext?.core.savedObjects
@@ -444,9 +439,10 @@ export async function enrichHostMetadata(
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 
-    const status = await metadataRequestContext.endpointAppContextService
-      ?.getAgentService()
-      ?.getAgentStatusById(esClient.asCurrentUser, elasticAgentId);
+    const status =
+      await metadataRequestContext.requestHandlerContext?.fleet?.agentClient.asCurrentUser.getAgentStatusById(
+        elasticAgentId
+      );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     hostStatus = fleetAgentStatusToEndpointHostStatus(status!);
   } catch (e) {
@@ -460,9 +456,10 @@ export async function enrichHostMetadata(
 
   let policyInfo: HostInfo['policy_info'];
   try {
-    const agent = await metadataRequestContext.endpointAppContextService
-      ?.getAgentService()
-      ?.getAgent(esClient.asCurrentUser, elasticAgentId);
+    const agent =
+      await metadataRequestContext.requestHandlerContext?.fleet?.agentClient.asCurrentUser.getAgent(
+        elasticAgentId
+      );
     const agentPolicy = await metadataRequestContext.endpointAppContextService
       .getAgentPolicyService()
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -508,8 +505,7 @@ async function legacyListMetadataQuery(
   endpointPolicies: PackagePolicy[],
   queryOptions: TypeOf<typeof GetMetadataListRequestSchemaV2.query>
 ): Promise<HostResultList> {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const agentService = endpointAppContext.service.getAgentService()!;
+  const agentService = context.fleet?.agentClient.asCurrentUser;
   if (agentService === undefined) {
     throw new Error('agentService not available');
   }

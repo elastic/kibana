@@ -21,7 +21,7 @@ function checkSecurityEnabled() {
   return appContextService.hasSecurity() && appContextService.getSecurityLicense().isEnabled();
 }
 
-function checkSuperuser(req: KibanaRequest) {
+export function checkSuperuser(req: KibanaRequest) {
   if (!checkSecurityEnabled()) {
     return false;
   }

@@ -43,7 +43,7 @@ import {
   legacyMetadataSearchResponseMock,
   unitedMetadataSearchResponseMock,
 } from './support/test_support';
-import { PackageService } from '../../../../../fleet/server/services';
+import { AgentClient, PackageService } from '../../../../../fleet/server/services';
 import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
@@ -60,6 +60,7 @@ import {
 } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
 import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
+import { createMockAgentClient } from '../../../../../fleet/server/mocks';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };
@@ -88,6 +89,7 @@ describe('test endpoint routes', () => {
   let mockAgentPolicyService: Required<
     ReturnType<typeof createMockEndpointAppContextServiceStartContract>
   >['agentPolicyService'];
+  let mockAgentClient: jest.Mocked<AgentClient>;
   let endpointAppContextService: EndpointAppContextService;
   let startContract: EndpointAppContextServiceStartContract;
   const noUnenrolledAgent = {
@@ -151,6 +153,8 @@ describe('test endpoint routes', () => {
         endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
         endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
         mockAgentService = startContract.agentService!;
+        mockAgentClient = createMockAgentClient();
+        mockAgentService.asScoped = () => mockAgentClient;
         mockAgentPolicyService = startContract.agentPolicyService!;
 
         registerEndpointRoutes(routerMock, {
@@ -176,8 +180,8 @@ describe('test endpoint routes', () => {
         [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
           path.startsWith(HOST_METADATA_LIST_ROUTE)
         )!;
-        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-        mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+        mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+        mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
         await routeHandler(
           createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
           mockRequest,
@@ -220,8 +224,8 @@ describe('test endpoint routes', () => {
           },
         });
 
-        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-        mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+        mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+        mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
         mockAgentPolicyService.getByIds = jest.fn().mockResolvedValueOnce([]);
         const metadata = new EndpointDocGenerator().generateHostMetadata();
         const esSearchMock = mockScopedClient.asCurrentUser.search as jest.Mock;
@@ -415,6 +419,8 @@ describe('test endpoint routes', () => {
         endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
         endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
         mockAgentService = startContract.agentService!;
+        mockAgentClient = createMockAgentClient();
+        mockAgentService.asScoped = () => mockAgentClient;
 
         registerEndpointRoutes(routerMock, {
           logFactory: loggingSystemMock.create(),
@@ -439,8 +445,8 @@ describe('test endpoint routes', () => {
         [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
           path.startsWith(HOST_METADATA_LIST_ROUTE)
         )!;
-        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-        mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+        mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+        mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
         await routeHandler(
           createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
           mockRequest,
@@ -474,8 +480,8 @@ describe('test endpoint routes', () => {
           },
         });
 
-        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-        mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+        mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+        mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
         (mockScopedClient.asCurrentUser.search as jest.Mock)
           .mockImplementationOnce(() => {
             throw new IndexNotFoundException();
@@ -536,8 +542,8 @@ describe('test endpoint routes', () => {
           },
         });
 
-        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-        mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+        mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+        mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
         (mockScopedClient.asCurrentUser.search as jest.Mock)
           .mockImplementationOnce(() => {
             throw new IndexNotFoundException();
@@ -653,6 +659,8 @@ describe('test endpoint routes', () => {
         endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
         endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
         mockAgentService = startContract.agentService!;
+        mockAgentClient = createMockAgentClient();
+        mockAgentService.asScoped = () => mockAgentClient;
         mockAgentPolicyService = startContract.agentPolicyService!;
 
         registerEndpointRoutes(routerMock, {
@@ -683,8 +691,8 @@ describe('test endpoint routes', () => {
         [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
           path.startsWith(HOST_METADATA_LIST_ROUTE)
         )!;
-        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-        mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+        mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+        mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
         await routeHandler(
           createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
           mockRequest,
@@ -718,8 +726,8 @@ describe('test endpoint routes', () => {
           },
         });
 
-        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-        mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+        mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+        mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
         mockAgentPolicyService.getByIds = jest.fn().mockResolvedValueOnce([]);
         const metadata = new EndpointDocGenerator().generateHostMetadata();
         const esSearchMock = mockScopedClient.asCurrentUser.search as jest.Mock;
@@ -913,6 +921,8 @@ describe('test endpoint routes', () => {
         endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
         endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
         mockAgentService = startContract.agentService!;
+        mockAgentClient = createMockAgentClient();
+        mockAgentService.asScoped = () => mockAgentClient;
 
         registerEndpointRoutes(routerMock, {
           logFactory: loggingSystemMock.create(),
@@ -942,8 +952,8 @@ describe('test endpoint routes', () => {
         [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
           path.startsWith(HOST_METADATA_LIST_ROUTE)
         )!;
-        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-        mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+        mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+        mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
         await routeHandler(
           createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
           mockRequest,
@@ -971,8 +981,8 @@ describe('test endpoint routes', () => {
           },
         });
 
-        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-        mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+        mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+        mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
         (mockScopedClient.asCurrentUser.search as jest.Mock)
           .mockImplementationOnce(() => {
             throw new IndexNotFoundException();
@@ -1017,7 +1027,7 @@ describe('test endpoint routes', () => {
         expect(endpointResultList.pageSize).toEqual(10);
       });
 
-      it('test find the latest of all endpoints with paging and filters properties', async () => {
+      it.only('test find the latest of all endpoints with paging and filters properties', async () => {
         const mockRequest = httpServerMock.createKibanaRequest({
           query: {
             page: 1,
@@ -1026,8 +1036,8 @@ describe('test endpoint routes', () => {
           },
         });
 
-        mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-        mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
+        mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+        mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
         (mockScopedClient.asCurrentUser.search as jest.Mock)
           .mockImplementationOnce(() => {
             throw new IndexNotFoundException();
@@ -1142,6 +1152,8 @@ describe('test endpoint routes', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
       mockAgentService = startContract.agentService!;
+      mockAgentClient = createMockAgentClient();
+      mockAgentService.asScoped = () => mockAgentClient;
 
       registerEndpointRoutes(routerMock, {
         logFactory: loggingSystemMock.create(),
@@ -1160,8 +1172,8 @@ describe('test endpoint routes', () => {
         Promise.resolve({ body: legacyMetadataSearchResponseMock() })
       );
 
-      mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
-      mockAgentService.getAgent = jest.fn().mockReturnValue({
+      mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+      mockAgentClient.getAgent.mockResolvedValue({
         active: true,
       } as unknown as Agent);
 
@@ -1192,9 +1204,7 @@ describe('test endpoint routes', () => {
         params: { id: response.hits.hits[0]._id },
       });
 
-      mockAgentService.getAgent = jest
-        .fn()
-        .mockReturnValue(agentGenerator.generate({ status: 'online' }));
+      mockAgentClient.getAgent.mockResolvedValue(agentGenerator.generate({ status: 'online' }));
       (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({ body: response })
       );
@@ -1229,7 +1239,7 @@ describe('test endpoint routes', () => {
         params: { id: response.hits.hits[0]._id },
       });
 
-      mockAgentService.getAgent = jest.fn().mockRejectedValue(new AgentNotFoundError('not found'));
+      mockAgentClient.getAgent.mockRejectedValue(new AgentNotFoundError('not found'));
 
       (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({ body: response })
@@ -1264,7 +1274,7 @@ describe('test endpoint routes', () => {
         params: { id: response.hits.hits[0]._id },
       });
 
-      mockAgentService.getAgent = jest.fn().mockReturnValue(
+      mockAgentClient.getAgent.mockResolvedValue(
         agentGenerator.generate({
           status: 'error',
         })
@@ -1304,7 +1314,7 @@ describe('test endpoint routes', () => {
       (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({ body: response })
       );
-      mockAgentService.getAgent = jest.fn().mockReturnValue({
+      mockAgentClient.getAgent.mockResolvedValue({
         active: false,
       } as unknown as Agent);
 

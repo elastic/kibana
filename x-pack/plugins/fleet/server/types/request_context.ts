@@ -13,10 +13,15 @@ import type {
   SavedObjectsClientContract,
   IRouter,
 } from '../../../../../src/core/server';
+import type { AgentClient } from '../services';
 
 /** @internal */
 export interface FleetRequestHandlerContext extends RequestHandlerContext {
   fleet: {
+    agentClient: {
+      asCurrentUser: AgentClient;
+      asInternalUser: AgentClient;
+    };
     epm: {
       /**
        * Saved Objects client configured to use kibana_system privileges instead of end-user privileges. Should only be

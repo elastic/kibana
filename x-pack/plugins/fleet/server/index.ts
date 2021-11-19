@@ -19,6 +19,7 @@ import { FleetPlugin } from './plugin';
 
 export type {
   AgentService,
+  AgentClient,
   ESIndexPatternService,
   PackageService,
   AgentPolicyServiceInterface,
@@ -34,6 +35,7 @@ export type {
   PutPackagePolicyUpdateCallback,
   PostPackagePolicyDeleteCallback,
   PostPackagePolicyCreateCallback,
+  FleetRequestHandlerContext,
 } from './types';
 export { AgentNotFoundError } from './errors';
 

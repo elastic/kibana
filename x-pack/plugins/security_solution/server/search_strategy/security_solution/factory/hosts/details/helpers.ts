@@ -9,6 +9,7 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import {
   IScopedClusterClient,
+  KibanaRequest,
   SavedObjectsClientContract,
 } from '../../../../../../../../../src/core/server';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
@@ -180,13 +181,14 @@ export const getHostEndpoint = async (
     esClient: IScopedClusterClient;
     savedObjectsClient: SavedObjectsClientContract;
     endpointContext: EndpointAppContext;
+    request: KibanaRequest;
   }
 ): Promise<EndpointFields | null> => {
   if (!id) {
     return null;
   }
 
-  const { esClient, endpointContext } = deps;
+  const { esClient, endpointContext, request } = deps;
   const logger = endpointContext.logFactory.get('metadata');
 
   try {
@@ -201,7 +203,7 @@ export const getHostEndpoint = async (
       // Using `internalUser` ES client below due to the fact that Fleet data has been moved to
       // system indices (`.fleet*`). Because this is a readonly action, this should be ok to do
       // here until proper RBOC controls are implemented
-      .getEnrichedHostMetadata(esClient.asInternalUser, id);
+      .getEnrichedHostMetadata(esClient.asInternalUser, request, id);
 
     const fleetAgentId = endpointData.metadata.elastic.agent.id;
 

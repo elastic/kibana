@@ -25,6 +25,7 @@ import { EndpointError } from '../../errors';
 import { HostMetadata } from '../../../../common/endpoint/types';
 import { Agent } from '../../../../../fleet/common';
 import { AgentPolicyServiceInterface } from '../../../../../fleet/server/services';
+import { KibanaRequest } from '../../../../../../../src/core/server';
 
 describe('EndpointMetadataService', () => {
   let testMockedContext: EndpointMetadataServiceTestContextMock;
@@ -117,12 +118,16 @@ describe('EndpointMetadataService', () => {
     it('should throw wrapped error if es error', async () => {
       const esMockResponse = elasticsearchServiceMock.createErrorTransportRequestPromise({});
       esClient.search.mockResolvedValue(esMockResponse);
-      const metadataListResponse = metadataService.getHostMetadataList(esClient, {
-        page: 0,
-        pageSize: 10,
-        kuery: '',
-        hostStatuses: [],
-      });
+      const metadataListResponse = metadataService.getHostMetadataList(
+        esClient,
+        {} as KibanaRequest,
+        {
+          page: 0,
+          pageSize: 10,
+          kuery: '',
+          hostStatuses: [],
+        }
+      );
       await expect(metadataListResponse).rejects.toThrow(EndpointError);
     });
 
@@ -176,6 +181,7 @@ describe('EndpointMetadataService', () => {
       const queryOptions = { page: 1, pageSize: 10, kuery: '', hostStatuses: [] };
       const metadataListResponse = await metadataService.getHostMetadataList(
         esClient,
+        {} as KibanaRequest,
         queryOptions
       );
       const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, packagePolicyIds);

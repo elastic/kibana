@@ -28,11 +28,10 @@ export const getAgentStatusForAgentPolicyRoute = (
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
-
       const results = await osqueryContext.service
         .getAgentService()
-        ?.getAgentStatusForAgentPolicy(esClient, request.query.policyId, request.query.kuery);
+        ?.asScoped(request)
+        .getAgentStatusForAgentPolicy(request.query.policyId, request.query.kuery);
 
       if (!results) {
         return response.ok({ body: {} });

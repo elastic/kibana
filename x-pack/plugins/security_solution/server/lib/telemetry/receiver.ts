@@ -13,7 +13,7 @@ import {
 } from 'src/core/server';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
-import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
+import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
@@ -32,7 +32,7 @@ import {
 
 export class TelemetryReceiver {
   private readonly logger: Logger;
-  private agentService?: AgentService;
+  private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;
   private esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
@@ -52,7 +52,7 @@ export class TelemetryReceiver {
     exceptionListClient?: ExceptionListClient
   ) {
     this.kibanaIndex = kibanaIndex;
-    this.agentService = endpointContextService?.getAgentService();
+    this.agentClient = endpointContextService?.getAgentService()?.asInternalUser;
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
@@ -70,7 +70,7 @@ export class TelemetryReceiver {
       throw Error('elasticsearch client is unavailable: cannot retrieve fleet policy responses');
     }
 
-    return this.agentService?.listAgents(this.esClient, {
+    return this.agentClient?.listAgents({
       perPage: this.max_records,
       showInactive: true,
       sortField: 'enrolled_at',

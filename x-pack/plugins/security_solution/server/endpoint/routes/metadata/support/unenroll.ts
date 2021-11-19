@@ -6,11 +6,11 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { AgentService } from '../../../../../../fleet/server';
+import { AgentClient } from '../../../../../../fleet/server';
 import { Agent } from '../../../../../../fleet/common/types/models';
 
 export async function findAllUnenrolledAgentIds(
-  agentService: AgentService,
+  agentClient: AgentClient,
   esClient: ElasticsearchClient,
   endpointPolicyIds: string[],
   pageSize: number = 1000
@@ -41,7 +41,7 @@ export async function findAllUnenrolledAgentIds(
   let hasMore = true;
 
   while (hasMore) {
-    const unenrolledAgents = await agentService.listAgents(esClient, searchOptions(page++));
+    const unenrolledAgents = await agentClient.listAgents(searchOptions(page++));
     result.push(...unenrolledAgents.agents.map((agent: Agent) => agent.id));
     hasMore = unenrolledAgents.agents.length > 0;
   }
