@@ -72,6 +72,8 @@ import {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
+  CtiThreatIntelSourceRequestOptions,
+  CtiThreatIntelSourceStrategyResponse,
 } from './cti';
 import {
   HostRulesRequestOptions,
@@ -85,6 +87,7 @@ import {
   UserRulesStrategyResponse,
 } from './ueba';
 
+export * from './cti';
 export * from './hosts';
 export * from './matrix_histogram';
 export * from './network';
@@ -178,6 +181,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? MatrixHistogramStrategyResponse
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentStrategyResponse
+  : T extends CtiQueries.threatIntelSource
+  ? CtiThreatIntelSourceStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -238,6 +243,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentRequestOptions
+  : T extends CtiQueries.threatIntelSource
+  ? CtiThreatIntelSourceRequestOptions
   : never;
 
 export interface DocValueFieldsInput {

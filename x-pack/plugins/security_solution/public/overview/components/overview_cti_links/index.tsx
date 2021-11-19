@@ -19,7 +19,7 @@ export type ThreatIntelLinkPanelProps = Pick<
   hasSomeThreatIntelData: boolean | undefined;
   isSomeIntegrationsInstalled: boolean | undefined;
   isSomeIntegrationsDisabled: boolean | undefined;
-  installedIntegrations: Integration[];
+  integrations: Integration[];
 };
 
 const ThreatIntelLinkPanelComponent: React.FC<ThreatIntelLinkPanelProps> = (props) => {

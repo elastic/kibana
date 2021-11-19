@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CTI_DATASET_KEY_MAP } from '../../../../common/cti/constants';
 import { LinkPanelListItem } from '../../components/link_panel';
 import { EventCounts } from '../../components/link_panel/helpers';

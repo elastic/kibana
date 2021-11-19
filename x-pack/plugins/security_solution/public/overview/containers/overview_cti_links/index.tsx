@@ -7,40 +7,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useKibana } from '../../../common/lib/kibana';
-import { TAG_REQUEST_BODY, getCtiListItems, getEmptyList } from './helpers';
-import { LinkPanelListItem } from '../../components/link_panel';
+import { TAG_REQUEST_BODY } from './helpers';
 
 interface Integration {
   id: string;
   dashboardIds: string[];
 }
 
-export const useCtiDashboardLinks = (
-  eventCountsByDataset: { [key: string]: number },
-  to: string,
-  from: string,
-  installedIntegrations: Integration[] = []
-) => {
-  const createDashboardUrl = useKibana().services.dashboard?.dashboardUrlGenerator?.createUrl;
+export const useCtiDashboardLinks = ({
+  to,
+  from,
+  integrations = [],
+}: { to?: string; from?: string; integrations?: [] } = {}) => {
+  const [installedDashboardIds, setInstalledDashboardIds] = useState<string[]>([]);
+  const dashboardLocator = useKibana().services.dashboard?.locator;
   const savedObjectsClient = useKibana().services.savedObjects.client;
-
-  const [listItems, setListItems] = useState<LinkPanelListItem[]>(
-    getEmptyList(installedIntegrations)
-  );
-
-  const [isPluginDisabled, setIsDashboardPluginDisabled] = useState(false);
-  const handleDisabledPlugin = useCallback(() => {
-    if (!isPluginDisabled) {
-      setIsDashboardPluginDisabled(true);
-    }
-    setListItems(getCtiListItems(eventCountsByDataset, installedIntegrations));
-  }, [
-    setIsDashboardPluginDisabled,
-    setListItems,
-    eventCountsByDataset,
-    installedIntegrations,
-    isPluginDisabled,
-  ]);
 
   const handleTagsReceived = useCallback(
     (TagsSO?) => {
@@ -56,9 +37,7 @@ export const useCtiDashboardLinks = (
   );
 
   useEffect(() => {
-    if (!createDashboardUrl || !savedObjectsClient) {
-      handleDisabledPlugin();
-    } else {
+    if (savedObjectsClient) {
       savedObjectsClient
         .find<SavedObjectAttributes>(TAG_REQUEST_BODY)
         .then(handleTagsReceived)
@@ -70,63 +49,39 @@ export const useCtiDashboardLinks = (
             }>;
           }) => {
             if (DashboardsSO?.savedObjects?.length) {
-              const dashboardUrls = await Promise.all(
-                DashboardsSO.savedObjects.map((SO) =>
-                  createDashboardUrl({
-                    dashboardId: SO.id,
-                    timeRange: {
-                      to,
-                      from,
-                    },
-                  }).then((url) => ({
-                    url,
-                    id: SO.id,
-                  }))
-                )
+              setInstalledDashboardIds(
+                DashboardsSO.savedObjects.map((SO) => SO.id ?? '').filter(Boolean)
               );
-
-              const integrationsWithPath = installedIntegrations.map((integration) => {
-                const integrationDashboards = integration.dashboardIds?.map((dashboardId) => {
-                  const dashboardFromSavedObjects = DashboardsSO.savedObjects?.find(
-                    (SO) => dashboardId === SO.id
-                  );
-                  return dashboardFromSavedObjects;
-                });
-                let overviewDashboard = integrationDashboards.find((dashboard) =>
-                  (dashboard?.attributes?.title ?? '').toString().includes('Overview')
-                );
-                if (!overviewDashboard) {
-                  overviewDashboard = integrationDashboards[0];
-                }
-                const overviewDashboardUrl = dashboardUrls.find(
-                  (dashboardUrl) => dashboardUrl?.id === overviewDashboard?.id
-                )?.url;
-                return {
-                  ...integration,
-                  path: overviewDashboardUrl,
-                };
-              });
-              setListItems(getCtiListItems(eventCountsByDataset, integrationsWithPath));
-            } else {
-              handleDisabledPlugin();
             }
           }
         );
     }
-  }, [
-    createDashboardUrl,
-    eventCountsByDataset,
-    from,
-    handleDisabledPlugin,
-    handleTagsReceived,
-    isPluginDisabled,
-    savedObjectsClient,
-    to,
-    installedIntegrations,
-  ]);
+  }, [handleTagsReceived, savedObjectsClient]);
+
+  const listItems = integrations.map((integration) => {
+    const listItem = {
+      title: integration.name,
+      count: integration.count,
+    };
+
+    if (
+      integration.dashboardId &&
+      installedDashboardIds.includes(integration.dashboardId) &&
+      dashboardLocator
+    ) {
+      listItem.path = dashboardLocator.getRedirectUrl({
+        dashboardId: newIntegration.dashboardId,
+        timeRange: {
+          to,
+          from,
+        },
+      });
+    }
+
+    return listItem;
+  });
 
   return {
-    isPluginDisabled,
     listItems,
   };
 };
