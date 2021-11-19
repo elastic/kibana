@@ -390,6 +390,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         }}
       >
         <EuiDataGrid
+          key={
+            // we control the key when pagination is on to circumvent an EUI rendering bug
+            pagination && columns.map(({ id }) => id).join('-') + '-' + pagination.pageSize
+          }
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
           rowHeightsOptions={
