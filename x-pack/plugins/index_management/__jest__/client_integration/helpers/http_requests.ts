@@ -109,7 +109,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 
   const setUpdateIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
+    const body = error ?? response;
 
     server.respondWith('PUT', `${API_BASE_PATH}/settings/:name`, [
       status,

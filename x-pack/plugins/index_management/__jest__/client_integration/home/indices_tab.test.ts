@@ -241,7 +241,7 @@ describe('<IndexManagementHome />', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
-      httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexName] });
+      // httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexName] });
 
       testBed = await setup();
       const { find, component } = testBed;
