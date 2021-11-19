@@ -18,7 +18,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { HttpFetchOptions, HttpFetchOptionsWithPath } from 'kibana/public';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
-import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
+import { forceHTMLElementOffsetWidth } from '../../../components/effected_policy_select/test_utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { licenseService } from '../../../../common/hooks/use_license';

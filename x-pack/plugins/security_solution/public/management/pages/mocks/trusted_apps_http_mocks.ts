@@ -141,9 +141,9 @@ export const trustedAppPostHttpMocks = httpHandlerMockFactory<TrustedAppPostHttp
     path: EXCEPTION_LIST_ITEM_URL,
     method: 'post',
     handler: ({ body, path }): ExceptionListItemSchema => {
-      const updatedExceptionItem = JSON.parse(
+      const { comments, ...updatedExceptionItem } = JSON.parse(
         body as string
-      ) as Required<CreateExceptionListItemSchema>;
+      ) as CreateExceptionListItemSchema;
       const response: ExceptionListItemSchema = {
         ...new ExceptionsListItemGenerator('seed').generate(),
         ...updatedExceptionItem,
