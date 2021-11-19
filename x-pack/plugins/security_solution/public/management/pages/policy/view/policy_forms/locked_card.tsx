@@ -35,9 +35,11 @@ export const LockedPolicyCard = memo(({ title }: { title: string }) => {
     <LockedPolicyDiv>
       <EuiCard
         data-test-subj="lockedPolicyCard"
-        betaBadgeLabel={i18n.translate('xpack.securitySolution.endpoint.policy.details.platinum', {
-          defaultMessage: 'Platinum',
-        })}
+        betaBadgeProps={{
+          label: i18n.translate('xpack.securitySolution.endpoint.policy.details.platinum', {
+            defaultMessage: 'Platinum',
+          }),
+        }}
         isDisabled={true}
         icon={<EuiIcon size="xl" type="lock" />}
         title={

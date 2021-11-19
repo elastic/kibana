@@ -16,7 +16,7 @@ import {
   Logger,
 } from 'kibana/server';
 
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
+import { nodeBuilder } from '@kbn/es-query';
 import { CasesService } from '../../services';
 import {
   CASE_COMMENT_SAVED_OBJECT,
