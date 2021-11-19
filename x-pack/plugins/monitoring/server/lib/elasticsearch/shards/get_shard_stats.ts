@@ -9,7 +9,7 @@ import { get } from 'lodash';
 // @ts-ignore
 import { checkParam } from '../../error_missing_required';
 // @ts-ignore
-import { createNewQuery } from '../../create_query';
+import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 // @ts-ignore
@@ -61,10 +61,10 @@ export function getShardStats(
   ccs?: string
 ) {
   const datasets = ['shard', 'shards'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     server: req.server,
-    productType,
+    moduleType,
     ccs,
     datasets,
   });
@@ -107,9 +107,9 @@ export function getShardStats(
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createNewQuery({
+      query: createQuery({
         types: ['shard', 'shards'],
-        productType: 'elasticsearch',
+        moduleType: 'elasticsearch',
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,
         filters,

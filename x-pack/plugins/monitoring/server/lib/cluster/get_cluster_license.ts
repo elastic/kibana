@@ -8,7 +8,7 @@
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
 // @ts-ignore
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 import { ElasticsearchResponse } from '../../../common/types/es';
@@ -18,10 +18,10 @@ import { getNewIndexPatterns } from './get_index_patterns';
 // is this being used anywhere?  not called within the app
 export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {
   const datasets = ['cluster_stats'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
     server: req.server,
-    productType,
+    moduleType,
     datasets,
   });
 
@@ -32,8 +32,8 @@ export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {
     filter_path: ['hits.hits._source.license'],
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createNewQuery({
-        productType,
+      query: createQuery({
+        moduleType,
         types: datasets,
         clusterUuid,
         metric: ElasticsearchMetric.getMetricFields(),

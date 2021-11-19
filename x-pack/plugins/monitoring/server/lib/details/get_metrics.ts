@@ -76,7 +76,7 @@ export async function getMetrics(
 // for requests that use metrics-* datastream, currently only elasticsearch and kibana integrations
 export async function getNewMetrics(
   req: LegacyRequest,
-  productType: string,
+  moduleType: string,
   metricSet: Metric[] = [],
   filters: Array<Record<string, any>> = [],
   metricOptions = {},
@@ -84,7 +84,7 @@ export async function getNewMetrics(
   groupBy: string | Record<string, any> | null = null,
   ccs?: string
 ) {
-  checkParam(productType, 'productType in details/getMetrics');
+  checkParam(moduleType, 'moduleType in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
 
   const config = req.server.config();
@@ -115,7 +115,7 @@ export async function getNewMetrics(
         metricNames.map((metricName) => {
           return getNewSeries(
             req,
-            productType,
+            moduleType,
             metricName,
             metricOptions,
             filters,

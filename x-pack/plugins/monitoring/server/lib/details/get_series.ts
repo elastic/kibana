@@ -11,7 +11,7 @@ import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest, Bucket } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { metrics } from '../metrics';
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 import { formatTimestampToDuration } from '../../../common';
 import { NORMALIZED_DERIVATIVE_UNIT, CALCULATE_DURATION_UNTIL } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
@@ -177,7 +177,7 @@ async function fetchSeries(
     size: 0,
     ignore_unavailable: true,
     body: {
-      query: createNewQuery({
+      query: createQuery({
         start: adjustedMin,
         end: Number(max),
         metric,
@@ -196,7 +196,7 @@ async function fetchSeries(
 
 async function fetchNewSeries(
   req: LegacyRequest,
-  productType: string,
+  moduleType: string,
   metric: Metric,
   metricOptions: any,
   groupBy: string | Record<string, any> | null,
@@ -257,7 +257,7 @@ async function fetchNewSeries(
 
   const indexPatterns = getNewIndexPatterns({
     server: req.server,
-    productType,
+    moduleType,
     ccs,
   });
 
@@ -266,7 +266,7 @@ async function fetchNewSeries(
     size: 0,
     ignore_unavailable: true,
     body: {
-      query: createNewQuery({
+      query: createQuery({
         start: adjustedMin,
         end: Number(max),
         metric,
@@ -453,7 +453,7 @@ export async function getSeries(
 
 export async function getNewSeries(
   req: LegacyRequest,
-  productType: string,
+  moduleType: string,
   metricName: string,
   metricOptions: Record<string, any>,
   filters: Array<Record<string, any>>,
@@ -466,7 +466,7 @@ export async function getNewSeries(
   }: { min: string | number; max: string | number; bucketSize: number; timezone: string },
   ccs?: string
 ) {
-  checkParam(productType, 'productType in details/getSeries');
+  checkParam(moduleType, 'moduleType in details/getSeries');
 
   const metric = metrics[metricName];
   if (!metric) {
@@ -474,7 +474,7 @@ export async function getNewSeries(
   }
   const response = await fetchNewSeries(
     req,
-    productType,
+    moduleType,
     metric,
     metricOptions,
     groupBy,

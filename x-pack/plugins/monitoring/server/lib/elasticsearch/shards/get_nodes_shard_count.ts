@@ -9,7 +9,7 @@ import { get } from 'lodash';
 // @ts-ignore
 import { checkParam } from '../../error_missing_required';
 // @ts-ignore
-import { createNewQuery } from '../../create_query';
+import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { LegacyRequest } from '../../../types';
@@ -37,10 +37,10 @@ async function getShardCountPerNode(
     });
   }
   const datasets = ['shard', 'shards'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
     server: req.server,
-    productType,
+    moduleType,
     datasets,
     ccs,
   });
@@ -51,8 +51,8 @@ async function getShardCountPerNode(
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createNewQuery({
-        productType: 'elasticsearch',
+      query: createQuery({
+        moduleType: 'elasticsearch',
         types: datasets,
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,

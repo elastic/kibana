@@ -56,7 +56,7 @@ export function createTimeFilter(options: {
  * document UUIDs, start time and end time, and injecting additional filters.
  *
  * Options object:
- * @param {String} options.type - `type` field value of the documents
+ * @param {Array} options.types - `types` field values of the documents
  * @param {Array} options.filters - additional filters to add to the `bool` section of the query. Default: []
  * @param {string} options.clusterUuid - a UUID of the cluster. Required.
  * @param {string} options.uuid - a UUID of the metric to filter for, or `null` if UUID should not be part of the query
@@ -65,77 +65,7 @@ export function createTimeFilter(options: {
  * @param {Metric} options.metric - Metric instance or metric fields object @see ElasticsearchMetric.getMetricFields
  */
 export function createQuery(options: {
-  type?: string;
-  types?: string[];
-  filters?: any[];
-  clusterUuid: string;
-  uuid?: string;
-  start?: number;
-  end?: number;
-  metric?: { uuidField?: string; timestampField: string };
-}) {
-  const { type, types, clusterUuid, uuid, filters } = defaults(options, { filters: [] });
-
-  const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
-
-  let typeFilter: any;
-  if (type) {
-    typeFilter = { bool: { should: [{ term: { type } }, { term: { 'metricset.name': type } }] } };
-  } else if (types) {
-    typeFilter = {
-      bool: {
-        should: [
-          ...types.map((t) => ({ term: { type: t } })),
-          ...types.map((t) => ({ term: { 'metricset.name': t } })),
-        ],
-      },
-    };
-  }
-
-  let clusterUuidFilter;
-  if (clusterUuid && !isFromStandaloneCluster) {
-    clusterUuidFilter = { term: { cluster_uuid: clusterUuid } };
-  }
-
-  let uuidFilter;
-  // options.uuid can be null, for example getting all the clusters
-  if (uuid) {
-    const uuidField = options.metric?.uuidField;
-    if (!uuidField) {
-      throw new MissingRequiredError('options.uuid given but options.metric.uuidField is false');
-    }
-    uuidFilter = { term: { [uuidField]: uuid } };
-  }
-
-  const timestampField = options.metric?.timestampField;
-  if (!timestampField) {
-    throw new MissingRequiredError('metric.timestampField');
-  }
-  const timeRangeFilter = createTimeFilter(options);
-
-  const combinedFilters = [
-    typeFilter,
-    clusterUuidFilter,
-    uuidFilter,
-    timeRangeFilter ?? undefined,
-    ...filters,
-  ];
-
-  if (isFromStandaloneCluster) {
-    combinedFilters.push(standaloneClusterFilter);
-  }
-
-  const query = {
-    bool: {
-      filter: combinedFilters.filter(Boolean),
-    },
-  };
-
-  return query;
-}
-
-export function createNewQuery(options: {
-  productType?: string;
+  moduleType?: string;
   types?: string[];
   dsType?: string;
   filters?: any[];
@@ -146,7 +76,7 @@ export function createNewQuery(options: {
   metric?: { uuidField?: string; timestampField: string };
 }) {
   const {
-    productType,
+    moduleType,
     types,
     clusterUuid,
     uuid,
@@ -156,7 +86,7 @@ export function createNewQuery(options: {
     filters: [],
   });
   // TODO: improve typing instead of having this
-  // if (types?.length && !productType) throw new Error('types must have a product type');
+  // if (types?.length && !moduleType) throw new Error('types must have a product type');
 
   const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
@@ -167,7 +97,7 @@ export function createNewQuery(options: {
   };
   if (types && types.length) {
     typeFilter.bool.should.push(
-      ...types.map((t) => ({ term: { 'data_stream.name': `${productType}.${t}` } })),
+      ...types.map((t) => ({ term: { 'data_stream.name': `${moduleType}.${t}` } })),
       ...types.map((t) => ({ term: { type: t } })),
       ...types.map((t) => ({ term: { 'metricset.name': t } }))
     );

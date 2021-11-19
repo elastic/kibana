@@ -9,7 +9,7 @@ import moment from 'moment';
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
 // @ts-ignore
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 // @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
 // @ts-ignore
@@ -73,8 +73,8 @@ export async function getKibanas(
     size: config.get('monitoring.ui.max_bucket_size'),
     ignore_unavailable: true,
     body: {
-      query: createNewQuery({
-        productType: 'kibana',
+      query: createQuery({
+        moduleType: 'kibana',
         types: ['kibana_stats', 'stats'],
         start,
         end,

@@ -10,7 +10,7 @@ import _ from 'lodash';
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
 // @ts-ignore
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 import {
@@ -95,10 +95,10 @@ export async function getLastRecovery(req: LegacyRequest, size: number, ccs?: st
   const metric = ElasticsearchMetric.getMetricFields();
 
   const datasets = ['index_recovery'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
     server: req.server,
-    productType,
+    moduleType,
     datasets,
     ccs,
   });
@@ -110,8 +110,8 @@ export async function getLastRecovery(req: LegacyRequest, size: number, ccs?: st
     body: {
       _source: ['index_recovery.shards'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createNewQuery({
-        productType,
+      query: createQuery({
+        moduleType,
         types: datasets,
         start,
         end,
@@ -127,8 +127,8 @@ export async function getLastRecovery(req: LegacyRequest, size: number, ccs?: st
     body: {
       _source: ['elasticsearch.index.recovery', '@timestamp'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createNewQuery({
-        productType,
+      query: createQuery({
+        moduleType,
         types: datasets,
         start,
         end,

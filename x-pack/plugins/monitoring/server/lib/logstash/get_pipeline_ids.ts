@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { get } from 'lodash';
 import { LegacyRequest, Bucket, Pipeline } from '../../types';
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 
 interface GetLogstashPipelineIdsParams {
@@ -39,7 +39,7 @@ export async function getLogstashPipelineIds({
     ignore_unavailable: true,
     filter_path: ['aggregations.nest.id.buckets', 'aggregations.nest_mb.id.buckets'],
     body: {
-      query: createNewQuery({
+      query: createQuery({
         start,
         end,
         metric: LogstashMetric.getMetricFields(),

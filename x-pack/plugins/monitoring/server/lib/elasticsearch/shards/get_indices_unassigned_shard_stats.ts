@@ -9,7 +9,7 @@ import { get } from 'lodash';
 // @ts-ignore
 import { checkParam } from '../../error_missing_required';
 // @ts-ignore
-import { createNewQuery } from '../../create_query';
+import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 // @ts-ignore
@@ -42,7 +42,7 @@ async function getUnassignedShardData(
   const datasets = ['shard', 'shards'];
   const indexPattern = getNewIndexPatterns({
     server: req.server,
-    productType: 'elasticsearch',
+    moduleType: 'elasticsearch',
     datasets,
     ccs,
   });
@@ -53,8 +53,8 @@ async function getUnassignedShardData(
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createNewQuery({
-        productType: 'elasticsearch',
+      query: createQuery({
+        moduleType: 'elasticsearch',
         types: datasets,
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,

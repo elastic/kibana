@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { checkParam } from '../../error_missing_required';
 // @ts-ignore
-import { createNewQuery } from '../../create_query';
+import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 // @ts-ignore
@@ -119,11 +119,11 @@ export function getNodeSummary(
   ];
 
   const datasets = ['node_stats'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     server: req.server,
     datasets,
-    productType,
+    moduleType,
     ccs,
   });
 
@@ -133,9 +133,9 @@ export function getNodeSummary(
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createNewQuery({
+      query: createQuery({
         types: ['node_stats'],
-        productType,
+        moduleType,
         start,
         end,
         clusterUuid,

@@ -11,17 +11,17 @@ import { checkParam } from '../error_missing_required';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 // @ts-ignore
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 export async function checkCcrEnabled(req: LegacyRequest) {
   const datasets = ['cluster_stats'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     server: req.server,
-    productType,
+    moduleType,
     datasets,
   });
 
@@ -36,8 +36,8 @@ export async function checkCcrEnabled(req: LegacyRequest) {
     size: 1,
     ignore_unavailable: true,
     body: {
-      query: createNewQuery({
-        productType,
+      query: createQuery({
+        moduleType,
         types: ['cluster_stats'],
         start,
         end,

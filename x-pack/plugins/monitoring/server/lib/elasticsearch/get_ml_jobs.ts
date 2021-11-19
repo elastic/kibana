@@ -9,7 +9,7 @@ import { includes } from 'lodash';
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
 // @ts-ignore
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 import { ML_SUPPORTED_LICENSES } from '../../../common/constants';
@@ -47,10 +47,10 @@ export function getMlJobs(req: LegacyRequest, ccs?: string) {
   const metric = ElasticsearchMetric.getMetricFields();
 
   const datasets = ['ml_job', 'job_stats'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     server: req.server,
-    productType,
+    moduleType,
     datasets,
     ccs,
   });
@@ -78,9 +78,9 @@ export function getMlJobs(req: LegacyRequest, ccs?: string) {
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       collapse: { field: 'job_stats.job_id' },
-      query: createNewQuery({
+      query: createQuery({
         types: datasets,
-        productType,
+        moduleType,
         start,
         end,
         clusterUuid,
@@ -108,10 +108,10 @@ export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSo
     const metric = ElasticsearchMetric.getMetricFields();
 
     const datasets = ['ml_job', 'job_stats'];
-    const productType = 'elasticsearch';
+    const moduleType = 'elasticsearch';
     const indexPatterns = getNewIndexPatterns({
       server: req.server,
-      productType,
+      moduleType,
       datasets,
     });
 
@@ -121,7 +121,7 @@ export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSo
       ignore_unavailable: true,
       filter_path: 'aggregations.jobs_count.value',
       body: {
-        query: createNewQuery({ productType, types: datasets, start, end, clusterUuid, metric }),
+        query: createQuery({ moduleType, types: datasets, start, end, clusterUuid, metric }),
         aggs: {
           jobs_count: { cardinality: { field: 'job_stats.job_id' } },
         },

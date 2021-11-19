@@ -36,6 +36,13 @@ import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
 import { LegacyRequest, Cluster } from '../../types';
 import { RulesByType } from '../../../common/types/alerts';
+import { getKibanas } from '../kibana/get_kibanas';
+import { getNodes } from '../logstash/get_nodes';
+import { getPipelineStatsAggregation } from '../logstash/get_pipeline_stats_aggregation';
+import { getPipelineStateDocument } from '../logstash/get_pipeline_state_document';
+import { getPipelineVersions } from '../logstash/get_pipeline_versions';
+import { getPipelineVertexStatsAggregation } from '../logstash/get_pipeline_vertex_stats_aggregation';
+import { getApmInfo } from '../apm/get_apm_info';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -174,6 +181,12 @@ export async function getClustersFromRequest(
     }
   }
   // add kibana data
+  await getApmInfo(req, apmIndexPattern, {
+    clusterUuid: clusters[0].cluster_uuid,
+    apmUuid: 'asf',
+    start: 10,
+    end: 1,
+  });
   const kibanas =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
       ? await getKibanasForClusters(req, kbnIndexPattern, clusters)

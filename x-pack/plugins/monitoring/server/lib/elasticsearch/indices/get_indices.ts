@@ -12,7 +12,7 @@ import { checkParam } from '../../error_missing_required';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 // @ts-ignore
-import { createNewQuery } from '../../create_query';
+import { createQuery } from '../../create_query';
 // @ts-ignore
 import { calculateRate } from '../../calculate_rate';
 // @ts-ignore
@@ -116,10 +116,10 @@ export function buildGetIndicesQuery(
   }
   const metricFields = ElasticsearchMetric.getMetricFields();
   const datasets = ['index', 'index_stats'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     datasets,
-    productType,
+    moduleType,
     ccs,
     server: req.server,
   });
@@ -154,9 +154,9 @@ export function buildGetIndicesQuery(
       'hits.hits.inner_hits.earliest.hits.hits._source.elasticsearch.index.total.search.query_total',
     ],
     body: {
-      query: createNewQuery({
+      query: createQuery({
         types: datasets,
-        productType,
+        moduleType,
         start,
         end,
         clusterUuid,

@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { checkParam } from '../error_missing_required';
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 import { calculateAvailability } from '../calculate_availability';
 import { LogstashMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
@@ -80,8 +80,8 @@ export async function getNodes(
     size: config.get('monitoring.ui.max_bucket_size'), // FIXME
     ignore_unavailable: true,
     body: {
-      query: createNewQuery({
-        productType: 'logstash',
+      query: createQuery({
+        moduleType: 'logstash',
         start,
         end,
         clusterUuid,

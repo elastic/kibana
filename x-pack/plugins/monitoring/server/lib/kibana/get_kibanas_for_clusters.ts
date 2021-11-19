@@ -8,7 +8,7 @@
 import { chain, find } from 'lodash';
 import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { checkParam } from '../error_missing_required';
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 import { KibanaClusterMetric } from '../metrics';
 
 /*
@@ -35,7 +35,7 @@ export function getKibanasForClusters(
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
 
-  const productType = 'kibana';
+  const moduleType = 'kibana';
 
   return Promise.all(
     clusters.map((cluster) => {
@@ -46,8 +46,8 @@ export function getKibanasForClusters(
         size: 0,
         ignore_unavailable: true,
         body: {
-          query: createNewQuery({
-            productType,
+          query: createQuery({
+            moduleType,
             types: ['stats', 'kibana_stats'],
             start,
             end,

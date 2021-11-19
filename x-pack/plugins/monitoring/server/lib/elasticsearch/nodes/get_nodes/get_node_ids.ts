@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { get } from 'lodash';
 import { ElasticsearchMetric } from '../../../metrics';
-import { createNewQuery } from '../../../create_query';
+import { createQuery } from '../../../create_query';
 import { LegacyRequest, Bucket } from '../../../../types';
 import { getNewIndexPatterns } from '../../../cluster/get_index_patterns';
 
@@ -22,10 +22,10 @@ export async function getNodeIds(
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
   const datasets = ['node_stats'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
     server: req.server,
-    productType,
+    moduleType,
     datasets,
     ccs,
   });
@@ -36,8 +36,8 @@ export async function getNodeIds(
     ignore_unavailable: true,
     filter_path: ['aggregations.composite_data.buckets'],
     body: {
-      query: createNewQuery({
-        productType,
+      query: createQuery({
+        moduleType,
         types: ['node_stats'],
         start,
         end,

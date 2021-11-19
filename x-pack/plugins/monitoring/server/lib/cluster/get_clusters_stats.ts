@@ -8,7 +8,7 @@
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
 // @ts-ignore
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 // @ts-ignore
@@ -43,10 +43,10 @@ export function getClustersStats(req: LegacyRequest, clusterUuid: string) {
  */
 function fetchClusterStats(req: LegacyRequest, clusterUuid: string) {
   const datasets = ['cluster_stats'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
     server: req.server,
-    productType,
+    moduleType,
     datasets,
   });
 
@@ -85,8 +85,8 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid: string) {
       'hits.hits._source.cluster_settings.cluster.metadata.display_name',
     ],
     body: {
-      query: createNewQuery({
-        productType,
+      query: createQuery({
+        moduleType,
         types: datasets,
         start,
         end,

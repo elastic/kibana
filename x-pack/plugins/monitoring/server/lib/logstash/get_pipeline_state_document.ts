@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { LegacyRequest, PipelineVersion } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
@@ -29,13 +29,13 @@ export async function getPipelineStateDocument({
     { term: { 'logstash_state.pipeline.hash': version.hash } },
   ];
 
-  const query = createNewQuery({
+  const query = createQuery({
     // We intentionally do not set a start/end time for the state document
     // The reason being that any matching document will work since they are all identical if they share a given hash
     // This is important because a user may pick a very narrow time picker window. If we were to use a start/end value
     // that could result in us being unable to render the graph
     // Use the logstash_stats documents to determine whether the instance is up/down
-    productType: 'logstash',
+    moduleType: 'logstash',
     types: ['logstash_state'],
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,

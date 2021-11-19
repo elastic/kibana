@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { createNewQuery } from '../../../create_query';
+import { createQuery } from '../../../create_query';
 import { calculateAuto } from '../../../calculate_auto';
 import { ElasticsearchMetric } from '../../../metrics';
 import { getMetricAggs } from './get_metric_aggs';
@@ -66,9 +66,9 @@ export async function getNodes(
   ];
 
   const datasets = ['node_stats'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    productType,
+    moduleType,
     server: req.server,
     datasets,
     ccs,
@@ -79,8 +79,8 @@ export async function getNodes(
     size: config.get('monitoring.ui.max_bucket_size'),
     ignore_unavailable: true,
     body: {
-      query: createNewQuery({
-        productType,
+      query: createQuery({
+        moduleType,
         types: datasets,
         start,
         end,

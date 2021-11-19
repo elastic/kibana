@@ -9,7 +9,7 @@ import { upperFirst } from 'lodash';
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
 // @ts-ignore
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 // @ts-ignore
 import { getDiffCalculation } from '../beats/_beats_stats';
 // @ts-ignore
@@ -133,7 +133,7 @@ export async function getApmInfo(
     ],
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createNewQuery({
+      query: createQuery({
         start,
         end,
         clusterUuid,

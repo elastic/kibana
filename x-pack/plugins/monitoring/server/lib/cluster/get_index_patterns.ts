@@ -38,19 +38,21 @@ export function getIndexPatterns(
     ...Object.keys(additionalPatterns).reduce((accum, varName) => {
       return {
         ...accum,
-        [varName]: prefixIndexPattern(config, additionalPatterns[varName], ccs, true),
+        [varName]: prefixIndexPattern(config, additionalPatterns[varName], ccs),
       };
     }, {}),
   };
   return indexPatterns;
 }
 
-export function getLegacyIndexPattern({ productType }: { productType: string }) {
+export function getLegacyIndexPattern({ moduleType }: { moduleType: string }) {
   let indexPattern = '';
-  switch (productType) {
+  switch (moduleType) {
     case 'elasticsearch':
       indexPattern = INDEX_PATTERN_ELASTICSEARCH;
       break;
+    case 'kibana':
+      indexPattern = INDEX_PATTERN_KIBANA;
     default:
       throw new Error('invalid product type to create index pattern');
   }
@@ -59,13 +61,13 @@ export function getLegacyIndexPattern({ productType }: { productType: string }) 
 
 export function getDsIndexPattern({
   type = DS_INDEX_PATTERN_METRICS,
-  productType,
+  moduleType,
   datasets,
   namespace = '*',
 }: {
   type?: string;
   datasets?: string[];
-  productType: string;
+  moduleType: string;
   namespace?: string;
 }): string {
   // if there is one dataset, include in the index pattern else use *.
@@ -73,29 +75,29 @@ export function getDsIndexPattern({
   // of indices could be too long
   let datasetsPattern = '';
   if (datasets) {
-    datasetsPattern = datasets.length === 1 ? `${productType}.${datasets[0]}` : '*';
+    datasetsPattern = datasets.length === 1 ? `${moduleType}.${datasets[0]}` : '*';
   } else {
-    datasetsPattern = `${productType}.*`;
+    datasetsPattern = `${moduleType}.*`;
   }
   return `${type}-${datasetsPattern}-${namespace}`;
 }
 
 export function getNewIndexPatterns({
   server,
-  productType,
+  moduleType,
   ccs = '*',
   type = DS_INDEX_PATTERN_METRICS,
   datasets,
   namespace = '*',
 }: {
   server: LegacyServer;
-  productType: string;
+  moduleType: string;
   ccs?: string;
   type?: string;
   datasets?: string[];
   namespace?: string;
 }): string {
-  const dsIndexPattern = getDsIndexPattern({ type, productType, datasets, namespace });
-  const legacyIndexPattern = getLegacyIndexPattern({ productType });
+  const dsIndexPattern = getDsIndexPattern({ type, moduleType, datasets, namespace });
+  const legacyIndexPattern = getLegacyIndexPattern({ moduleType });
   return prefixIndexPattern(server.config(), `${legacyIndexPattern},${dsIndexPattern}`, ccs);
 }

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { checkParam } from '../../error_missing_required';
 // @ts-ignore
-import { createNewQuery } from '../../create_query';
+import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse } from '../../../../common/types/es';
@@ -75,10 +75,10 @@ export function getIndexSummary(
   ccs?: string
 ) {
   const datasets = ['index', 'index_stats'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     datasets,
-    productType,
+    moduleType,
     ccs,
     server: req.server,
   });
@@ -100,9 +100,9 @@ export function getIndexSummary(
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createNewQuery({
+      query: createQuery({
         types: ['index', 'index_stats'],
-        productType,
+        moduleType,
         start,
         end,
         clusterUuid,

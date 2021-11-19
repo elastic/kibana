@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { createNewQuery } from '../create_query';
+import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { checkParam } from '../error_missing_required';
 import { LegacyRequest } from '../../types';
@@ -38,8 +38,8 @@ function fetchPipelineVersions({
       },
     },
   ];
-  const query = createNewQuery({
-    productType: 'logstash',
+  const query = createQuery({
+    moduleType: 'logstash',
     types: ['stats', 'logstash_stats'],
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,

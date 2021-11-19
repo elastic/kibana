@@ -8,7 +8,7 @@
 // @ts-ignore
 import { StringOptions } from '@kbn/config-schema/target_types/types';
 // @ts-ignore
-import { createNewQuery } from '../../create_query';
+import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
@@ -101,10 +101,10 @@ export function getShardAllocation(
   const metric = ElasticsearchMetric.getMetricFields();
 
   const datasets = ['shard', 'shards'];
-  const productType = 'elasticsearch';
+  const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     datasets,
-    productType,
+    moduleType,
     server: req.server,
     ccs,
   });
@@ -114,9 +114,9 @@ export function getShardAllocation(
     size: config.get('monitoring.ui.max_bucket_size'),
     ignore_unavailable: true,
     body: {
-      query: createNewQuery({
+      query: createQuery({
         types: ['shard', 'shards'],
-        productType,
+        moduleType,
         clusterUuid,
         metric,
         filters,
