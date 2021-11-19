@@ -12,11 +12,13 @@ import { EuiSwitch, EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } fro
 
 interface Props {
   checked: boolean;
+  disabled?: boolean;
   onChange: () => void;
 }
 
 export const KeepPoliciesUpToDateSwitch: React.FunctionComponent<Props> = ({
   checked,
+  disabled = false,
   onChange,
 }) => (
   <>
@@ -27,6 +29,7 @@ export const KeepPoliciesUpToDateSwitch: React.FunctionComponent<Props> = ({
       )}
       checked={checked}
       onChange={onChange}
+      disabled={disabled}
     />
     <EuiSpacer size="s" />
     <EuiText color="subdued" size="xs">

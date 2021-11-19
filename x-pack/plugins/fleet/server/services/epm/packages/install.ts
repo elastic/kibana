@@ -18,7 +18,7 @@ import type {
   InstallablePackage,
   InstallSource,
 } from '../../../../common';
-import { MANAGED_PACKAGES } from '../../../../common';
+import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
 import {
   IngestManagerError,
   PackageOperationNotSupportedError,
@@ -534,11 +534,14 @@ export async function createInstallation(options: {
   const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
-  // For managed packages, default the `keep_policies_up_to_date` setting to true. For all other
-  // packages, default it to false.
-  const defaultKeepPoliciesUpToDate = MANAGED_PACKAGES.some(
+  // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
+  // packages, default it to undefined. Use undefined rather than false to allow us to differentiate
+  // between "unset" and "user explicitly disabled".
+  const defaultKeepPoliciesUpToDate = AUTO_UPGRADE_POLICIES_PACKAGES.some(
     ({ name }) => name === packageInfo.name
-  );
+  )
+    ? true
+    : undefined;
 
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
