@@ -36,9 +36,7 @@ import {
 import { getGlyphUrl } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 
-import {
-  removeOrphanedSourcesAndLayers,
-} from './utils';
+import { removeOrphanedSourcesAndLayers } from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';

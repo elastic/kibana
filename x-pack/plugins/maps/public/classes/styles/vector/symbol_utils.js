@@ -51,7 +51,7 @@ export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map((symbolId) => {
  * @param {number} [radius=0.25] - size of SDF around the cutoff as percent of output icon size
  * @return {ImageData} Monochrome image that can be added to a MapLibre map
  */
-export async function createSdfIcon(svgString, cutoff=0.25, radius=0.25) {
+export async function createSdfIcon(svgString, cutoff = 0.25, radius = 0.25) {
   const buffer = 3;
   const size = 16 + buffer * 4;
   const svgCanvas = document.createElement('canvas');

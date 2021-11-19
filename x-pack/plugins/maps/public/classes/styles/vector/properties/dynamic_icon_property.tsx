@@ -40,7 +40,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
       const { customIconStops, iconPaletteId } = this._options;
       const icons = [
         ...(iconPaletteId ? getIconPalette(iconPaletteId) : []),
-        ...(customIconStops ? customIconStops.map(({ icon }) => icon) : [])
+        ...(customIconStops ? customIconStops.map(({ icon }) => icon) : []),
       ];
       Promise.all(
         icons.map(async (icon) => {
