@@ -8,6 +8,8 @@
 import React from 'react';
 import maki from '@elastic/maki';
 import xml2js from 'xml2js';
+import Canvg from 'canvg';
+import calcSDF from 'bitmap-sdf';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
@@ -41,11 +43,69 @@ export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map((symbolId) => {
   };
 });
 
+/**
+ * Converts a SVG icon to a monochrome image using a signed distance function.
+ *
+ * @param {string} svgString - SVG icon as string
+ * @param {number} [cutoff=0.25] - balance between SDF inside 1 and outside 0 of glyph
+ * @param {number} [radius=0.25] - size of SDF around the cutoff as percent of output icon size
+ * @return {ImageData} Monochrome image that can be added to a MapLibre map
+ */
+export async function createSdfIcon(svgString, cutoff=0.25, radius=0.25) {
+  const buffer = 3;
+  const size = 16 + buffer * 4;
+  const svgCanvas = document.createElement('canvas');
+  svgCanvas.width = size;
+  svgCanvas.height = size;
+  const svgCtx = svgCanvas.getContext('2d');
+  const v = Canvg.fromString(svgCtx, svgString, {
+    ignoreDimensions: true,
+    offsetX: buffer / 2,
+    offsetY: buffer / 2,
+  });
+  v.resize(size - buffer, size - buffer);
+  await v.render();
+
+  const distances = calcSDF(svgCtx, {
+    channel: 3,
+    cutoff,
+    radius: radius * size,
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  const imageData = ctx.createImageData(size, size);
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      imageData.data[j * size * 4 + i * 4 + 0] = 0;
+      imageData.data[j * size * 4 + i * 4 + 1] = 0;
+      imageData.data[j * size * 4 + i * 4 + 2] = 0;
+      imageData.data[j * size * 4 + i * 4 + 3] = distances[j * size + i] * 255;
+    }
+  }
+  return imageData;
+}
+
 export function getMakiSymbolSvg(symbolId) {
   if (!SYMBOLS[symbolId]) {
     throw new Error(`Unable to find symbol: ${symbolId}`);
   }
   return SYMBOLS[symbolId];
+}
+
+export async function loadMakiIconInMap(symbolId, mbMap) {
+  const pixelRatio = Math.floor(window.devicePixelRatio);
+  if (!mbMap.hasImage(symbolId)) {
+    const svg = getMakiSymbolSvg(symbolId);
+    const imageData = await createSdfIcon(svg);
+    mbMap.addImage(symbolId, imageData, {
+      pixelRatio,
+      sdf: true,
+    });
+  }
 }
 
 export function getMakiSymbolAnchor(symbolId) {
@@ -57,12 +117,6 @@ export function getMakiSymbolAnchor(symbolId) {
     default:
       return 'center';
   }
-}
-
-// Style descriptor stores symbolId, for example 'aircraft'
-// Icons are registered in Mapbox with full maki ids, for example 'aircraft-11'
-export function getMakiIconId(symbolId, iconPixelSize) {
-  return `${symbolId}-${iconPixelSize}`;
 }
 
 export function buildSrcUrl(svgString) {

@@ -10,8 +10,12 @@ import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
-// @ts-expect-error
-import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
+import {
+  getIconPalette,
+  getMakiSymbolAnchor,
+  loadMakiIconInMap,
+  // @ts-expect-error
+} from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
 import { LegendProps } from './style_property';
@@ -33,12 +37,23 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
 
   syncIconWithMb(symbolLayerId: string, mbMap: MbMap, iconPixelSize: number) {
     if (this._isIconDynamicConfigComplete()) {
-      mbMap.setLayoutProperty(
-        symbolLayerId,
-        'icon-image',
-        this._getMbIconImageExpression(iconPixelSize)
-      );
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
+      const { customIconStops, iconPaletteId } = this._options;
+      const icons = [
+        ...(iconPaletteId ? getIconPalette(iconPaletteId) : []),
+        ...(customIconStops ? customIconStops.map(({ icon }) => icon) : [])
+      ];
+      Promise.all(
+        icons.map(async (icon) => {
+          await loadMakiIconInMap(icon, mbMap);
+        })
+      ).then(() => {
+        mbMap.setLayoutProperty(
+          symbolLayerId,
+          'icon-image',
+          this._getMbIconImageExpression(iconPixelSize)
+        );
+        mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
+      });
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', null);
       mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', null);
@@ -80,11 +95,11 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     const mbStops = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      mbStops.push(getMakiIconId(style, iconPixelSize));
+      mbStops.push(style);
     });
 
     if (fallbackSymbolId) {
-      mbStops.push(getMakiIconId(fallbackSymbolId, iconPixelSize)); // last item is fallback style for anything that does not match provided stops
+      mbStops.push(fallbackSymbolId); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }

@@ -7,10 +7,6 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-// @ts-expect-error
-import { spritesheet } from '@elastic/maki';
-import sprites1 from '@elastic/maki/dist/sprite@1.png';
-import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
@@ -37,12 +33,10 @@ import {
   RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
-import { getGlyphUrl, isRetina } from '../../util';
+import { getGlyphUrl } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 
 import {
-  addSpriteSheetToMapFromImageData,
-  loadSpriteSheetImageData,
   removeOrphanedSourcesAndLayers,
 } from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
@@ -244,7 +238,6 @@ export class MbMap extends Component<Props, State> {
     }
 
     this.setState({ mbMap }, () => {
-      this._loadMakiSprites(mbMap);
       this._initResizerChecker();
       this._registerMapEventListeners(mbMap);
       this.props.onMapReady(this._getMapExtentState());
@@ -286,15 +279,6 @@ export class MbMap extends Component<Props, State> {
         this.state.mbMap.resize();
       }
     });
-  }
-
-  async _loadMakiSprites(mbMap: MapboxMap) {
-    const spritesUrl = isRetina() ? sprites2 : sprites1;
-    const json = isRetina() ? spritesheet[2] : spritesheet[1];
-    const spritesData = await loadSpriteSheetImageData(spritesUrl);
-    if (this._isMounted) {
-      addSpriteSheetToMapFromImageData(json, spritesData, mbMap);
-    }
   }
 
   _syncMbMapWithMapState = () => {
