@@ -15,7 +15,7 @@ describe('DependencyManager', () => {
       R: [],
       A: ['B', 'C'],
       B: ['D'],
-      C: ['A', 'B'],
+      C: ['F', 'B'],
       F: ['E'],
       E: ['D'],
       D: ['L'],
