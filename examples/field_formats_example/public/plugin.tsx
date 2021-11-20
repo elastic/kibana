@@ -22,7 +22,7 @@ import { registerExampleFormat } from './examples/2_creating_custom_formatter';
 import {
   IndexPatternFieldEditorStart,
   IndexPatternFieldEditorSetup,
-} from '../../../src/plugins/index_pattern_field_editor/public';
+} from '../../../src/plugins/data_view_field_editor/public';
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';
 import { registerExampleFormatEditor } from './examples/3_creating_custom_format_editor';
 import img from './formats.png';
@@ -35,7 +35,7 @@ interface SetupDeps {
 
 interface StartDeps {
   fieldFormats: FieldFormatsStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   data: DataPublicPluginStart;
 }
 
@@ -65,7 +65,7 @@ export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, 
         return;
       }
 
-      plugins.indexPatternFieldEditor.openEditor({
+      plugins.dataViewFieldEditor.openEditor({
         ctx: {
           indexPattern,
         },

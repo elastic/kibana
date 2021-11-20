@@ -80,7 +80,7 @@ export function Tabs({
   location,
   refreshFields,
 }: TabsProps) {
-  const { application, uiSettings, docLinks, indexPatternFieldEditor } =
+  const { application, uiSettings, docLinks, dataViewFieldEditor } =
     useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -91,7 +91,7 @@ export function Tabs({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
   });
   const closeEditorHandler = useRef<() => void | undefined>();
-  const { DeleteRuntimeFieldProvider } = indexPatternFieldEditor;
+  const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
@@ -122,7 +122,7 @@ export function Tabs({
 
   const openFieldEditor = useCallback(
     (fieldName?: string) => {
-      closeEditorHandler.current = indexPatternFieldEditor.openEditor({
+      closeEditorHandler.current = dataViewFieldEditor.openEditor({
         ctx: {
           indexPattern,
         },
@@ -130,7 +130,7 @@ export function Tabs({
         fieldName,
       });
     },
-    [indexPatternFieldEditor, indexPattern, refreshFields]
+    [dataViewFieldEditor, indexPattern, refreshFields]
   );
 
   useEffect(() => {

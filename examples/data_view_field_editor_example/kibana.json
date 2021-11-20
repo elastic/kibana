@@ -1,15 +1,15 @@
 {
-  "id": "indexPatternFieldEditorExample",
+  "id": "dataViewFieldEditorExample",
   "kibanaVersion": "kibana",
   "version": "0.0.1",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["data", "indexPatternFieldEditor", "developerExamples"],
+  "requiredPlugins": ["data", "dataViewFieldEditor", "developerExamples"],
   "optionalPlugins": [],
   "requiredBundles": [],
   "owner": {
     "name": "App Services",
     "githubTeam": "kibana-app-services"
   },
-  "description": "Index pattern field editor example app"
+  "description": "Data view field editor example app"
 }

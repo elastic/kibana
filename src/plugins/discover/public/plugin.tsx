@@ -56,7 +56,7 @@ import { DiscoverAppLocatorDefinition, DiscoverAppLocator } from './locator';
 import { SearchEmbeddableFactory } from './embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
-import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../../plugins/data_view_field_editor/public';
 import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';

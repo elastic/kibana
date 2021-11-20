@@ -1,25 +1,25 @@
-# Index pattern field editor
+# Data view field editor
 
 The reusable field editor across Kibana!   
 
 This editor can be used to
 
-* create or edit a runtime field inside an index pattern.  
+* create or edit a runtime field inside a data view.  
 * edit concrete (mapped) fields. In this case certain functionalities will be disabled like the possibility to change the field _type_ or to set the field _value_.
 
 ## How to use
 
-You first need to add in your kibana.json the "`indexPatternFieldEditor`" plugin as a required dependency of your plugin.
+You first need to add in your kibana.json the "`dataViewFieldEditor`" plugin as a required dependency of your plugin.
 
-You will then receive in the start contract of the indexPatternFieldEditor plugin the following API:
+You will then receive in the start contract of the dataViewFieldEditor plugin the following API:
 
-### `userPermissions.editIndexPattern(): boolean`
+### `userPermissions.editDataView(): boolean`
 
-Convenience method that uses the `core.application.capabilities` api to determine whether the user can edit the index pattern. 
+Convenience method that uses the `core.application.capabilities` api to determine whether the user can edit the data view. 
 
 ### `openEditor(options: OpenFieldEditorOptions): CloseEditor`
 
-Use this method to open the index pattern field editor to either create (runtime) or edit (concrete | runtime) a field.  
+Use this method to open the data view field editor to either create (runtime) or edit (concrete | runtime) a field.  
 
 #### `options`
 
@@ -27,9 +27,9 @@ Use this method to open the index pattern field editor to either create (runtime
 
 This is the only required option. You need to provide the context in which the editor is being consumed. This object has the following properties:
 
-- `indexPattern: IndexPattern`: the index pattern you want to create/edit the field into.
+- `dataView: DataView`: the data view you want to create/edit the field into.
 
-`onSave(field: IndexPatternField): void` (optional)
+`onSave(field: DataViewField): void` (optional)
 
 You can provide an optional `onSave` handler to be notified when the field has being created/updated. This handler is called after the field has been persisted to the saved object.
 
@@ -39,7 +39,7 @@ You can optionally pass the name of a field to edit. Leave empty to create a new
 
 ### `openDeleteModal(options: OpenFieldDeleteModalOptions): CloseEditor`
 
-Use this method to open a confirmation modal to delete runtime fields from an index pattern.  
+Use this method to open a confirmation modal to delete runtime fields from a data view.  
 
 #### `options`
 
@@ -47,7 +47,7 @@ Use this method to open a confirmation modal to delete runtime fields from an in
 
 You need to provide the context in which the deletion modal is being consumed. This object has the following properties:
 
-- `indexPattern: IndexPattern`: the index pattern you want to delete fields from.
+- `dataView: DataView`: the index pattern you want to delete fields from.
 
 `onDelete(fieldNames: string[]): void` (optional)
 
@@ -63,14 +63,14 @@ This children func React component provides a handler to delete one or multiple 
 
 #### Props
 
-* `indexPattern: IndexPattern`: the current index pattern. (**required**)
+* `dataView: DataView`: the current dataView. (**required**)
 
 ```js
 
-const { DeleteRuntimeFieldProvider } = indexPatternFieldEditor;
+const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
 // Single field
-<DeleteRuntimeFieldProvider indexPattern={indexPattern}>
+<DeleteRuntimeFieldProvider dataView={dataView}>
   {(deleteField) => (
     <EuiButton fill color="danger" onClick={() => deleteField('myField')}>
       Delete
@@ -79,7 +79,7 @@ const { DeleteRuntimeFieldProvider } = indexPatternFieldEditor;
 </DeleteRuntimeFieldProvider>
 
 // Multiple fields
-<DeleteRuntimeFieldProvider indexPattern={indexPattern}>
+<DeleteRuntimeFieldProvider dataView={dataView}>
   {(deleteFields) => (
     <EuiButton fill color="danger" onClick={() => deleteFields(['field1', 'field2', 'field3'])}>
       Delete

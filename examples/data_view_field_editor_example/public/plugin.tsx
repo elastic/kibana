@@ -9,7 +9,7 @@
 import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';
-import { IndexPatternFieldEditorStart } from '../../../src/plugins/index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../../src/plugins/data_view_field_editor/public';
 
 interface StartDeps {
   data: DataPublicPluginStart;

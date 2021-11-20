@@ -25,7 +25,7 @@ import {
   IndexPattern,
   IndexPatternField,
 } from '../../../src/plugins/data/public';
-import { IndexPatternFieldEditorStart } from '../../../src/plugins/index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../../src/plugins/data_view_field_editor/public';
 
 interface Props {
   indexPattern?: IndexPattern;
