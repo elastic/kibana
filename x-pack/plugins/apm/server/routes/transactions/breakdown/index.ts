@@ -15,7 +15,6 @@ import {
   SPAN_SELF_TIME_SUM,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-  TRANSACTION_BREAKDOWN_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { rangeQuery, kqlQuery } from '../../../../../observability/server';
@@ -49,11 +48,6 @@ export async function getTransactionBreakdown({
     sum_all_self_times: {
       sum: {
         field: SPAN_SELF_TIME_SUM,
-      },
-    },
-    total_transaction_breakdown_count: {
-      sum: {
-        field: TRANSACTION_BREAKDOWN_COUNT,
       },
     },
     types: {
@@ -92,15 +86,7 @@ export async function getTransactionBreakdown({
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
-    {
-      bool: {
-        should: [
-          { exists: { field: SPAN_SELF_TIME_SUM } },
-          { exists: { field: TRANSACTION_BREAKDOWN_COUNT } },
-        ],
-        minimum_should_match: 1,
-      },
-    },
+    { exists: { field: SPAN_SELF_TIME_SUM } },
   ];
 
   if (transactionName) {
