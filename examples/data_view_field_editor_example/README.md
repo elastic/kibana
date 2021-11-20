@@ -1,6 +1,6 @@
-## data view field editor example
+## Data view field editor example
 
-This example drata view field editor app shows how to:
+This example data view field editor app shows how to:
  - Edit data view fields via flyout
  - Delete data view runtime fields with modal confirm prompt
 
