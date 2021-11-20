@@ -42,11 +42,6 @@ export class DashboardContainerFactoryDefinition
 {
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
-  private readonly persistableStateService: EmbeddablePersistableStateService;
-
-  public inject: EmbeddablePersistableStateService['inject'];
-
-  public extract: EmbeddablePersistableStateService['extract'];
 
   public inject: EmbeddablePersistableStateService['inject'];
   public extract: EmbeddablePersistableStateService['extract'];

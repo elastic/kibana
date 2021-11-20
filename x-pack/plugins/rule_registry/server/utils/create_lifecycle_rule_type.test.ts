@@ -276,7 +276,6 @@ describe('createLifecycleRuleTypeFactory', () => {
           return castArray(val);
         });
 
-        // @ts-expect-error 4.3.5 upgrade
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
             hits: [{ fields: stored } as any],

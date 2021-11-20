@@ -534,7 +534,7 @@
     "@types/hapi__inert": "^5.2.3",
     "@types/has-ansi": "^3.0.0",
     "@types/he": "^1.1.1",
-    "@types/history": "^4.7.3",
+    "@types/history": "^4.7.9",
     "@types/hjson": "^2.4.2",
     "@types/http-proxy": "^1.17.4",
     "@types/http-proxy-agent": "^2.0.2",
