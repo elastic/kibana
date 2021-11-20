@@ -94,6 +94,38 @@
           },
           {
             "parentPluginId": "reporting",
+            "id": "def-public.ReportingAPIClient.getKibanaAppHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaAppHref",
+            "description": [],
+            "signature": [
+              "(job: ",
+              "Job",
+              ") => string"
+            ],
+            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.getKibanaAppHref.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "job",
+                "description": [],
+                "signature": [
+                  "Job"
+                ],
+                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
             "id": "def-public.ReportingAPIClient.getReportURL",
             "type": "Function",
             "tags": [],
@@ -160,7 +192,7 @@
             "label": "deleteReport",
             "description": [],
             "signature": [
-              "(jobId: string) => Promise<any>"
+              "(jobId: string) => Promise<void>"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -236,7 +268,7 @@
             "label": "total",
             "description": [],
             "signature": [
-              "() => Promise<any>"
+              "() => Promise<number>"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -435,7 +467,7 @@
             "label": "createImmediateReport",
             "description": [],
             "signature": [
-              "(baseParams: { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => Promise<any>"
+              "(baseParams: { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => Promise<unknown>"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -555,7 +587,9 @@
             "label": "verifyBrowser",
             "description": [],
             "signature": [
-              "() => Promise<any>"
+              "() => Promise<",
+              "DiagnoseResponse",
+              ">"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -570,7 +604,9 @@
             "label": "verifyScreenCapture",
             "description": [],
             "signature": [
-              "() => Promise<any>"
+              "() => Promise<",
+              "DiagnoseResponse",
+              ">"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -585,7 +621,7 @@
             "label": "migrateReportingIndicesIlmPolicy",
             "description": [],
             "signature": [
-              "() => Promise<any>"
+              "() => Promise<unknown>"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -823,9 +859,224 @@
       }
     ],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "reporting",
+        "id": "def-public.JobParamsDownloadCSV",
+        "type": "Interface",
+        "tags": [],
+        "label": "JobParamsDownloadCSV",
+        "description": [],
+        "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.JobParamsDownloadCSV.browserTimezone",
+            "type": "string",
+            "tags": [],
+            "label": "browserTimezone",
+            "description": [],
+            "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.JobParamsDownloadCSV.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.JobParamsDownloadCSV.searchSource",
+            "type": "Object",
+            "tags": [],
+            "label": "searchSource",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceFields",
+                "text": "SearchSourceFields"
+              }
+            ],
+            "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.JobParamsDownloadCSV.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-public.JobParamsPNGV2",
+        "type": "Interface",
+        "tags": [],
+        "label": "JobParamsPNGV2",
+        "description": [],
+        "signature": [
+          "JobParamsPNGV2",
+          " extends { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/png_v2.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.JobParamsPNGV2.layout",
+            "type": "Object",
+            "tags": [],
+            "label": "layout",
+            "description": [],
+            "signature": [
+              "{ id: string; dimensions?: { width: number; height: number; } | undefined; }"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/export_types/png_v2.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.JobParamsPNGV2.locatorParams",
+            "type": "Object",
+            "tags": [],
+            "label": "locatorParams",
+            "description": [
+              "\nThis value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page."
+            ],
+            "signature": [
+              "LocatorParams",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/export_types/png_v2.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "reporting",
+        "id": "def-public.JobAppParamsPDF",
+        "type": "Type",
+        "tags": [],
+        "label": "JobAppParamsPDF",
+        "description": [],
+        "signature": [
+          "{ title: string; layout: { id: string; dimensions?: { width: number; height: number; } | undefined; }; objectType: string; relativeUrls: string[]; isDeprecated?: boolean | undefined; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-public.JobAppParamsPDFV2",
+        "type": "Type",
+        "tags": [],
+        "label": "JobAppParamsPDFV2",
+        "description": [],
+        "signature": [
+          "{ title: string; layout: { id: string; dimensions?: { width: number; height: number; } | undefined; }; objectType: string; locatorParams: ",
+          "LocatorParams",
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">[]; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf_v2.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-public.JobParamsCSV",
+        "type": "Type",
+        "tags": [],
+        "label": "JobParamsCSV",
+        "description": [],
+        "signature": [
+          "BaseParamsCSV & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-public.JobParamsPDF",
+        "type": "Type",
+        "tags": [],
+        "label": "JobParamsPDF",
+        "description": [],
+        "signature": [
+          "BaseParamsPDF & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-public.JobParamsPDFV2",
+        "type": "Type",
+        "tags": [],
+        "label": "JobParamsPDFV2",
+        "description": [],
+        "signature": [
+          "BaseParamsPDFV2 & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf_v2.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-public.JobParamsPNG",
+        "type": "Type",
+        "tags": [],
+        "label": "JobParamsPNG",
+        "description": [],
+        "signature": [
+          "BaseParamsPNG & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/png.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "start": {
       "parentPluginId": "reporting",
@@ -944,13 +1195,20 @@
           },
           {
             "parentPluginId": "reporting",
-            "id": "def-server.ReportingCore.getKibanaVersion",
+            "id": "def-server.ReportingCore.getKibanaPackageInfo",
             "type": "Function",
             "tags": [],
-            "label": "getKibanaVersion",
+            "label": "getKibanaPackageInfo",
             "description": [],
             "signature": [
-              "() => string"
+              "() => ",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.PackageInfo",
+                "text": "PackageInfo"
+              }
             ],
             "path": "x-pack/plugins/reporting/server/core.ts",
             "deprecated": false,
@@ -1561,6 +1819,59 @@
           },
           {
             "parentPluginId": "reporting",
+            "id": "def-server.ReportingCore.getDataViewsService",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewsService",
+            "description": [],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewsService",
+                "text": "DataViewsService"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/reporting/server/core.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-server.ReportingCore.getDataViewsService.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/plugins/reporting/server/core.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getDataService",
             "type": "Function",
             "tags": [],
@@ -1955,6 +2266,125 @@
     "interfaces": [
       {
         "parentPluginId": "reporting",
+        "id": "def-server.JobParamsDownloadCSV",
+        "type": "Interface",
+        "tags": [],
+        "label": "JobParamsDownloadCSV",
+        "description": [],
+        "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.JobParamsDownloadCSV.browserTimezone",
+            "type": "string",
+            "tags": [],
+            "label": "browserTimezone",
+            "description": [],
+            "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.JobParamsDownloadCSV.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.JobParamsDownloadCSV.searchSource",
+            "type": "Object",
+            "tags": [],
+            "label": "searchSource",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceFields",
+                "text": "SearchSourceFields"
+              }
+            ],
+            "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.JobParamsDownloadCSV.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-server.JobParamsPNGV2",
+        "type": "Interface",
+        "tags": [],
+        "label": "JobParamsPNGV2",
+        "description": [],
+        "signature": [
+          "JobParamsPNGV2",
+          " extends { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/png_v2.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.JobParamsPNGV2.layout",
+            "type": "Object",
+            "tags": [],
+            "label": "layout",
+            "description": [],
+            "signature": [
+              "{ id: string; dimensions?: { width: number; height: number; } | undefined; }"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/export_types/png_v2.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.JobParamsPNGV2.locatorParams",
+            "type": "Object",
+            "tags": [],
+            "label": "locatorParams",
+            "description": [
+              "\nThis value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page."
+            ],
+            "signature": [
+              "LocatorParams",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/reporting/common/types/export_types/png_v2.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
         "id": "def-server.ReportingConfig",
         "type": "Interface",
         "tags": [],
@@ -2187,7 +2617,7 @@
               "TaskScheduling",
               ", \"schedule\" | \"runNow\" | \"ephemeralRunNow\" | \"ensureScheduled\"> & Pick<",
               "TaskStore",
-              ", \"remove\" | \"fetch\" | \"get\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
+              ", \"fetch\" | \"get\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
             ],
             "path": "x-pack/plugins/reporting/server/types.ts",
             "deprecated": false
@@ -2197,7 +2627,64 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "reporting",
+        "id": "def-server.JobParamsCSV",
+        "type": "Type",
+        "tags": [],
+        "label": "JobParamsCSV",
+        "description": [],
+        "signature": [
+          "BaseParamsCSV & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-server.JobParamsPDF",
+        "type": "Type",
+        "tags": [],
+        "label": "JobParamsPDF",
+        "description": [],
+        "signature": [
+          "BaseParamsPDF & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-server.JobParamsPDFV2",
+        "type": "Type",
+        "tags": [],
+        "label": "JobParamsPDFV2",
+        "description": [],
+        "signature": [
+          "BaseParamsPDFV2 & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf_v2.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "reporting",
+        "id": "def-server.JobParamsPNG",
+        "type": "Type",
+        "tags": [],
+        "label": "JobParamsPNG",
+        "description": [],
+        "signature": [
+          "BaseParamsPNG & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/reporting/common/types/export_types/png.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "start": {
       "parentPluginId": "reporting",

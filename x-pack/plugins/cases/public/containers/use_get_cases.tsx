@@ -19,7 +19,7 @@ import {
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getCases, patchCase } from './api';
-import { useOwnerContext } from '../components/owner_context/use_owner_context';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 
 export interface UseGetCasesState {
   data: AllCases;
@@ -145,7 +145,7 @@ export const useGetCases = (
     initialFilterOptions?: Partial<FilterOptions>;
   } = {}
 ): UseGetCases => {
-  const owner = useOwnerContext();
+  const { owner } = useCasesContext();
   const { initialQueryParams = empty, initialFilterOptions = empty } = params;
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,

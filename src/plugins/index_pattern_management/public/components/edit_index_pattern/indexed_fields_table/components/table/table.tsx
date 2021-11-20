@@ -163,8 +163,8 @@ const runtimeIconTipTitle = i18n.translate(
 );
 
 const runtimeIconTipText = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipText',
-  { defaultMessage: 'This field exists on the index pattern only.' }
+  'indexPatternManagement.editDataView.fields.table.runtimeIconTipText',
+  { defaultMessage: 'This field exists on the data view only.' }
 );
 
 interface IndexedFieldProps {
@@ -225,7 +225,7 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
 
 export class Table extends PureComponent<IndexedFieldProps> {
   renderBooleanTemplate(value: string, arialLabel: string) {
-    return value ? <EuiIcon type="dot" color="secondary" aria-label={arialLabel} /> : <span />;
+    return value ? <EuiIcon type="dot" color="success" aria-label={arialLabel} /> : <span />;
   }
 
   renderFieldType(type: string, isConflict: boolean) {
@@ -319,6 +319,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
             onClick: editField,
             type: 'icon',
             'data-test-subj': 'editFieldFormat',
+            available: (field) => field.isUserEditable,
           },
         ],
         width: '40px',
@@ -333,7 +334,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
             onClick: (field) => deleteField(field.name),
             type: 'icon',
             'data-test-subj': 'deleteField',
-            available: (field) => !field.isMapped,
+            available: (field) => !field.isMapped && field.isUserEditable,
           },
         ],
         width: '40px',

@@ -407,16 +407,24 @@ export function DashboardTopNav({
       const timeRange = timefilter.getTime();
       ShowShareModal({
         share,
+        timeRange,
         kibanaVersion,
         anchorElement,
         dashboardCapabilities,
+        dashboardSessionStorage,
         currentDashboardState: currentState,
         savedDashboard: dashboardAppState.savedDashboard,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
-        timeRange,
       });
     },
-    [dashboardAppState, dashboardCapabilities, share, kibanaVersion, timefilter]
+    [
+      share,
+      timefilter,
+      kibanaVersion,
+      dashboardAppState,
+      dashboardCapabilities,
+      dashboardSessionStorage,
+    ]
   );
 
   const dashboardTopNavActions = useMemo(() => {
@@ -494,7 +502,7 @@ export function DashboardTopNav({
             {
               'data-test-subj': 'dashboardUnsavedChangesBadge',
               badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
-              color: 'secondary',
+              color: 'success',
             },
           ]
         : undefined;

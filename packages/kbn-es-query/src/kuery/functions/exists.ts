@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPatternFieldBase, IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
 import * as literal from '../node_types/literal';
 

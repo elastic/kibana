@@ -5,20 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useMemo } from 'react';
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed } from '@kbn/test/jest';
 
 // This import needs to come first as it contains the jest.mocks
-import { setupEnvironment, getCommonActions, WithFieldEditorDependencies } from './helpers';
-import {
-  FieldEditor,
-  FieldEditorFormState,
-  Props,
-} from '../../public/components/field_editor/field_editor';
+import { setupEnvironment, mockDocuments } from './helpers';
+import { FieldEditorFormState, Props } from '../../public/components/field_editor/field_editor';
 import type { Field } from '../../public/types';
-import type { RuntimeFieldPainlessError } from '../../public/lib';
-import { setup, FieldEditorTestBed, defaultProps } from './field_editor.helpers';
+import { setSearchResponse } from './field_editor_flyout_preview.helpers';
+import {
+  setup,
+  FieldEditorTestBed,
+  waitForDocumentsAndPreviewUpdate,
+} from './field_editor.helpers';
 
 describe('<FieldEditor />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -42,18 +40,14 @@ describe('<FieldEditor />', () => {
     let promise: ReturnType<FieldEditorFormState['submit']>;
 
     await act(async () => {
-      // We can't await for the promise here as the validation for the
-      // "script" field has a setTimeout which is mocked by jest. If we await
-      // we don't have the chance to call jest.advanceTimersByTime and thus the
-      // test times out.
+      // We can't await for the promise here ("await state.submit()") as the validation for the
+      // "script" field has different setTimeout mocked by jest.
+      // If we await here (await state.submit()) we don't have the chance to call jest.advanceTimersByTime()
+      // below and the test times out.
       promise = state.submit();
     });
 
-    await act(async () => {
-      // The painless syntax validation has a timeout set to 600ms
-      // we give it a bit more time just to be on the safe side
-      jest.advanceTimersByTime(1000);
-    });
+    await waitForDocumentsAndPreviewUpdate();
 
     await act(async () => {
       promise.then((response) => {
@@ -61,7 +55,13 @@ describe('<FieldEditor />', () => {
       });
     });
 
-    return formState!;
+    if (formState === undefined) {
+      throw new Error(
+        `The form state is not defined, this probably means that the promise did not resolve due to an unresolved validation.`
+      );
+    }
+
+    return formState;
   };
 
   beforeAll(() => {
@@ -75,6 +75,7 @@ describe('<FieldEditor />', () => {
 
   beforeEach(async () => {
     onChange = jest.fn();
+    setSearchResponse(mockDocuments);
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
   });
 
@@ -88,7 +89,7 @@ describe('<FieldEditor />', () => {
 
       try {
         expect(isOn).toBe(false);
-      } catch (e) {
+      } catch (e: any) {
         e.message = `"${row}" row toggle expected to be 'off' but was 'on'. \n${e.message}`;
         throw e;
       }
@@ -177,75 +178,6 @@ describe('<FieldEditor />', () => {
       component.update();
 
       expect(getLastStateUpdate().isValid).toBe(true);
-      expect(form.getErrorsMessages()).toEqual([]);
-    });
-
-    test('should clear the painless syntax error whenever the field type changes', async () => {
-      const field: Field = {
-        name: 'myRuntimeField',
-        type: 'keyword',
-        script: { source: 'emit(6)' },
-      };
-
-      const dummyError = {
-        reason: 'Awwww! Painless syntax error',
-        message: '',
-        position: { offset: 0, start: 0, end: 0 },
-        scriptStack: [''],
-      };
-
-      const ComponentToProvidePainlessSyntaxErrors = () => {
-        const [error, setError] = useState<RuntimeFieldPainlessError | null>(null);
-        const clearError = useMemo(() => () => setError(null), []);
-        const syntaxError = useMemo(() => ({ error, clear: clearError }), [error, clearError]);
-
-        return (
-          <>
-            <FieldEditor {...defaultProps} field={field} syntaxError={syntaxError} />
-
-            {/* Button to forward dummy syntax error */}
-            <button onClick={() => setError(dummyError)} data-test-subj="setPainlessErrorButton">
-              Set painless error
-            </button>
-          </>
-        );
-      };
-
-      let testBedToCapturePainlessErrors: TestBed<string>;
-
-      await act(async () => {
-        testBedToCapturePainlessErrors = await registerTestBed(
-          WithFieldEditorDependencies(ComponentToProvidePainlessSyntaxErrors),
-          {
-            memoryRouter: {
-              wrapComponent: false,
-            },
-          }
-        )();
-      });
-
-      testBed = {
-        ...testBedToCapturePainlessErrors!,
-        actions: getCommonActions(testBedToCapturePainlessErrors!),
-      };
-
-      const {
-        form,
-        component,
-        find,
-        actions: { fields },
-      } = testBed;
-
-      // We set some dummy painless error
-      act(() => {
-        find('setPainlessErrorButton').simulate('click');
-      });
-      component.update();
-
-      expect(form.getErrorsMessages()).toEqual(['Awwww! Painless syntax error']);
-
-      // We change the type and expect the form error to not be there anymore
-      await fields.updateType('keyword');
       expect(form.getErrorsMessages()).toEqual([]);
     });
   });

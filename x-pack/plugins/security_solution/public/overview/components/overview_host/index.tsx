@@ -11,7 +11,7 @@ import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo, useCallback } from 'react';
 
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { ESQuery } from '../../../../common/typed_json';
 import { ID as OverviewHostQueryId, useHostOverview } from '../../containers/overview_host';
 import { HeaderSection } from '../../../common/components/header_section';
@@ -57,7 +57,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   const goToHost = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         path: getHostDetailsUrl('allHosts', urlSearch),
       });

@@ -58,7 +58,15 @@ export interface CustomPaletteParams {
   colorStops?: ColorStop[];
   steps?: number;
 }
+export type CustomPaletteParamsConfig = CustomPaletteParams & {
+  maxSteps?: number;
+};
 
-export type RequiredPaletteParamTypes = Required<CustomPaletteParams>;
+export type RequiredPaletteParamTypes = Required<CustomPaletteParams> & {
+  maxSteps?: number;
+};
 
-export type LayerType = 'data' | 'threshold';
+export type LayerType = 'data' | 'referenceLine';
+
+// Shared by XY Chart and Heatmap as for now
+export type ValueLabelConfig = 'hide' | 'inside' | 'outside';

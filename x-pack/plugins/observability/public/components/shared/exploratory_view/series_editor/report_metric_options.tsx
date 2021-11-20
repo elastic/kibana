@@ -13,6 +13,8 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiBadge,
+  EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -33,7 +35,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const metricOptions = seriesConfig?.metricOptions;
 
-  const { indexPatterns } = useAppIndexPatternContext();
+  const { indexPatterns, indexPatternErrors, loading } = useAppIndexPatternContext();
 
   const onChange = (value?: string) => {
     setSeries(seriesId, {
@@ -47,6 +49,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   }
 
   const indexPattern = indexPatterns?.[series.dataType];
+  const indexPatternError = indexPatternErrors?.[series.dataType];
 
   const options = (metricOptions ?? []).map(({ label, field, id }) => {
     let disabled = false;
@@ -78,6 +81,21 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
     };
   });
 
+  if (indexPatternError && !indexPattern && !loading) {
+    // TODO: Add a link to docs to explain how to add index patterns
+    return (
+      <EuiText color="danger" className="eui-textNoWrap">
+        {indexPatternError.body.error === 'Forbidden'
+          ? NO_PERMISSIONS
+          : indexPatternError.body.message}
+      </EuiText>
+    );
+  }
+
+  if (!indexPattern && !loading) {
+    return <EuiText>{NO_DATA_AVAILABLE}</EuiText>;
+  }
+
   return (
     <>
       {!series.selectedMetricField && (
@@ -88,6 +106,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"
+              isLoading={!indexPattern && loading}
             >
               {SELECT_REPORT_METRIC_LABEL}
             </EuiButton>
@@ -107,19 +126,23 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
           </EuiListGroup>
         </EuiPopover>
       )}
-      {series.selectedMetricField && (
-        <EuiBadge
-          iconType="cross"
-          iconSide="right"
-          iconOnClick={() => onChange(undefined)}
-          iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
-        >
-          {
-            seriesConfig?.metricOptions?.find((option) => option.id === series.selectedMetricField)
-              ?.label
-          }
-        </EuiBadge>
-      )}
+      {series.selectedMetricField &&
+        (indexPattern ? (
+          <EuiBadge
+            iconType="cross"
+            iconSide="right"
+            iconOnClick={() => onChange(undefined)}
+            iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
+          >
+            {
+              seriesConfig?.metricOptions?.find(
+                (option) => option.id === series.selectedMetricField
+              )?.label
+            }
+          </EuiBadge>
+        ) : (
+          <EuiLoadingSpinner />
+        ))}
     </>
   );
 }
@@ -137,3 +160,12 @@ const REMOVE_REPORT_METRIC_LABEL = i18n.translate(
     defaultMessage: 'Remove report metric',
   }
 );
+
+const NO_DATA_AVAILABLE = i18n.translate('xpack.observability.expView.seriesEditor.noData', {
+  defaultMessage: 'No data available',
+});
+
+const NO_PERMISSIONS = i18n.translate('xpack.observability.expView.seriesEditor.noPermissions', {
+  defaultMessage:
+    "Unable to create Index Pattern. You don't have the required permission, please contact your admin.",
+});

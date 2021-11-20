@@ -10,168 +10,185 @@ import { i18n } from '@kbn/i18n';
 
 export const ControlGroupStrings = {
   getEmbeddableTitle: () =>
-    i18n.translate('presentationUtil.inputControls.controlGroup.title', {
+    i18n.translate('presentationUtil.controls.controlGroup.title', {
       defaultMessage: 'Control group',
     }),
+  emptyState: {
+    getCallToAction: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.emptyState.callToAction', {
+        defaultMessage: 'Controls let you filter and interact with your dashboard data',
+      }),
+    getAddControlButtonTitle: () =>
+      i18n.translate(
+        'presentationUtil.inputControls.controlGroup.emptyState.addControlButtonTitle',
+        {
+          defaultMessage: 'Add control',
+        }
+      ),
+    getTwoLineLoadingTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.emptyState.twoLineLoadingTitle', {
+        defaultMessage: '...',
+      }),
+  },
   manageControl: {
-    getFlyoutTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.flyoutTitle', {
-        defaultMessage: 'Manage control',
+    getFlyoutCreateTitle: () =>
+      i18n.translate(
+        'presentationUtil.inputControls.controlGroup.manageControl.createFlyoutTitle',
+        {
+          defaultMessage: 'Create control',
+        }
+      ),
+    getFlyoutEditTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.editFlyoutTitle', {
+        defaultMessage: 'Edit control',
       }),
     getTitleInputTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.titleInputTitle', {
+      i18n.translate('presentationUtil.controls.controlGroup.manageControl.titleInputTitle', {
         defaultMessage: 'Title',
       }),
     getWidthInputTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.widthInputTitle', {
-        defaultMessage: 'Control width',
+        defaultMessage: 'Control size',
       }),
     getSaveChangesTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.saveChangesTitle', {
+      i18n.translate('presentationUtil.controls.controlGroup.manageControl.saveChangesTitle', {
         defaultMessage: 'Save and close',
       }),
     getCancelTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.cancelTitle', {
+      i18n.translate('presentationUtil.controls.controlGroup.manageControl.cancelTitle', {
         defaultMessage: 'Cancel',
       }),
   },
   management: {
     getAddControlTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.management.addControl', {
+      i18n.translate('presentationUtil.controls.controlGroup.management.addControl', {
         defaultMessage: 'Add control',
       }),
     getManageButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.buttonTitle', {
-        defaultMessage: 'Manage controls',
+        defaultMessage: 'Configure controls',
       }),
     getFlyoutTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.flyoutTitle', {
-        defaultMessage: 'Manage controls',
+        defaultMessage: 'Configure controls',
       }),
     getDefaultWidthTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.defaultWidthTitle', {
-        defaultMessage: 'Default width',
+        defaultMessage: 'Default size',
       }),
     getLayoutTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.management.layoutTitle', {
+      i18n.translate('presentationUtil.controls.controlGroup.management.layoutTitle', {
         defaultMessage: 'Layout',
       }),
     getDeleteButtonTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.management.delete', {
+      i18n.translate('presentationUtil.controls.controlGroup.management.delete', {
         defaultMessage: 'Delete control',
       }),
     getSetAllWidthsToDefaultTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.setAllWidths', {
-        defaultMessage: 'Set all widths to default',
+        defaultMessage: 'Set all sizes to default',
       }),
     getDeleteAllButtonTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteAll', {
+      i18n.translate('presentationUtil.controls.controlGroup.management.deleteAll', {
         defaultMessage: 'Delete all',
       }),
     controlWidth: {
       getWidthSwitchLegend: () =>
         i18n.translate(
-          'presentationUtil.inputControls.controlGroup.management.layout.controlWidthLegend',
+          'presentationUtil.controls.controlGroup.management.layout.controlWidthLegend',
           {
-            defaultMessage: 'Change control width',
+            defaultMessage: 'Change control size',
           }
         ),
       getAutoWidthTitle: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.layout.auto', {
+        i18n.translate('presentationUtil.controls.controlGroup.management.layout.auto', {
           defaultMessage: 'Auto',
         }),
       getSmallWidthTitle: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.layout.small', {
+        i18n.translate('presentationUtil.controls.controlGroup.management.layout.small', {
           defaultMessage: 'Small',
         }),
       getMediumWidthTitle: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.layout.medium', {
+        i18n.translate('presentationUtil.controls.controlGroup.management.layout.medium', {
           defaultMessage: 'Medium',
         }),
       getLargeWidthTitle: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.layout.large', {
+        i18n.translate('presentationUtil.controls.controlGroup.management.layout.large', {
           defaultMessage: 'Large',
         }),
     },
     controlStyle: {
       getDesignSwitchLegend: () =>
         i18n.translate(
-          'presentationUtil.inputControls.controlGroup.management.layout.designSwitchLegend',
+          'presentationUtil.controls.controlGroup.management.layout.designSwitchLegend',
           {
             defaultMessage: 'Switch control designs',
           }
         ),
       getSingleLineTitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.layout.singleLine', {
-          defaultMessage: 'Single line layout',
+          defaultMessage: 'Single line',
         }),
       getTwoLineTitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.layout.twoLine', {
-          defaultMessage: 'Two line layout',
+          defaultMessage: 'Double line',
         }),
     },
     deleteControls: {
       getDeleteAllTitle: () =>
-        i18n.translate(
-          'presentationUtil.inputControls.controlGroup.management.delete.deleteAllTitle',
-          {
-            defaultMessage: 'Delete all controls?',
-          }
-        ),
+        i18n.translate('presentationUtil.controls.controlGroup.management.delete.deleteAllTitle', {
+          defaultMessage: 'Delete all controls?',
+        }),
       getDeleteTitle: () =>
-        i18n.translate(
-          'presentationUtil.inputControls.controlGroup.management.delete.deleteTitle',
-          {
-            defaultMessage: 'Delete control?',
-          }
-        ),
+        i18n.translate('presentationUtil.controls.controlGroup.management.delete.deleteTitle', {
+          defaultMessage: 'Delete control?',
+        }),
       getSubtitle: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.delete.sub', {
+        i18n.translate('presentationUtil.controls.controlGroup.management.delete.sub', {
           defaultMessage: 'Controls are not recoverable once removed.',
         }),
       getConfirm: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.delete.confirm', {
+        i18n.translate('presentationUtil.controls.controlGroup.management.delete.confirm', {
           defaultMessage: 'Delete',
         }),
       getCancel: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.delete.cancel', {
+        i18n.translate('presentationUtil.controls.controlGroup.management.delete.cancel', {
           defaultMessage: 'Cancel',
         }),
     },
     discardChanges: {
       getTitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.discard.title', {
-          defaultMessage: 'Discard?',
+          defaultMessage: 'Discard changes?',
         }),
       getSubtitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.discard.sub', {
-          defaultMessage:
-            'Discard changes to this control? Changes are not recoverable once discardsd.',
+          defaultMessage: `Changes that you've made to this control will be discarded, are you sure you want to continue?`,
         }),
       getConfirm: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.discard.confirm', {
-          defaultMessage: 'Discard',
+          defaultMessage: 'Discard changes',
         }),
       getCancel: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.discard.cancel', {
+        i18n.translate('presentationUtil.controls.controlGroup.management.discard.cancel', {
           defaultMessage: 'Cancel',
         }),
     },
     discardNewControl: {
       getTitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteNew.title', {
-          defaultMessage: 'Discard?',
+          defaultMessage: 'Discard new control',
         }),
       getSubtitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteNew.sub', {
-          defaultMessage: 'Discard new control? Controls are not recoverable once discarded.',
+          defaultMessage: `Changes that you've made to this control will be discarded, are you sure you want to continue?`,
         }),
       getConfirm: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteNew.confirm', {
-          defaultMessage: 'Discard',
+          defaultMessage: 'Discard control',
         }),
       getCancel: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteNew.cancel', {
+        i18n.translate('presentationUtil.controls.controlGroup.management.deleteNew.cancel', {
           defaultMessage: 'Cancel',
         }),
     },
@@ -179,10 +196,10 @@ export const ControlGroupStrings = {
   floatingActions: {
     getEditButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.floatingActions.editTitle', {
-        defaultMessage: 'Manage control',
+        defaultMessage: 'Edit control',
       }),
     getRemoveButtonTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.floatingActions.removeTitle', {
+      i18n.translate('presentationUtil.controls.controlGroup.floatingActions.removeTitle', {
         defaultMessage: 'Remove control',
       }),
   },

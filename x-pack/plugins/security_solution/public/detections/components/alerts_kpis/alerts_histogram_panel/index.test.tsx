@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
 
-import { esQuery, Filter } from '../../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 import { TestProviders } from '../../../../common/mock';
 import { SecurityPageName } from '../../../../app/types';
 
@@ -122,7 +122,7 @@ describe('AlertsHistogramPanel', () => {
           preventDefault: jest.fn(),
         });
 
-      expect(mockNavigateToApp).toBeCalledWith('securitySolution', {
+      expect(mockNavigateToApp).toBeCalledWith('securitySolutionUI', {
         deepLinkId: SecurityPageName.alerts,
         path: '',
       });
@@ -133,10 +133,11 @@ describe('AlertsHistogramPanel', () => {
   describe('Query', () => {
     it('it render with a illegal KQL', async () => {
       await act(async () => {
-        const spyOnBuildEsQuery = jest.spyOn(esQuery, 'buildEsQuery');
-        spyOnBuildEsQuery.mockImplementation(() => {
-          throw new Error('Something went wrong');
-        });
+        jest.mock('@kbn/es-query', () => ({
+          buildEsQuery: jest.fn().mockImplementation(() => {
+            throw new Error('Something went wrong');
+          }),
+        }));
         const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
         const wrapper = mount(
           <TestProviders>
@@ -170,7 +171,7 @@ describe('AlertsHistogramPanel', () => {
 
       await waitFor(() => {
         expect(mockGetAlertsHistogramQuery.mock.calls[0]).toEqual([
-          'signal.rule.name',
+          'kibana.alert.rule.name',
           '2020-07-07T08:20:18.966Z',
           '2020-07-08T08:20:18.966Z',
           [
@@ -196,7 +197,7 @@ describe('AlertsHistogramPanel', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'signal.status',
+          key: 'kibana.alert.workflow_status',
           negate: false,
           params: {
             query: 'open',
@@ -205,7 +206,7 @@ describe('AlertsHistogramPanel', () => {
         },
         query: {
           term: {
-            'signal.status': 'open',
+            'kibana.alert.workflow_status': 'open',
           },
         },
       };
@@ -223,13 +224,13 @@ describe('AlertsHistogramPanel', () => {
 
       await waitFor(() => {
         expect(mockGetAlertsHistogramQuery.mock.calls[1]).toEqual([
-          'signal.rule.name',
+          'kibana.alert.rule.name',
           '2020-07-07T08:20:18.966Z',
           '2020-07-08T08:20:18.966Z',
           [
             {
               bool: {
-                filter: [{ term: { 'signal.status': 'open' } }],
+                filter: [{ term: { 'kibana.alert.workflow_status': 'open' } }],
                 must: [],
                 must_not: [],
                 should: [],

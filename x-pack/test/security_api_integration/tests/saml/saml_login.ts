@@ -7,7 +7,7 @@
 
 import { stringify } from 'query-string';
 import url from 'url';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
@@ -468,7 +468,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await setTimeoutAsync(20000);
       });
 
       const expectNewSessionCookie = (cookie: Cookie) => {
@@ -568,7 +568,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
       });
 
       it('should redirect user to a page that would capture URL fragment', async () => {
@@ -639,7 +639,7 @@ export default function ({ getService }: FtrProviderContext) {
         ['when access token is valid', async () => {}],
         // Scenario when active cookie has an expired access token. Access token expiration is set
         // to 15s for API integration tests so we need to wait for 20s to make sure token expires.
-        ['when access token is expired', async () => await delay(20000)],
+        ['when access token is expired', async () => await setTimeoutAsync(20000)],
         // Scenario when active cookie references to access/refresh token pair that were already
         // removed from Elasticsearch (to simulate 24h when expired tokens are removed).
         [
@@ -650,7 +650,7 @@ export default function ({ getService }: FtrProviderContext) {
               body: { query: { match: { doc_type: 'token' } } },
               refresh: true,
             });
-            expect(esResponse.body).to.have.property('deleted').greaterThan(0);
+            expect(esResponse).to.have.property('deleted').greaterThan(0);
           },
         ],
       ];

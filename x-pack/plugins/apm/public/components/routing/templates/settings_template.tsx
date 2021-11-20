@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { CoreStart } from 'kibana/public';
 import { ApmMainTemplate } from './apm_main_template';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { getAPMHref } from '../../shared/Links/apm/APMLink';
+import { getLegacyApmHref } from '../../shared/Links/apm/APMLink';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -69,7 +69,7 @@ function getTabs({
       label: i18n.translate('xpack.apm.settings.agentConfig', {
         defaultMessage: 'Agent Configuration',
       }),
-      href: getAPMHref({
+      href: getLegacyApmHref({
         basePath,
         path: `/settings/agent-configuration`,
         search,
@@ -80,7 +80,7 @@ function getTabs({
       label: i18n.translate('xpack.apm.settings.anomalyDetection', {
         defaultMessage: 'Anomaly detection',
       }),
-      href: getAPMHref({
+      href: getLegacyApmHref({
         basePath,
         path: `/settings/anomaly-detection`,
         search,
@@ -92,21 +92,29 @@ function getTabs({
       label: i18n.translate('xpack.apm.settings.customizeApp', {
         defaultMessage: 'Customize app',
       }),
-      href: getAPMHref({ basePath, path: `/settings/customize-ui`, search }),
+      href: getLegacyApmHref({
+        basePath,
+        path: `/settings/customize-ui`,
+        search,
+      }),
     },
     {
       key: 'apm-indices',
       label: i18n.translate('xpack.apm.settings.indices', {
         defaultMessage: 'Indices',
       }),
-      href: getAPMHref({ basePath, path: `/settings/apm-indices`, search }),
+      href: getLegacyApmHref({
+        basePath,
+        path: `/settings/apm-indices`,
+        search,
+      }),
     },
     {
       key: 'schema',
       label: i18n.translate('xpack.apm.settings.schema', {
         defaultMessage: 'Schema',
       }),
-      href: getAPMHref({ basePath, path: `/settings/schema`, search }),
+      href: getLegacyApmHref({ basePath, path: `/settings/schema`, search }),
     },
   ];
 

@@ -26,9 +26,8 @@ const INSTRUCTIONS_TYPE = {
   ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud',
 };
 
-const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('home.breadcrumbs.addDataTitle', {
-  defaultMessage: 'Add data',
+const integrationsTitle = i18n.translate('home.breadcrumbs.integrationsAppTitle', {
+  defaultMessage: 'Integrations',
 });
 
 class TutorialUi extends React.Component {
@@ -80,12 +79,8 @@ class TutorialUi extends React.Component {
 
     getServices().chrome.setBreadcrumbs([
       {
-        text: homeTitle,
-        href: '#/',
-      },
-      {
-        text: addDataTitle,
-        href: '#/tutorial_directory',
+        text: integrationsTitle,
+        href: this.props.addBasePath('/app/integrations/browse'),
       },
       {
         text: tutorial ? tutorial.name : this.props.tutorialId,
@@ -426,6 +421,7 @@ class TutorialUi extends React.Component {
             iconType={icon}
             isBeta={this.state.tutorial.isBeta}
             notices={this.renderModuleNotices()}
+            basePath={getServices().http.basePath}
           />
 
           {this.renderInstructionSetsToggle()}

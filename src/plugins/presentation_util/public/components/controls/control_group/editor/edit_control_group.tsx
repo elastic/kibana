@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiTitle,
   EuiSpacer,
@@ -17,13 +17,16 @@ import {
   EuiButtonGroup,
   EuiButtonEmpty,
   EuiFlyoutHeader,
+  EuiCheckbox,
+  EuiFlyoutFooter,
+  EuiButton,
 } from '@elastic/eui';
 
 import {
   CONTROL_LAYOUT_OPTIONS,
   CONTROL_WIDTH_OPTIONS,
   DEFAULT_CONTROL_WIDTH,
-} from '../control_group_constants';
+} from './editor_constants';
 import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../../../services';
 import { ControlStyle, ControlWidth } from '../../types';
@@ -31,7 +34,13 @@ import { ControlGroupStrings } from '../control_group_strings';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
 
-export const EditControlGroup = () => {
+interface EditControlGroupState {
+  newControlStyle: ControlGroupInput['controlStyle'];
+  newDefaultWidth: ControlGroupInput['defaultControlWidth'];
+  setAllWidths: boolean;
+}
+
+export const EditControlGroup = ({ closeFlyout }: { closeFlyout: () => void }) => {
   const { overlays } = pluginServices.getHooks();
   const { openConfirm } = overlays.useService();
 
@@ -41,9 +50,28 @@ export const EditControlGroup = () => {
     useEmbeddableDispatch,
     actions: { setControlStyle, setAllControlWidths, setDefaultControlWidth },
   } = useReduxContainerContext<ControlGroupInput, typeof controlGroupReducers>();
-
   const dispatch = useEmbeddableDispatch();
   const { panels, controlStyle, defaultControlWidth } = useEmbeddableSelector((state) => state);
+
+  const [state, setState] = useState<EditControlGroupState>({
+    newControlStyle: controlStyle,
+    newDefaultWidth: defaultControlWidth,
+    setAllWidths: false,
+  });
+
+  const onSave = () => {
+    const { newControlStyle, newDefaultWidth, setAllWidths } = state;
+    if (newControlStyle && newControlStyle !== controlStyle) {
+      dispatch(setControlStyle(newControlStyle));
+    }
+    if (newDefaultWidth && newDefaultWidth !== defaultControlWidth) {
+      dispatch(setDefaultControlWidth(newDefaultWidth));
+    }
+    if (setAllWidths && newDefaultWidth) {
+      dispatch(setAllControlWidths(newDefaultWidth));
+    }
+    closeFlyout();
+  };
 
   return (
     <>
@@ -58,46 +86,37 @@ export const EditControlGroup = () => {
             color="primary"
             legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
             options={CONTROL_LAYOUT_OPTIONS}
-            idSelected={controlStyle}
+            idSelected={state.newControlStyle}
             onChange={(newControlStyle) =>
-              dispatch(setControlStyle(newControlStyle as ControlStyle))
+              setState((s) => ({ ...s, newControlStyle: newControlStyle as ControlStyle }))
             }
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
         <EuiFormRow label={ControlGroupStrings.management.getDefaultWidthTitle()}>
-          <EuiFlexGroup direction={'row'}>
-            <EuiFlexItem>
-              <EuiButtonGroup
-                color="primary"
-                idSelected={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
-                legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-                options={CONTROL_WIDTH_OPTIONS}
-                onChange={(newWidth: string) =>
-                  dispatch(setDefaultControlWidth(newWidth as ControlWidth))
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={() =>
-                  dispatch(setAllControlWidths(defaultControlWidth ?? DEFAULT_CONTROL_WIDTH))
-                }
-                aria-label={'delete-all'}
-                iconType="returnKey"
-                size="s"
-              >
-                {ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiButtonGroup
+            color="primary"
+            idSelected={state.newDefaultWidth ?? DEFAULT_CONTROL_WIDTH}
+            legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+            options={CONTROL_WIDTH_OPTIONS}
+            onChange={(newDefaultWidth: string) =>
+              setState((s) => ({ ...s, newDefaultWidth: newDefaultWidth as ControlWidth }))
+            }
+          />
         </EuiFormRow>
-
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="s" />
+        <EuiCheckbox
+          id="editControls_setAllSizesCheckbox"
+          label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
+          checked={state.setAllWidths}
+          onChange={(e) => setState((s) => ({ ...s, setAllWidths: e.target.checked }))}
+        />
+        <EuiSpacer size="l" />
 
         <EuiButtonEmpty
           onClick={() => {
             if (!containerActions?.removeEmbeddable) return;
+            closeFlyout();
             openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
               confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
               cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
@@ -119,6 +138,33 @@ export const EditControlGroup = () => {
           {ControlGroupStrings.management.getDeleteAllButtonTitle()}
         </EuiButtonEmpty>
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              aria-label={`cancel-editing-group`}
+              iconType="cross"
+              onClick={() => {
+                closeFlyout();
+              }}
+            >
+              {ControlGroupStrings.manageControl.getCancelTitle()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              aria-label={`save-group`}
+              iconType="check"
+              color="primary"
+              onClick={() => {
+                onSave();
+              }}
+            >
+              {ControlGroupStrings.manageControl.getSaveChangesTitle()}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </>
   );
 };

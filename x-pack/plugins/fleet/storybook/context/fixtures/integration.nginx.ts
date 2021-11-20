@@ -295,6 +295,7 @@ export const response: GetInfoResponse['response'] = {
       ilm_policy: [],
       index_template: [],
       transform: [],
+      ml_model: [],
     },
   },
   policy_templates: [

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
 
@@ -19,8 +20,8 @@ import {
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import { userLoginEvent } from '../audit';
+import type { AuditServiceSetup } from '../audit';
+import { accessAgreementAcknowledgedEvent, userLoginEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -77,7 +78,6 @@ export interface ProviderLoginAttempt {
 }
 
 export interface AuthenticatorOptions {
-  legacyAuditLogger: SecurityAuditLogger;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
@@ -197,18 +197,21 @@ export class Authenticator {
   /**
    * Session instance.
    */
-  private readonly session = this.options.session;
+  private readonly session: AuthenticatorOptions['session'];
 
   /**
    * Internal authenticator logger.
    */
-  private readonly logger = this.options.loggers.get('authenticator');
+  private readonly logger: Logger;
 
   /**
    * Instantiates Authenticator and bootstrap configured providers.
    * @param options Authenticator options.
    */
   constructor(private readonly options: Readonly<AuthenticatorOptions>) {
+    this.session = this.options.session;
+    this.logger = this.options.loggers.get('authenticator');
+
     const providerCommonOptions = {
       client: this.options.clusterClient,
       basePath: this.options.basePath,
@@ -465,9 +468,12 @@ export class Authenticator {
       accessAgreementAcknowledged: true,
     });
 
-    this.options.legacyAuditLogger.accessAgreementAcknowledged(
-      currentUser.username,
-      existingSessionValue.provider
+    const auditLogger = this.options.audit.asScoped(request);
+    auditLogger.log(
+      accessAgreementAcknowledgedEvent({
+        username: currentUser.username,
+        provider: existingSessionValue.provider,
+      })
     );
 
     this.options.featureUsageService.recordPreAccessAgreementUsage();
@@ -804,10 +810,7 @@ export class Authenticator {
    * @param providerType Type of the provider that handles logout. If not specified, then the first
    * provider in the chain (default) is assumed.
    */
-  private getLoggedOutURL(
-    request: KibanaRequest,
-    providerType: string = this.options.config.authc.sortedProviders[0].type
-  ) {
+  private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
     // The app that handles logout needs to know the reason of the logout and the URL we may need to
     // redirect user to once they log in again (e.g. when session expires).
     const searchParams = new URLSearchParams();
@@ -823,7 +826,12 @@ export class Authenticator {
 
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
-    return this.options.config.authc.selector.enabled || shouldProviderUseLoginForm(providerType)
+    return this.options.config.authc.selector.enabled ||
+      (providerType
+        ? shouldProviderUseLoginForm(providerType)
+        : this.options.config.authc.sortedProviders.length > 0
+        ? shouldProviderUseLoginForm(this.options.config.authc.sortedProviders[0].type)
+        : false)
       ? `${this.options.basePath.serverBasePath}/login?${searchParams.toString()}`
       : `${this.options.basePath.serverBasePath}/security/logged_out?${searchParams.toString()}`;
   }

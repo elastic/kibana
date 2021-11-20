@@ -40,6 +40,7 @@ import {
   INDICATOR_INDEX_PATTERNS,
   INDICATOR_INDEX_QUERY,
   INDICATOR_MAPPING,
+  INDICATOR_PREFIX_OVERRIDE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -102,13 +103,19 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
+import {
+  SCHEDULE_INTERVAL_AMOUNT_INPUT,
+  SCHEDULE_INTERVAL_UNITS_INPUT,
+  SCHEDULE_LOOKBACK_AMOUNT_INPUT,
+  SCHEDULE_LOOKBACK_UNITS_INPUT,
+} from '../../screens/create_new_rule';
 import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { goBackToAllRulesTable } from '../../tasks/rule_details';
 
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
-import { DEFAULT_THREAT_MATCH_QUERY } from '../../../common/constants';
+const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -383,6 +390,19 @@ describe('indicator match', () => {
           getIndicatorMappingComboField(2).should('not.exist');
         });
       });
+
+      describe('Schedule', () => {
+        it('IM rule has 1h time interval and lookback by default', () => {
+          selectIndicatorMatchType();
+          fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
+          fillAboutRuleAndContinue(getNewThreatIndicatorRule());
+
+          cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', '1');
+          cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', 'h');
+          cy.get(SCHEDULE_LOOKBACK_AMOUNT_INPUT).invoke('val').should('eql', '5');
+          cy.get(SCHEDULE_LOOKBACK_UNITS_INPUT).invoke('val').should('eql', 'm');
+        });
+      });
     });
 
     describe('Generating signals', () => {
@@ -391,7 +411,8 @@ describe('indicator match', () => {
         loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       });
 
-      it('Creates and activates a new Indicator Match rule', () => {
+      // Skipping until we fix dupe mitigation
+      it.skip('Creates and activates a new Indicator Match rule', () => {
         waitForAlertsPanelToBeLoaded();
         waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
@@ -428,6 +449,10 @@ describe('indicator match', () => {
         cy.get(ABOUT_DETAILS).within(() => {
           getDetails(SEVERITY_DETAILS).should('have.text', getNewThreatIndicatorRule().severity);
           getDetails(RISK_SCORE_DETAILS).should('have.text', getNewThreatIndicatorRule().riskScore);
+          getDetails(INDICATOR_PREFIX_OVERRIDE).should(
+            'have.text',
+            getNewThreatIndicatorRule().threatIndicatorPath
+          );
           getDetails(REFERENCE_URLS_DETAILS).should((details) => {
             expect(removeExternalLinkText(details.text())).equal(expectedUrls);
           });
@@ -489,7 +514,7 @@ describe('indicator match', () => {
           .should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
-      it('Investigate alert in timeline', () => {
+      it.skip('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();

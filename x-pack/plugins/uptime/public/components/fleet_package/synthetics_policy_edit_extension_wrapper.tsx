@@ -71,9 +71,11 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
         };
 
         enableTLS =
-          formattedDefaultConfigForMonitorType[ConfigKeys.METADATA].is_tls_enabled || false;
+          formattedDefaultConfigForMonitorType[ConfigKeys.METADATA].is_tls_enabled ||
+          Boolean(vars?.[ConfigKeys.TLS_VERIFICATION_MODE]?.value);
         enableZipUrlTLS =
-          formattedDefaultConfigForMonitorType[ConfigKeys.METADATA].is_zip_url_tls_enabled || false;
+          formattedDefaultConfigForMonitorType[ConfigKeys.METADATA].is_zip_url_tls_enabled ||
+          Boolean(vars?.[ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]?.value);
 
         const formattedDefaultConfig: Partial<PolicyConfig> = {
           [type]: formattedDefaultConfigForMonitorType,
@@ -97,6 +99,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
         defaultMonitorType={monitorType}
         defaultIsTLSEnabled={isTLSEnabled}
         defaultIsZipUrlTLSEnabled={isZipUrlTLSEnabled}
+        isEditable={true}
       >
         <TLSFieldsContextProvider defaultValues={isTLSEnabled ? defaultTLSConfig : undefined}>
           <HTTPContextProvider defaultValues={fullDefaultConfig?.[DataStream.HTTP]}>

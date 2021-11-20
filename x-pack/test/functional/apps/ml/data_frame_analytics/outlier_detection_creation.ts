@@ -217,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
 
-          await ml.testExecution.logTestStep('sets the create index pattern switch');
+          await ml.testExecution.logTestStep('sets the create data view switch');
           await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
           await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
             testData.createIndexPattern

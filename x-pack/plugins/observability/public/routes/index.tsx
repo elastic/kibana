@@ -7,13 +7,10 @@
 
 import * as t from 'io-ts';
 import React from 'react';
-import { alertWorkflowStatusRt } from '../../common/typings';
+import { casesPath } from '../../common';
 import { ExploratoryViewPage } from '../components/shared/exploratory_view';
 import { AlertsPage } from '../pages/alerts';
-import { AllCasesPage } from '../pages/cases/all_cases';
-import { CaseDetailsPage } from '../pages/cases/case_details';
-import { ConfigureCasesPage } from '../pages/cases/configure_cases';
-import { CreateCasePage } from '../pages/cases/create_case';
+import { CasesPage } from '../pages/cases';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
@@ -36,12 +33,14 @@ export const routes = {
       return <HomePage />;
     },
     params: {},
+    exact: true,
   },
   '/landing': {
     handler: () => {
       return <LandingPage />;
     },
     params: {},
+    exact: true,
   },
   '/overview': {
     handler: ({ query }: any) => {
@@ -55,49 +54,23 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
+    exact: true,
   },
-  '/cases': {
+  [casesPath]: {
     handler: () => {
-      return <AllCasesPage />;
+      return <CasesPage />;
     },
     params: {},
-  },
-  '/cases/create': {
-    handler: () => {
-      return <CreateCasePage />;
-    },
-    params: {},
-  },
-  '/cases/configure': {
-    handler: () => {
-      return <ConfigureCasesPage />;
-    },
-    params: {},
-  },
-  '/cases/:detailName': {
-    handler: () => {
-      return <CaseDetailsPage />;
-    },
-    params: {
-      path: t.partial({
-        detailName: t.string,
-      }),
-    },
+    exact: false,
   },
   '/alerts': {
-    handler: (routeParams: any) => {
-      return <AlertsPage routeParams={routeParams} />;
+    handler: () => {
+      return <AlertsPage />;
     },
     params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        kuery: t.string,
-        workflowStatus: alertWorkflowStatusRt,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
+      // Technically gets a '_a' param by using Kibana URL state sync helpers
     },
+    exact: true,
   },
   '/exploratory-view/': {
     handler: () => {
@@ -111,5 +84,6 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
+    exact: true,
   },
 };

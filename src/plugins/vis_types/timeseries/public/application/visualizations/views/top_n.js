@@ -120,13 +120,15 @@ export class TopN extends Component {
               maxWidth: this.state.labelMaxWidth,
             },
           },
-          onClick: {
+          onClickStyle: {
             row: {
               cursor: 'pointer',
             },
           },
         },
-        this.props
+        {
+          onClickStyle: typeof this.props.onClick === 'function',
+        }
       );
       return (
         <tr key={key} onClick={this.handleClick({ lastValue, ...item })} style={styles.row}>
@@ -180,7 +182,6 @@ export class TopN extends Component {
 
 TopN.defaultProps = {
   tickFormatter: (n) => n,
-  onClick: (i) => i,
   direction: 'desc',
 };
 

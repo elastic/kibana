@@ -18,7 +18,7 @@ export const schema = {
     defaultValue: '',
     helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
       defaultMessage:
-        'Use an asterisk (*) to match multiple characters. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+        'Enter an index pattern that matches one or more data sources. Use an asterisk (*) to match multiple characters. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
     }),
     validations: [
       {
@@ -47,16 +47,16 @@ export const schema = {
   },
   id: {
     label: i18n.translate('indexPatternEditor.editor.form.customIdLabel', {
-      defaultMessage: 'Custom index pattern ID',
+      defaultMessage: 'Custom data view ID',
     }),
     helpText: i18n.translate('indexPatternEditor.editor.form.customIdHelp', {
       defaultMessage:
-        'Kibana provides a unique identifier for each index pattern, or you can create your own.',
+        'Kibana provides a unique identifier for each data view, or you can create your own.',
     }),
   },
   type: {
     label: i18n.translate('indexPatternEditor.editor.form.TypeLabel', {
-      defaultMessage: 'Index pattern type',
+      defaultMessage: 'Data view type',
     }),
     defaultValue: INDEX_PATTERN_TYPE.DEFAULT,
   },

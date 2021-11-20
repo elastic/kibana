@@ -11,8 +11,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Story } from '@storybook/react';
 
 const bar = '#c5ced8';
-const panel = '#f7f9fa';
-const background = '#e0e6ec';
+const panel = '#ffff';
+const background = '#FAFBFD';
 const minHeight = 60;
 
 const panelStyle = {
@@ -23,12 +23,10 @@ const panelStyle = {
 
 const kqlBarStyle = { background: bar, padding: 16, minHeight, fontStyle: 'italic' };
 
-const inputBarStyle = { background: '#fff', padding: 4 };
-
 const layout = (OptionStory: Story) => (
   <EuiFlexGroup style={{ background }} direction="column">
     <EuiFlexItem style={kqlBarStyle}>KQL Bar</EuiFlexItem>
-    <EuiFlexItem style={inputBarStyle}>
+    <EuiFlexItem>
       <OptionStory />
     </EuiFlexItem>
     <EuiFlexItem>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const RULE_EXECUTION_LOG_PROVIDER = 'rule-execution.security';
+export const RULE_EXECUTION_LOG_PROVIDER = 'securitySolution.ruleExecution';
 
 export const ALERT_SAVED_OBJECT_TYPE = 'alert';
 

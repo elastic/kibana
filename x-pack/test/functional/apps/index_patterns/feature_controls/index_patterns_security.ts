@@ -64,6 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_index_patterns_all_role'),
@@ -179,7 +180,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does not show Management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Discover']);
+        expect(navLinks).to.eql(['Discover']);
       });
 
       it(`doesn't show Index Patterns in management side-nav`, async () => {

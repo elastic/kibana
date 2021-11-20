@@ -123,11 +123,11 @@ describe('Connectors', () => {
     ).toBe('Update My Connector');
   });
 
-  test('it shows the deprecated callout when the connector is legacy', async () => {
+  test('it shows the deprecated callout when the connector is deprecated', async () => {
     render(
       <Connectors
         {...props}
-        selectedConnector={{ id: 'servicenow-legacy', type: ConnectorTypes.serviceNowITSM }}
+        selectedConnector={{ id: 'servicenow-uses-table-api', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
         // wrapper: TestProviders produces a TS error
@@ -135,12 +135,8 @@ describe('Connectors', () => {
       }
     );
 
-    expect(screen.getByText('Deprecated connector type')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'This connector type is deprecated. Create a new connector or update this connector'
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText('This connector type is deprecated')).toBeInTheDocument();
+    expect(screen.getByText('Update this connector, or create a new one.')).toBeInTheDocument();
   });
 
   test('it does not shows the deprecated callout when the connector is none', async () => {

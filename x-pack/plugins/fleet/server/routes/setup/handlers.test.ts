@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { httpServerMock } from 'src/core/server/mocks';
+import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 import type { PostFleetSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services/app_context';
 import { setupFleet } from '../../services/setup';
+import type { FleetRequestHandlerContext } from '../../types';
 
 import { fleetSetupHandler } from './handlers';
 
 jest.mock('../../services/setup', () => {
   return {
+    ...jest.requireActual('../../services/setup'),
     setupFleet: jest.fn(),
   };
 });
@@ -24,12 +26,19 @@ jest.mock('../../services/setup', () => {
 const mockSetupFleet = setupFleet as jest.MockedFunction<typeof setupFleet>;
 
 describe('FleetSetupHandler', () => {
-  let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+  let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
   beforeEach(async () => {
-    context = xpackMocks.createRequestHandlerContext();
+    context = {
+      ...xpackMocks.createRequestHandlerContext(),
+      fleet: {
+        epm: {
+          internalSoClient: savedObjectsClientMock.create(),
+        },
+      },
+    };
     response = httpServerMock.createResponseFactory();
     request = httpServerMock.createKibanaRequest({
       method: 'post',

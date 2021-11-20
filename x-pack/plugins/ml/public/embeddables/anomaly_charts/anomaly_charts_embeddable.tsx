@@ -64,8 +64,7 @@ export class AnomalyChartsEmbeddable extends Embeddable<
 
       // First get list of unique indices from the selected jobs
       const indices = new Set(jobs.map((j) => j.datafeed_config.indices).flat());
-
-      // Then find the index patterns assuming the index pattern title matches the index name
+      // Then find the data view assuming the data view title matches the index name
       const indexPatterns: Record<string, DataView> = {};
       for (const indexName of indices) {
         const response = await indexPatternsService.find(`"${indexName}"`);
@@ -83,12 +82,12 @@ export class AnomalyChartsEmbeddable extends Embeddable<
         indexPatterns: Object.values(indexPatterns),
       });
     } catch (e) {
-      // Unable to find and load index pattern but we can ignore the error
+      // Unable to find and load data view but we can ignore the error
       // as we only load it to support the filter & query bar
       // the visualizations should still work correctly
 
       // eslint-disable-next-line no-console
-      console.error(`Unable to load index patterns for ${jobIds}`, e);
+      console.error(`Unable to load data views for ${jobIds}`, e);
     }
   }
 

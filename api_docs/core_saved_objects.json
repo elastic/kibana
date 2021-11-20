@@ -1073,7 +1073,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
+              "\"conflict\" | \"aliasMatch\" | \"exactMatch\""
             ],
             "path": "src/core/public/saved_objects/types.ts",
             "deprecated": false
@@ -4423,51 +4423,6 @@
                 "path": "src/core/server/saved_objects/service/lib/errors.ts",
                 "deprecated": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError",
-            "type": "Function",
-            "tags": [],
-            "label": "createGenericNotFoundEsUnavailableError",
-            "description": [],
-            "signature": [
-              "(type?: string | null, id?: string | null) => ",
-              "DecoratedError"
-            ],
-            "path": "src/core/server/saved_objects/service/lib/errors.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "string | null"
-                ],
-                "path": "src/core/server/saved_objects/service/lib/errors.ts",
-                "deprecated": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "core",
-                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string | null"
-                ],
-                "path": "src/core/server/saved_objects/service/lib/errors.ts",
-                "deprecated": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -14079,7 +14034,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
+              "\"conflict\" | \"aliasMatch\" | \"exactMatch\""
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
@@ -14279,6 +14234,23 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsServiceSetup.getKibanaIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaIndex",
+            "description": [
+              "\nReturns the default index used for saved objects."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/core/server/saved_objects/saved_objects_service.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -15510,7 +15482,7 @@
           },
           "<T> extends Pick<",
           "SavedObject",
-          "<T>, \"type\" | \"id\" | \"version\" | \"namespaces\" | \"updated_at\" | \"error\" | \"migrationVersion\" | \"coreMigrationVersion\" | \"originId\">"
+          "<T>, \"version\" | \"type\" | \"id\" | \"namespaces\" | \"migrationVersion\" | \"coreMigrationVersion\" | \"error\" | \"updated_at\" | \"originId\">"
         ],
         "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
         "deprecated": false,
@@ -16789,6 +16761,10 @@
           " & { dynamic?: false | \"strict\" | undefined; }) | (",
           "MappingHistogramProperty",
           " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingDenseVectorProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingAggregateMetricDoubleProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
           "MappingObjectProperty",
           " & { dynamic?: false | \"strict\" | undefined; }) | (",
           "MappingNestedProperty",
@@ -16807,7 +16783,23 @@
           " & { dynamic?: false | \"strict\" | undefined; }) | (",
           "MappingKeywordProperty",
           " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingNumberProperty",
+          "MappingFloatNumberProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingHalfFloatNumberProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingDoubleNumberProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingIntegerNumberProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingLongNumberProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingShortNumberProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingByteNumberProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingUnsignedLongNumberProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }) | (",
+          "MappingScaledFloatNumberProperty",
           " & { dynamic?: false | \"strict\" | undefined; }) | (",
           "MappingLongRangeProperty",
           " & { dynamic?: false | \"strict\" | undefined; }) | (",

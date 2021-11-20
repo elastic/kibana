@@ -7,13 +7,14 @@
 
 import { Logger, CoreSetup } from 'kibana/server';
 import moment from 'moment';
+import { IEventLogService } from '../../../event_log/server';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../task_manager/server';
 import { PreConfiguredAction } from '../types';
-import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
+import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 
@@ -24,9 +25,17 @@ export function initializeActionsTelemetry(
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
   kibanaIndex: string,
-  preconfiguredActions: PreConfiguredAction[]
+  preconfiguredActions: PreConfiguredAction[],
+  eventLog: IEventLogService
 ) {
-  registerActionsTelemetryTask(logger, taskManager, core, kibanaIndex, preconfiguredActions);
+  registerActionsTelemetryTask(
+    logger,
+    taskManager,
+    core,
+    kibanaIndex,
+    preconfiguredActions,
+    eventLog
+  );
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -38,13 +47,20 @@ function registerActionsTelemetryTask(
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
   kibanaIndex: string,
-  preconfiguredActions: PreConfiguredAction[]
+  preconfiguredActions: PreConfiguredAction[],
+  eventLog: IEventLogService
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, preconfiguredActions),
+      createTaskRunner: telemetryTaskRunner(
+        logger,
+        core,
+        kibanaIndex,
+        preconfiguredActions,
+        eventLog
+      ),
     },
   });
 }
@@ -66,10 +82,12 @@ export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
   kibanaIndex: string,
-  preconfiguredActions: PreConfiguredAction[]
+  preconfiguredActions: PreConfiguredAction[],
+  eventLog: IEventLogService
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
+    const eventLogIndex = eventLog.getIndexPattern();
     const getEsClient = () =>
       core.getStartServices().then(
         ([
@@ -83,9 +101,10 @@ export function telemetryTaskRunner(
         const esClient = await getEsClient();
         return Promise.all([
           getTotalCount(esClient, kibanaIndex, preconfiguredActions),
-          getInUseTotalCount(esClient, kibanaIndex),
+          getInUseTotalCount(esClient, kibanaIndex, undefined, preconfiguredActions),
+          getExecutionsPerDayCount(esClient, eventLogIndex),
         ])
-          .then(([totalAggegations, totalInUse]) => {
+          .then(([totalAggegations, totalInUse, totalExecutionsPerDay]) => {
             return {
               state: {
                 runs: (state.runs || 0) + 1,
@@ -94,6 +113,15 @@ export function telemetryTaskRunner(
                 count_active_total: totalInUse.countTotal,
                 count_active_by_type: totalInUse.countByType,
                 count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
+                count_active_email_connectors_by_service_type: totalInUse.countEmailByService,
+                count_actions_namespaces: totalInUse.countNamespaces,
+                count_actions_executions_per_day: totalExecutionsPerDay.countTotal,
+                count_actions_executions_by_type_per_day: totalExecutionsPerDay.countByType,
+                count_actions_executions_failed_per_day: totalExecutionsPerDay.countFailed,
+                count_actions_executions_failed_by_type_per_day:
+                  totalExecutionsPerDay.countFailedByType,
+                avg_execution_time_per_day: totalExecutionsPerDay.avgExecutionTime,
+                avg_execution_time_by_type_per_day: totalExecutionsPerDay.avgExecutionTimeByType,
               },
               runAt: getNextMidnight(),
             };

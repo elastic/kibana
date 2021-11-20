@@ -64,10 +64,7 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
     ],
     hasOperationType: false,
     filterFields: [
-      {
-        field: TRANSACTION_URL,
-        isNegated: false,
-      },
+      TRANSACTION_URL,
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
       USER_AGENT_DEVICE,

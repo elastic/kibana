@@ -9,7 +9,7 @@
 import { CoreStart } from 'kibana/public';
 
 import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../services/embeddable';
-import { DashboardContainer } from '../../application/embeddable';
+import { DashboardContainer } from '../../application/embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../../application/test_helpers';
 import {
   ContactCardEmbeddable,

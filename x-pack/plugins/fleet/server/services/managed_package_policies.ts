@@ -6,9 +6,13 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import semverGte from 'semver/functions/gte';
 
-import type { UpgradePackagePolicyDryRunResponseItem } from '../../common';
-import { AUTO_UPDATE_PACKAGES } from '../../common';
+import type {
+  Installation,
+  PackageInfo,
+  UpgradePackagePolicyDryRunResponseItem,
+} from '../../common';
 
 import { appContextService } from './app_context';
 import { getInstallation, getPackageInfo } from './epm/packages';
@@ -16,7 +20,7 @@ import { packagePolicyService } from './package_policy';
 
 export interface UpgradeManagedPackagePoliciesResult {
   packagePolicyId: string;
-  diff: UpgradePackagePolicyDryRunResponseItem['diff'];
+  diff?: UpgradePackagePolicyDryRunResponseItem['diff'];
   errors: any;
 }
 
@@ -49,15 +53,16 @@ export const upgradeManagedPackagePolicies = async (
       pkgName: packagePolicy.package.name,
     });
 
-    const isPolicyVersionAlignedWithInstalledVersion =
-      packageInfo.version === installedPackage?.version;
+    if (!installedPackage) {
+      results.push({
+        packagePolicyId,
+        errors: [`${packagePolicy.package.name} is not installed`],
+      });
 
-    const shouldUpgradePolicies =
-      !isPolicyVersionAlignedWithInstalledVersion &&
-      (AUTO_UPDATE_PACKAGES.some((pkg) => pkg.name === packageInfo.name) ||
-        packageInfo.keepPoliciesUpToDate);
+      continue;
+    }
 
-    if (shouldUpgradePolicies) {
+    if (shouldUpgradePolicies(packageInfo, installedPackage)) {
       // Since upgrades don't report diffs/errors, we need to perform a dry run first in order
       // to notify the user of any granular policy upgrade errors that occur during Fleet's
       // preconfiguration check
@@ -67,7 +72,10 @@ export const upgradeManagedPackagePolicies = async (
       );
 
       if (dryRunResults.hasErrors) {
-        const errors = dryRunResults.diff?.[1].errors;
+        const errors = dryRunResults.diff
+          ? dryRunResults.diff?.[1].errors
+          : [dryRunResults.body?.message];
+
         appContextService
           .getLogger()
           .error(
@@ -91,3 +99,15 @@ export const upgradeManagedPackagePolicies = async (
 
   return results;
 };
+
+export function shouldUpgradePolicies(
+  packageInfo: PackageInfo,
+  installedPackage: Installation
+): boolean {
+  const isPolicyVersionGteInstalledVersion = semverGte(
+    packageInfo.version,
+    installedPackage.version
+  );
+
+  return !isPolicyVersionGteInstalledVersion && !!packageInfo.keepPoliciesUpToDate;
+}

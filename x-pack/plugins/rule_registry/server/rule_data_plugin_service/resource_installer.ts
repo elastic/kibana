@@ -6,7 +6,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 
@@ -85,7 +85,7 @@ export class ResourceInstaller {
       // We can install them in parallel
       await Promise.all([
         this.createOrUpdateLifecyclePolicy({
-          policy: getResourceName(DEFAULT_ILM_POLICY_ID),
+          name: getResourceName(DEFAULT_ILM_POLICY_ID),
           body: defaultLifecyclePolicy,
         }),
 
@@ -116,7 +116,7 @@ export class ResourceInstaller {
 
       if (ilmPolicy != null) {
         await this.createOrUpdateLifecyclePolicy({
-          policy: indexInfo.getIlmPolicyName(),
+          name: indexInfo.getIlmPolicyName(),
           body: { policy: ilmPolicy },
         });
       }
@@ -309,12 +309,14 @@ export class ResourceInstaller {
 
         template: {
           settings: {
+            hidden: true,
             'index.lifecycle': {
               name: ilmPolicyName,
               // TODO: fix the types in the ES package, they don't include rollover_alias???
               // @ts-expect-error
               rollover_alias: primaryNamespacedAlias,
             },
+            'index.mapping.total_fields.limit': 1100,
           },
           mappings: {
             dynamic: false,
@@ -385,7 +387,7 @@ export class ResourceInstaller {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
 
-    logger.debug(`Installing lifecycle policy ${policy.policy}`);
+    logger.debug(`Installing lifecycle policy ${policy.name}`);
     return clusterClient.ilm.putLifecycle(policy);
   }
 

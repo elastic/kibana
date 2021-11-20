@@ -11,7 +11,7 @@ import pMap from 'p-map';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENTS_PREFIX } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
 
@@ -70,8 +70,8 @@ export async function getAgentStatusForAgentPolicy(
           ...[
             kuery,
             filterKuery,
-            `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`,
-            agentPolicyId ? `${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${agentPolicyId}"` : undefined,
+            `${AGENTS_PREFIX}.attributes.active:true`,
+            agentPolicyId ? `${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"` : undefined,
           ]
         ),
       }),

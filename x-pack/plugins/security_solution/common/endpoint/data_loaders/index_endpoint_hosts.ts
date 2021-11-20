@@ -8,9 +8,10 @@
 import { Client } from '@elastic/elasticsearch';
 import { cloneDeep, merge } from 'lodash';
 import { AxiosResponse } from 'axios';
+import uuid from 'uuid';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Agent, CreatePackagePolicyResponse, GetPackagesResponse } from '../../../../fleet/common';
 import { EndpointDocGenerator } from '../generate_data';
 import { HostMetadata, HostPolicyResponse } from '../types';
@@ -139,12 +140,13 @@ export async function indexEndpointHostDocs({
 
     if (enrollFleet) {
       const { id: appliedPolicyId, name: appliedPolicyName } = hostMetadata.Endpoint.policy.applied;
+      const uniqueAppliedPolicyName = `${appliedPolicyName}-${uuid.v4()}`;
 
       // If we don't yet have a "real" policy record, then create it now in ingest (package config)
       if (!realPolicies[appliedPolicyId]) {
         const createdPolicies = await indexFleetEndpointPolicy(
           kbnClient,
-          appliedPolicyName,
+          uniqueAppliedPolicyName,
           epmEndpointPackage.version
         );
 
@@ -290,15 +292,13 @@ export const deleteIndexedEndpointHosts = async (
       },
     };
 
-    response.hosts = (
-      await esClient
-        .deleteByQuery({
-          index: indexedData.metadataIndex,
-          wait_for_completion: true,
-          body,
-        })
-        .catch(wrapErrorAndRejectPromise)
-    ).body;
+    response.hosts = await esClient
+      .deleteByQuery({
+        index: indexedData.metadataIndex,
+        wait_for_completion: true,
+        body,
+      })
+      .catch(wrapErrorAndRejectPromise);
 
     // Delete from the transform destination index
     await esClient
@@ -311,29 +311,27 @@ export const deleteIndexedEndpointHosts = async (
   }
 
   if (indexedData.policyResponses.length) {
-    response.policyResponses = (
-      await esClient
-        .deleteByQuery({
-          index: indexedData.policyResponseIndex,
-          wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      'agent.id': indexedData.policyResponses.map(
-                        (policyResponse) => policyResponse.agent.id
-                      ),
-                    },
+    response.policyResponses = await esClient
+      .deleteByQuery({
+        index: indexedData.policyResponseIndex,
+        wait_for_completion: true,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'agent.id': indexedData.policyResponses.map(
+                      (policyResponse) => policyResponse.agent.id
+                    ),
                   },
-                ],
-              },
+                },
+              ],
             },
           },
-        })
-        .catch(wrapErrorAndRejectPromise)
-    ).body;
+        },
+      })
+      .catch(wrapErrorAndRejectPromise);
   }
 
   merge(response, await deleteIndexedFleetAgents(esClient, indexedData));

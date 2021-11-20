@@ -48,11 +48,11 @@ test(`passes title through if provided`, async () => {
 test(`gets the title from the savedObject`, async () => {
   const createJobMock = jest.fn();
   const title = 'savedTitle';
-  mockRequestHandlerContext.core.savedObjects.client.get.mockResolvedValue(
-    createMockSavedObject({
+  mockRequestHandlerContext.core.savedObjects.client.resolve.mockResolvedValue({
+    saved_object: createMockSavedObject({
       attributes: { title },
-    })
-  );
+    }),
+  } as any);
 
   await compatibilityShim(createJobMock, mockLogger)(
     createMockJobParams({ objectType: 'search', savedObjectId: 'abc' }),
@@ -72,9 +72,9 @@ test(`gets the title from the savedObject`, async () => {
 test(`passes the objectType and savedObjectId to the savedObjectsClient`, async () => {
   const createJobMock = jest.fn();
   const context = mockRequestHandlerContext;
-  context.core.savedObjects.client.get.mockResolvedValue(
-    createMockSavedObject({ attributes: { title: '' } })
-  );
+  context.core.savedObjects.client.resolve.mockResolvedValue({
+    saved_object: createMockSavedObject({ attributes: { title: '' } }),
+  } as any);
 
   const objectType = 'search';
   const savedObjectId = 'abc';
@@ -92,10 +92,8 @@ test(`passes the objectType and savedObjectId to the savedObjectsClient`, async 
   );
   expect(mockLogger.error.mock.calls.length).toBe(0);
 
-  const getMock = context.core.savedObjects.client.get.mock;
-  expect(getMock.calls.length).toBe(1);
-  expect(getMock.calls[0][0]).toBe(objectType);
-  expect(getMock.calls[0][1]).toBe(savedObjectId);
+  expect(context.core.savedObjects.client.resolve).toHaveBeenCalledTimes(1);
+  expect(context.core.savedObjects.client.resolve).toHaveBeenCalledWith(objectType, savedObjectId);
 });
 
 test(`logs no warnings when title and relativeUrls is passed`, async () => {

@@ -19,7 +19,7 @@ describe('DeprecatedCallout', () => {
       wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
     });
 
-    expect(screen.getByText('Deprecated connector type')).toBeInTheDocument();
+    expect(screen.getByText('This connector type is deprecated')).toBeInTheDocument();
   });
 
   test('it calls onMigrate when pressing the button', () => {

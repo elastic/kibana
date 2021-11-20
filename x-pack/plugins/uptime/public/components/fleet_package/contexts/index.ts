@@ -7,7 +7,7 @@
 export {
   PolicyConfigContext,
   PolicyConfigContextProvider,
-  initialValue as defaultMonitorType,
+  initialValue as defaultPolicyConfig,
   usePolicyConfigContext,
 } from './policy_config_context';
 export {

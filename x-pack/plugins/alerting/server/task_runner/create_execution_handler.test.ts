@@ -99,7 +99,7 @@ const createExecutionHandlerParams: jest.Mocked<
     stateVal: 'My other {{state.value}} goes here',
   },
   supportsEphemeralTasks: false,
-  maxEphemeralActionsPerAlert: Promise.resolve(10),
+  maxEphemeralActionsPerAlert: 10,
 };
 
 beforeEach(() => {
@@ -175,7 +175,6 @@ test('enqueues execution per selected action', async () => {
           "kibana": Object {
             "alerting": Object {
               "action_group_id": "default",
-              "action_subgroup": undefined,
               "instance_id": "2",
             },
             "saved_objects": Array [

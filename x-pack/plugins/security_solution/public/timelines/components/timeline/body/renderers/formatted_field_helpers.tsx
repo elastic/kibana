@@ -30,7 +30,7 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../common/constants';
 import { LinkAnchor } from '../../../../../common/components/links';
 
 const EventModuleFlexItem = styled(EuiFlexItem)`
@@ -73,7 +73,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const goToRuleDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
         path: getRuleDetailsUrl(ruleId ?? '', search),
       });
@@ -83,7 +83,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
 
   const href = useMemo(
     () =>
-      getUrlForApp(APP_ID, {
+      getUrlForApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
         path: getRuleDetailsUrl(ruleId ?? '', search),
       }),

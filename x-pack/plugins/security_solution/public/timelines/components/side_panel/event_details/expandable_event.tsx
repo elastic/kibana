@@ -33,6 +33,7 @@ interface Props {
   isDraggable?: boolean;
   loading: boolean;
   messageHeight?: number;
+  rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
   hostRisk: HostRisk | null;
@@ -93,6 +94,7 @@ export const ExpandableEvent = React.memo<Props>(
     loading,
     detailsData,
     hostRisk,
+    rawEventData,
   }) => {
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
@@ -111,6 +113,7 @@ export const ExpandableEvent = React.memo<Props>(
             id={event.eventId}
             isAlert={isAlert}
             isDraggable={isDraggable}
+            rawEventData={rawEventData}
             timelineId={timelineId}
             timelineTabType={timelineTabType}
             hostRisk={hostRisk}

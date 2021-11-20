@@ -61,7 +61,7 @@ export function SyntheticsIntegrationPageProvider({
      * Determines if the policy was created successfully by looking for the creation success toast
      */
     async isPolicyCreatedSuccessfully() {
-      await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
+      await testSubjects.existOrFail('postInstallAddAgentModal');
     },
 
     /**

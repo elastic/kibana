@@ -8,12 +8,7 @@
 import { Store } from 'redux';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type {
-  CoreSetup,
-  Plugin,
-  PluginInitializerContext,
-  CoreStart,
-} from '../../../../src/core/public';
+import type { CoreSetup, Plugin, CoreStart } from '../../../../src/core/public';
 import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from './components';
 import {
   getLastUpdatedLazy,
@@ -32,17 +27,12 @@ import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_tim
 import { getHoverActions } from './components/hover_actions';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
   private _store: Store | undefined;
   private _storage = new Storage(localStorage);
 
   public setup(core: CoreSetup) {}
 
   public start(core: CoreStart, { data }: TimelinesStartPlugins): TimelinesUIStart {
-    const config = this.initializerContext.config.get<{ enabled: boolean }>();
-    if (!config.enabled) {
-      return {} as TimelinesUIStart;
-    }
     return {
       getHoverActions: () => {
         return getHoverActions(this._store);

@@ -8,7 +8,7 @@ pageLoadAssetSize:
   console: 46091
   core: 435325
   crossClusterReplication: 65408
-  dashboard: 374194
+  dashboard: 82025
   dashboardEnhanced: 65646
   devTools: 38637
   discover: 99999
@@ -76,7 +76,7 @@ pageLoadAssetSize:
   watcher: 43598
   runtimeFields: 41752
   stackAlerts: 29684
-  presentationUtil: 94301
+  presentationUtil: 84606
   osquery: 107090
   fileUpload: 25664
   dataVisualizer: 27530
@@ -94,17 +94,17 @@ pageLoadAssetSize:
   expressionShape: 34008
   interactiveSetup: 80000
   expressionTagcloud: 27505
-  securitySolution: 231753
+  securitySolution: 273763
   customIntegrations: 28810
   expressionMetricVis: 23121
   visTypeMetric: 23332
   bfetch: 22837
-  kibanaUtils: 97808
+  kibanaUtils: 79713
   data: 491273
   dataViews: 41532
   expressions: 140958
   fieldFormats: 65209
-  kibanaReact: 99422
+  kibanaReact: 74422
   share: 71239
   uiActions: 35121
   dataEnhanced: 24980

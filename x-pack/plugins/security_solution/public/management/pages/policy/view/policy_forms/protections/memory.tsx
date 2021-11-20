@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SecurityPageName } from '../../../../../../app/types';
 import { Immutable, OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { MemoryProtectionOSes, OS } from '../../../types';
@@ -23,7 +23,7 @@ import { ProtectionSwitch } from '../components/protection_switch';
  *  which will configure for all relevant OSes.
  */
 export const MemoryProtection = React.memo(() => {
-  const OSes: Immutable<MemoryProtectionOSes[]> = [OS.windows];
+  const OSes: Immutable<MemoryProtectionOSes[]> = [OS.windows, OS.mac, OS.linux];
   const protection = 'memory_protection';
   const protectionLabel = i18n.translate(
     'xpack.securitySolution.endpoint.policy.protections.memory',
@@ -36,7 +36,7 @@ export const MemoryProtection = React.memo(() => {
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory_protection', {
         defaultMessage: 'Memory threat',
       })}
-      supportedOss={[OperatingSystem.WINDOWS]}
+      supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
       dataTestSubj="memoryProtectionsForm"
       rightCorner={
         <ProtectionSwitch protection={protection} protectionLabel={protectionLabel} osList={OSes} />
@@ -51,7 +51,7 @@ export const MemoryProtection = React.memo(() => {
           defaultMessage="View {detectionRulesLink}. Prebuilt rules are tagged “Elastic” on the Detection Rules page."
           values={{
             detectionRulesLink: (
-              <LinkToApp appId={APP_ID} deepLinkId={SecurityPageName.rules}>
+              <LinkToApp appId={APP_UI_ID} deepLinkId={SecurityPageName.rules}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policy.details.detectionRulesLink"
                   defaultMessage="related detection rules"

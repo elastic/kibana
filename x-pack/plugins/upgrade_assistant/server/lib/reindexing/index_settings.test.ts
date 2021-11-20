@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockKibanaSemverVersion, mockKibanaVersion } from '../../../common/constants';
+import { MAJOR_VERSION } from '../../../common/constants';
 import { versionService } from '../version';
 import { getMockVersionInfo } from '../__fixtures__/version';
 
@@ -131,7 +131,7 @@ describe('transformFlatSettings', () => {
 
   describe('sourceNameForIndex', () => {
     beforeEach(() => {
-      versionService.setup(mockKibanaVersion);
+      versionService.setup(MAJOR_VERSION);
     });
 
     it('parses internal indices', () => {
@@ -152,7 +152,7 @@ describe('transformFlatSettings', () => {
 
   describe('generateNewIndexName', () => {
     beforeEach(() => {
-      versionService.setup(mockKibanaVersion);
+      versionService.setup(MAJOR_VERSION);
     });
 
     it('parses internal indices', () => {
@@ -186,7 +186,7 @@ describe('transformFlatSettings', () => {
       ).toEqual([]);
     });
 
-    if (mockKibanaSemverVersion.major === 7) {
+    if (currentMajor === 7) {
       describe('[7.x] customTypeName warning', () => {
         it('returns customTypeName warning for non-_doc mapping types', () => {
           expect(

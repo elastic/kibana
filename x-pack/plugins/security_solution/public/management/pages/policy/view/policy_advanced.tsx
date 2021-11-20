@@ -171,10 +171,10 @@ const PolicyAdvanced = React.memo(
         <EuiFormRow
           fullWidth
           label={
-            <EuiFlexGroup>
-              <EuiFlexItem>{configPath.join('.')}</EuiFlexItem>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem grow={true}>{configPath.join('.')}</EuiFlexItem>
               {documentation && (
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiIconTip content={documentation} position="right" />
                 </EuiFlexItem>
               )}

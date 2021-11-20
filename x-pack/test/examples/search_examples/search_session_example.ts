@@ -15,11 +15,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const searchSessions = getService('searchSessions');
 
-  describe('Search session example', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/118921
+  describe.skip('Search session example', () => {
     const appId = 'searchExamples';
 
     before(async function () {
-      const { body } = await es.info();
+      const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {
         log.debug('Skipping because this build does not have the required shard_delay agg');
         this.skip();

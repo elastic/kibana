@@ -12,20 +12,6 @@ You do not need to configure any additional settings to use the
 [[general-security-settings]]
 ==== General security settings
 
-[cols="2*<"]
-|===
-| `xpack.security.enabled`
-  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-  By default, {kib} automatically detects whether to enable the
-  {security-features} based on the license and whether {es} {security-features}
-  are enabled. +
-  +
-  Do not set this to `false`; it disables the login form, user and role management
-  screens, and authorization using <<kibana-privileges>>. To disable
-  {security-features} entirely, see
-  {ref}/security-settings.html[{es} security settings].
-|===
-
 [float]
 [[authentication-security-settings]]
 ==== Authentication security settings
@@ -272,7 +258,7 @@ You can configure the following settings in the `kibana.yml` file.
 
 |[[xpack-session-idleTimeout]] `xpack.security.session.idleTimeout` {ess-icon}
   | Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both
-highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 1 hour.
+highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 8 hours.
 
 2+a|
 [TIP]
@@ -338,52 +324,32 @@ For more details and a reference of audit events, refer to <<xpack-security-audi
 [cols="2*<"]
 |======
 | `xpack.security.audit.enabled` {ess-icon}
-| Set to `true` _and_ configure an appender with `xpack.security.audit.appender` to enable ECS audit logging`. *Default:* `false`
+| Set to `true` to enable audit logging`. *Default:* `false`
 
 2+a| For example:
 [source,yaml]
 ----------------------------------------
 xpack.security.audit.enabled: true
-xpack.security.audit.appender:
+xpack.security.audit.appender: <1>
   type: rolling-file
-  fileName: ./audit.log
+  fileName: ./logs/audit.log
   policy:
     type: time-interval
-    interval: 24h <1>
+    interval: 24h <2>
   strategy:
     type: numeric
-    max: 10 <2>
+    max: 10 <3>
   layout:
     type: json
 ----------------------------------------
-<1> Rotates log files every 24 hours.
-<2> Keeps maximum of 10 log files before deleting older ones.
+<1> This appender is the default and will be used if no `appender.*` config options are specified.
+<2> Rotates log files every 24 hours.
+<3> Keeps maximum of 10 log files before deleting older ones.
 
-[NOTE]
-============
-{ess} does not support custom log file policies. To enable audit logging on {ess} only specify:
+| `xpack.security.audit.appender`
+| Optional. Specifies where audit logs should be written to and how they should be formatted. If no appender is specified, a default appender will be used (see above).
 
-[source,yaml]
-----------------------------------------
-xpack.security.audit.enabled: true
-xpack.security.audit.appender.type: rolling-file
-----------------------------------------
-============
-
-[NOTE]
-============
-deprecated:[7.15.0,"In 8.0 and later, the legacy audit logger will be removed, and this setting will enable the ECS audit logger with a default appender."] To enable the legacy audit logger only specify:
-
-[source,yaml]
-----------------------------------------
-xpack.security.audit.enabled: true
-----------------------------------------
-============
-
-| `xpack.security.audit.appender` {ess-icon}
-| Optional. Specifies where audit logs should be written to and how they should be formatted.
-
-| `xpack.security.audit.appender.type` {ess-icon}
+| `xpack.security.audit.appender.type`
 | Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`. 
 
 Refer to <<audit-logging-file-appender>> and <<audit-logging-rolling-file-appender>> for appender specific settings.

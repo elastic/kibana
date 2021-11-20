@@ -11,7 +11,7 @@ import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 import { ES_CLIENT_HEADERS } from '../client_headers';
 
@@ -40,6 +40,7 @@ export async function loadAction({
   inputDir,
   skipExisting,
   useCreate,
+  docsOnly,
   client,
   log,
   kbnClient,
@@ -47,7 +48,8 @@ export async function loadAction({
   inputDir: string;
   skipExisting: boolean;
   useCreate: boolean;
-  client: KibanaClient;
+  docsOnly?: boolean;
+  client: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
 }) {
@@ -76,7 +78,7 @@ export async function loadAction({
 
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, log }),
+    createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
     createIndexDocRecordsStream(client, stats, progress, useCreate),
   ]);
 

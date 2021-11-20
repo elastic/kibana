@@ -23,7 +23,6 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "eui_theme_vars/package.json",
   "package.json",
   "README.md"
 ]
@@ -36,7 +35,6 @@ RUNTIME_DEPS = [
   "@npm//@elastic/numeral",
   "@npm//@emotion/react",
   "@npm//abortcontroller-polyfill",
-  "@npm//angular",
   "@npm//babel-loader",
   "@npm//babel-plugin-transform-react-remove-prop-types",
   "@npm//core-js",
@@ -48,6 +46,7 @@ RUNTIME_DEPS = [
   "@npm//moment-timezone",
   "@npm//moment",
   "@npm//raw-loader",
+  "@npm//react-ace",
   "@npm//react-dom",
   "@npm//react-intl",
   "@npm//react-is",
@@ -76,7 +75,6 @@ TYPES_DEPS = [
   "@npm//@elastic/numeral",
   "@npm//@emotion/react",
   "@npm//abortcontroller-polyfill",
-  "@npm//angular",
   "@npm//babel-loader",
   "@npm//core-js",
   "@npm//css-loader",

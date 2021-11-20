@@ -9,7 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import semver from 'semver';
+import semverMajor from 'semver/functions/major';
+import semverMinor from 'semver/functions/minor';
+import semverPatch from 'semver/functions/patch';
 
 import type { AgentPolicy } from '../../types';
 import { useKibanaVersion } from '../../hooks';
@@ -17,27 +19,36 @@ import { useKibanaVersion } from '../../hooks';
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
-export const DownloadStep = () => {
+export const DownloadStep = (hasFleetServer: boolean) => {
   const kibanaVersion = useKibanaVersion();
   const kibanaVersionURLString = useMemo(
     () =>
-      `${semver.major(kibanaVersion)}-${semver.minor(kibanaVersion)}-${semver.patch(
-        kibanaVersion
-      )}`,
+      `${semverMajor(kibanaVersion)}-${semverMinor(kibanaVersion)}-${semverPatch(kibanaVersion)}`,
     [kibanaVersion]
   );
+  const title = hasFleetServer
+    ? i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentForFleetServerTitle', {
+        defaultMessage: 'Download the Fleet Server to a centralized host',
+      })
+    : i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentTitle', {
+        defaultMessage: 'Download the Elastic Agent to your host',
+      });
+  const downloadDescription = hasFleetServer ? (
+    <FormattedMessage
+      id="xpack.fleet.agentEnrollment.downloadDescriptionForFleetServer"
+      defaultMessage="Fleet Server runs on an Elastic Agent. Install this agent on a centralized host so that other hosts you wish to monitor can connect to it. In production, we recommend using one or more dedicated hosts. You can download the Elastic Agent binaries and verification signatures from Elastic’s download page."
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.fleet.agentEnrollment.downloadDescription"
+      defaultMessage="Install the Elastic Agent on the hosts you wish to monitor. Do not install this agent policy on a host containing Fleet Server. You can download the Elastic Agent binaries and verification signatures from Elastic’s download page."
+    />
+  );
   return {
-    title: i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentTitle', {
-      defaultMessage: 'Download the Elastic Agent to your host',
-    }),
+    title,
     children: (
       <>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.downloadDescription"
-            defaultMessage="Fleet Server runs on an Elastic Agent. You can download the Elastic Agent binaries and verification signatures from Elastic’s download page."
-          />
-        </EuiText>
+        <EuiText>{downloadDescription}</EuiText>
         <EuiSpacer size="s" />
         <EuiText size="s">
           <FormattedMessage

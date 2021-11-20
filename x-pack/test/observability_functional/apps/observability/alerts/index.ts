@@ -14,31 +14,50 @@ async function asyncForEach<T>(array: T[], callback: (item: T, index: number) =>
   }
 }
 
-const ACTIVE_ALERTS_CELL_COUNT = 48;
-const RECOVERED_ALERTS_CELL_COUNT = 24;
-const TOTAL_ALERTS_CELL_COUNT = 72;
+const ACTIVE_ALERTS_CELL_COUNT = 78;
+const RECOVERED_ALERTS_CELL_COUNT = 120;
+const TOTAL_ALERTS_CELL_COUNT = 198;
 
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
+export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const find = getService('find');
 
-  describe('Observability alerts', function () {
+  describe('Observability alerts 1', function () {
     this.tags('includeFirefox');
 
-    const pageObjects = getPageObjects(['common']);
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
     const observability = getService('observability');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await observability.alerts.common.navigateToTimeWithData();
+      const setup = async () => {
+        await observability.alerts.common.setKibanaTimeZoneToUTC();
+        await observability.alerts.common.navigateToTimeWithData();
+      };
+      await setup();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
+    describe('With no data', () => {
+      it('Shows the no data screen', async () => {
+        await observability.alerts.common.getNoDataPageOrFail();
+      });
+    });
+
     describe('Alerts table', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await observability.alerts.common.navigateToTimeWithData();
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
       it('Renders the table', async () => {
         await observability.alerts.common.getTableOrFail();
       });
@@ -92,7 +111,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             // We shouldn't expect any data for the last 15 minutes
             await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
             await observability.alerts.common.getNoDataStateOrFail();
-            await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
           });
         });
       });
@@ -122,7 +140,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               const titleText = await (
                 await observability.alerts.common.getAlertsFlyoutTitle()
               ).getVisibleText();
-              expect(titleText).to.contain('Log threshold');
+              expect(titleText).to.contain('APM Failed Transaction Rate (one)');
             });
           });
 
@@ -142,11 +160,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             ];
             const expectedDescriptions = [
               'Active',
-              'Sep 2, 2021 @ 12:54:09.674',
-              '15 minutes',
-              '100.25',
-              '1957',
-              'Log threshold',
+              'Oct 19, 2021 @ 15:00:41.555',
+              '20 minutes',
+              '5',
+              '30.73',
+              'Failed transaction rate threshold',
             ];
 
             await asyncForEach(flyoutTitles, async (title, index) => {
@@ -161,6 +179,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('Displays a View in App button', async () => {
             await observability.alerts.common.getAlertsFlyoutViewInAppButtonOrFail();
           });
+
+          it('Displays a View rule details link', async () => {
+            await observability.alerts.common.getAlertsFlyoutViewRuleDetailsLinkOrFail();
+          });
         });
       });
 
@@ -172,19 +194,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await alertStatusCell.moveMouseTo();
             await retry.waitFor(
               'cell actions visible',
-              async () => await observability.alerts.common.copyToClipboardButtonExists()
+              async () => await observability.alerts.common.filterForValueButtonExists()
             );
           });
         });
 
         afterEach(async () => {
           await observability.alerts.common.clearQueryBar();
-        });
-
-        it('Copy button works', async () => {
-          // NOTE: We don't have access to the clipboard in a headless environment,
-          // so we'll just check the button is clickable in the functional tests.
-          await (await observability.alerts.common.getCopyToClipboardButton()).click();
+          // Reset the query bar by hiding the dropdown
+          await observability.alerts.common.submitQuery('');
         });
 
         it('Filter for value works', async () => {
@@ -198,6 +216,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const cells = await observability.alerts.common.getTableCells();
             expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
           });
+        });
+      });
+
+      describe('Actions Button', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await observability.alerts.common.navigateToTimeWithData();
+        });
+
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        });
+
+        it('Opens rule details page when click on "View Rule Details"', async () => {
+          const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
+          await actionsButton.click();
+          await observability.alerts.common.viewRuleDetailsButtonClick();
+          expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
         });
       });
     });

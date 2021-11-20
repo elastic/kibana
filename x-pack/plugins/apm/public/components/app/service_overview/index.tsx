@@ -16,7 +16,7 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { LatencyChart } from '../../shared/charts/latency_chart';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
-import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
+import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
@@ -138,7 +138,7 @@ export function ServiceOverview() {
             >
               {!isRumAgent && (
                 <EuiFlexItem grow={3}>
-                  <TransactionErrorRateChart
+                  <FailedTransactionRateChart
                     height={nonLatencyChartHeight}
                     showAnnotations={false}
                     kuery={kuery}

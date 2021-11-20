@@ -23,12 +23,13 @@ export function openmetricsMetricsSpecProvider(context: TutorialContext): Tutori
   return {
     id: 'openmetricsMetrics',
     name: i18n.translate('home.tutorials.openmetricsMetrics.nameTitle', {
-      defaultMessage: 'OpenMetrics metrics',
+      defaultMessage: 'OpenMetrics Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.openmetricsMetrics.shortDescription', {
-      defaultMessage: 'Fetch metrics from an endpoint that serves metrics in OpenMetrics format.',
+      defaultMessage:
+        'Collect metrics from an endpoint that serves metrics in OpenMetrics format with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.openmetricsMetrics.longDescription', {
       defaultMessage:

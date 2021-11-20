@@ -65,6 +65,11 @@ export interface NewPackagePolicy {
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
+  elasticsearch?: {
+    privileges?: {
+      cluster?: string[];
+    };
+  };
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {

@@ -573,16 +573,43 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     });
   });
 
-  it('shows tls fields when metadata.is_tls_enabled is true', async () => {
-    const { getByLabelText } = render(<WrappedComponent />);
-    const verificationMode = getByLabelText('Verification mode') as HTMLInputElement;
-    const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
-    expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('true');
-    expect(verificationMode).toBeInTheDocument();
-    expect(verificationMode.value).toEqual(
-      `${defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]}`
-    );
-  });
+  it.each([[true], [false]])(
+    'shows tls fields when metadata.is_tls_enabled is or verification mode is truthy true',
+    async (isTLSEnabledInUIMetadataKey) => {
+      const currentPolicy = {
+        ...defaultCurrentPolicy,
+        inputs: [
+          {
+            ...defaultNewPolicy.inputs[0],
+            enabled: true,
+            streams: [
+              {
+                ...defaultNewPolicy.inputs[0].streams[0],
+                vars: {
+                  ...defaultNewPolicy.inputs[0].streams[0].vars,
+                  __ui: {
+                    type: 'yaml',
+                    value: JSON.stringify({
+                      is_tls_enabled: isTLSEnabledInUIMetadataKey,
+                    }),
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { getByLabelText } = render(<WrappedComponent policy={currentPolicy} />);
+      const verificationMode = getByLabelText('Verification mode') as HTMLInputElement;
+      const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
+      expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('true');
+      expect(verificationMode).toBeInTheDocument();
+      expect(verificationMode.value).toEqual(
+        `${defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]}`
+      );
+    }
+  );
 
   it('handles browser validation', async () => {
     const currentPolicy = {
@@ -1074,6 +1101,60 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(queryByLabelText('Proxy URL')).not.toBeInTheDocument();
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
   });
+
+  it.each([
+    [true, 'Testing script'],
+    [false, 'Inline script'],
+  ])(
+    'browser monitors - auto selects the right tab depending on source metadata',
+    async (isGeneratedScript, text) => {
+      const currentPolicy = {
+        ...defaultCurrentPolicy,
+        inputs: [
+          {
+            ...defaultNewPolicy.inputs[0],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[1],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[2],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[3],
+            enabled: true,
+            streams: [
+              {
+                ...defaultNewPolicy.inputs[3].streams[0],
+                vars: {
+                  ...defaultNewPolicy.inputs[3].streams[0].vars,
+                  'source.inline.script': {
+                    type: 'yaml',
+                    value: JSON.stringify('step(() => {})'),
+                  },
+                  __ui: {
+                    type: 'yaml',
+                    value: JSON.stringify({
+                      script_source: {
+                        is_generated_script: isGeneratedScript,
+                      },
+                    }),
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { getByText } = render(<WrappedComponent policy={currentPolicy} />);
+
+      expect(getByText(text)).toBeInTheDocument();
+    }
+  );
 
   it('hides tls fields when metadata.is_tls_enabled is false', async () => {
     const { getByLabelText, queryByLabelText } = render(

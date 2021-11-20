@@ -12,7 +12,7 @@ import {
   ESSearchResponse,
 } from '../../../../../src/core/types/elasticsearch';
 import { UxUIFilters } from '../../typings/ui_filters';
-import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 
 interface Options {
   mockResponse?: (
@@ -96,7 +96,6 @@ export async function inspectSearchParams(
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },
-    dynamicIndexPattern: null as any,
   };
   try {
     response = await fn(mockSetup);

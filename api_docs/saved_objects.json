@@ -561,42 +561,6 @@
         "deprecated": true,
         "references": [
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/saved_searches/legacy/saved_searches.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/saved_searches/legacy/saved_searches.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/plugin.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/plugin.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualizations.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualizations.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/saved_visualizations.ts"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/services/saved_objects.ts"
           },
@@ -1073,11 +1037,11 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
+            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/apps/main/components/top_nav/on_save_search.tsx"
+            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
           },
           {
             "plugin": "dashboard",
@@ -1211,7 +1175,7 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
+          ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
           ", \"overlays\" | \"savedObjectsClient\">) => Promise<true>"
         ],
@@ -1234,7 +1198,7 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
+              ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
@@ -2091,30 +2055,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/saved_searches/legacy/_saved_search.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/saved_searches/legacy/_saved_search.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
-          },
-          {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts"
           },
@@ -2546,7 +2486,7 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              ", \"create\" | \"history\" | \"setPreferredSearchStrategyId\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined"
+              ", \"history\" | \"setOverwriteDataViewType\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"create\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
@@ -2875,7 +2815,7 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              ", \"create\" | \"history\" | \"setPreferredSearchStrategyId\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined"
+              ", \"history\" | \"setOverwriteDataViewType\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"create\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
@@ -3705,14 +3645,6 @@
           "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,
           "references": [
-            {
-              "plugin": "discover",
-              "path": "src/plugins/discover/public/saved_searches/legacy/_saved_search.ts"
-            },
-            {
-              "plugin": "visualizations",
-              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
-            },
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"

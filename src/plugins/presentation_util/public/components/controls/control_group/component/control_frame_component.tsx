@@ -13,6 +13,7 @@ import {
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
+  EuiLoadingChart,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -21,6 +22,7 @@ import { EditControlButton } from '../editor/edit_control';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
 import { ControlGroupStrings } from '../control_group_strings';
+import { pluginServices } from '../../../../services';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -36,6 +38,10 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
   } = useReduxContainerContext<ControlGroupInput>();
   const { controlStyle } = useEmbeddableSelector((state) => state);
 
+  // Presentation Services Context
+  const { overlays } = pluginServices.getHooks();
+  const { openConfirm } = overlays.useService();
+
   const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId });
 
   const [title, setTitle] = useState<string>();
@@ -47,14 +53,16 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
       embeddable.render(embeddableRoot.current);
     }
     const subscription = embeddable?.getInput$().subscribe((newInput) => setTitle(newInput.title));
-    return () => subscription?.unsubscribe();
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, [embeddable, embeddableRoot]);
 
   const floatingActions = (
     <div
-      className={classNames('controlFrame--floatingActions', {
-        'controlFrame--floatingActions-twoLine': usingTwoLineLayout,
-        'controlFrame--floatingActions-oneLine': !usingTwoLineLayout,
+      className={classNames('controlFrameFloatingActions', {
+        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
     >
       <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
@@ -63,7 +71,18 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
       <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
         <EuiButtonIcon
           aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
-          onClick={() => removeEmbeddable(embeddableId)}
+          onClick={() =>
+            openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
+              confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
+              cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
+              title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
+              buttonColor: 'danger',
+            }).then((confirmed) => {
+              if (confirmed) {
+                removeEmbeddable(embeddableId);
+              }
+            })
+          }
           iconType="cross"
           color="danger"
         />
@@ -71,36 +90,54 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
     </div>
   );
 
+  const embeddableParentClassNames = classNames('controlFrame__control', {
+    'controlFrame--twoLine': controlStyle === 'twoLine',
+    'controlFrame--oneLine': controlStyle === 'oneLine',
+  });
+
   const form = (
     <EuiFormControlLayout
-      className={'controlFrame--formControlLayout'}
+      className={'controlFrame__formControlLayout'}
       fullWidth
       prepend={
         <>
-          {customPrepend ?? null}
+          {(embeddable && customPrepend) ?? null}
           {usingTwoLineLayout ? undefined : (
-            <EuiFormLabel className="controlFrame--formControlLayout__label" htmlFor={embeddableId}>
+            <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
               {title}
             </EuiFormLabel>
           )}
         </>
       }
     >
-      <div
-        className={classNames('controlFrame--control', {
-          'controlFrame--twoLine': controlStyle === 'twoLine',
-          'controlFrame--oneLine': controlStyle === 'oneLine',
-        })}
-        id={`controlFrame--${embeddableId}`}
-        ref={embeddableRoot}
-      />
+      {embeddable && (
+        <div
+          className={embeddableParentClassNames}
+          id={`controlFrame--${embeddableId}`}
+          ref={embeddableRoot}
+        />
+      )}
+      {!embeddable && (
+        <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>
+          <div className="controlFrame--controlLoading">
+            <EuiLoadingChart />
+          </div>
+        </div>
+      )}
     </EuiFormControlLayout>
   );
 
   return (
     <>
-      {enableActions && floatingActions}
-      <EuiFormRow fullWidth label={usingTwoLineLayout ? title : undefined}>
+      {embeddable && enableActions && floatingActions}
+      <EuiFormRow
+        fullWidth
+        label={
+          usingTwoLineLayout
+            ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
+            : undefined
+        }
+      >
         {form}
       </EuiFormRow>
     </>

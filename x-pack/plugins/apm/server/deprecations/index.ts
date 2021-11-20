@@ -9,15 +9,17 @@ import { GetDeprecationsContext, DeprecationsDetails } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { CloudSetup } from '../../../cloud/server';
-import { getCloudAgentPolicy } from '../lib/fleet/get_cloud_apm_package_policy';
+import { getCloudAgentPolicy } from '../routes/fleet/get_cloud_apm_package_policy';
 import { APMRouteHandlerResources } from '../';
 
 export function getDeprecations({
   cloudSetup,
   fleet,
+  branch,
 }: {
   cloudSetup?: CloudSetup;
   fleet?: APMRouteHandlerResources['plugins']['fleet'];
+  branch: string;
 }) {
   return async ({
     savedObjectsClient,
@@ -36,6 +38,8 @@ export function getDeprecations({
     const isCloudEnabled = !!cloudSetup?.isCloudEnabled;
 
     const hasCloudAgentPolicy = !isEmpty(cloudAgentPolicy);
+    // TODO: remove when docs support "main"
+    const docBranch = branch === 'main' ? 'master' : branch;
 
     if (isCloudEnabled && !hasCloudAgentPolicy) {
       deprecations.push({
@@ -46,8 +50,7 @@ export function getDeprecations({
           defaultMessage:
             'Running the APM Server binary directly is considered a legacy option and is deprecated since 7.16. Switch to APM Server managed by an Elastic Agent instead. Read our documentation to learn more.',
         }),
-        documentationUrl:
-          'https://www.elastic.co/guide/en/apm/server/current/apm-integration.html',
+        documentationUrl: `https://www.elastic.co/guide/en/apm/server/${docBranch}/apm-integration.html`,
         level: 'warning',
         correctiveActions: {
           manualSteps: [

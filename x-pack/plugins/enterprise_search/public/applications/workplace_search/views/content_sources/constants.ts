@@ -531,7 +531,7 @@ export const SOURCE_SYNCHRONIZATION_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationDescription',
   {
     defaultMessage:
-      'Synchronization provides control over data being indexed from the content source. Enable synchronization of data from the content source to Workplace Search.',
+      'Enable or disable synchronization of data from this content source to Workplace Search.',
   }
 );
 
@@ -539,7 +539,7 @@ export const SOURCE_FREQUENCY_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceFrequencyDescription',
   {
     defaultMessage:
-      'Schedule the frequency of data synchronization between Workplace search and the content source. Indexing schedules that occur less frequently lower the burden on third-party servers, while more frequent will ensure your data is up-to-date.',
+      'Manage the frequency of data synchronization from Workplace search to this content source. Sync more frequently to ensure your data is up to date. Sync less frequently to reduce the burden on third party servers.',
   }
 );
 
@@ -547,7 +547,7 @@ export const SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsDescription',
   {
     defaultMessage:
-      'Customize the indexing rules that determine what data is synchronized from this content source to Workplace Search.',
+      'Customize the indexing rules that determine which objects and assets are synchronized from this content source to Workplace Search.',
   }
 );
 
@@ -636,13 +636,6 @@ export const BLOCKED_TIME_WINDOWS_TITLE = i18n.translate(
   }
 );
 
-export const SYNCHRONIZATION_LINK_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.synchronizationLinkLabel',
-  {
-    defaultMessage: 'Learn more about synchronization',
-  }
-);
-
 export const SYNCHRONIZATION_DISABLED_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.synchronizationDisabledTitle',
   {
@@ -654,20 +647,6 @@ export const SYNCHRONIZATION_DISABLED_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.synchronizationDisabledDescription',
   {
     defaultMessage: 'Contact your administrator to enable synchronization controls.',
-  }
-);
-
-export const SYNC_FREQUENCY_LINK_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.syncFrequencyLinkLabel',
-  {
-    defaultMessage: 'Learn more about synchronization frequency',
-  }
-);
-
-export const OBJECTS_AND_ASSETS_LINK_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.objectsAndAssetsLinkLabel',
-  {
-    defaultMessage: 'Learn more about Objects and assets',
   }
 );
 

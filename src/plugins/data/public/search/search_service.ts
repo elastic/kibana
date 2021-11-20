@@ -39,6 +39,8 @@ import {
   geoPointFunction,
   queryFilterFunction,
   rangeFilterFunction,
+  removeFilterFunction,
+  selectFilterFunction,
   kibanaFilterFunction,
   phraseFilterFunction,
   esRawResponse,
@@ -139,6 +141,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(existsFilterFunction);
     expressions.registerFunction(queryFilterFunction);
     expressions.registerFunction(rangeFilterFunction);
+    expressions.registerFunction(removeFilterFunction);
+    expressions.registerFunction(selectFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
 

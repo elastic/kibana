@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { IScopedClusterClient } from 'kibana/server';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';

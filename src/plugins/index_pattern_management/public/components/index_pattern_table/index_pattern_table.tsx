@@ -46,9 +46,18 @@ const search = {
   },
 };
 
-const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
-  defaultMessage: 'Index patterns',
+const title = i18n.translate('indexPatternManagement.dataViewTable.title', {
+  defaultMessage: 'Data Views',
 });
+
+const securityDataView = i18n.translate(
+  'indexPatternManagement.indexPatternTable.badge.securityDataViewTitle',
+  {
+    defaultMessage: 'Security Data View',
+  }
+);
+
+const securitySolution = 'security-solution';
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
@@ -97,7 +106,9 @@ export const IndexPatternTable = ({
   const columns = [
     {
       field: 'title',
-      name: 'Pattern',
+      name: i18n.translate('indexPatternManagement.dataViewTable.nameColumn', {
+        defaultMessage: 'Name',
+      }),
       render: (
         name: string,
         index: {
@@ -114,6 +125,9 @@ export const IndexPatternTable = ({
           </EuiButtonEmpty>
           &emsp;
           <EuiBadgeGroup gutterSize="s">
+            {index.id && index.id.indexOf(securitySolution) === 0 && (
+              <EuiBadge>{securityDataView}</EuiBadge>
+            )}
             {index.tags &&
               index.tags.map(({ key: tagKey, name: tagName }) => (
                 <EuiBadge key={tagKey}>{tagName}</EuiBadge>
@@ -134,8 +148,8 @@ export const IndexPatternTable = ({
       data-test-subj="createIndexPatternButton"
     >
       <FormattedMessage
-        id="indexPatternManagement.indexPatternTable.createBtn"
-        defaultMessage="Create index pattern"
+        id="indexPatternManagement.dataViewTable.createBtn"
+        defaultMessage="Create data view"
       />
     </EuiButton>
   ) : (
@@ -164,8 +178,8 @@ export const IndexPatternTable = ({
         pageTitle={title}
         description={
           <FormattedMessage
-            id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
-            defaultMessage="Create and manage the index patterns that help you retrieve your data from Elasticsearch."
+            id="indexPatternManagement.dataViewTable.indexPatternExplanation"
+            defaultMessage="Create and manage the data views that help you retrieve your data from Elasticsearch."
           />
         }
         bottomBorder

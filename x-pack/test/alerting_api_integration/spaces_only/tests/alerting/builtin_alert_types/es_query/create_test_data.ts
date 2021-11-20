@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { v4 as uuid } from 'uuid';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '../../../../../common/lib';
@@ -16,7 +16,7 @@ export const DOCUMENT_SOURCE = 'queryDataEndpointTests';
 export const DOCUMENT_REFERENCE = '-na-';
 
 export async function createEsDocuments(
-  es: any,
+  es: Client,
   esTestIndexTool: ESTestIndexTool,
   endDate: string = END_DATE,
   intervals: number = 1,
@@ -39,7 +39,7 @@ export async function createEsDocuments(
   await esTestIndexTool.waitForDocs(DOCUMENT_SOURCE, DOCUMENT_REFERENCE, totalDocuments);
 }
 
-async function createEsDocument(es: any, epochMillis: number, testedValue: number) {
+async function createEsDocument(es: Client, epochMillis: number, testedValue: number) {
   const document = {
     source: DOCUMENT_SOURCE,
     reference: DOCUMENT_REFERENCE,
@@ -54,7 +54,7 @@ async function createEsDocument(es: any, epochMillis: number, testedValue: numbe
     body: document,
   });
 
-  if (response.body.result !== 'created') {
+  if (response.result !== 'created') {
     throw new Error(`document not created: ${JSON.stringify(response)}`);
   }
 }

@@ -6,8 +6,14 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { ML_RULE_TYPE_ID } from '../../../../../common/constants';
-import { MachineLearningRuleParams, machineLearningRuleParams } from '../../schemas/rule_schemas';
+import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
+
+import {
+  CompleteRule,
+  machineLearningRuleParams,
+  MachineLearningRuleParams,
+} from '../../schemas/rule_schemas';
 import { mlExecutor } from '../../signals/executors/ml';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
 
@@ -44,7 +50,7 @@ export const createMlAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {
@@ -52,7 +58,7 @@ export const createMlAlertType = (
           bulkCreate,
           exceptionItems,
           listClient,
-          rule,
+          completeRule,
           tuple,
           wrapHits,
         },
@@ -67,7 +73,7 @@ export const createMlAlertType = (
         listClient,
         logger,
         ml,
-        rule,
+        completeRule: completeRule as CompleteRule<MachineLearningRuleParams>,
         services,
         tuple,
         wrapHits,
