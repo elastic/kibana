@@ -196,7 +196,7 @@ export class ScreenshotObservableHandler {
             height: boundingClientRect.height,
             width: boundingClientRect.width,
           };
-          this.logger.debug(`Creating screenshot stream with: ${dimensionsAsString(dimensions)}`);
+          this.logger.debug(`output dimensions: ${dimensionsAsString(dimensions)}`);
           const stitcher = new ScreenshotStitcher({ outputClip: dimensions });
 
           const endTrace = startTrace('get_screenshots', 'read');
@@ -205,7 +205,7 @@ export class ScreenshotObservableHandler {
             .getClips$()
             .pipe(
               switchMap(async (clip) => {
-                this.logger.debug(`Capturing screenshot at ${dimensionsAsString(clip)}`);
+                this.logger.debug(`clip: ${dimensionsAsString(clip)}`);
 
                 let data: Buffer | undefined;
                 try {
@@ -217,7 +217,7 @@ export class ScreenshotObservableHandler {
                   throw new Error(`Unable to capture screenshot: ${err}`);
                 }
 
-                this.logger.info(`Writing partial screenshot with ${data.byteLength} bytes.`);
+                this.logger.info(`buffering clip with ${data.byteLength} bytes.`);
                 stream.write(data);
 
                 byteLength += data.byteLength;
@@ -228,7 +228,7 @@ export class ScreenshotObservableHandler {
 
           endTrace();
 
-          this.logger.info(`screenshots streamed: ${screenshotCount}`);
+          this.logger.info(`screenshots taken: ${screenshotCount}`);
 
           return {
             screenshots: [{ title, description, byteLength }],

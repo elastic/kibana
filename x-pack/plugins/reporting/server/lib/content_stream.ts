@@ -268,7 +268,6 @@ export class ContentStream extends Duplex {
     this.buffer = this.buffer.slice(size);
   }
 
-  // @ts-ignore
   private async flushAllFullChunks() {
     const maxChunkSize = await this.getMaxChunkSize();
 
@@ -283,7 +282,7 @@ export class ContentStream extends Duplex {
       Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
     ]);
 
-    this.flush() // FIXME: calling flush directly from here is just for PNG
+    this.flushAllFullChunks()
       .then(() => callback())
       .catch(callback);
   }
